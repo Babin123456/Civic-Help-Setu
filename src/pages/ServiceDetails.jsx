@@ -7,6 +7,7 @@ import { useToast } from '../context/ToastContext';
 import UntranslatedBadge from '../components/common/UntranslatedBadge';
 import { useFocusMode } from '../hooks/useFocusMode';
 import ServiceGuide from '../components/services/ServiceGuide';
+import AppointmentVisitPackModal from '../components/location/AppointmentVisitPackModal';
 import SourceConflictCautionBanner from '../components/services/SourceConflictCautionBanner';
 import BarrierReportModal from '../components/barriers/BarrierReportModal';
 import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
@@ -40,6 +41,7 @@ const ServiceDetails = () => {
 
   const [linkCopied, setLinkCopied] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showVisitPackModal, setShowVisitPackModal] = useState(false);
   const [showBarrierModal, setShowBarrierModal] = useState(false);
   const [service, setService] = useState(() => getServiceById(id));
   const [isSaved, setIsSaved] = useState(() => {
@@ -246,6 +248,7 @@ const ServiceDetails = () => {
 
               <button
                 type="button"
+                onClick={() => setShowVisitPackModal(true)}
                 className="btn btn-outline"
                 style={{
                   padding: '0.6rem 1rem',
@@ -318,6 +321,10 @@ const ServiceDetails = () => {
         </div>
       )}
 
+      {/* Civic Appointment Preparation and Visit Pack Modal (#150) */}
+      <AppointmentVisitPackModal
+        isOpen={showVisitPackModal}
+        onClose={() => setShowVisitPackModal(false)}
       {/* Citizen Barrier Report Modal (#148) */}
       <BarrierReportModal
         isOpen={showBarrierModal}
