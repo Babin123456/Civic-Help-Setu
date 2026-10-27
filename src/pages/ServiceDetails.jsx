@@ -7,6 +7,7 @@ import { useToast } from '../context/ToastContext';
 import UntranslatedBadge from '../components/common/UntranslatedBadge';
 import { useFocusMode } from '../hooks/useFocusMode';
 import ServiceGuide from '../components/services/ServiceGuide';
+import DataFreshnessTrustBadge from '../components/services/DataFreshnessTrustBadge';
 
 const copyServiceLink = async (url) => {
   try {
@@ -140,8 +141,9 @@ const ServiceDetails = () => {
               <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', lineHeight: '1.6', maxWidth: '600px' }}>
                 {service.shortDescription}
               </p>
-              <div style={{ marginTop: '0.75rem' }}>
+              <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <UntranslatedBadge />
+                <DataFreshnessTrustBadge service={service} />
               </div>
             </div>
 
