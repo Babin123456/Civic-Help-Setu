@@ -32,6 +32,7 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 |---|---|---|---|
 | `civicbridge_checklists` | `checklistStorage.js` | Which checklist items are ticked, per checklist or application id | Drafts and in-progress work |
 | `civic_journey_progress_<journeyId>` (one per journey) | `journeyDependencyEngine.js` | Completed tasks of a journey plan | Drafts and in-progress work |
+| `civic_accessibility_visit_plans` | `accessibilityPlannerService.js` | Saved citizen accessibility needs, accommodations, and office pre-visit confirmation checklists | Drafts and in-progress work |
 | `civicbridge_eligibility_assessments` | `assessmentStorage.js` | Answers and results of eligibility checks | Drafts and in-progress work |
 | `civicbridge_applications` | `trackingService.js` | Applications the person tracks: reference id, service, status, stages | Tracking records |
 | `civicbridge_office_tokens` | `locationService.js` | Office visit tokens and appointments | Tracking records |

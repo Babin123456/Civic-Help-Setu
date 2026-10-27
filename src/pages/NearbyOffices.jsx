@@ -9,7 +9,9 @@ import {
   ShieldCheck,
   Building2,
   CalendarCheck,
+  Accessibility,
 } from 'lucide-react';
+import AccessibilityNeedsPlannerModal from '../components/location/AccessibilityNeedsPlannerModal';
 import {
   filterCivicOffices,
   requestUserCoordinates,
@@ -56,6 +58,7 @@ const NearbyOffices = () => {
   const [viewMode, setViewMode] = useState('split'); // 'split' | 'map' | 'list'
   const [selectedOffice, setSelectedOffice] = useState(null);
   const [bookingOffice, setBookingOffice] = useState(null);
+  const [isAccessibilityModalOpen, setIsAccessibilityModalOpen] = useState(false);
 
   // Initialize service query param if arriving from a specific service details page
   useEffect(() => {
@@ -253,11 +256,28 @@ const NearbyOffices = () => {
             )}
           </div>
 
-          {/* View Mode Buttons */}
-          <div
-            style={{
-              display: 'inline-flex',
-              flexWrap: 'wrap',
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => setIsAccessibilityModalOpen(true)}
+              className="btn btn-secondary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '0.85rem',
+                padding: '0.45rem 0.85rem',
+              }}
+            >
+              <Accessibility size={16} color="var(--success)" />
+              <span>Accessibility Needs Planner</span>
+            </button>
+
+            {/* View Mode Buttons */}
+            <div
+              style={{
+                display: 'inline-flex',
+                flexWrap: 'wrap',
               maxWidth: '100%',
               background: 'var(--glass-bg)',
               borderRadius: '0.6rem',
@@ -322,6 +342,7 @@ const NearbyOffices = () => {
             >
               <List size={15} /> Directory List
             </button>
+          </div>
           </div>
         </div>
 
@@ -496,6 +517,13 @@ const NearbyOffices = () => {
           onClose={() => setBookingOffice(null)}
           office={bookingOffice}
           prefilledService={serviceFilter}
+        />
+
+        {/* Accessibility Needs Planner Modal */}
+        <AccessibilityNeedsPlannerModal
+          isOpen={isAccessibilityModalOpen}
+          onClose={() => setIsAccessibilityModalOpen(false)}
+          initialOfficeId={selectedOffice?.id}
         />
       </div>
     </div>
