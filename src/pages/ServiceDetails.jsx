@@ -1,6 +1,17 @@
+
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, AlertOctagon } from 'lucide-react';
+import {
+  ArrowLeft,
+  Bookmark,
+  Check,
+  Link2,
+  Printer,
+  Share2,
+  Zap,
+  AlertOctagon,
+} from 'lucide-react';
+
 import { getServiceById } from '../services/serviceCatalog';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -13,12 +24,25 @@ import BarrierReportModal from '../components/barriers/BarrierReportModal';
 import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
 import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
 
+const getSavedServices = () => {
+  try {
+    const saved = JSON.parse(
+      localStorage.getItem('civicbridge_saved') || '[]'
+    );
+
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+};
+
 const copyServiceLink = async (url) => {
   try {
-    if (navigator?.clipboard) {
+    if (navigator?.clipboard?.writeText) {
       await navigator.clipboard.writeText(url);
       return true;
     }
+
     return false;
   } catch {
     return false;
@@ -27,14 +51,16 @@ const copyServiceLink = async (url) => {
 
 const getServiceUrl = (serviceId) => {
   if (typeof window === 'undefined') {
-    return `/services/${serviceId}`;
+    return `/services/${encodeURIComponent(serviceId)}`;
   }
-  return `${window.location.origin}/services/${serviceId}`;
+
+  return `${window.location.origin}/services/${encodeURIComponent(serviceId)}`;
 };
 
 const ServiceDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const { user } = useAuth();
   const { toast } = useToast();
   const { focusMode, toggleFocusMode } = useFocusMode();
@@ -43,67 +69,141 @@ const ServiceDetails = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showVisitPackModal, setShowVisitPackModal] = useState(false);
   const [showBarrierModal, setShowBarrierModal] = useState(false);
+
   const [service, setService] = useState(() => getServiceById(id));
-  const [isSaved, setIsSaved] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('civicbridge_saved') || '[]');
-      return saved.some((s) => s.id === id);
-    } catch {
-      return false;
-    }
-  });
+
+  const [isSaved, setIsSaved] = useState(() =>
+    getSavedServices().some((savedService) => savedService.id === id)
+  );
 
   useEffect(() => {
     setService(getServiceById(id));
 
-    try {
-      const saved = JSON.parse(localStorage.getItem('civicbridge_saved') || '[]');
-      setIsSaved(saved.some((s) => s.id === id));
-    } catch {
-      setIsSaved(false);
-    }
+    const savedServices = getSavedServices();
+
+    setIsSaved(
+      savedServices.some((savedService) => savedService.id === id)
+    );
   }, [id]);
 
+  useEffect(() => {
+    if (!linkCopied) return undefined;
+
+    const timeoutId = setTimeout(() => {
+      setLinkCopied(false);
+    }, 2000);
+
+    return () => clearTimeout(timeoutId);
+  }, [linkCopied]);
+
   const handleCopyLink = async () => {
-    const ok = await copyServiceLink(getServiceUrl(id));
-    if (ok) {
-      toast.success('Service link copied to clipboard.');
+    const success = await copyServiceLink(getServiceUrl(id));
+
+    if (success) {
       setLinkCopied(true);
-      setTimeout(() => setLinkCopied(false), 2000);
+      toast.success('Service link copied to clipboard.');
     } else {
-      toast.error('Could not copy the link. Please copy it from the address bar.');
+      toast.error(
+        'Could not copy the link. Please copy it from the address bar.'
+      );
     }
   };
 
   const toggleSave = () => {
     if (!service) return;
 
-    let saved = JSON.parse(localStorage.getItem('civicbridge_saved') || '[]');
-    if (isSaved) {
-      saved = saved.filter((s) => s.id !== service.id);
-    } else {
-      saved.push({ id: service.id, name: service.name, category: service.category });
+    const savedServices = getSavedServices();
+
+    const alreadySaved = savedServices.some(
+      (savedService) => savedService.id === service.id
+    );
+
+    const updatedServices = alreadySaved
+      ? savedServices.filter(
+          (savedService) => savedService.id !== service.id
+        )
+      : [
+          ...savedServices,
+          {
+            id: service.id,
+            name: service.name,
+            category: service.category,
+          },
+        ];
+
+    try {
+      localStorage.setItem(
+        'civicbridge_saved',
+        JSON.stringify(updatedServices)
+      );
+
+      setIsSaved(!alreadySaved);
+
+      toast.success(
+        alreadySaved
+          ? 'Service removed from saved services.'
+          : 'Service saved successfully.'
+      );
+    } catch {
+      toast.error(
+        'Unable to save this service. Please check your browser storage settings.'
+      );
+    }
+  };
+
+  const handleApply = () => {
+    if (!user) {
+      navigate('/login');
+      return;
     }
 
-    localStorage.setItem('civicbridge_saved', JSON.stringify(saved));
-    setIsSaved(!isSaved);
+    // Replace this placeholder with the actual application workflow.
+    toast.error('The application workflow is not available yet.');
   };
 
   if (!service) {
     return (
-      <div className="section container" style={{ textAlign: 'center' }}>
-        <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Service not found</h2>
-        <Link to="/services" className="btn btn-secondary">Return to directory</Link>
+      <div
+        className="section container"
+        style={{ textAlign: 'center' }}
+      >
+        <h2
+          style={{
+            fontSize: '2rem',
+            marginBottom: '1rem',
+          }}
+        >
+          Service not found
+        </h2>
+
+        <p
+          style={{
+            color: 'var(--text-secondary)',
+            marginBottom: '1.5rem',
+          }}
+        >
+          The requested service may have been removed or the link may be
+          incorrect.
+        </p>
+
+        <Link to="/services" className="btn btn-secondary">
+          Return to directory
+        </Link>
       </div>
     );
   }
 
   return (
     <div
-      className={`section animate-fade-in${focusMode ? ' service-details--focus' : ''}`}
+      className={`section animate-fade-in${
+        focusMode ? ' service-details--focus' : ''
+      }`}
       style={{ paddingBottom: '6rem' }}
     >
-      <div className="container" style={{ maxWidth: '900px' }}>
+      <div
+        className="container"
+        style={{ maxWidth: '900px' }}
+      >
         <div style={{ marginBottom: '2rem' }}>
           <Link
             to="/services"
@@ -113,17 +213,37 @@ const ServiceDetails = () => {
               gap: '0.5rem',
               color: 'var(--text-secondary)',
               fontWeight: '500',
-              transition: 'color 0.3s'
+              transition: 'color 0.3s',
             }}
           >
-            <ArrowLeft size={18} /> Back to Services
+            <ArrowLeft size={18} />
+            Back to Services
           </Link>
         </div>
 
-        <div className="glass-panel service-details__panel" style={{ borderRadius: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', flexWrap: 'wrap' }}>
+        <div
+          className="glass-panel service-details__panel"
+          style={{ borderRadius: '1.5rem' }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              gap: '2rem',
+              flexWrap: 'wrap',
+            }}
+          >
             <div style={{ flex: '1 1 400px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  marginBottom: '1rem',
+                  flexWrap: 'wrap',
+                }}
+              >
                 <span
                   style={{
                     padding: '0.25rem 0.75rem',
@@ -131,39 +251,79 @@ const ServiceDetails = () => {
                     color: 'var(--accent-main)',
                     borderRadius: '99px',
                     fontSize: '0.875rem',
-                    fontWeight: '600'
+                    fontWeight: '600',
                   }}
                 >
                   {service.category}
                 </span>
-                <span style={{ fontSize: '0.875rem', color: 'var(--text-tertiary)', fontWeight: '500' }}>
+
+                <span
+                  style={{
+                    fontSize: '0.875rem',
+                    color: 'var(--text-tertiary)',
+                    fontWeight: '500',
+                  }}
+                >
                   {service.type}
                 </span>
               </div>
 
-              <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: '800', lineHeight: '1.2', marginBottom: '1rem' }}>
+              <h1
+                style={{
+                  fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+                  fontWeight: '800',
+                  lineHeight: '1.2',
+                  marginBottom: '1rem',
+                }}
+              >
                 {service.name}
               </h1>
-              <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', lineHeight: '1.6', maxWidth: '600px' }}>
+
+              <p
+                style={{
+                  fontSize: '1.125rem',
+                  color: 'var(--text-secondary)',
+                  lineHeight: '1.6',
+                  maxWidth: '600px',
+                }}
+              >
                 {service.shortDescription}
               </p>
+
               <div style={{ marginTop: '0.75rem' }}>
                 <UntranslatedBadge />
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem',
+              }}
+            >
               <button
                 type="button"
-                onClick={() => (user ? alert('Apply flow placeholder') : navigate('/login'))}
+                onClick={handleApply}
                 className="btn btn-primary"
-                style={{ padding: '0.85rem 1.75rem', fontSize: '1.05rem', background: 'var(--accent-main)', color: 'var(--bg-main)' }}
+                style={{
+                  padding: '0.85rem 1.75rem',
+                  fontSize: '1.05rem',
+                  background: 'var(--accent-main)',
+                  color: 'var(--bg-main)',
+                }}
               >
                 <Zap size={18} fill="currentColor" />
                 Fast-Track Apply
               </button>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '0.5rem',
+                }}
+              >
                 <button
                   type="button"
                   onClick={toggleSave}
@@ -171,16 +331,26 @@ const ServiceDetails = () => {
                   style={{
                     padding: '0.65rem',
                     fontSize: '0.875rem',
-                    background: isSaved ? 'rgba(56, 189, 248, 0.1)' : 'var(--glass-bg)',
-                    borderColor: isSaved ? 'var(--accent-main)' : 'var(--border-main)',
-                    color: isSaved ? 'var(--accent-main)' : 'var(--text-primary)',
+                    background: isSaved
+                      ? 'rgba(56, 189, 248, 0.1)'
+                      : 'var(--glass-bg)',
+                    borderColor: isSaved
+                      ? 'var(--accent-main)'
+                      : 'var(--border-main)',
+                    color: isSaved
+                      ? 'var(--accent-main)'
+                      : 'var(--text-primary)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '0.35rem'
+                    gap: '0.35rem',
                   }}
+                  aria-pressed={isSaved}
                 >
-                  <Bookmark size={16} fill={isSaved ? 'currentColor' : 'none'} />
+                  <Bookmark
+                    size={16}
+                    fill={isSaved ? 'currentColor' : 'none'}
+                  />
                   {isSaved ? 'Saved' : 'Save'}
                 </button>
 
@@ -196,10 +366,13 @@ const ServiceDetails = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '0.35rem'
+                    gap: '0.35rem',
                   }}
                 >
-                  <Share2 size={16} color="var(--accent-main)" />
+                  <Share2
+                    size={16}
+                    color="var(--accent-main)"
+                  />
                   Report
                 </button>
 
@@ -217,10 +390,13 @@ const ServiceDetails = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '0.35rem'
+                    gap: '0.35rem',
                   }}
                 >
-                  <AlertOctagon size={16} color="#f59e0b" />
+                  <AlertOctagon
+                    size={16}
+                    color="#f59e0b"
+                  />
                   Report Access Barrier
                 </button>
 
@@ -238,10 +414,21 @@ const ServiceDetails = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '0.35rem'
+                    gap: '0.35rem',
                   }}
                 >
-                  {linkCopied ? <Check size={16} color="var(--accent-main)" /> : <Link2 size={16} color="var(--accent-main)" />}
+                  {linkCopied ? (
+                    <Check
+                      size={16}
+                      color="var(--accent-main)"
+                    />
+                  ) : (
+                    <Link2
+                      size={16}
+                      color="var(--accent-main)"
+                    />
+                  )}
+
                   {linkCopied ? 'Copied' : 'Copy link'}
                 </button>
               </div>
@@ -256,7 +443,7 @@ const ServiceDetails = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '0.45rem'
+                  gap: '0.45rem',
                 }}
               >
                 <Printer size={16} />
@@ -265,24 +452,60 @@ const ServiceDetails = () => {
             </div>
           </div>
 
-          <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-light)' }}>
-            <h2 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>Overview</h2>
-            <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7' }}>
-              {service.description || service.shortDescription || 'Details for this service are available in the programme information.'}
+          <div
+            style={{
+              marginTop: '2rem',
+              paddingTop: '1.5rem',
+              borderTop: '1px solid var(--border-light)',
+            }}
+          >
+            <h2
+              style={{
+                fontSize: '1.25rem',
+                marginBottom: '0.75rem',
+              }}
+            >
+              Overview
+            </h2>
+
+            <p
+              style={{
+                color: 'var(--text-secondary)',
+                lineHeight: '1.7',
+              }}
+            >
+              {service.description ||
+                service.shortDescription ||
+                'Details for this service are available in the programme information.'}
             </p>
           </div>
 
-          {/* Official Source Conflict Caution Banner (#149) */}
-          <SourceConflictCautionBanner serviceId={service.id} />
-          <FeeTransparencyCard serviceId={service.id} serviceName={service.name} />
+          {/* Official Source Conflict Caution Banner */}
+          <SourceConflictCautionBanner
+            serviceId={service.id}
+          />
 
-          <ServiceGuide service={service} focusMode={focusMode} onToggleFocusMode={toggleFocusMode} />
+          {/* Fee Transparency */}
+          <FeeTransparencyCard
+            serviceId={service.id}
+            serviceName={service.name}
+          />
 
-          {/* Civic Application Readiness Scorecard (#147) */}
-          <ApplicationReadinessScorecard service={service} />
+          {/* Service Guide */}
+          <ServiceGuide
+            service={service}
+            focusMode={focusMode}
+            onToggleFocusMode={toggleFocusMode}
+          />
+
+          {/* Civic Application Readiness Scorecard */}
+          <ApplicationReadinessScorecard
+            service={service}
+          />
         </div>
       </div>
 
+      {/* Report Issue Modal */}
       {showReportModal && (
         <div
           style={{
@@ -292,24 +515,41 @@ const ServiceDetails = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 1000
+            zIndex: 1000,
+            padding: '1rem',
           }}
           onClick={() => setShowReportModal(false)}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="report-issue-title"
             style={{
               width: 'min(90vw, 520px)',
               background: 'var(--bg-card)',
               borderRadius: '1rem',
               padding: '1.5rem',
-              border: '1px solid var(--border-light)'
+              border: '1px solid var(--border-light)',
             }}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
           >
-            <h3 style={{ marginBottom: '0.75rem' }}>Report issue</h3>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-              Please contact the civic support desk to report incorrect information for this service.
+            <h3
+              id="report-issue-title"
+              style={{ marginBottom: '0.75rem' }}
+            >
+              Report issue
+            </h3>
+
+            <p
+              style={{
+                color: 'var(--text-secondary)',
+                marginBottom: '1rem',
+              }}
+            >
+              Please contact the civic support desk to report
+              incorrect information for this service.
             </p>
+
             <button
               type="button"
               className="btn btn-primary"
@@ -321,11 +561,13 @@ const ServiceDetails = () => {
         </div>
       )}
 
-      {/* Civic Appointment Preparation and Visit Pack Modal (#150) */}
+      {/* Civic Appointment Preparation and Visit Pack Modal */}
       <AppointmentVisitPackModal
         isOpen={showVisitPackModal}
         onClose={() => setShowVisitPackModal(false)}
-      {/* Citizen Barrier Report Modal (#148) */}
+      />
+
+      {/* Citizen Barrier Report Modal */}
       <BarrierReportModal
         isOpen={showBarrierModal}
         onClose={() => setShowBarrierModal(false)}
