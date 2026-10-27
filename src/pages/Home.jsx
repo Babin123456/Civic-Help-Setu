@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import SearchBox from '../components/SearchBox';
-import { BookOpen, Shield, HelpCircle, Users, CheckCircle2, Code, ArrowRight, Sparkles, ShieldAlert } from 'lucide-react';
+import { BookOpen, Shield, HelpCircle, Users, CheckCircle2, Code, ArrowRight, Sparkles, ShieldAlert, Compass } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import QuickActionPanel from '../components/QuickActionPanel';
 import DisasterReliefHubModal from '../components/emergency/DisasterReliefHubModal';
+import LifeEventNavigatorModal from '../components/journey/LifeEventNavigatorModal';
 
 const useTypewriter = (words, typingSpeed = 80, deletingSpeed = 40, pauseDuration = 2500) => {
   const [text, setText] = useState('');
@@ -38,6 +39,7 @@ const Home = () => {
   const typingWords = ["Government Services.", "Passport Applications.", "Birth Certificates.", "Public Systems."];
   const typedText = useTypewriter(typingWords);
   const [isReliefModalOpen, setIsReliefModalOpen] = useState(false);
+  const [isLifeEventModalOpen, setIsLifeEventModalOpen] = useState(false);
 
   return (
     <div style={{ position: 'relative', overflow: 'hidden' }}>
@@ -71,6 +73,21 @@ const Home = () => {
 
           <div className="animate-fade-in delay-300" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <Link to="/services" className="btn btn-primary">Explore All Guides</Link>
+            <button
+              type="button"
+              onClick={() => setIsLifeEventModalOpen(true)}
+              className="btn btn-secondary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                borderColor: 'var(--accent-main)',
+                color: 'var(--accent-main)',
+              }}
+            >
+              <Compass size={16} color="var(--accent-main)" />
+              <span>Life-Event Navigator</span>
+            </button>
             <Link to="/assistant" className="btn btn-secondary">Try AI Assistant</Link>
             <button
               type="button"
@@ -217,6 +234,12 @@ const Home = () => {
       <DisasterReliefHubModal
         isOpen={isReliefModalOpen}
         onClose={() => setIsReliefModalOpen(false)}
+      />
+
+      {/* Civic Life-Event Navigator Modal */}
+      <LifeEventNavigatorModal
+        isOpen={isLifeEventModalOpen}
+        onClose={() => setIsLifeEventModalOpen(false)}
       />
     </div>
   );
