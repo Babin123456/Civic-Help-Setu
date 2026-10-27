@@ -41,6 +41,7 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_saved_rich` | `savedStorage.js` | Saved guides with folder and note | Saved items |
 | `civicbridge_saved` | `savedStorage.js`, `ServiceDetails.jsx` | Older list of saved guide ids, kept in step with the one above | Saved items |
 | `civic_compared_services` | `comparisonService.js` | Services picked for comparison | Saved items |
+| `civic_service_fee_preferences` | `feeTransparencyService.js` | Saved citizen fee calculator tier and optional add-on selections | Saved items |
 | `civicbridge_vault_docs` | `vaultStorage.js` | Document vault entries: type, number, issuer, dates, notes, file name and size. File bytes are not stored | Document vault |
 | `civicbridge_vault_pin` | `vaultStorage.js` | Reserved for a vault PIN, nothing writes it today | Document vault |
 | `civicbridge_chat_history` | `chatStorage.js` | Assistant conversation (trimmed to the latest messages by `trimHistory`) | Assistant history |

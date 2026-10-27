@@ -51,6 +51,7 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_cached_shelters', category: 'cache', exportAs: null }, // disasterReliefService.js
   { key: 'civicbridge_checklists', category: 'drafts', exportAs: 'checklistProgress', empty: {} }, // checklistStorage.js
   { key: 'civicbridge_community_audits', category: 'activity', exportAs: null }, // communityAuditService.js
+  { key: 'civic_service_fee_preferences', category: 'saved', exportAs: 'serviceFeePreferences', empty: {} }, // feeTransparencyService.js
 ];
 
 /**
