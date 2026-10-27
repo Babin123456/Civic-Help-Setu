@@ -55,6 +55,7 @@ export const USER_DATA_STORES = [
   { key: 'civic_glossary_suggestions', category: 'activity', exportAs: 'glossarySuggestions', empty: [] }, // civicGlossaryService.js
   { key: 'civic_life_event_journeys', category: 'drafts', exportAs: 'lifeEventJourneys', empty: {} }, // lifeEventNavigatorService.js
   { key: 'civicbridge_community_audits', category: 'activity', exportAs: null }, // communityAuditService.js
+  { key: 'civic_service_fee_preferences', category: 'saved', exportAs: 'serviceFeePreferences', empty: {} }, // feeTransparencyService.js
 ];
 
 /**
