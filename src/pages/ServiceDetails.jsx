@@ -7,6 +7,7 @@ import { useToast } from '../context/ToastContext';
 import UntranslatedBadge from '../components/common/UntranslatedBadge';
 import { useFocusMode } from '../hooks/useFocusMode';
 import ServiceGuide from '../components/services/ServiceGuide';
+import SourceConflictCautionBanner from '../components/services/SourceConflictCautionBanner';
 
 const copyServiceLink = async (url) => {
   try {
@@ -242,6 +243,9 @@ const ServiceDetails = () => {
               {service.description || service.shortDescription || 'Details for this service are available in the programme information.'}
             </p>
           </div>
+
+          {/* Official Source Conflict Caution Banner (#149) */}
+          <SourceConflictCautionBanner serviceId={service.id} />
 
           <ServiceGuide service={service} focusMode={focusMode} onToggleFocusMode={toggleFocusMode} />
         </div>

@@ -53,6 +53,7 @@ import {
   dismissReportEntry,
   describeActionFailure,
 } from '../utils/adminDestructiveActions';
+import SourceConflictReviewQueue from '../components/admin/SourceConflictReviewQueue';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -397,6 +398,9 @@ const Admin = () => {
                   servicesCount={services.length}
                   reportsCount={pendingReportsCount}
                 />
+
+                {/* Civic Source Conflict and Confidence Review Queue (#149) */}
+                <SourceConflictReviewQueue />
               </div>
             )}
 
