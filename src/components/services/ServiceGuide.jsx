@@ -1,5 +1,7 @@
 import FocusModeToggle from '../common/FocusModeToggle';
 import OfficialSourcesList from './OfficialSourcesList';
+import FormFieldExplainer from '../glossary/FormFieldExplainer';
+import { findJargonTerms } from '../../data/civicGlossary';
 
 const hasItems = (list) => Array.isArray(list) && list.length > 0;
 
@@ -44,9 +46,22 @@ const ServiceGuide = ({ service, focusMode = false, onToggleFocusMode }) => {
         <div className="service-guide__block">
           <h3>Documents you need</h3>
           <ul>
-            {documents.map((item, i) => (
-              <li key={i}>{item}</li>
-            ))}
+            {documents.map((item, i) => {
+              const terms = findJargonTerms(item);
+              const topTerm = terms[0];
+              return (
+                <li key={i}>
+                  <span>{item}</span>
+                  {topTerm && (
+                    <FormFieldExplainer
+                      term={topTerm.term}
+                      label="What is this?"
+                      variant="inline"
+                    />
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

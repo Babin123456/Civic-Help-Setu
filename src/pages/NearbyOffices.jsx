@@ -9,7 +9,9 @@ import {
   ShieldCheck,
   Building2,
   CalendarCheck,
+  Accessibility,
 } from 'lucide-react';
+import AccessibilityNeedsPlannerModal from '../components/location/AccessibilityNeedsPlannerModal';
 import {
   filterCivicOffices,
   requestUserCoordinates,
@@ -20,6 +22,8 @@ import InteractiveOfficeMap from '../components/location/InteractiveOfficeMap';
 import LocationFilterToolbar from '../components/location/LocationFilterToolbar';
 import OfficeCard from '../components/location/OfficeCard';
 import AppointmentModal from '../components/location/AppointmentModal';
+import { AccessibilityFilterBar } from '../components/location/AccessibilityFacilityPanel';
+import { filterOfficesByAccessibilityAndLanguage } from '../services/accessibilityMapService';
 import LocationPermissionPanel, { LOCATION_REQUEST_BUTTON_ID } from '../components/location/LocationPermissionPanel';
 import {
   LOCATION_STATUS,
@@ -44,6 +48,8 @@ const NearbyOffices = () => {
   const [onlyOpenNow, setOnlyOpenNow] = useState(false);
   const [onlyWheelchair, setOnlyWheelchair] = useState(false);
   const [serviceFilter, setServiceFilter] = useState('');
+  const [selectedFacilities, setSelectedFacilities] = useState([]);
+  const [selectedLanguages, setSelectedLanguages] = useState([]);
 
   // Location & Geolocation State
   const [userCoords, setUserCoords] = useState(() => getCachedUserCoordinates());
@@ -56,6 +62,7 @@ const NearbyOffices = () => {
   const [viewMode, setViewMode] = useState('split'); // 'split' | 'map' | 'list'
   const [selectedOffice, setSelectedOffice] = useState(null);
   const [bookingOffice, setBookingOffice] = useState(null);
+  const [isAccessibilityModalOpen, setIsAccessibilityModalOpen] = useState(false);
 
   // Initialize service query param if arriving from a specific service details page
   useEffect(() => {
@@ -128,6 +135,23 @@ const NearbyOffices = () => {
     toast?.info?.('Location filter cleared.');
   };
 
+  const handleToggleFacility = (key) => {
+    setSelectedFacilities((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  };
+
+  const handleToggleLanguage = (lang) => {
+    setSelectedLanguages((prev) =>
+      prev.includes(lang) ? prev.filter((l) => l !== lang) : [...prev, lang]
+    );
+  };
+
+  const handleClearAccessibilityFilters = () => {
+    setSelectedFacilities([]);
+    setSelectedLanguages([]);
+  };
+
   const handleResetFilters = () => {
     setSearchQuery('');
     setSelectedState('');
@@ -137,12 +161,14 @@ const NearbyOffices = () => {
     setOnlyOpenNow(false);
     setOnlyWheelchair(false);
     setServiceFilter('');
+    setSelectedFacilities([]);
+    setSelectedLanguages([]);
     toast?.info?.('All discovery filters have been reset.');
   };
 
   // Filtered offices memo
   const filteredOffices = useMemo(() => {
-    return filterCivicOffices({
+    const baseOffices = filterCivicOffices({
       userCoords,
       searchQuery,
       state: selectedState,
@@ -152,6 +178,15 @@ const NearbyOffices = () => {
       serviceId: serviceFilter,
       onlyOpenNow,
       onlyWheelchairAccessible: onlyWheelchair,
+    });
+
+    return filterOfficesByAccessibilityAndLanguage({
+      offices: baseOffices,
+      requiredFacilities: selectedFacilities,
+      requiredLanguages: selectedLanguages,
+      localityQuery: searchQuery,
+      state: selectedState,
+      district: selectedDistrict,
     });
   }, [
     userCoords,
@@ -163,6 +198,8 @@ const NearbyOffices = () => {
     serviceFilter,
     onlyOpenNow,
     onlyWheelchair,
+    selectedFacilities,
+    selectedLanguages,
   ]);
 
   // Tailored empty-state hint: which next step actually helps
@@ -253,11 +290,28 @@ const NearbyOffices = () => {
             )}
           </div>
 
-          {/* View Mode Buttons */}
-          <div
-            style={{
-              display: 'inline-flex',
-              flexWrap: 'wrap',
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => setIsAccessibilityModalOpen(true)}
+              className="btn btn-secondary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '0.85rem',
+                padding: '0.45rem 0.85rem',
+              }}
+            >
+              <Accessibility size={16} color="var(--success)" />
+              <span>Accessibility Needs Planner</span>
+            </button>
+
+            {/* View Mode Buttons */}
+            <div
+              style={{
+                display: 'inline-flex',
+                flexWrap: 'wrap',
               maxWidth: '100%',
               background: 'var(--glass-bg)',
               borderRadius: '0.6rem',
@@ -323,6 +377,7 @@ const NearbyOffices = () => {
               <List size={15} /> Directory List
             </button>
           </div>
+          </div>
         </div>
 
         {/* Filter Toolbar Component */}
@@ -349,6 +404,15 @@ const NearbyOffices = () => {
           onClearLocation={handleClearLocation}
           isLocating={locationStatus === LOCATION_STATUS.REQUESTING}
           onResetFilters={handleResetFilters}
+        />
+
+        {/* Accessibility & Language Coverage Filter Bar */}
+        <AccessibilityFilterBar
+          selectedFacilities={selectedFacilities}
+          onToggleFacility={handleToggleFacility}
+          selectedLanguages={selectedLanguages}
+          onToggleLanguage={handleToggleLanguage}
+          onClearFilters={handleClearAccessibilityFilters}
         />
 
         {!userCoords && (
@@ -496,6 +560,13 @@ const NearbyOffices = () => {
           onClose={() => setBookingOffice(null)}
           office={bookingOffice}
           prefilledService={serviceFilter}
+        />
+
+        {/* Accessibility Needs Planner Modal */}
+        <AccessibilityNeedsPlannerModal
+          isOpen={isAccessibilityModalOpen}
+          onClose={() => setIsAccessibilityModalOpen(false)}
+          initialOfficeId={selectedOffice?.id}
         />
       </div>
     </div>

@@ -34,6 +34,28 @@ export const CIVIC_OFFICES = [
     tokensPerDay: 250,
     averageWaitTime: '25 mins',
     features: ['wheelchair_accessible', 'token_system', 'photocopy_station', 'drinking_water', 'parking_available'],
+    accessibility: {
+      wheelchairRamp: true,
+      elevator: true,
+      accessibleRestroom: true,
+      brailleSignage: false,
+      assistiveListening: null, // unknown
+      signLanguageSupport: false,
+      tactilePaving: null, // unknown
+      accessibleParking: true,
+    },
+    languageCoverage: {
+      supportedLanguages: ['Hindi', 'English', 'Punjabi', 'Urdu'],
+      helpdeskLanguages: ['Hindi', 'English'],
+      formsAvailableLanguages: ['Hindi', 'English'],
+      hasSignLanguageInterpreter: false,
+    },
+    auditMetadata: {
+      verifiedBy: 'Delhi Social Welfare Dept & District Audit',
+      reviewDate: '2026-02-15',
+      sourceUrl: 'https://edistrict.delhigovt.nic.in/accessibility-audit',
+      verificationNotes: 'Ramp and accessible washroom verified on ground inspection.',
+    },
     directionsUrl: 'https://www.google.com/maps/search/?api=1&query=28.5204,77.2155',
   },
   {
@@ -66,6 +88,28 @@ export const CIVIC_OFFICES = [
     tokensPerDay: 400,
     averageWaitTime: '40 mins',
     features: ['token_system', 'automated_driving_track', 'wheelchair_accessible', 'parking_available'],
+    accessibility: {
+      wheelchairRamp: true,
+      elevator: null, // unknown
+      accessibleRestroom: false,
+      brailleSignage: null, // unknown
+      assistiveListening: false,
+      signLanguageSupport: null, // unknown
+      tactilePaving: false,
+      accessibleParking: true,
+    },
+    languageCoverage: {
+      supportedLanguages: ['Hindi', 'English'],
+      helpdeskLanguages: ['Hindi', 'English'],
+      formsAvailableLanguages: ['Hindi', 'English'],
+      hasSignLanguageInterpreter: null,
+    },
+    auditMetadata: {
+      verifiedBy: 'Transport Commissionerate Field Audit',
+      reviewDate: '2026-01-20',
+      sourceUrl: 'https://transport.delhi.gov.in',
+      verificationNotes: 'Ground floor tracks and token counter have ramp access.',
+    },
     directionsUrl: 'https://www.google.com/maps/search/?api=1&query=28.5912,77.2558',
   },
   {
@@ -98,6 +142,28 @@ export const CIVIC_OFFICES = [
     tokensPerDay: 600,
     averageWaitTime: '15 mins',
     features: ['wheelchair_accessible', 'token_system', 'air_conditioned', 'biometric_kiosks', 'express_counters'],
+    accessibility: {
+      wheelchairRamp: true,
+      elevator: true,
+      accessibleRestroom: true,
+      brailleSignage: true,
+      assistiveListening: true,
+      signLanguageSupport: false,
+      tactilePaving: true,
+      accessibleParking: true,
+    },
+    languageCoverage: {
+      supportedLanguages: ['English', 'Hindi', 'Bengali', 'Punjabi', 'Urdu'],
+      helpdeskLanguages: ['English', 'Hindi'],
+      formsAvailableLanguages: ['English', 'Hindi'],
+      hasSignLanguageInterpreter: false,
+    },
+    auditMetadata: {
+      verifiedBy: 'Ministry of External Affairs PSK Inspection',
+      reviewDate: '2026-03-01',
+      sourceUrl: 'https://passportindia.gov.in',
+      verificationNotes: 'Full accessibility compliance according to Sugamya Bharat guidelines.',
+    },
     directionsUrl: 'https://www.google.com/maps/search/?api=1&query=28.6328,77.2415',
   },
   {
