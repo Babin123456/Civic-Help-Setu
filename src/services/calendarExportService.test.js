@@ -187,6 +187,32 @@ describe('calendarExportService.generateIcsContent', () => {
   });
 });
 
+describe('what the Google and Outlook links share', () => {
+  it('leaves the appointment token out of both web links', () => {
+    [calendarExportService.getGoogleCalendarUrl(baseAppointment), calendarExportService.getOutlookCalendarUrl(baseAppointment)].forEach(
+      (url) => {
+        const decoded = decodeURIComponent(url);
+        expect(decoded).not.toContain('TKN-123456');
+        expect(decoded).not.toContain('123456');
+        expect(decoded).toContain('Tahsil Office');
+        expect(decoded).toContain('Income Certificate');
+      }
+    );
+  });
+
+  it('leaves out the id fallback too', () => {
+    const { token, ...noToken } = baseAppointment;
+    void token;
+    const url = calendarExportService.getGoogleCalendarUrl({ ...noToken, id: 'apt-secret-77' });
+    expect(decodeURIComponent(url)).not.toContain('apt-secret-77');
+  });
+
+  it('still puts the token in the .ics file, which is built on this device', () => {
+    const ics = calendarExportService.generateIcsContent(baseAppointment);
+    expect(prop(ics, 'DESCRIPTION')).toContain('TKN-123456');
+  });
+});
+
 describe('generateICalendarEvent (saved service reminders)', () => {
   it('ends an all-day event on the next day, including at month and year end', () => {
     let ics = generateICalendarEvent({ serviceName: 'Passport', deadlineDate: '2026-11-30' });

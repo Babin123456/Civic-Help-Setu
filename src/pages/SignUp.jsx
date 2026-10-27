@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { Shield, Sparkles, ArrowRight, UserPlus } from 'lucide-react';
 import AuthRedirectNotice from '../components/common/AuthRedirectNotice';
 import { buildAuthPath, getRedirectTarget } from '../utils/authRedirect';
+import { describeProviderError, logProviderError } from '../utils/providerError';
 
 const SignUpPage = () => {
   const { isClerkConfigured, signInAsDemo } = useAuth();
@@ -54,8 +55,8 @@ const SignUpPage = () => {
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
       navigate(buildAuthPath('/login', redirectTarget), { state: redirectState });
     } catch (err) {
-      console.error(err);
-      setError(err?.errors?.[0]?.message || 'Sign‑up failed');
+      logProviderError('Sign-up failed', err);
+      setError(describeProviderError(err, 'Sign‑up failed. Please check your details and try again.'));
     } finally {
       setLoading(false);
     }

@@ -171,6 +171,10 @@ const CalendarSyncModal = ({ isOpen, onClose, appointment }) => {
               <span>Add to Outlook Web / Live</span>
               <ExternalLink size={16} />
             </a>
+            <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-tertiary, var(--text-secondary))' }}>
+              The Google and Outlook links share only the office, place, time and service. Your token stays out of them;
+              the .ICS file is made on this device and includes it.
+            </p>
           </div>
 
           <div style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>

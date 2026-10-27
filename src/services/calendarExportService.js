@@ -30,6 +30,11 @@ const formatLocalDateTime = (date) =>
   `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}` +
   `T${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}00`;
 
+// Google and Outlook get the event through the URL, so the appointment token is left
+// out of it. The downloaded .ics file is built on this device and still carries it.
+const WEB_LINK_DETAILS = (appointment) =>
+  `Appointment for ${appointment.serviceName || 'Civic Procedure'}. Carry required originals and photocopies. Your token is in Civic Help Setu.`;
+
 export const calendarExportService = {
   /**
    * Turns an appointment date (YYYY-MM-DD) and slot ("10:00 AM - 11:30 AM (Morning)")
@@ -115,9 +120,7 @@ export const calendarExportService = {
     const { startStr, endStr } = times;
     const title = encodeURIComponent(`Civic Appointment: ${appointment.officeName || 'Public Service Center'}`);
     const location = encodeURIComponent(appointment.address || 'Govt Facilitation Center');
-    const details = encodeURIComponent(
-      `Appointment for ${appointment.serviceName || 'Civic Procedure'}. Token: ${appointment.token || appointment.id || 'N/A'}. Carry required originals and photocopies.`
-    );
+    const details = encodeURIComponent(WEB_LINK_DETAILS(appointment));
 
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
   },
@@ -128,9 +131,7 @@ export const calendarExportService = {
     const { startStr, endStr } = times;
     const title = encodeURIComponent(`Civic Appointment: ${appointment.officeName || 'Public Service Center'}`);
     const location = encodeURIComponent(appointment.address || 'Govt Facilitation Center');
-    const details = encodeURIComponent(
-      `Appointment for ${appointment.serviceName || 'Civic Procedure'}. Token: ${appointment.token || appointment.id || 'N/A'}.`
-    );
+    const details = encodeURIComponent(WEB_LINK_DETAILS(appointment));
 
     return `https://outlook.live.com/calendar/0/deeplink/compose?subject=${title}&startdt=${startStr}&enddt=${endStr}&body=${details}&location=${location}`;
   }

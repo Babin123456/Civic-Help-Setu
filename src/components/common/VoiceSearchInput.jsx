@@ -54,7 +54,7 @@ export default function VoiceSearchInput({ onTranscript, onServiceMatched }) {
       type="button"
       onClick={handleStartListening}
       aria-label={isListening ? 'Listening to voice search' : 'Start voice search'}
-      title={isListening ? 'Listening...' : 'Voice Search (English & Vernacular terms)'}
+      title={isListening ? 'Listening...' : "Voice Search. Uses your browser's speech service (in Chrome the audio is processed by Google)."}
       style={{
         border: 'none',
         background: isListening ? '#fee2e2' : 'transparent',

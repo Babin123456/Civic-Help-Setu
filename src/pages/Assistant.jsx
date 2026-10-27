@@ -561,6 +561,7 @@ const Assistant = () => {
             type="button"
             onClick={toggleVoiceInput}
             aria-label={isListening ? 'Stop listening' : 'Start voice typing'}
+            title="Voice typing uses your browser's speech service. In Chrome the audio is processed by Google."
             style={{
               padding: '0.65rem',
               flexShrink: 0,

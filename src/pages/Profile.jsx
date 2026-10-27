@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { describeProviderError, logProviderError } from '../utils/providerError';
 import ClearMyDataPanel from '../components/privacy/ClearMyDataPanel';
 
 /* ─────────────────────────── helpers ─────────────────────────── */
@@ -147,8 +148,8 @@ const Profile = () => {
       setEditing(false);
       setTimeout(() => setSaveOk(false), 3000);
     } catch (err) {
-      console.error(err);
-      setSaveError(err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message || 'Failed to save. Please try again.');
+      logProviderError('Profile save failed', err);
+      setSaveError(describeProviderError(err, 'Failed to save. Please try again.'));
     } finally {
       setSaving(false);
     }
@@ -162,7 +163,7 @@ const Profile = () => {
     try {
       await clerkUser.setProfileImage({ file });
     } catch (err) {
-      console.error('Avatar upload failed:', err);
+      logProviderError('Avatar upload failed', err);
     } finally {
       setAvatarLoading(false);
     }

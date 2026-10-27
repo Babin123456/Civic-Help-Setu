@@ -244,8 +244,6 @@ Configure the variables required by the application:
 
 ```env
 VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-VITE_OPENAI_API_KEY=your_openai_key
-VITE_API_BASE_URL=your_backend_base_url
 ```
 
 **Important security notes:**

@@ -1,7 +1,9 @@
 import React from 'react';
+import { stripUrlForSharing } from '../../utils/dataMinimization';
 
 const QRCodeView = ({ url, size = 180 }) => {
-  const encoded = encodeURIComponent(url || window.location.href);
+  // Only origin + path goes to the QR service, never a query string or fragment.
+  const encoded = encodeURIComponent(stripUrlForSharing(url || window.location.href));
   const qrEndpoint = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encoded}&margin=10`;
 
   return (
@@ -23,6 +25,7 @@ const QRCodeView = ({ url, size = 180 }) => {
         height={size}
         style={{ display: 'block', borderRadius: '0.5rem' }}
         loading="lazy"
+        referrerPolicy="no-referrer"
       />
       <span style={{ fontSize: '0.75rem', color: '#4b5563', marginTop: '0.4rem', fontWeight: '600' }}>
         Scan to view on Mobile

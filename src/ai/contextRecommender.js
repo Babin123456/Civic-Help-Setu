@@ -1,4 +1,5 @@
 import { MOCK_SERVICES } from '../data/services';
+import { redactPersonalData } from '../utils/dataMinimization';
 
 const PRIVACY_CONSENT_KEY = 'civicbridge_ai_context_consent';
 
@@ -20,18 +21,10 @@ export const setAIContextConsent = (enabled) => {
 };
 
 /**
- * Strips potential PII (Aadhaar, PAN, phone numbers) before sending to LLM context.
+ * Strips potential PII (Aadhaar, PAN, phone numbers, email, reference ids) before
+ * any text is sent to an external service.
  */
-export const sanitizeForPrivacy = (text = '') => {
-  if (!text) return '';
-  return text
-    // Redact 12-digit Aadhaar-like numbers
-    .replace(/\b\d{4}\s?\d{4}\s?\d{4}\b/g, '[REDACTED_AADHAAR]')
-    // Redact 10-char PAN-like patterns
-    .replace(/\b[A-Z]{5}[0-9]{4}[A-Z]{1}\b/gi, '[REDACTED_PAN]')
-    // Redact 10-digit phone numbers
-    .replace(/\b[6-9]\d{9}\b/g, '[REDACTED_PHONE]');
-};
+export const sanitizeForPrivacy = (text = '') => redactPersonalData(text);
 
 /**
  * Builds non-sensitive personalized profile context from saved services and recent activity.

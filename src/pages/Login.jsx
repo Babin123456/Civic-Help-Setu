@@ -9,6 +9,7 @@ import AuthRedirectNotice from '../components/common/AuthRedirectNotice';
 import AuthFallbackBanner from '../components/AuthFallbackBanner';
 import { buildAuthPath, getRedirectTarget } from '../utils/authRedirect';
 import { classifyAuthFailure, createRedirectGate } from '../utils/authFailure';
+import { logProviderError } from '../utils/providerError';
 
 // Google 4‑color SVG Brand Icon
 const GoogleLogo = ({ size = 20 }) => (
@@ -63,7 +64,7 @@ const ClerkGoogleButton = ({ disabled, redirectTo = '/' }) => {
       return;
     }
     if (result.status === 'failed') {
-      console.error('Google Sign‑In Error:', result.error);
+      logProviderError('Google sign-in failed', result.error);
       setFailure(classifyAuthFailure(result.error, { online: navigator.onLine }));
       setLoading(false);
     }
