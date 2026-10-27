@@ -7,6 +7,7 @@ import { useToast } from '../context/ToastContext';
 import UntranslatedBadge from '../components/common/UntranslatedBadge';
 import { useFocusMode } from '../hooks/useFocusMode';
 import ServiceGuide from '../components/services/ServiceGuide';
+import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
 
 const copyServiceLink = async (url) => {
   try {
@@ -244,6 +245,9 @@ const ServiceDetails = () => {
           </div>
 
           <ServiceGuide service={service} focusMode={focusMode} onToggleFocusMode={toggleFocusMode} />
+
+          {/* Civic Application Readiness Scorecard (#147) */}
+          <ApplicationReadinessScorecard service={service} />
         </div>
       </div>
 
