@@ -48,6 +48,7 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_ai_context_consent` | `ai/contextRecommender.js` | Whether saved items may be used as assistant context | Assistant history |
 | `civic_service_reviews` | `reviewStorage.js` | Reviews written on this device (seeded with sample reviews on first read) | Reviews, votes and reports |
 | `civicbridge_faq_votes` | `faqService.js` | Which FAQ answers were voted helpful | Reviews, votes and reports |
+| `civic_glossary_suggestions` | `civicGlossaryService.js` | User-submitted term clarification suggestions for editorial review | Reviews, votes and reports |
 | `civicbridge_community_audits` | `communityAuditService.js` | Audit reports and votes (seeded with sample reports on first read) | Reviews, votes and reports |
 | `civicbridge_offline_cache` | `offlineCacheService.js` | Copies of saved guides and application stages for offline use | Offline copies and location |
 | `civicbridge_offline_last_sync` | `offlineCacheService.js` | Time of the last offline sync | Offline copies and location |
