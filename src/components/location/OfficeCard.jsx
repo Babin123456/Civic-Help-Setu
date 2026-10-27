@@ -16,6 +16,7 @@ import {
 import { formatDistance } from '../../services/locationService';
 import { useToast } from '../../context/ToastContext';
 import BestTimeToVisitCard from './BestTimeToVisitCard';
+import { OfficeAccessibilityDetails } from './AccessibilityFacilityPanel';
 
 const OfficeCard = ({
   office,
@@ -254,6 +255,9 @@ const OfficeCard = ({
 
         {/* Real-time Footfall Rush Forecaster & Best Time to Visit */}
         <BestTimeToVisitCard office={office} />
+
+        {/* Verified Accessibility Facilities and Language Coverage */}
+        <OfficeAccessibilityDetails office={office} />
       </div>
 
       {/* Bottom Action Buttons */}

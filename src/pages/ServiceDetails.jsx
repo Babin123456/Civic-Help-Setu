@@ -8,6 +8,7 @@ import UntranslatedBadge from '../components/common/UntranslatedBadge';
 import { useFocusMode } from '../hooks/useFocusMode';
 import ServiceGuide from '../components/services/ServiceGuide';
 import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
+import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
 
 const copyServiceLink = async (url) => {
   try {
@@ -243,6 +244,8 @@ const ServiceDetails = () => {
               {service.description || service.shortDescription || 'Details for this service are available in the programme information.'}
             </p>
           </div>
+
+          <FeeTransparencyCard serviceId={service.id} serviceName={service.name} />
 
           <ServiceGuide service={service} focusMode={focusMode} onToggleFocusMode={toggleFocusMode} />
 
