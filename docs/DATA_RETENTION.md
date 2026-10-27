@@ -32,6 +32,9 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 |---|---|---|---|
 | `civicbridge_checklists` | `checklistStorage.js` | Which checklist items are ticked, per checklist or application id | Drafts and in-progress work |
 | `civic_journey_progress_<journeyId>` (one per journey) | `journeyDependencyEngine.js` | Completed tasks of a journey plan | Drafts and in-progress work |
+| `civic_accessibility_visit_plans` | `accessibilityPlannerService.js` | Saved citizen accessibility needs, accommodations, and office pre-visit confirmation checklists | Drafts and in-progress work |
+| `civic_grievance_evidence_drafts` | `grievanceEvidenceService.js` | Private user-controlled grievance preparation drafts and timelines | Drafts and in-progress work |
+| `civic_life_event_journeys` | `lifeEventNavigatorService.js` | Saved life-event roadmap progress, hidden tasks and regional selections | Drafts and in-progress work |
 | `civicbridge_eligibility_assessments` | `assessmentStorage.js` | Answers and results of eligibility checks | Drafts and in-progress work |
 | `civicbridge_applications` | `trackingService.js` | Applications the person tracks: reference id, service, status, stages | Tracking records |
 | `civicbridge_office_tokens` | `locationService.js` | Office visit tokens and appointments | Tracking records |
@@ -41,12 +44,14 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_saved_rich` | `savedStorage.js` | Saved guides with folder and note | Saved items |
 | `civicbridge_saved` | `savedStorage.js`, `ServiceDetails.jsx` | Older list of saved guide ids, kept in step with the one above | Saved items |
 | `civic_compared_services` | `comparisonService.js` | Services picked for comparison | Saved items |
+| `civic_service_fee_preferences` | `feeTransparencyService.js` | Saved citizen fee calculator tier and optional add-on selections | Saved items |
 | `civicbridge_vault_docs` | `vaultStorage.js` | Document vault entries: type, number, issuer, dates, notes, file name and size. File bytes are not stored | Document vault |
 | `civicbridge_vault_pin` | `vaultStorage.js` | Reserved for a vault PIN, nothing writes it today | Document vault |
 | `civicbridge_chat_history` | `chatStorage.js` | Assistant conversation (trimmed to the latest messages by `trimHistory`) | Assistant history |
 | `civicbridge_ai_context_consent` | `ai/contextRecommender.js` | Whether saved items may be used as assistant context | Assistant history |
 | `civic_service_reviews` | `reviewStorage.js` | Reviews written on this device (seeded with sample reviews on first read) | Reviews, votes and reports |
 | `civicbridge_faq_votes` | `faqService.js` | Which FAQ answers were voted helpful | Reviews, votes and reports |
+| `civic_glossary_suggestions` | `civicGlossaryService.js` | User-submitted term clarification suggestions for editorial review | Reviews, votes and reports |
 | `civicbridge_community_audits` | `communityAuditService.js` | Audit reports and votes (seeded with sample reports on first read) | Reviews, votes and reports |
 | `civicbridge_offline_cache` | `offlineCacheService.js` | Copies of saved guides and application stages for offline use | Offline copies and location |
 | `civicbridge_offline_last_sync` | `offlineCacheService.js` | Time of the last offline sync | Offline copies and location |
