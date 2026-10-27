@@ -35,6 +35,7 @@ import { services } from '../data/services';
 import TrackEmptyState from '../components/tracking/TrackEmptyState';
 import TrackingReceiptModal from '../components/tracking/TrackingReceiptModal';
 import SlaBreachAlertWidget from '../components/tracking/SlaBreachAlertWidget';
+import GrievanceEvidenceOrganizerModal from '../components/grievance/GrievanceEvidenceOrganizerModal';
 
 const Track = () => {
   const location = useLocation();
@@ -51,6 +52,7 @@ const Track = () => {
   const [newNoteText, setNewNoteText] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isJourneyModalOpen, setIsJourneyModalOpen] = useState(false);
+  const [isGrievanceModalOpen, setIsGrievanceModalOpen] = useState(false);
 
   useEffect(() => {
     const freshApps = getApplications();
@@ -160,9 +162,19 @@ const Track = () => {
               <h1 style={{ margin: 0, fontSize: 'clamp(2rem, 4vw, 3rem)' }}>Track your civic service status</h1>
             </div>
 
-            <button type="button" className="btn btn-primary" onClick={() => setIsAddModalOpen(true)}>
-              <Plus size={16} /> Add Application
-            </button>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setIsGrievanceModalOpen(true)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <FileText size={16} color="var(--accent-main)" /> Grievance Organizer
+              </button>
+              <button type="button" className="btn btn-primary" onClick={() => setIsAddModalOpen(true)}>
+                <Plus size={16} /> Add Application
+              </button>
+            </div>
           </div>
         </header>
 
@@ -324,6 +336,12 @@ const Track = () => {
       />
 
       <TrackingReceiptModal app={activeApp} isOpen={showReceipt} onClose={() => setShowReceipt(false)} />
+
+      <GrievanceEvidenceOrganizerModal
+        isOpen={isGrievanceModalOpen}
+        onClose={() => setIsGrievanceModalOpen(false)}
+        defaultServiceId={activeApp?.serviceId}
+      />
     </section>
   );
 };
