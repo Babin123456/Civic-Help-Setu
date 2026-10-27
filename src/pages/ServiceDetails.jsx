@@ -7,6 +7,7 @@ import { useToast } from '../context/ToastContext';
 import UntranslatedBadge from '../components/common/UntranslatedBadge';
 import { useFocusMode } from '../hooks/useFocusMode';
 import ServiceGuide from '../components/services/ServiceGuide';
+import AppointmentVisitPackModal from '../components/location/AppointmentVisitPackModal';
 
 const copyServiceLink = async (url) => {
   try {
@@ -36,6 +37,7 @@ const ServiceDetails = () => {
 
   const [linkCopied, setLinkCopied] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showVisitPackModal, setShowVisitPackModal] = useState(false);
   const [service, setService] = useState(() => getServiceById(id));
   const [isSaved, setIsSaved] = useState(() => {
     try {
@@ -220,6 +222,7 @@ const ServiceDetails = () => {
 
               <button
                 type="button"
+                onClick={() => setShowVisitPackModal(true)}
                 className="btn btn-outline"
                 style={{
                   padding: '0.6rem 1rem',
@@ -284,6 +287,13 @@ const ServiceDetails = () => {
           </div>
         </div>
       )}
+
+      {/* Civic Appointment Preparation and Visit Pack Modal (#150) */}
+      <AppointmentVisitPackModal
+        isOpen={showVisitPackModal}
+        onClose={() => setShowVisitPackModal(false)}
+        service={service}
+      />
     </div>
   );
 };
