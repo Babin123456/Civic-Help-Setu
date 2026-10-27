@@ -53,6 +53,7 @@ import {
   dismissReportEntry,
   describeActionFailure,
 } from '../utils/adminDestructiveActions';
+import BarrierInsightsDashboard from '../components/barriers/BarrierInsightsDashboard';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -397,6 +398,9 @@ const Admin = () => {
                   servicesCount={services.length}
                   reportsCount={pendingReportsCount}
                 />
+
+                {/* Citizen-Reported Service Barrier Insights Dashboard (#148) */}
+                <BarrierInsightsDashboard />
               </div>
             )}
 
