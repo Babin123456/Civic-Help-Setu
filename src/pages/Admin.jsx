@@ -54,6 +54,7 @@ import {
   describeActionFailure,
 } from '../utils/adminDestructiveActions';
 import SourceConflictReviewQueue from '../components/admin/SourceConflictReviewQueue';
+import BarrierInsightsDashboard from '../components/barriers/BarrierInsightsDashboard';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -401,6 +402,8 @@ const Admin = () => {
 
                 {/* Civic Source Conflict and Confidence Review Queue (#149) */}
                 <SourceConflictReviewQueue />
+                {/* Citizen-Reported Service Barrier Insights Dashboard (#148) */}
+                <BarrierInsightsDashboard />
               </div>
             )}
 
