@@ -7,6 +7,7 @@ import { useToast } from '../context/ToastContext';
 import UntranslatedBadge from '../components/common/UntranslatedBadge';
 import { useFocusMode } from '../hooks/useFocusMode';
 import ServiceGuide from '../components/services/ServiceGuide';
+import SourceConflictCautionBanner from '../components/services/SourceConflictCautionBanner';
 import BarrierReportModal from '../components/barriers/BarrierReportModal';
 import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
 import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
@@ -268,6 +269,8 @@ const ServiceDetails = () => {
             </p>
           </div>
 
+          {/* Official Source Conflict Caution Banner (#149) */}
+          <SourceConflictCautionBanner serviceId={service.id} />
           <FeeTransparencyCard serviceId={service.id} serviceName={service.name} />
 
           <ServiceGuide service={service} focusMode={focusMode} onToggleFocusMode={toggleFocusMode} />
