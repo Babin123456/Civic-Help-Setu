@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap } from 'lucide-react';
+import { ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, AlertOctagon } from 'lucide-react';
 import { getServiceById } from '../services/serviceCatalog';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -8,6 +8,10 @@ import UntranslatedBadge from '../components/common/UntranslatedBadge';
 import { useFocusMode } from '../hooks/useFocusMode';
 import ServiceGuide from '../components/services/ServiceGuide';
 import AppointmentVisitPackModal from '../components/location/AppointmentVisitPackModal';
+import SourceConflictCautionBanner from '../components/services/SourceConflictCautionBanner';
+import BarrierReportModal from '../components/barriers/BarrierReportModal';
+import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
+import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
 
 const copyServiceLink = async (url) => {
   try {
@@ -38,6 +42,7 @@ const ServiceDetails = () => {
   const [linkCopied, setLinkCopied] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showVisitPackModal, setShowVisitPackModal] = useState(false);
+  const [showBarrierModal, setShowBarrierModal] = useState(false);
   const [service, setService] = useState(() => getServiceById(id));
   const [isSaved, setIsSaved] = useState(() => {
     try {
@@ -200,6 +205,27 @@ const ServiceDetails = () => {
 
                 <button
                   type="button"
+                  onClick={() => setShowBarrierModal(true)}
+                  className="btn btn-secondary"
+                  style={{
+                    gridColumn: '1 / -1',
+                    padding: '0.65rem',
+                    fontSize: '0.875rem',
+                    background: 'rgba(245, 158, 11, 0.08)',
+                    borderColor: 'rgba(245, 158, 11, 0.3)',
+                    color: '#f59e0b',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.35rem'
+                  }}
+                >
+                  <AlertOctagon size={16} color="#f59e0b" />
+                  Report Access Barrier
+                </button>
+
+                <button
+                  type="button"
                   onClick={handleCopyLink}
                   className="btn btn-secondary"
                   aria-label="Copy link to this service page"
@@ -246,7 +272,14 @@ const ServiceDetails = () => {
             </p>
           </div>
 
+          {/* Official Source Conflict Caution Banner (#149) */}
+          <SourceConflictCautionBanner serviceId={service.id} />
+          <FeeTransparencyCard serviceId={service.id} serviceName={service.name} />
+
           <ServiceGuide service={service} focusMode={focusMode} onToggleFocusMode={toggleFocusMode} />
+
+          {/* Civic Application Readiness Scorecard (#147) */}
+          <ApplicationReadinessScorecard service={service} />
         </div>
       </div>
 
@@ -292,6 +325,10 @@ const ServiceDetails = () => {
       <AppointmentVisitPackModal
         isOpen={showVisitPackModal}
         onClose={() => setShowVisitPackModal(false)}
+      {/* Citizen Barrier Report Modal (#148) */}
+      <BarrierReportModal
+        isOpen={showBarrierModal}
+        onClose={() => setShowBarrierModal(false)}
         service={service}
       />
     </div>
