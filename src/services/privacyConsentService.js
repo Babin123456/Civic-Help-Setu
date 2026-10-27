@@ -50,6 +50,7 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_offline_last_sync', category: 'cache', exportAs: null }, // offlineCacheService.js
   { key: 'civicbridge_cached_shelters', category: 'cache', exportAs: null }, // disasterReliefService.js
   { key: 'civicbridge_checklists', category: 'drafts', exportAs: 'checklistProgress', empty: {} }, // checklistStorage.js
+  { key: 'civic_grievance_evidence_drafts', category: 'drafts', exportAs: 'grievanceEvidenceDrafts', empty: [] }, // grievanceEvidenceService.js
   { key: 'civicbridge_community_audits', category: 'activity', exportAs: null }, // communityAuditService.js
 ];
 
