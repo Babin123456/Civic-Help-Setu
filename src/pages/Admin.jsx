@@ -69,13 +69,25 @@ const Admin = () => {
   const [communityAudits, setCommunityAudits] = useState([]);
 
   // Modals
-  const [serviceModal, setServiceModal] = useState({ isOpen: false, service: null });
-  const [reportModal, setReportModal] = useState({ isOpen: false, report: null });
-  const [roleModal, setRoleModal] = useState({ isOpen: false, targetUser: null });
-  const [submissionModal, setSubmissionModal] = useState({ isOpen: false, submission: null });
+  const [serviceModal, setServiceModal] = useState({
+    isOpen: false,
+    service: null,
+  });
+  const [reportModal, setReportModal] = useState({
+    isOpen: false,
+    report: null,
+  });
+  const [roleModal, setRoleModal] = useState({
+    isOpen: false,
+    targetUser: null,
+  });
+  const [submissionModal, setSubmissionModal] = useState({
+    isOpen: false,
+    submission: null,
+  });
   const [importOpen, setImportOpen] = useState(false);
 
-  // Destructive action waiting for confirmation: { kind: 'service' | 'report', id, name, dialog }
+  // Destructive action waiting for confirmation
   const [pendingAction, setPendingAction] = useState(null);
   const [isActionRunning, setIsActionRunning] = useState(false);
   const [actionError, setActionError] = useState('');
@@ -100,10 +112,15 @@ const Admin = () => {
   };
 
   const handleSaveService = (serviceData) => {
-    const updated = saveAdminService(serviceData, user?.username || 'SuperAdmin');
+    const updated = saveAdminService(
+      serviceData,
+      user?.username || 'SuperAdmin'
+    );
     setServices(updated);
     setAuditLogs(getAuditLogs());
-    toast?.success?.('Service guide saved. It now shows in the public directory on this device.');
+    toast?.success?.(
+      'Service guide saved. It now shows in the public directory on this device.'
+    );
   };
 
   const handleImportResult = (result) => {
@@ -111,24 +128,29 @@ const Admin = () => {
       toast?.error?.(result.error);
       return;
     }
+
     setServices(getAdminServices());
     setAuditLogs(getAuditLogs());
+
     const skipped = result.skipped.length
       ? ` ${result.skipped.length} skipped because they were added elsewhere in the meantime.`
       : '';
+
     if (result.imported) {
-      toast?.success?.(`${result.imported} service${result.imported === 1 ? '' : 's'} imported.${skipped}`);
+      toast?.success?.(
+        `${result.imported} service${result.imported === 1 ? '' : 's'} imported.${skipped}`
+      );
     } else {
       toast?.warning?.(`Nothing was imported.${skipped}`);
     }
   };
 
-  // Delete and dismiss only open the confirmation. The change itself happens in
-  // runPendingAction once the admin confirms.
   const handleDeleteService = (id) => {
-    const target = services.find((s) => s.id === id);
+    const target = services.find((service) => service.id === id);
     if (!target) return;
-    const builtIn = MOCK_SERVICES.some((s) => s.id === id);
+
+    const builtIn = MOCK_SERVICES.some((service) => service.id === id);
+
     setActionError('');
     setPendingAction({
       kind: 'service',
@@ -141,21 +163,29 @@ const Admin = () => {
 
   const handleCancelPendingAction = () => {
     if (actionGuard.isPending()) return;
+
     setPendingAction(null);
     setActionError('');
   };
 
   const runPendingAction = async () => {
     if (!pendingAction) return;
+
     const actor = user?.username || 'SuperAdmin';
+
     const result = await actionGuard.run(async () => {
       setIsActionRunning(true);
       setActionError('');
+
       if (pendingAction.kind === 'report') {
         return {
-          reports: dismissReportEntry({ id: pendingAction.id, dismissReport }),
+          reports: dismissReportEntry({
+            id: pendingAction.id,
+            dismissReport,
+          }),
         };
       }
+
       return removeServiceGuide({
         id: pendingAction.id,
         name: pendingAction.name,
@@ -165,26 +195,39 @@ const Admin = () => {
         hadLocalChanges: hasLocalServiceCopy(pendingAction.id),
       });
     });
+
     setIsActionRunning(false);
 
     if (result.status === 'busy') return;
+
     if (result.status === 'failed') {
-      setActionError(describeActionFailure(pendingAction.kind, pendingAction.name));
+      setActionError(
+        describeActionFailure(pendingAction.kind, pendingAction.name)
+      );
+
       toast?.error?.(
-        pendingAction.kind === 'report' ? 'Report was not dismissed.' : `"${pendingAction.name}" was not changed.`
+        pendingAction.kind === 'report'
+          ? 'Report was not dismissed.'
+          : `"${pendingAction.name}" was not changed.`
       );
       return;
     }
 
     if (pendingAction.kind === 'report') {
       setReports(result.value.reports);
-      toast?.success?.('Report dismissed. It was deleted from the queue and cannot be restored.');
+      toast?.success?.(
+        'Report dismissed. It was deleted from the queue and cannot be restored.'
+      );
     } else {
       setServices(result.value.services);
       setAuditLogs(getAuditLogs());
+
       const { outcome } = result.value;
+
       if (outcome === 'nothing-to-clear') {
-        toast?.info?.(`"${pendingAction.name}" has no local changes saved on this device. The built-in guide stays in the directory.`);
+        toast?.info?.(
+          `"${pendingAction.name}" has no local changes saved on this device. The built-in guide stays in the directory.`
+        );
       } else {
         toast?.success?.(
           outcome === 'reverted-to-builtin'
@@ -193,18 +236,24 @@ const Admin = () => {
         );
       }
     }
+
     setPendingAction(null);
   };
 
   const handleResolveReport = (id, resolution) => {
-    const updated = resolveReport(id, resolution, user?.username || 'SuperAdmin');
+    const updated = resolveReport(
+      id,
+      resolution,
+      user?.username || 'SuperAdmin'
+    );
     setReports(updated);
     setAuditLogs(getAuditLogs());
   };
 
   const handleDismissReport = (id) => {
-    const target = reports.find((r) => r.id === id);
+    const target = reports.find((report) => report.id === id);
     if (!target) return;
+
     setActionError('');
     setPendingAction({
       kind: 'report',
@@ -215,46 +264,81 @@ const Admin = () => {
   };
 
   const handleEditServiceFromReport = (serviceId) => {
-    const target = services.find((s) => s.id === serviceId);
+    const target = services.find((service) => service.id === serviceId);
+
     if (target) {
-      setServiceModal({ isOpen: true, service: target });
+      setServiceModal({
+        isOpen: true,
+        service: target,
+      });
     }
   };
 
   const handleSaveRole = (userId, newRole, customPermissions) => {
-    const updated = updateUserRole(userId, newRole, customPermissions, user?.username || 'SuperAdmin');
+    const updated = updateUserRole(
+      userId,
+      newRole,
+      customPermissions,
+      user?.username || 'SuperAdmin'
+    );
     setUsers(updated);
     setAuditLogs(getAuditLogs());
   };
 
   const handleApproveSubmission = (submissionId, reviewNotes) => {
-    const updated = approveServiceSubmission(submissionId, reviewNotes, user?.username || 'SuperAdmin');
+    const updated = approveServiceSubmission(
+      submissionId,
+      reviewNotes,
+      user?.username || 'SuperAdmin'
+    );
     setSubmissions(updated);
     setServices(getAdminServices());
     setAuditLogs(getAuditLogs());
   };
 
   const handleRejectSubmission = (submissionId, reviewNotes) => {
-    const updated = rejectServiceSubmission(submissionId, reviewNotes, user?.username || 'SuperAdmin');
+    const updated = rejectServiceSubmission(
+      submissionId,
+      reviewNotes,
+      user?.username || 'SuperAdmin'
+    );
     setSubmissions(updated);
     setAuditLogs(getAuditLogs());
   };
 
   const handleResolveAudit = (auditId) => {
-    const note = window.prompt('Enter administrative resolution note / corrective action taken:', 'Verified ground reality and updated office procedure.');
+    const note = window.prompt(
+      'Enter administrative resolution note / corrective action taken:',
+      'Verified ground reality and updated office procedure.'
+    );
+
     if (note && note.trim()) {
-      resolveAuditReport(auditId, note.trim(), user?.username || 'SuperAdmin');
+      resolveAuditReport(
+        auditId,
+        note.trim(),
+        user?.username || 'SuperAdmin'
+      );
       setCommunityAudits(getAuditReports());
-      toast?.success?.('Discrepancy audit resolved and official notice published.');
+      toast?.success?.(
+        'Discrepancy audit resolved and official notice published.'
+      );
     }
   };
 
-  const pendingReportsCount = reports.filter((r) => r.status === 'pending').length;
-  const pendingSubmissionsCount = submissions.filter((s) => s.status === 'pending').length;
-  const pendingAuditsCount = countOpenAudits(communityAudits);
+  const pendingReportsCount = reports.filter(
+    (report) => report.status === 'pending'
+  ).length;
 
+  const pendingSubmissionsCount = submissions.filter(
+    (submission) => submission.status === 'pending'
+  ).length;
+
+  const pendingAuditsCount = countOpenAudits(communityAudits);
   return (
-    <div className="section animate-fade-in" style={{ paddingBottom: '6rem' }}>
+    <div
+      className="section animate-fade-in"
+      style={{ paddingBottom: '6rem' }}
+    >
       <div className="container" style={{ maxWidth: '1280px' }}>
         {/* Header Bar */}
         <div
@@ -285,19 +369,47 @@ const Admin = () => {
             >
               <ShieldCheck size={18} /> Governance & Content Moderation Portal
             </div>
-            <h1 style={{ fontSize: 'clamp(2rem, 4vw, 2.75rem)', fontWeight: '900' }}>
+
+            <h1
+              style={{
+                fontSize: 'clamp(2rem, 4vw, 2.75rem)',
+                fontWeight: '900',
+              }}
+            >
               Civic Administration Dashboard
             </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginTop: '0.2rem' }}>
-              Review service submissions, manage public guides, resolve citizen reports, and administer RBAC roles.
+
+            <p
+              style={{
+                color: 'var(--text-secondary)',
+                fontSize: '0.95rem',
+                marginTop: '0.2rem',
+              }}
+            >
+              Review service submissions, manage public guides, resolve citizen
+              reports, and administer RBAC roles.
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+            }}
+          >
             <div style={{ textAlign: 'right' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-primary)', display: 'block' }}>
+              <span
+                style={{
+                  fontSize: '0.85rem',
+                  fontWeight: '700',
+                  color: 'var(--text-primary)',
+                  display: 'block',
+                }}
+              >
                 {user?.fullName || user?.username || 'Admin User'}
               </span>
+
               <span
                 style={{
                   fontSize: '0.75rem',
@@ -312,6 +424,7 @@ const Admin = () => {
                 Role: {user?.role || 'admin'}
               </span>
             </div>
+
             <button
               type="button"
               onClick={handleLogout}
@@ -329,8 +442,15 @@ const Admin = () => {
           </div>
         </div>
 
-        {/* Layout Grid: Sidebar Tabs & Main Content */}
-        <div className="admin-layout" style={{ display: 'grid', gap: '2rem', alignItems: 'start' }}>
+        {/* Layout Grid */}
+        <div
+          className="admin-layout"
+          style={{
+            display: 'grid',
+            gap: '2rem',
+            alignItems: 'start',
+          }}
+        >
           {/* Sidebar Tabs */}
           <div
             className="glass-panel"
@@ -344,17 +464,50 @@ const Admin = () => {
           >
             {[
               { id: 'dashboard', label: 'Overview Metrics', badge: null },
-              { id: 'services', label: `Service Catalog (${services.length})`, badge: null },
-              { id: 'submissions', label: 'Submissions Queue', badge: pendingSubmissionsCount || null },
-              { id: 'reports', label: 'Inaccuracy Reports', badge: pendingReportsCount || null },
-              { id: 'community-audits', label: 'Discrepancy Audits', badge: pendingAuditsCount || null },
-              { id: 'freshness', label: 'Freshness & Trust Queue', badge: null },
-              { id: 'bottlenecks', label: 'Process Bottleneck Loop', badge: null },
-              { id: 'notices', label: 'Notices & Gazette Digest', badge: null },
-              { id: 'users', label: `User Roles (${users.length})`, badge: null },
+              {
+                id: 'services',
+                label: `Service Catalog (${services.length})`,
+                badge: null,
+              },
+              {
+                id: 'submissions',
+                label: 'Submissions Queue',
+                badge: pendingSubmissionsCount || null,
+              },
+              {
+                id: 'reports',
+                label: 'Inaccuracy Reports',
+                badge: pendingReportsCount || null,
+              },
+              {
+                id: 'community-audits',
+                label: 'Discrepancy Audits',
+                badge: pendingAuditsCount || null,
+              },
+              {
+                id: 'freshness',
+                label: 'Freshness & Trust Queue',
+                badge: null,
+              },
+              {
+                id: 'bottlenecks',
+                label: 'Process Bottleneck Loop',
+                badge: null,
+              },
+              {
+                id: 'notices',
+                label: 'Notices & Gazette Digest',
+                badge: null,
+              },
+              {
+                id: 'users',
+                label: `User Roles (${users.length})`,
+                badge: null,
+              },
               { id: 'audit', label: 'Audit Trail Logs', badge: null },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
+
               return (
                 <button
                   key={tab.id}
@@ -372,11 +525,14 @@ const Admin = () => {
                     justifyContent: 'space-between',
                     border: 'none',
                     transition: 'all 0.15s',
-                    background: isActive ? 'var(--accent-main)' : 'transparent',
+                    background: isActive
+                      ? 'var(--accent-main)'
+                      : 'transparent',
                     color: isActive ? '#ffffff' : 'var(--text-secondary)',
                   }}
                 >
                   <span>{tab.label}</span>
+
                   {tab.badge && (
                     <span
                       style={{
@@ -384,8 +540,12 @@ const Admin = () => {
                         borderRadius: '99px',
                         fontSize: '0.7rem',
                         fontWeight: '700',
-                        background: isActive ? '#ffffff' : 'rgba(239, 68, 68, 0.2)',
-                        color: isActive ? 'var(--accent-main)' : '#ef4444',
+                        background: isActive
+                          ? '#ffffff'
+                          : 'rgba(239, 68, 68, 0.2)',
+                        color: isActive
+                          ? 'var(--accent-main)'
+                          : '#ef4444',
                       }}
                     >
                       {tab.badge}
@@ -408,6 +568,7 @@ const Admin = () => {
 
                 {/* Civic Source Conflict and Confidence Review Queue (#149) */}
                 <SourceConflictReviewQueue />
+
                 {/* Citizen-Reported Service Barrier Insights Dashboard (#148) */}
                 <BarrierInsightsDashboard />
               </div>
@@ -416,23 +577,60 @@ const Admin = () => {
             {/* Service Catalog Tab */}
             {activeTab === 'services' && (
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem' }}>
-                  <h2 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0 }}>Public Service Guides</h2>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '0.75rem',
+                    marginBottom: '1.25rem',
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontSize: '1.25rem',
+                      fontWeight: '800',
+                      margin: 0,
+                    }}
+                  >
+                    Public Service Guides
+                  </h2>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '0.75rem',
+                    }}
+                  >
                     <button
                       type="button"
                       onClick={() => setImportOpen((open) => !open)}
                       className="btn btn-secondary"
                       aria-expanded={importOpen}
-                      style={{ fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                      style={{
+                        fontSize: '0.85rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                      }}
                     >
                       <Upload size={16} /> Import CSV / JSON
                     </button>
+
                     <button
                       type="button"
-                      onClick={() => setServiceModal({ isOpen: true, service: null })}
+                      onClick={() =>
+                        setServiceModal({ isOpen: true, service: null })
+                      }
                       className="btn btn-primary"
-                      style={{ fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                      style={{
+                        fontSize: '0.85rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                      }}
                     >
                       <Plus size={16} /> Add New Service Guide
                     </button>
@@ -450,7 +648,9 @@ const Admin = () => {
 
                 <ServiceRecordList
                   services={services}
-                  onEdit={(svc) => setServiceModal({ isOpen: true, service: svc })}
+                  onEdit={(service) =>
+                    setServiceModal({ isOpen: true, service })
+                  }
                   onDelete={handleDeleteService}
                 />
               </div>
@@ -459,14 +659,41 @@ const Admin = () => {
             {/* Community Submissions Queue Tab */}
             {activeTab === 'submissions' && (
               <div>
-                <div style={{ marginBottom: '1.25rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.75rem' }}>
-                  <h2 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0 }}>Community Submissions & Edits Queue</h2>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>
-                    Citizen and contributor proposals pending moderator verification before publication.
+                <div
+                  style={{
+                    marginBottom: '1.25rem',
+                    borderBottom: '1px solid var(--border-light)',
+                    paddingBottom: '0.75rem',
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontSize: '1.25rem',
+                      fontWeight: '800',
+                      margin: 0,
+                    }}
+                  >
+                    Community Submissions & Edits Queue
+                  </h2>
+                  <p
+                    style={{
+                      color: 'var(--text-secondary)',
+                      fontSize: '0.85rem',
+                      margin: '0.25rem 0 0',
+                    }}
+                  >
+                    Citizen and contributor proposals pending moderator
+                    verification before publication.
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem',
+                  }}
+                >
                   {submissions.map((sub) => (
                     <div
                       key={sub.id}
@@ -474,21 +701,59 @@ const Admin = () => {
                       style={{
                         padding: '1.25rem',
                         borderRadius: '0.85rem',
-                        borderLeft: `4px solid ${sub.status === 'approved' ? '#10b981' : sub.status === 'rejected' ? '#ef4444' : '#f59e0b'}`,
+                        borderLeft: `4px solid ${
+                          sub.status === 'approved'
+                            ? '#10b981'
+                            : sub.status === 'rejected'
+                              ? '#ef4444'
+                              : '#f59e0b'
+                        }`,
                       }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          flexWrap: 'wrap',
+                          gap: '0.5rem',
+                          marginBottom: '0.5rem',
+                        }}
+                      >
                         <div>
-                          <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--accent-main)', textTransform: 'uppercase' }}>
+                          <span
+                            style={{
+                              fontSize: '0.75rem',
+                              fontWeight: '700',
+                              color: 'var(--accent-main)',
+                              textTransform: 'uppercase',
+                            }}
+                          >
                             {sub.category}
                           </span>
-                          <h3 style={{ fontSize: '1.15rem', fontWeight: '800', margin: '0.2rem 0', color: 'var(--text-primary)' }}>
+
+                          <h3
+                            style={{
+                              fontSize: '1.15rem',
+                              fontWeight: '800',
+                              margin: '0.2rem 0',
+                              color: 'var(--text-primary)',
+                            }}
+                          >
                             {sub.name}
                           </h3>
-                          <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
-                            Submitted by: {sub.submittedBy} ({sub.contributorEmail}) on {sub.submittedAt}
+
+                          <span
+                            style={{
+                              fontSize: '0.8rem',
+                              color: 'var(--text-tertiary)',
+                            }}
+                          >
+                            Submitted by: {sub.submittedBy} (
+                            {sub.contributorEmail}) on {sub.submittedAt}
                           </span>
                         </div>
+
                         <span
                           style={{
                             fontSize: '0.75rem',
@@ -496,15 +761,27 @@ const Admin = () => {
                             borderRadius: '99px',
                             fontWeight: '700',
                             textTransform: 'uppercase',
-                            background: sub.status === 'approved' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                            color: sub.status === 'approved' ? '#10b981' : '#f59e0b',
+                            background:
+                              sub.status === 'approved'
+                                ? 'rgba(16, 185, 129, 0.15)'
+                                : 'rgba(245, 158, 11, 0.15)',
+                            color:
+                              sub.status === 'approved'
+                                ? '#10b981'
+                                : '#f59e0b',
                           }}
                         >
                           {sub.status}
                         </span>
                       </div>
 
-                      <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: '0.5rem 0 1rem' }}>
+                      <p
+                        style={{
+                          fontSize: '0.875rem',
+                          color: 'var(--text-secondary)',
+                          margin: '0.5rem 0 1rem',
+                        }}
+                      >
                         {sub.shortDescription}
                       </p>
 
@@ -512,9 +789,20 @@ const Admin = () => {
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           <button
                             type="button"
-                            onClick={() => setSubmissionModal({ isOpen: true, submission: sub })}
+                            onClick={() =>
+                              setSubmissionModal({
+                                isOpen: true,
+                                submission: sub,
+                              })
+                            }
                             className="btn btn-primary"
-                            style={{ padding: '0.45rem 1rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                            style={{
+                              padding: '0.45rem 1rem',
+                              fontSize: '0.85rem',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.4rem',
+                            }}
                           >
                             <FileCheck size={15} /> Review & Moderate
                           </button>
@@ -529,58 +817,150 @@ const Admin = () => {
             {/* Reports Queue Tab */}
             {activeTab === 'reports' && (
               <div>
-                <div style={{ marginBottom: '1.25rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.75rem' }}>
-                  <h2 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0 }}>Community Inaccuracy Reports</h2>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>
-                    Citizens flag broken links, outdated fees, and missing procedures for moderator audit.
+                <div
+                  style={{
+                    marginBottom: '1.25rem',
+                    borderBottom: '1px solid var(--border-light)',
+                    paddingBottom: '0.75rem',
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontSize: '1.25rem',
+                      fontWeight: '800',
+                      margin: 0,
+                    }}
+                  >
+                    Community Inaccuracy Reports
+                  </h2>
+                  <p
+                    style={{
+                      color: 'var(--text-secondary)',
+                      fontSize: '0.85rem',
+                      margin: '0.25rem 0 0',
+                    }}
+                  >
+                    Citizens flag broken links, outdated fees, and missing
+                    procedures for moderator audit.
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem',
+                  }}
+                >
                   {reports.map((report) => (
                     <div
                       key={report.id}
                       className="card"
                       style={{
                         padding: '1.25rem',
-                        borderLeft: `4px solid ${report.status === 'resolved' ? '#10b981' : '#f59e0b'}`,
+                        borderLeft: `4px solid ${
+                          report.status === 'resolved' ? '#10b981' : '#f59e0b'
+                        }`,
                         background: 'var(--glass-bg)',
                       }}
                     >
-                      <div className="flex-between" style={{ marginBottom: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div
+                        className="flex-between"
+                        style={{
+                          marginBottom: '0.4rem',
+                          flexWrap: 'wrap',
+                          gap: '0.5rem',
+                        }}
+                      >
                         <div>
-                          <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--accent-main)', textTransform: 'uppercase', marginRight: '0.5rem' }}>
+                          <span
+                            style={{
+                              fontSize: '0.75rem',
+                              fontWeight: '700',
+                              color: 'var(--accent-main)',
+                              textTransform: 'uppercase',
+                              marginRight: '0.5rem',
+                            }}
+                          >
                             {report.serviceName}
                           </span>
-                          <strong style={{ color: 'var(--text-primary)', fontSize: '0.95rem' }}>{report.issueType}</strong>
+
+                          <strong
+                            style={{
+                              color: 'var(--text-primary)',
+                              fontSize: '0.95rem',
+                            }}
+                          >
+                            {report.issueType}
+                          </strong>
                         </div>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{report.createdAt}</span>
+
+                        <span
+                          style={{
+                            fontSize: '0.75rem',
+                            color: 'var(--text-tertiary)',
+                          }}
+                        >
+                          {report.createdAt}
+                        </span>
                       </div>
 
-                      <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.85rem', fontStyle: 'italic' }}>
+                      <p
+                        style={{
+                          fontSize: '0.875rem',
+                          color: 'var(--text-secondary)',
+                          marginBottom: '0.85rem',
+                          fontStyle: 'italic',
+                        }}
+                      >
                         "{report.description}"
                       </p>
 
-                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          gap: '0.5rem',
+                          alignItems: 'center',
+                        }}
+                      >
                         {report.status === 'resolved' ? (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', color: '#10b981', fontWeight: '600' }}>
-                            <CheckCircle2 size={16} /> Resolved: {report.resolutionNotes}
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.25rem',
+                              fontSize: '0.8rem',
+                              color: '#10b981',
+                              fontWeight: '600',
+                            }}
+                          >
+                            <CheckCircle2 size={16} /> Resolved:{' '}
+                            {report.resolutionNotes}
                           </span>
                         ) : (
                           <>
                             <button
                               type="button"
-                              onClick={() => setReportModal({ isOpen: true, report })}
+                              onClick={() =>
+                                setReportModal({ isOpen: true, report })
+                              }
                               className="btn btn-primary"
-                              style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}
+                              style={{
+                                padding: '0.4rem 0.85rem',
+                                fontSize: '0.8rem',
+                              }}
                             >
                               Review & Resolve
                             </button>
+
                             <button
                               type="button"
                               onClick={() => handleDismissReport(report.id)}
                               className="btn btn-secondary"
-                              style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}
+                              style={{
+                                padding: '0.4rem 0.85rem',
+                                fontSize: '0.8rem',
+                              }}
                             >
                               Dismiss
                             </button>
@@ -592,76 +972,195 @@ const Admin = () => {
                 </div>
               </div>
             )}
-
-            {/* Community Discrepancy Audits Tab */}
+                        {/* Community Discrepancy Audits Tab */}
             {activeTab === 'community-audits' && (
               <div>
-                <div style={{ marginBottom: '1.25rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.75rem' }}>
-                  <h2 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0 }}>Crowdsourced Discrepancy Audits</h2>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>
-                    Citizen-reported divergences between official service rules and ground-level counter demands.
+                <div
+                  style={{
+                    marginBottom: '1.25rem',
+                    borderBottom: '1px solid var(--border-light)',
+                    paddingBottom: '0.75rem',
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontSize: '1.25rem',
+                      fontWeight: '800',
+                      margin: 0,
+                    }}
+                  >
+                    Crowdsourced Discrepancy Audits
+                  </h2>
+                  <p
+                    style={{
+                      color: 'var(--text-secondary)',
+                      fontSize: '0.85rem',
+                      margin: '0.25rem 0 0',
+                    }}
+                  >
+                    Citizen-reported divergences between official service rules
+                    and ground-level counter demands.
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem',
+                  }}
+                >
                   {communityAudits.length === 0 ? (
-                    <div className="card" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-tertiary)' }}>
+                    <div
+                      className="card"
+                      style={{
+                        padding: '2rem',
+                        textAlign: 'center',
+                        color: 'var(--text-tertiary)',
+                      }}
+                    >
                       No community discrepancy reports recorded yet.
                     </div>
                   ) : (
-                    communityAudits.map((report) => describeAuditReport(report, services)).map((item) => (
-                      <div
-                        key={item.id}
-                        className="card"
-                        style={{
-                          padding: '1.25rem',
-                          borderLeft: `4px solid ${item.tone === 'resolved' ? '#10b981' : item.tone === 'urgent' ? '#ef4444' : '#f59e0b'}`,
-                          background: 'var(--glass-bg)',
-                        }}
-                      >
-                        <div className="flex-between" style={{ marginBottom: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                          <div>
-                            <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--accent-main)', textTransform: 'uppercase', marginRight: '0.5rem' }}>
-                              {item.serviceName}
-                            </span>
-                            <span style={{ fontSize: '0.75rem', padding: '0.15rem 0.45rem', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', fontWeight: '600' }}>
-                              {item.categoryLabel}
-                            </span>
-                          </div>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{item.reportedDate}</span>
-                        </div>
+                    communityAudits
+                      .map((report) => describeAuditReport(report, services))
+                      .map((item) => (
+                        <div
+                          key={item.id}
+                          className="card"
+                          style={{
+                            padding: '1.25rem',
+                            borderLeft: `4px solid ${
+                              item.tone === 'resolved'
+                                ? '#10b981'
+                                : item.tone === 'urgent'
+                                  ? '#ef4444'
+                                  : '#f59e0b'
+                            }`,
+                            background: 'var(--glass-bg)',
+                          }}
+                        >
+                          <div
+                            className="flex-between"
+                            style={{
+                              marginBottom: '0.4rem',
+                              flexWrap: 'wrap',
+                              gap: '0.5rem',
+                            }}
+                          >
+                            <div>
+                              <span
+                                style={{
+                                  fontSize: '0.75rem',
+                                  fontWeight: '700',
+                                  color: 'var(--accent-main)',
+                                  textTransform: 'uppercase',
+                                  marginRight: '0.5rem',
+                                }}
+                              >
+                                {item.serviceName}
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: '0.75rem',
+                                  padding: '0.15rem 0.45rem',
+                                  borderRadius: '4px',
+                                  background: 'rgba(239, 68, 68, 0.1)',
+                                  color: '#ef4444',
+                                  fontWeight: '600',
+                                }}
+                              >
+                                {item.categoryLabel}
+                              </span>
+                            </div>
 
-                        <h4 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-primary)', margin: '0.3rem 0' }}>
-                          {item.title}
-                        </h4>
-                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.6rem' }}>
-                          {item.description}
-                        </p>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-light)' }}>
-                          <div style={{ display: 'flex', gap: '1rem', fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
-                            <span>👍 {item.upvotes} Citizens Corroborated</span>
-                            <span>👎 {item.downvotes} Refuted</span>
-                            <span>Reported by: {item.reportedBy}</span>
-                          </div>
-
-                          {item.resolved ? (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', color: '#10b981', fontWeight: '600' }}>
-                              <CheckCircle2 size={16} /> Resolved: {item.adminNote}
-                            </span>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => handleResolveAudit(item.id)}
-                              className="btn btn-primary"
-                              style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}
+                            <span
+                              style={{
+                                fontSize: '0.75rem',
+                                color: 'var(--text-tertiary)',
+                              }}
                             >
-                              Resolve & Post Directive
-                            </button>
-                          )}
+                              {item.reportedDate}
+                            </span>
+                          </div>
+
+                          <h4
+                            style={{
+                              fontSize: '1rem',
+                              fontWeight: '700',
+                              color: 'var(--text-primary)',
+                              margin: '0.3rem 0',
+                            }}
+                          >
+                            {item.title}
+                          </h4>
+
+                          <p
+                            style={{
+                              fontSize: '0.875rem',
+                              color: 'var(--text-secondary)',
+                              marginBottom: '0.6rem',
+                            }}
+                          >
+                            {item.description}
+                          </p>
+
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              flexWrap: 'wrap',
+                              gap: '0.5rem',
+                              paddingTop: '0.5rem',
+                              borderTop: '1px solid var(--border-light)',
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: 'flex',
+                                gap: '1rem',
+                                fontSize: '0.8rem',
+                                color: 'var(--text-tertiary)',
+                              }}
+                            >
+                              <span>
+                                👍 {item.upvotes} Citizens Corroborated
+                              </span>
+                              <span>👎 {item.downvotes} Refuted</span>
+                              <span>Reported by: {item.reportedBy}</span>
+                            </div>
+
+                            {item.resolved ? (
+                              <span
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.25rem',
+                                  fontSize: '0.8rem',
+                                  color: '#10b981',
+                                  fontWeight: '600',
+                                }}
+                              >
+                                <CheckCircle2 size={16} /> Resolved:{' '}
+                                {item.adminNote}
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleResolveAudit(item.id)}
+                                className="btn btn-primary"
+                                style={{
+                                  padding: '0.4rem 0.85rem',
+                                  fontSize: '0.8rem',
+                                }}
+                              >
+                                Resolve & Post Directive
+                              </button>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      ))
                   )}
                 </div>
               </div>
@@ -670,33 +1169,106 @@ const Admin = () => {
             {/* User Roles & RBAC Governance Tab */}
             {activeTab === 'users' && (
               <div>
-                <div style={{ marginBottom: '1.25rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.75rem' }}>
-                  <h2 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0 }}>User Roles & Governance Access Control</h2>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>
-                    Assign administrative privileges, moderator queue access, or editor permissions.
+                <div
+                  style={{
+                    marginBottom: '1.25rem',
+                    borderBottom: '1px solid var(--border-light)',
+                    paddingBottom: '0.75rem',
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontSize: '1.25rem',
+                      fontWeight: '800',
+                      margin: 0,
+                    }}
+                  >
+                    User Roles & Governance Access Control
+                  </h2>
+                  <p
+                    style={{
+                      color: 'var(--text-secondary)',
+                      fontSize: '0.85rem',
+                      margin: '0.25rem 0 0',
+                    }}
+                  >
+                    Assign administrative privileges, moderator queue access,
+                    or editor permissions.
                   </p>
                 </div>
 
-                <div className="glass-panel" style={{ borderRadius: '0.85rem', overflow: 'hidden' }}>
-                  <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+                <div
+                  className="glass-panel"
+                  style={{
+                    borderRadius: '0.85rem',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <table
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      borderCollapse: 'collapse',
+                      fontSize: '0.875rem',
+                    }}
+                  >
                     <thead>
-                      <tr style={{ borderBottom: '1px solid var(--border-light)', color: 'var(--text-tertiary)', background: 'rgba(0, 0, 0, 0.15)' }}>
-                        <th style={{ padding: '0.85rem 1rem', fontWeight: '700' }}>Citizen / Officer</th>
-                        <th style={{ padding: '0.85rem 1rem', fontWeight: '700' }}>Email Address</th>
-                        <th style={{ padding: '0.85rem 1rem', fontWeight: '700' }}>Active Role</th>
-                        <th style={{ padding: '0.85rem 1rem', fontWeight: '700' }}>Member Since</th>
-                        <th style={{ padding: '0.85rem 1rem', fontWeight: '700', textAlign: 'right' }}>Actions</th>
+                      <tr
+                        style={{
+                          borderBottom: '1px solid var(--border-light)',
+                          color: 'var(--text-tertiary)',
+                          background: 'rgba(0, 0, 0, 0.15)',
+                        }}
+                      >
+                        <th style={{ padding: '0.85rem 1rem', fontWeight: '700' }}>
+                          Citizen / Officer
+                        </th>
+                        <th style={{ padding: '0.85rem 1rem', fontWeight: '700' }}>
+                          Email Address
+                        </th>
+                        <th style={{ padding: '0.85rem 1rem', fontWeight: '700' }}>
+                          Active Role
+                        </th>
+                        <th style={{ padding: '0.85rem 1rem', fontWeight: '700' }}>
+                          Member Since
+                        </th>
+                        <th
+                          style={{
+                            padding: '0.85rem 1rem',
+                            fontWeight: '700',
+                            textAlign: 'right',
+                          }}
+                        >
+                          Actions
+                        </th>
                       </tr>
                     </thead>
+
                     <tbody>
                       {users.map((usr) => (
-                        <tr key={usr.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                          <td style={{ padding: '0.85rem 1rem', fontWeight: '600', color: 'var(--text-primary)' }}>
+                        <tr
+                          key={usr.id}
+                          style={{ borderBottom: '1px solid var(--border-light)' }}
+                        >
+                          <td
+                            style={{
+                              padding: '0.85rem 1rem',
+                              fontWeight: '600',
+                              color: 'var(--text-primary)',
+                            }}
+                          >
                             {usr.username}
                           </td>
-                          <td style={{ padding: '0.85rem 1rem', color: 'var(--text-secondary)' }}>
+
+                          <td
+                            style={{
+                              padding: '0.85rem 1rem',
+                              color: 'var(--text-secondary)',
+                            }}
+                          >
                             {usr.email}
                           </td>
+
                           <td style={{ padding: '0.85rem 1rem' }}>
                             <span
                               style={{
@@ -709,30 +1281,47 @@ const Admin = () => {
                                   usr.role === 'admin'
                                     ? 'rgba(239, 68, 68, 0.15)'
                                     : usr.role === 'moderator'
-                                    ? 'rgba(245, 158, 11, 0.15)'
-                                    : usr.role === 'editor'
-                                    ? 'rgba(56, 189, 248, 0.15)'
-                                    : 'rgba(255, 255, 255, 0.08)',
+                                      ? 'rgba(245, 158, 11, 0.15)'
+                                      : usr.role === 'editor'
+                                        ? 'rgba(56, 189, 248, 0.15)'
+                                        : 'rgba(255, 255, 255, 0.08)',
                                 color:
                                   usr.role === 'admin'
                                     ? '#ef4444'
                                     : usr.role === 'moderator'
-                                    ? '#f59e0b'
-                                    : usr.role === 'editor'
-                                    ? 'var(--accent-main)'
-                                    : 'var(--text-secondary)',
+                                      ? '#f59e0b'
+                                      : usr.role === 'editor'
+                                        ? 'var(--accent-main)'
+                                        : 'var(--text-secondary)',
                               }}
                             >
                               {usr.role}
                             </span>
                           </td>
-                          <td style={{ padding: '0.85rem 1rem', color: 'var(--text-tertiary)' }}>
+
+                          <td
+                            style={{
+                              padding: '0.85rem 1rem',
+                              color: 'var(--text-tertiary)',
+                            }}
+                          >
                             {usr.joinedAt}
                           </td>
-                          <td style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>
+
+                          <td
+                            style={{
+                              padding: '0.85rem 1rem',
+                              textAlign: 'right',
+                            }}
+                          >
                             <button
                               type="button"
-                              onClick={() => setRoleModal({ isOpen: true, targetUser: usr })}
+                              onClick={() =>
+                                setRoleModal({
+                                  isOpen: true,
+                                  targetUser: usr,
+                                })
+                              }
                               style={{
                                 background: 'none',
                                 border: 'none',
@@ -756,6 +1345,9 @@ const Admin = () => {
             {activeTab === 'freshness' && (
               <div>
                 <StaleRecordsReviewQueue />
+              </div>
+            )}
+
             {/* Process Bottleneck Feedback Loop Tab */}
             {activeTab === 'bottlenecks' && (
               <div>
@@ -785,7 +1377,11 @@ const Admin = () => {
           title={pendingAction?.dialog.title}
           message={pendingAction?.dialog.message}
           itemName={pendingAction?.dialog.itemName}
-          confirmLabel={actionError ? 'Try again' : pendingAction?.dialog.confirmLabel}
+          confirmLabel={
+            actionError
+              ? 'Try again'
+              : pendingAction?.dialog.confirmLabel
+          }
           cancelLabel={pendingAction?.dialog.cancelLabel}
           variant="danger"
           isLoading={isActionRunning}
@@ -797,14 +1393,18 @@ const Admin = () => {
         <ServiceModal
           isOpen={serviceModal.isOpen}
           serviceToEdit={serviceModal.service}
-          onClose={() => setServiceModal({ isOpen: false, service: null })}
+          onClose={() =>
+            setServiceModal({ isOpen: false, service: null })
+          }
           onSave={handleSaveService}
         />
 
         <ReportResolutionModal
           isOpen={reportModal.isOpen}
           report={reportModal.report}
-          onClose={() => setReportModal({ isOpen: false, report: null })}
+          onClose={() =>
+            setReportModal({ isOpen: false, report: null })
+          }
           onResolve={handleResolveReport}
           onDismiss={handleDismissReport}
           onEditService={handleEditServiceFromReport}
@@ -813,14 +1413,18 @@ const Admin = () => {
         <RoleManagementModal
           isOpen={roleModal.isOpen}
           targetUser={roleModal.targetUser}
-          onClose={() => setRoleModal({ isOpen: false, targetUser: null })}
+          onClose={() =>
+            setRoleModal({ isOpen: false, targetUser: null })
+          }
           onSaveRole={handleSaveRole}
         />
 
         <ServiceSubmissionReviewModal
           isOpen={submissionModal.isOpen}
           submission={submissionModal.submission}
-          onClose={() => setSubmissionModal({ isOpen: false, submission: null })}
+          onClose={() =>
+            setSubmissionModal({ isOpen: false, submission: null })
+          }
           onApprove={handleApproveSubmission}
           onReject={handleRejectSubmission}
         />
