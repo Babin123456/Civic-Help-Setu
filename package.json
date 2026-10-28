@@ -8,6 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "lint:security": "eslint -c eslint.security.config.js --max-warnings 0 src",
+    "headers:generate": "node scripts/generateVercelHeaders.js",
+    "headers:check": "node scripts/generateVercelHeaders.js --check",
     "preview": "vite preview",
     "test": "vitest run"
   },
