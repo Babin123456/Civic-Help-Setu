@@ -56,6 +56,7 @@ export const USER_DATA_STORES = [
   { key: 'civic_life_event_journeys', category: 'drafts', exportAs: 'lifeEventJourneys', empty: {} }, // lifeEventNavigatorService.js
   { key: 'civicbridge_community_audits', category: 'activity', exportAs: null }, // communityAuditService.js
   { key: 'civic_service_fee_preferences', category: 'saved', exportAs: 'serviceFeePreferences', empty: {} }, // feeTransparencyService.js
+  { key: 'civicbridge_applicant_profiles_v1', category: 'drafts', exportAs: 'applicantProfiles', empty: [] }, // applicantProfileService.js
 ];
 
 /**
@@ -127,6 +128,7 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_plain_lang',
   'civicbridge_a11y_prefs',
   'civicbridge_focus_mode',
+  'civicbridge_active_applicant_profile_id_v1',
   // Demo sign-in session, signing out is its own action
   'civicbridge_demo_user',
   // Admin portal data and the shared review queue for outdated-info reports
