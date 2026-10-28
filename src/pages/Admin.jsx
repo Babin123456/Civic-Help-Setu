@@ -754,6 +754,9 @@ const Admin = () => {
             {activeTab === 'bottlenecks' && (
               <div>
                 <BottleneckFeedbackDashboard />
+              </div>
+            )}
+
             {/* Notices & Gazette Digest Tab */}
             {activeTab === 'notices' && (
               <div>
