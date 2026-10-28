@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Security headers and a report-only Content Security Policy (issue #219), generated from `scripts/securityHeaders.js` into `vercel.json`. See `docs/SECURITY_HEADERS.md`.
 - Initial setup of CivicBridge MVP.
 - React/Vite project structure.
 - Routing and basic page skeletons.
