@@ -18,23 +18,7 @@ import { useToast } from '../context/ToastContext';
 import UntranslatedBadge from '../components/common/UntranslatedBadge';
 import { useFocusMode } from '../hooks/useFocusMode';
 import ServiceGuide from '../components/services/ServiceGuide';
-import AppointmentVisitPackModal from '../components/location/AppointmentVisitPackModal';
-import SourceConflictCautionBanner from '../components/services/SourceConflictCautionBanner';
-import BarrierReportModal from '../components/barriers/BarrierReportModal';
-import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
-import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
-
-const getSavedServices = () => {
-  try {
-    const saved = JSON.parse(
-      localStorage.getItem('civicbridge_saved') || '[]'
-    );
-
-    return Array.isArray(saved) ? saved : [];
-  } catch {
-    return [];
-  }
-};
+import NoticeBadge from '../components/notices/NoticeBadge';
 
 const copyServiceLink = async (url) => {
   try {
@@ -289,9 +273,9 @@ const ServiceDetails = () => {
               >
                 {service.shortDescription}
               </p>
-
-              <div style={{ marginTop: '0.75rem' }}>
+              <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <UntranslatedBadge />
+                <NoticeBadge serviceId={service.id} serviceName={service.name} />
               </div>
             </div>
 
