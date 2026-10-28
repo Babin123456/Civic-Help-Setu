@@ -8,6 +8,7 @@ import { useToast } from '../context/ToastContext';
 import UntranslatedBadge from '../components/common/UntranslatedBadge';
 import { useFocusMode } from '../hooks/useFocusMode';
 import ServiceGuide from '../components/services/ServiceGuide';
+import DataFreshnessTrustBadge from '../components/services/DataFreshnessTrustBadge';
 import JourneyHandoffModal from '../components/journey/JourneyHandoffModal';
 import NoticeBadge from '../components/notices/NoticeBadge';
 
@@ -264,6 +265,7 @@ const ServiceDetails = () => {
               </p>
               <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <UntranslatedBadge />
+                <DataFreshnessTrustBadge service={service} />
                 <NoticeBadge serviceId={service.id} serviceName={service.name} />
               </div>
             </div>
