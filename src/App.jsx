@@ -34,6 +34,7 @@ import Profile from './pages/Profile';
 import OpenSource from './pages/OpenSource';
 import Privacy from './pages/Privacy';
 import Admin from './pages/Admin';
+import SharedChecklistView from './pages/SharedChecklistView';
 import NotFound from './pages/NotFound';
 
 const Services = lazy(() => import('./pages/Services'));
@@ -76,6 +77,7 @@ function AppRoot() {
                       <Route path="/nearby" element={<NearbyOffices />} />
                       <Route path="/nearby-offices" element={<NearbyOffices />} />
                       <Route path="/track" element={<Track />} />
+                      <Route path="/shared-checklist/:token" element={<SharedChecklistView />} />
 
                       <Route path="/saved" element={
                         <ProtectedRoute>

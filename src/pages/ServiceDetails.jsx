@@ -1,23 +1,14 @@
 
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import {
-  ArrowLeft,
-  Bookmark,
-  Check,
-  Link2,
-  Printer,
-  Share2,
-  Zap,
-  AlertOctagon,
-} from 'lucide-react';
-
+import { ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, Users } from 'lucide-react';
 import { getServiceById } from '../services/serviceCatalog';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import UntranslatedBadge from '../components/common/UntranslatedBadge';
 import { useFocusMode } from '../hooks/useFocusMode';
 import ServiceGuide from '../components/services/ServiceGuide';
+import JourneyHandoffModal from '../components/journey/JourneyHandoffModal';
 import NoticeBadge from '../components/notices/NoticeBadge';
 
 const copyServiceLink = async (url) => {
@@ -51,9 +42,7 @@ const ServiceDetails = () => {
 
   const [linkCopied, setLinkCopied] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [showVisitPackModal, setShowVisitPackModal] = useState(false);
-  const [showBarrierModal, setShowBarrierModal] = useState(false);
-
+  const [handoffModalOpen, setHandoffModalOpen] = useState(false);
   const [service, setService] = useState(() => getServiceById(id));
 
   const [isSaved, setIsSaved] = useState(() =>
@@ -433,6 +422,23 @@ const ServiceDetails = () => {
                 <Printer size={16} />
                 <span>Print Visit Dossier</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => (user ? setHandoffModalOpen(true) : navigate('/login'))}
+                className="btn btn-secondary"
+                style={{
+                  padding: '0.6rem 1rem',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem'
+                }}
+              >
+                <Users size={16} />
+                <span>Handoff to Helper</span>
+              </button>
             </div>
           </div>
 
@@ -545,17 +551,13 @@ const ServiceDetails = () => {
         </div>
       )}
 
-      {/* Civic Appointment Preparation and Visit Pack Modal */}
-      <AppointmentVisitPackModal
-        isOpen={showVisitPackModal}
-        onClose={() => setShowVisitPackModal(false)}
-      />
-
-      {/* Citizen Barrier Report Modal */}
-      <BarrierReportModal
-        isOpen={showBarrierModal}
-        onClose={() => setShowBarrierModal(false)}
-        service={service}
+      <JourneyHandoffModal
+        isOpen={handoffModalOpen}
+        onClose={() => setHandoffModalOpen(false)}
+        serviceId={service.id}
+        serviceName={service.name}
+        availableTasks={service.steps || []}
+        currentUser={user}
       />
     </div>
   );
