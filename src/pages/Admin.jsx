@@ -40,6 +40,7 @@ import ServiceSubmissionReviewModal from '../components/admin/ServiceSubmissionR
 import AuditLogViewer from '../components/admin/AuditLogViewer';
 import ServiceImportPanel from '../components/admin/ServiceImportPanel';
 import ServiceRecordList from '../components/admin/ServiceRecordList';
+import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel';
 import { useToast } from '../context/ToastContext';
 import { getAuditReports, resolveAuditReport } from '../services/communityAuditService';
@@ -346,6 +347,7 @@ const Admin = () => {
               { id: 'submissions', label: 'Submissions Queue', badge: pendingSubmissionsCount || null },
               { id: 'reports', label: 'Inaccuracy Reports', badge: pendingReportsCount || null },
               { id: 'community-audits', label: 'Discrepancy Audits', badge: pendingAuditsCount || null },
+              { id: 'bottlenecks', label: 'Process Bottleneck Loop', badge: null },
               { id: 'notices', label: 'Notices & Gazette Digest', badge: null },
               { id: 'users', label: `User Roles (${users.length})`, badge: null },
               { id: 'audit', label: 'Audit Trail Logs', badge: null },
@@ -748,6 +750,10 @@ const Admin = () => {
               </div>
             )}
 
+            {/* Process Bottleneck Feedback Loop Tab */}
+            {activeTab === 'bottlenecks' && (
+              <div>
+                <BottleneckFeedbackDashboard />
             {/* Notices & Gazette Digest Tab */}
             {activeTab === 'notices' && (
               <div>
