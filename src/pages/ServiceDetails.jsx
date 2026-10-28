@@ -9,6 +9,7 @@ import UntranslatedBadge from '../components/common/UntranslatedBadge';
 import { useFocusMode } from '../hooks/useFocusMode';
 import ServiceGuide from '../components/services/ServiceGuide';
 import JourneyHandoffModal from '../components/journey/JourneyHandoffModal';
+import NoticeBadge from '../components/notices/NoticeBadge';
 
 const copyServiceLink = async (url) => {
   try {
@@ -261,9 +262,9 @@ const ServiceDetails = () => {
               >
                 {service.shortDescription}
               </p>
-
-              <div style={{ marginTop: '0.75rem' }}>
+              <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <UntranslatedBadge />
+                <NoticeBadge serviceId={service.id} serviceName={service.name} />
               </div>
             </div>
 
