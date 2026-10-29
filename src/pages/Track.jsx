@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import SharedDeviceNotice from '../components/privacy/SharedDeviceNotice';
 import { parseReferenceParam } from '../utils/searchParams';
 import { useLocation } from 'react-router-dom';
 import {
@@ -163,6 +164,7 @@ const Track = () => {
                 Application Tracking
               </p>
               <h1 style={{ margin: 0, fontSize: 'clamp(2rem, 4vw, 3rem)' }}>Track your civic service status</h1>
+              <SharedDeviceNotice what="tracked applications" />
             </div>
 
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
