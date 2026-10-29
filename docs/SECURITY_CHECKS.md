@@ -108,3 +108,12 @@ npm run lint:security
 
 - These are three common checks, not a full security review. They do not look at server code (there is none in this repo), HTTP headers, or runtime behaviour.
 - The workflow could only be checked statically (`actionlint`) and by running each command locally. Its first real run will be on GitHub.
+
+## When a page crashes
+
+Page routes are wrapped in `RouteErrorBoundary` (`src/components/common/RouteErrorBoundary.jsx`, used in `App.jsx`). If a page throws while rendering, only that page is replaced by a short message with **Try again** and **Go to home**; the navigation bar, footer and accessibility toolbar stay usable, and moving to another page clears the error. If a page file cannot be downloaded (offline, or a new deployment), the button becomes **Reload page**. `RouteErrorFallback` remains the router's last-resort screen for anything outside a page.
+
+Rules for this screen:
+
+- It never shows the error, its message or its stack. The boundary does not even keep them in state. In development the error is written to the browser console; production logs nothing.
+- Do not add a "details" section or `error.message` to it. If production diagnostics are needed later, send them to a reporting service, not to the page.
