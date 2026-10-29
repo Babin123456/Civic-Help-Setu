@@ -15,9 +15,11 @@
     "rules:test": "npm --prefix firebase/emulator install --no-audit --no-fund && npm --prefix firebase/emulator test"
   },
   "dependencies": {
+    "@clerk/backend": "^3.26.4",
     "@clerk/clerk-react": "^5.61.10",
     "@clerk/react": "^6.17.8",
     "@clerk/themes": "^2.4.57",
+    "firebase-admin": "^14.5.0",
     "lucide-react": "^1.46.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

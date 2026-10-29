@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
 
@@ -129,9 +129,28 @@ describe('wiring', () => {
     expect(pkg.scripts['rules:test']).toContain('firebase/emulator');
   });
 
-  it('keeps firebase-tools out of the app dependencies', () => {
+  it('keeps the Firebase client SDK and firebase-tools out of the browser bundle', () => {
     const all = { ...pkg.dependencies, ...pkg.devDependencies };
-    expect(Object.keys(all).filter((name) => name.includes('firebase'))).toEqual([]);
+    expect(Object.keys(all).filter((name) => name === 'firebase' || name === 'firebase-tools')).toEqual([]);
+    // firebase-admin is server code: only the serverless function under api/ may import it
+    const walk = (dir) =>
+      readdirSync(new URL(`../${dir}`, import.meta.url), { withFileTypes: true }).flatMap((entry) =>
+        entry.isDirectory() ? walk(`${dir}/${entry.name}`) : [`${dir}/${entry.name}`]
+      );
+    const importsFirebase = walk('src').filter(
+      (file) => /\.(js|jsx)$/.test(file) && /from ['"](firebase|firebase-admin)[/'"]/.test(read(file))
+    );
+    expect(importsFirebase).toEqual([]);
+  });
+
+  it('routes /api to the serverless functions instead of the single-page app', () => {
+    const vercel = JSON.parse(read('vercel.json'));
+    const rewrite = vercel.rewrites.find((r) => r.destination === '/index.html');
+    const matches = (path) => new RegExp(`^${rewrite.source}$`).test(path);
+    expect(matches('/api/firebase-token')).toBe(false);
+    expect(matches('/services/1')).toBe(true);
+    expect(matches('/')).toBe(true);
+    expect(matches('/apiary')).toBe(true);
   });
 
   it('runs the emulator tests in CI for changes under firebase/', () => {
