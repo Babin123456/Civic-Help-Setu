@@ -1009,6 +1009,33 @@ html:not([data-theme="light"]) .cmd__result-row--cleared svg { color: #4ade80; }
   .cmd__danger, .cmd__retry { width: 100%; }
 }
 
+/* ===== Admin: official link health panel (#258) ===== */
+.lhp { display: flex; flex-direction: column; gap: 1rem; }
+.lhp__title { font-size: 1.35rem; font-weight: 800; margin: 0; color: var(--text-primary); }
+.lhp__intro, .lhp__summary, .lhp__empty { margin: 0; font-size: 0.875rem; color: var(--text-secondary); max-width: 70ch; }
+.lhp__list, .lhp-links { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.85rem; }
+.lhp-service { border: 1px solid var(--border-light); border-radius: 0.85rem; padding: 1rem; background: var(--glass-bg-subtle); }
+.lhp-service__name { margin: 0 0 0.6rem; font-size: 1.05rem; color: var(--text-primary); }
+.lhp-link { border: 1px solid var(--border-main); border-radius: 0.65rem; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.lhp-link__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; flex-wrap: wrap; }
+.lhp-link__main { min-width: 0; flex: 1 1 220px; }
+.lhp-link__name { font-weight: 700; color: var(--text-primary); }
+.lhp-link__url, .lhp-link__dest { font-size: 0.8rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.lhp-link__detail { margin: 0; font-size: 0.85rem; color: var(--text-secondary); }
+.lhp-link__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.lhp-btn { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+.lhp-badge { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.2rem 0.6rem; border-radius: 99px; font-size: 0.78rem; font-weight: 700; color: var(--text-primary); border: 1px solid var(--border-main); }
+.lhp-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--text-tertiary); }
+.lhp-badge--ok .lhp-dot { background: #10b981; }
+.lhp-badge--warn .lhp-dot { background: #f59e0b; }
+.lhp-badge--bad .lhp-dot { background: #ef4444; }
+.lhp-manual { display: flex; flex-direction: column; gap: 0.6rem; border-top: 1px solid var(--border-light); padding-top: 0.6rem; }
+.lhp-manual fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+.lhp-manual legend { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.3rem; }
+.lhp-radio { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-primary); }
+.lhp-field { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.85rem; color: var(--text-primary); }
+.lhp-field input { padding: 0.5rem 0.7rem; border-radius: 0.5rem; border: 1px solid var(--border-main); background: var(--bg-tertiary); color: var(--text-primary); }
+.lhp-error { margin: 0; font-size: 0.85rem; color: var(--text-primary); border-left: 3px solid #ef4444; padding-left: 0.5rem; }
 /* Requirement types on checklist items (#265) */
 .req-note { display: flex; flex-direction: column; gap: 0.25rem; margin-top: 0.35rem; font-size: 0.85rem; font-weight: 400; text-decoration: none; }
 .req-intro { margin: 0 0 0.5rem; font-size: 0.9rem; color: var(--text-secondary); }

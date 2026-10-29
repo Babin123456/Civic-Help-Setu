@@ -40,6 +40,7 @@ import {
 import { addNotice, updateNotice, changeNoticeStatus, resetNoticesToDefault } from './noticeDigestService';
 import { moderateBarrierReport } from './barrierReportService';
 import { recordServiceReview } from './dataFreshnessTrustService';
+import { saveLinkCheck } from './linkHealthService';
 
 const memoryStorage = () => {
   const data = new Map();
@@ -97,6 +98,7 @@ const CALLS = {
   'notices.manage': () => resetNoticesToDefault(moduleStorage),
   'availabilityNotices.manage': () => deleteAvailabilityNotice('n1', moduleStorage),
   'freshness.review': () => recordServiceReview('svc', 'Rev', '', moduleStorage),
+  'links.check': () => saveLinkCheck('svc:0', { url: 'https://a.gov.in/', status: 'reachable' }, moduleStorage),
   'ownership.read': () => getOwnershipMap(moduleStorage),
   'ownership.manage': () => assignServiceOwnership('svc', { team: 'Docs' }, { storage: moduleStorage }),
 };

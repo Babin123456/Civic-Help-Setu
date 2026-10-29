@@ -38,6 +38,7 @@ export const PERMISSIONS = {
   'barriers.moderate': { roles: ['admin'], resource: 'civicbridge_barrier_reports', description: 'Moderate a barrier report' },
   'feedback.moderate': { roles: ['admin'], resource: 'bottleneck feedback', description: 'Review, list for moderation or reset bottleneck feedback' },
   'notices.manage': { roles: ['admin'], resource: 'notice digest', description: 'Add, edit, change the status of or reset notices' },
+  'links.check': { roles: ['admin'], resource: 'link health records', description: 'Check an official application link and record the result' },
   'availabilityNotices.manage': { roles: ['admin'], resource: 'service availability notices', description: 'Add, edit, publish or withdraw a service availability notice' },
   'freshness.review': { roles: ['admin'], resource: 'service review overrides', description: 'Record that a service guide was reviewed' },
   'ownership.read': { roles: ['admin'], resource: 'civicbridge_service_ownership_v1', description: 'Read who is assigned to review each service guide, with private notes' },

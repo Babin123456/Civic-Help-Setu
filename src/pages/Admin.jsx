@@ -53,6 +53,7 @@ import {
   buildOwnershipFilterOptions,
 } from '../services/serviceOwnershipService';
 import StaleRecordsReviewQueue from '../components/admin/StaleRecordsReviewQueue';
+import LinkHealthPanel from '../components/admin/LinkHealthPanel';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel';
 import AvailabilityNoticePanel from '../components/admin/AvailabilityNoticePanel';
@@ -596,6 +597,11 @@ const Admin = () => {
               {
                 id: 'freshness',
                 label: 'Freshness & Trust Queue',
+                badge: null,
+              },
+              {
+                id: 'link-health',
+                label: 'Official Link Health',
                 badge: null,
               },
               {
@@ -1559,6 +1565,9 @@ const Admin = () => {
                 <StaleRecordsReviewQueue />
               </div>
             )}
+
+            {/* Official application-link health check */}
+            {activeTab === 'link-health' && <LinkHealthPanel />}
 
             {/* Process Bottleneck Feedback Loop Tab */}
             {activeTab === 'bottlenecks' && (
