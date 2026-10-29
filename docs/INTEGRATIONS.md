@@ -104,9 +104,11 @@ provider is added later: call it from a server you control, keep the key there, 
 text through `minimizeForExternal()` from `src/utils/dataMinimization.js` at the single
 call site (or ask the user first).
 
-### Analytics
+### Analytics and error reporting
 
-None. The consent center has an `analytics_telemetry` switch that is off by default, but
+None. What a diagnostic event may contain, and how to add a tracker safely, is in [DIAGNOSTICS.md](DIAGNOSTICS.md). Clerk's own usage telemetry is switched off (`telemetry={false}` in `src/main.jsx`).
+
+Analytics: The consent center has an `analytics_telemetry` switch that is off by default, but
 no code collects anything. If analytics is added, keep it behind that switch and never put
 names, phones, reference IDs, grievance text or coordinates in events.
 

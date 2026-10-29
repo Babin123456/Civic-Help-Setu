@@ -3,6 +3,7 @@
  * and active application tokens for offline office visits.
  */
 import { MOCK_SERVICES } from '../data/services.js';
+import { logDiagnostic } from '../utils/diagnostics';
 
 const CACHE_KEY = 'civicbridge_offline_cache';
 const LAST_SYNC_KEY = 'civicbridge_offline_last_sync';
@@ -34,7 +35,7 @@ export const cacheServiceOffline = (service) => {
     localStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
     return true;
   } catch (e) {
-    console.error('Error caching service offline:', e);
+    logDiagnostic('Error caching service offline:', e);
     return false;
   }
 };
@@ -71,7 +72,7 @@ export const cacheAllSavedGuides = () => {
     localStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
     return { success: true, count };
   } catch (e) {
-    console.error('Failed to cache saved guides:', e);
+    logDiagnostic('Failed to cache saved guides:', e);
     return { success: false, count: 0 };
   }
 };

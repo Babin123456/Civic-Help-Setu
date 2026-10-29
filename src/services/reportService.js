@@ -2,6 +2,7 @@
  * Report Service: Manages citizen reports for outdated or inaccurate civic information.
  * Follows strict field validation, privacy-preserving optional fields, and auditable storage.
  */
+import { logDiagnostic } from '../utils/diagnostics';
 
 export const OUTDATED_REPORTS_STORAGE_KEY = 'civicbridge_error_reports';
 
@@ -104,7 +105,7 @@ export const getAllOutdatedReports = () => {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch (err) {
-    console.error('Failed to read outdated reports from localStorage:', err);
+    logDiagnostic('Failed to read outdated reports from localStorage:', err);
     return [];
   }
 };
@@ -155,7 +156,7 @@ export const submitOutdatedReport = (reportData) => {
       message: 'Thank you! Your report has been submitted to the civic review queue.',
     };
   } catch (err) {
-    console.error('Failed to persist outdated report:', err);
+    logDiagnostic('Failed to persist outdated report:', err);
     return {
       ok: false,
       message: 'Unable to save report due to local storage limitation. Please try again.',
@@ -198,7 +199,7 @@ export const updateReportModerationStatus = (reportId, newStatus, resolutionNote
     localStorage.setItem(OUTDATED_REPORTS_STORAGE_KEY, JSON.stringify(all));
     return { ok: true, report: all[targetIndex] };
   } catch (err) {
-    console.error('Failed to update report status:', err);
+    logDiagnostic('Failed to update report status:', err);
     return { ok: false, message: 'Storage error' };
   }
 };

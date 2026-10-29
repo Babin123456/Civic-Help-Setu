@@ -9,6 +9,7 @@ import {
   formatIcsUtcTimestamp,
   parseIsoDate,
 } from '../utils/icsText';
+import { logDiagnostic } from '../utils/diagnostics';
 
 const REMINDERS_STORAGE_KEY = 'civicbridge_reminders';
 const NOTIFICATION_SETTINGS_KEY = 'civicbridge_notification_settings';
@@ -32,7 +33,7 @@ export const saveNotificationSettings = (settings) => {
   try {
     localStorage.setItem(NOTIFICATION_SETTINGS_KEY, JSON.stringify(settings));
   } catch (err) {
-    console.error('Failed to save notification settings:', err);
+    logDiagnostic('Failed to save notification settings:', err);
   }
 };
 
@@ -49,7 +50,7 @@ export const requestBrowserNotificationPermission = async () => {
     });
     return permission;
   } catch (err) {
-    console.error('Failed to request notification permission:', err);
+    logDiagnostic('Failed to request notification permission:', err);
     return 'denied';
   }
 };
@@ -95,7 +96,7 @@ export const saveReminder = ({
   try {
     localStorage.setItem(REMINDERS_STORAGE_KEY, JSON.stringify(reminders));
   } catch (err) {
-    console.error('Failed to save reminder:', err);
+    logDiagnostic('Failed to save reminder:', err);
   }
 
   return reminderItem;
@@ -106,7 +107,7 @@ export const deleteReminder = (serviceId) => {
   try {
     localStorage.setItem(REMINDERS_STORAGE_KEY, JSON.stringify(reminders));
   } catch (err) {
-    console.error('Failed to delete reminder:', err);
+    logDiagnostic('Failed to delete reminder:', err);
   }
   return reminders;
 };

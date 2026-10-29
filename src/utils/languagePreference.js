@@ -1,5 +1,6 @@
 // Language list and saved-choice helpers. Kept free of React so the
 // persistence rules can be unit tested.
+import { logDiagnostic } from './diagnostics';
 
 export const LANGUAGE_KEY = 'civicbridge_lang';
 export const SOURCE_LANGUAGE = 'en';
@@ -29,7 +30,7 @@ export const saveLanguage = (code) => {
   try {
     localStorage.setItem(LANGUAGE_KEY, valid);
   } catch (err) {
-    console.error('Failed to save language preference', err);
+    logDiagnostic('Failed to save language preference', err);
   }
   return valid;
 };

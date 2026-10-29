@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Download, Upload, ShieldCheck, Check, AlertCircle } from 'lucide-react';
 import { exportVaultData, importVaultData } from '../../services/vaultStorage';
 import { useToast } from '../../context/ToastContext';
+import { logDiagnostic } from '../../utils/diagnostics';
 
 const VaultBackupRestoreModal = ({
   isOpen,
@@ -28,7 +29,7 @@ const VaultBackupRestoreModal = ({
       URL.revokeObjectURL(url);
       toast.success('Encrypted vault backup downloaded successfully.');
     } catch (err) {
-      console.error(err);
+      logDiagnostic('Vault backup or restore failed', err);
       toast.error('Failed to export vault data.');
     }
   };

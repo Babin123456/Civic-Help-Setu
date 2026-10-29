@@ -11,6 +11,7 @@ import { requirePermission } from './accessControl';
  * - Enforces human review: system NEVER auto-adjudicates conflicts based on scraped text.
  * - Changes to verification state are strictly auditable with an immutable log.
  */
+import { logDiagnostic } from '../utils/diagnostics';
 
 export const SOURCE_CONFLICTS_STORAGE_KEY = 'civicbridge_source_conflicts';
 export const CONFLICT_AUDIT_LOGS_KEY = 'civicbridge_conflict_audit_logs';
@@ -99,7 +100,7 @@ const appendAuditLog = (entry, storage = getStorage()) => {
     });
     storage.setItem(CONFLICT_AUDIT_LOGS_KEY, JSON.stringify(logs));
   } catch (err) {
-    console.error('Failed to append conflict audit log', err);
+    logDiagnostic('Failed to append conflict audit log', err);
   }
 };
 

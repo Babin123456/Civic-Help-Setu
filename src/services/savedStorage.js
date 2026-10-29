@@ -1,3 +1,4 @@
+import { logDiagnostic } from '../utils/diagnostics';
 const STORAGE_KEY = 'civicbridge_saved_rich';
 const LEGACY_KEY = 'civicbridge_saved';
 
@@ -27,7 +28,7 @@ export const getSavedItems = () => {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch (err) {
-    console.error('Failed to load saved items from storage', err);
+    logDiagnostic('Failed to load saved items from storage', err);
     return [];
   }
 };

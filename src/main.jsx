@@ -15,10 +15,11 @@ const isClerkKeyValid = Boolean(
   (rawKey.startsWith('pk_test_') || rawKey.startsWith('pk_live_'))
 );
 
+// Clerk's own usage telemetry is switched off (telemetry={false}); see docs/DIAGNOSTICS.md.
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     {isClerkKeyValid ? (
-      <ClerkProvider publishableKey={rawKey} afterSignOutUrl="/">
+      <ClerkProvider publishableKey={rawKey} afterSignOutUrl="/" telemetry={false}>
         <App />
       </ClerkProvider>
     ) : (

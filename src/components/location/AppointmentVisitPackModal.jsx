@@ -21,6 +21,7 @@ import {
   buildPrintableVisitPackText,
 } from '../../services/appointmentVisitPackService';
 import { useToast } from '../../context/ToastContext';
+import { logDiagnostic } from '../../utils/diagnostics';
 
 const AppointmentVisitPackModal = ({
   isOpen,
@@ -77,7 +78,7 @@ const AppointmentVisitPackModal = ({
         URL.revokeObjectURL(blobUrl);
       }, 500);
     } catch (err) {
-      console.error('Print generation failed', err);
+      logDiagnostic('Print generation failed', err);
       toast?.error?.('Failed to open print preview.');
     }
   };

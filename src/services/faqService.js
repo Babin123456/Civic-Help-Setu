@@ -3,6 +3,7 @@
  * and manages user feedback/votes on helpfulness.
  */
 import { FAQ_DATABASE } from '../data/faq_database.js';
+import { logDiagnostic } from '../utils/diagnostics';
 
 const FAQ_VOTES_KEY = 'civicbridge_faq_votes';
 
@@ -157,7 +158,7 @@ export const voteFaqHelpful = (faqId, isHelpful) => {
     localStorage.setItem(FAQ_VOTES_KEY, JSON.stringify(votes));
     return votes;
   } catch (e) {
-    console.error('Error saving FAQ vote:', e);
+    logDiagnostic('Error saving FAQ vote:', e);
     return {};
   }
 };

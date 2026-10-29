@@ -1,4 +1,5 @@
 import { trimHistory } from '../ai/conversationContext.js';
+import { logDiagnostic } from '../utils/diagnostics';
 
 const STORAGE_KEY = 'civicbridge_chat_history';
 
@@ -16,7 +17,7 @@ export const loadChatHistory = () => {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) && parsed.length > 0 ? parsed : [DEFAULT_WELCOME_MESSAGE];
   } catch (err) {
-    console.error('Failed to load chat history', err);
+    logDiagnostic('Failed to load chat history', err);
     return [DEFAULT_WELCOME_MESSAGE];
   }
 };
@@ -38,7 +39,7 @@ export const saveChatHistory = (messages) => {
     }));
     localStorage.setItem(STORAGE_KEY, JSON.stringify(serializable));
   } catch (err) {
-    console.error('Failed to save chat history', err);
+    logDiagnostic('Failed to save chat history', err);
   }
 };
 
