@@ -7,6 +7,9 @@ import {
   validateWindows,
   findOverlaps,
   describeWindow,
+  windowWarnings,
+  windowToRow,
+  rowToWindow,
   getWindowViews,
 } from './applicationWindowService';
 
@@ -63,6 +66,25 @@ describe('window states (#256)', () => {
     expect(describeWindow(win({ status: 'closed' }), TODAY).state).toBe('upcoming');
   });
 
+  it('does not infer a missing boundary', () => {
+    const endOnly = describeWindow(win({ startDate: '' }), TODAY);
+    expect(endOnly.stateLabel).toBe('Open (start date not published)');
+    expect(endOnly.rangeText).toBe('Until 30 November 2026');
+    const startOnly = describeWindow(win({ startDate: '2026-10-01', endDate: '' }), TODAY);
+    expect(startOnly.stateLabel).toBe('Open (end date not published)');
+    expect(startOnly.rangeText).toBe('From 1 October 2026');
+  });
+
+  it('uses a neutral label when the review is not confirmed', () => {
+    expect(describeWindow(win({ startDate: '2026-10-01', reviewedOn: '' }), TODAY).stateLabel).toBe('Listed as open');
+  });
+
+  it('round-trips a window through the admin form row', () => {
+    const w = win({ status: 'open' });
+    expect(rowToWindow(windowToRow(w))).toEqual(w);
+    expect(windowToRow({ label: ' A  b ' }).label).toBe('A b');
+  });
+
   it('marks stale, missing and future review dates as not confirmed', () => {
     expect(describeWindow(win(), TODAY).confirmed).toBe(true);
     expect(describeWindow(win({ reviewedOn: '2026-01-01' }), TODAY).confirmed).toBe(false);
@@ -81,7 +103,8 @@ describe('multiple and overlapping windows (#256)', () => {
   it('detects overlapping rounds and ignores rounds with an unpublished boundary', () => {
     const rounds = [win(), win({ startDate: '2026-11-15', endDate: '2026-12-15' }), win({ startDate: '2027-01-01', endDate: '2027-01-31' })];
     expect(findOverlaps(rounds)).toEqual([[0, 1]]);
-    expect(validateWindows(rounds)).toContain('Rounds 1 and 2 overlap.');
+    expect(validateWindows(rounds)).toEqual([]);
+    expect(windowWarnings(rounds)).toEqual(['Rounds 1 and 2 overlap. Check that both are correct.']);
     expect(findOverlaps([win(), win({ endDate: '' })])).toEqual([]);
   });
 

@@ -6,27 +6,13 @@ import { isFormDirty } from '../../utils/formDraft';
 import UnsavedChangesDialog from '../common/UnsavedChangesDialog';
 import { INDIAN_STATES_AND_UTS, JURISDICTION_LEVELS, JURISDICTION_LEVEL_LABELS } from '../../data/jurisdictions';
 import { normalizeJurisdiction, validateJurisdiction } from '../../services/jurisdictionService';
-import { normalizeWindow, validateWindows } from '../../services/applicationWindowService';
+import { normalizeWindow, validateWindows, windowToRow, rowToWindow, windowWarnings } from '../../services/applicationWindowService';
 import { CONTACT_TYPES, CONTACT_METHODS, validateContacts } from '../../services/contactDirectoryService';
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 const MODES = ['Online', 'Offline', 'Online / Offline'];
 
 const EMPTY_WINDOW = { label: '', startDate: '', endDate: '', status: '', noticeTitle: '', noticeUrl: '', reviewedOn: '' };
-
-const windowToRow = (raw) => {
-  const w = normalizeWindow(raw);
-  return { label: w.label, startDate: w.startDate, endDate: w.endDate, status: w.status, noticeTitle: w.notice.title, noticeUrl: w.notice.url, reviewedOn: w.reviewedOn };
-};
-
-const rowToWindow = (row) => ({
-  label: row.label,
-  startDate: row.startDate,
-  endDate: row.endDate,
-  status: row.status,
-  notice: { title: row.noticeTitle, url: row.noticeUrl },
-  reviewedOn: row.reviewedOn,
-});
 
 const EMPTY_CONTACT = { type: 'helpdesk', method: 'phone', value: '', hours: '', sourceUrl: '', lastVerified: '' };
 
@@ -203,11 +189,11 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
       ],
     };
 
-    // No level chosen means "not specified", so the field is removed rather than guessed.
     // No rounds means "no window data", so the field is removed rather than stored empty.
     if (form.intakeWindows.length > 0) servicePayload.intakeWindows = form.intakeWindows.map((r) => normalizeWindow(rowToWindow(r)));
     else delete servicePayload.intakeWindows;
 
+    // No level chosen means "not specified", so the field is removed rather than guessed.
     if (jurisdiction) servicePayload.jurisdiction = jurisdiction;
     else delete servicePayload.jurisdiction;
 
@@ -431,6 +417,9 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
             <p className="ownership-form__hint">
               Only enter dates the official notice publishes. Leave a date empty when it is not published; it will not be guessed.
             </p>
+            {windowWarnings(form.intakeWindows.map(rowToWindow)).map((m) => (
+              <p key={m} className="ownership-form__hint" role="note">{m}</p>
+            ))}
             {form.intakeWindows.map((row, i) => {
               const set = (patch) =>
                 setForm({ ...form, intakeWindows: form.intakeWindows.map((r, j) => (j === i ? { ...r, ...patch } : r)) });

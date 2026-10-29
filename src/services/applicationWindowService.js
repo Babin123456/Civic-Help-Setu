@@ -99,9 +99,27 @@ export const validateWindows = (windows) => {
   if (windows === undefined || windows === null) return [];
   if (!Array.isArray(windows)) return ['Intake windows must be a list.'];
   const errors = windows.flatMap((w, i) => validateWindow(w).map((m) => `Round ${i + 1}: ${m}`));
-  findOverlaps(windows).forEach(([a, b]) => errors.push(`Rounds ${a + 1} and ${b + 1} overlap.`));
   return errors;
 };
+
+/** Non-blocking notes for a list (overlapping rounds can be legitimate parallel rounds). */
+export const windowWarnings = (windows) =>
+  findOverlaps(windows).map(([a, b]) => `Rounds ${a + 1} and ${b + 1} overlap. Check that both are correct.`);
+
+/** Form row <-> window record conversion used by the admin form. */
+export const windowToRow = (raw) => {
+  const w = normalizeWindow(raw);
+  return { label: w.label, startDate: w.startDate, endDate: w.endDate, status: w.status, noticeTitle: w.notice.title, noticeUrl: w.notice.url, reviewedOn: w.reviewedOn };
+};
+
+export const rowToWindow = (row) => ({
+  label: row.label,
+  startDate: row.startDate,
+  endDate: row.endDate,
+  status: row.status,
+  notice: { title: row.noticeTitle, url: row.noticeUrl },
+  reviewedOn: row.reviewedOn,
+});
 
 const longDate = (iso) =>
   new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
@@ -117,22 +135,6 @@ export const describeWindow = (raw, today = todayIso()) => {
   const end = isValidIsoDate(w.endDate) ? w.endDate : '';
   const reviewed = isValidIsoDate(w.reviewedOn) ? w.reviewedOn : '';
 
-  let state = 'unpublished';
-  let stateLabel = 'Window not published';
-  if (start && today < start) {
-    state = 'upcoming';
-    stateLabel = `Opens on ${longDate(start)}`;
-  } else if (end && today > end) {
-    state = 'closed';
-    stateLabel = 'Closed';
-  } else if (start || end || w.status === 'open') {
-    state = w.status === 'closed' && !start && !end ? 'closed' : 'open';
-    stateLabel = state === 'open' ? 'Open' : 'Closed';
-  } else if (w.status === 'closed') {
-    state = 'closed';
-    stateLabel = 'Closed';
-  }
-
   let confirmed = false;
   let reviewNote = 'Review date not recorded. Check the official notice before applying.';
   if (reviewed) {
@@ -146,6 +148,28 @@ export const describeWindow = (raw, today = todayIso()) => {
       reviewNote = `Last reviewed ${longDate(reviewed)}.`;
     }
   }
+
+  let state = 'unpublished';
+  let stateLabel = 'Window not published';
+  if (start && today < start) {
+    state = 'upcoming';
+    stateLabel = `Opens on ${longDate(start)}`;
+  } else if (end && today > end) {
+    state = 'closed';
+    stateLabel = 'Closed';
+  } else if (start || end) {
+    state = 'open';
+    if (start && end) stateLabel = 'Open';
+    else if (start) stateLabel = 'Open (end date not published)';
+    else stateLabel = 'Open (start date not published)';
+  } else if (w.status === 'open') {
+    state = 'open';
+    stateLabel = 'Open';
+  } else if (w.status === 'closed') {
+    state = 'closed';
+    stateLabel = 'Closed';
+  }
+  if (state === 'open' && !confirmed) stateLabel = stateLabel.replace(/^Open/, 'Listed as open');
 
   const range = [];
   if (start) range.push(`From ${longDate(start)}`);
