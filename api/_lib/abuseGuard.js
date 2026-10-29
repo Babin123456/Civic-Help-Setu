@@ -22,10 +22,13 @@ export function createRateLimiter({ limit, windowMs, now = Date.now, maxKeys = M
   function sweep(at) {
     for (const [key, entry] of windows) if (entry.resetAt <= at) windows.delete(key);
     // Still full of live windows (many distinct callers): drop the oldest so memory stays bounded.
+    // Side effect: a caller with many addresses can push other callers' live counters out (docs/ABUSE_CONTROLS.md).
     while (windows.size >= maxKeys) windows.delete(windows.keys().next().value);
   }
 
   return {
+    /** Number of windows currently held (for tests and diagnostics). */
+    size: () => windows.size,
     /** Counts one request for `key`. Returns { allowed, remaining, retryAfterSeconds }. */
     take(key) {
       const at = now();
@@ -64,17 +67,18 @@ const firstValue = (value) => (Array.isArray(value) ? value[0] : value);
 
 /**
  * The caller's address. `x-vercel-forwarded-for` and `x-real-ip` are set by Vercel and cannot be
- * chosen by the client; the generic `x-forwarded-for` is used only as a last resort. Falls back to
- * one shared bucket so a request with no address is still limited.
+ * chosen by the client. `x-forwarded-for` is deliberately not read: without the Vercel headers the
+ * client could set it to any value. Returns null when there is no usable address; the caller then
+ * skips the per-address limit rather than putting every such request in one shared bucket.
  */
 export function clientKey(headers = {}) {
   const lower = {};
   for (const [name, value] of Object.entries(headers)) lower[name.toLowerCase()] = firstValue(value);
-  for (const name of ['x-vercel-forwarded-for', 'x-real-ip', 'x-forwarded-for']) {
+  for (const name of ['x-vercel-forwarded-for', 'x-real-ip']) {
     const raw = lower[name];
     if (typeof raw !== 'string') continue;
     const candidate = raw.split(',')[0].trim();
     if (/^[0-9a-fA-F:.]{2,45}$/.test(candidate)) return candidate;
   }
-  return 'unknown';
+  return null;
 }

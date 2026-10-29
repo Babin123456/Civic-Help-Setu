@@ -51,8 +51,11 @@ export function createFirebaseTokenHandler({ verifySession, getPublicMetadata, m
   return async function handle({ method, headers }) {
     if (method !== 'POST') return json(405, { error: 'method_not_allowed' }, { Allow: 'POST' });
 
-    if (ipLimiter) {
-      const verdict = ipLimiter.take(clientKey(headers));
+    // No usable address: skip the per-address limit (a shared bucket would let one caller block all
+    // the others); the per-account limit below still applies.
+    const address = ipLimiter ? clientKey(headers) : null;
+    if (address) {
+      const verdict = ipLimiter.take(address);
       if (!verdict.allowed) return tooMany(verdict.retryAfterSeconds);
     }
 

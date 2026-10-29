@@ -32,6 +32,10 @@ describe('createRateLimiter', () => {
   it('keeps memory bounded when there are many distinct callers', () => {
     const limiter = createRateLimiter({ limit: 1, windowMs: 60_000, maxKeys: 10 });
     for (let i = 0; i < 100; i += 1) expect(limiter.take(`k${i}`).allowed).toBe(true);
+    expect(limiter.size()).toBeLessThanOrEqual(10);
+    // The oldest key was evicted, so it starts a fresh window; the newest is still counted.
+    expect(limiter.take('k0').allowed).toBe(true);
+    expect(limiter.take('k99').allowed).toBe(false);
   });
 
   it('rejects a bad configuration', () => {
@@ -69,18 +73,21 @@ describe('createSingleFlight', () => {
 });
 
 describe('clientKey', () => {
-  it('prefers headers set by the Vercel edge over x-forwarded-for', () => {
+  it('reads headers set by the Vercel edge and prefers x-vercel-forwarded-for', () => {
     expect(clientKey({ 'x-vercel-forwarded-for': '203.0.113.5', 'x-forwarded-for': '1.1.1.1' })).toBe('203.0.113.5');
     expect(clientKey({ 'X-Real-IP': '198.51.100.7' })).toBe('198.51.100.7');
   });
   it('takes the first address of a list and accepts IPv6', () => {
-    expect(clientKey({ 'x-forwarded-for': '203.0.113.9, 10.0.0.1' })).toBe('203.0.113.9');
+    expect(clientKey({ 'x-vercel-forwarded-for': '203.0.113.9, 10.0.0.1' })).toBe('203.0.113.9');
     expect(clientKey({ 'x-real-ip': '2001:db8::1' })).toBe('2001:db8::1');
   });
-  it('uses one shared bucket when there is no usable address', () => {
-    expect(clientKey({})).toBe('unknown');
-    expect(clientKey(undefined)).toBe('unknown');
-    expect(clientKey({ 'x-real-ip': '<script>' })).toBe('unknown');
+  it('returns null when there is no usable address', () => {
+    expect(clientKey({})).toBeNull();
+    expect(clientKey(undefined)).toBeNull();
+    expect(clientKey({ 'x-real-ip': '<script>' })).toBeNull();
+  });
+  it('ignores a client-set x-forwarded-for', () => {
+    expect(clientKey({ 'x-forwarded-for': '203.0.113.9' })).toBeNull();
   });
 });
 
@@ -109,6 +116,17 @@ describe('firebase token handler with abuse controls', () => {
     expect(blocked.body.retryAfterSeconds).toBe(Number(blocked.headers['Retry-After']));
     expect(deps.verifySession).toHaveBeenCalledTimes(2);
     expect((await post(handle, { 'x-real-ip': '203.0.113.2' })).status).toBe(200);
+  });
+
+  it('does not share one bucket between requests with no address; the account limit still applies', async () => {
+    const { handle } = make({
+      ipLimiter: createRateLimiter({ limit: 1, windowMs: 60_000 }),
+      userLimiter: createRateLimiter({ limit: 2, windowMs: 60_000 }),
+    });
+    const noAddr = () => handle({ method: 'POST', headers: { authorization: `Bearer ${SESSION}` } });
+    expect((await noAddr()).status).toBe(200);
+    expect((await noAddr()).status).toBe(200);
+    expect((await noAddr()).status).toBe(429);
   });
 
   it('limits one account independently of its address', async () => {
