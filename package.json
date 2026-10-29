@@ -11,7 +11,8 @@
     "headers:generate": "node scripts/generateVercelHeaders.js",
     "headers:check": "node scripts/generateVercelHeaders.js --check",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "rules:test": "npm --prefix firebase/emulator install --no-audit --no-fund && npm --prefix firebase/emulator test"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.61.10",

@@ -114,6 +114,8 @@ names, phones, reference IDs, grievance text or coordinates in events.
 
 ### Firebase / Firestore (planned, not in code)
 
+The security rules for it already exist and are tested on the Firebase emulators: see [FIREBASE_RULES.md](FIREBASE_RULES.md) (access policy per collection and storage path, how to run `npm run rules:test`, and the rule that rules are tested before every deploy).
+
 The maintainer plans Firestore with security rules. Nothing is wired yet. When it is:
 
 - The web config (`apiKey`, `authDomain`, `projectId`, ...) is public, not a secret.
