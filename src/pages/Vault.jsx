@@ -16,6 +16,7 @@ import VaultStats from '../components/vault/VaultStats';
 import DocumentModal from '../components/vault/DocumentModal';
 import DocumentPreviewModal from '../components/vault/DocumentPreviewModal';
 import ExpiringDocumentsAlert from '../components/vault/ExpiringDocumentsAlert';
+import VaultRenewalReminderBanner from '../components/vault/VaultRenewalReminderBanner';
 import VaultBackupRestoreModal from '../components/vault/VaultBackupRestoreModal';
 import SharedDeviceNotice from '../components/privacy/SharedDeviceNotice';
 import ServiceTaggingModal from '../components/vault/ServiceTaggingModal';
@@ -222,6 +223,9 @@ const Vault = () => {
             </button>
           </div>
         </div>
+
+        {/* Statutory Document Renewal Reminders */}
+        <VaultRenewalReminderBanner documents={documents} />
 
         {/* Document Expiration Warnings */}
         <ExpiringDocumentsAlert expiringList={expiringDocs} />
