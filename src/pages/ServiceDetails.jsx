@@ -18,6 +18,7 @@ import SourceConflictCautionBanner from '../components/services/SourceConflictCa
 import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
 import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
 import ApplicabilityPanel from '../components/services/ApplicabilityPanel';
+import IntakeWindowPanel from '../components/services/IntakeWindowPanel';
 
 const copyServiceLink = async (url) => {
   try {
@@ -513,6 +514,8 @@ const ServiceDetails = () => {
           />
 
           <ApplicabilityPanel service={service} />
+
+          <IntakeWindowPanel service={service} />
 
           {/* Fee Transparency */}
           <FeeTransparencyCard
