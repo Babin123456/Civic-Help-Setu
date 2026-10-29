@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { parseSlugParam } from '../utils/searchParams';
 import { useLocation } from 'react-router-dom';
 import {
   MapPin,
@@ -67,7 +68,7 @@ const NearbyOffices = () => {
   // Initialize service query param if arriving from a specific service details page
   useEffect(() => {
     const params = new URLSearchParams(routerLocation.search);
-    const sId = params.get('service');
+    const sId = parseSlugParam(params.get('service'));
     if (sId) {
       setServiceFilter(sId);
       toast?.info?.(`Filtering facilitation centers for ${sId.replace(/-/g, ' ')}`);
