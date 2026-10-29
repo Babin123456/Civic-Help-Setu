@@ -40,6 +40,14 @@ import ServiceSubmissionReviewModal from '../components/admin/ServiceSubmissionR
 import AuditLogViewer from '../components/admin/AuditLogViewer';
 import ServiceImportPanel from '../components/admin/ServiceImportPanel';
 import ServiceRecordList from '../components/admin/ServiceRecordList';
+import ServiceOwnershipModal from '../components/admin/ServiceOwnershipModal';
+import {
+  getOwnershipMap,
+  assignServiceOwnership,
+  clearServiceOwnership,
+  filterByOwnership,
+  buildOwnershipFilterOptions,
+} from '../services/serviceOwnershipService';
 import StaleRecordsReviewQueue from '../components/admin/StaleRecordsReviewQueue';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel';
@@ -87,6 +95,9 @@ const Admin = () => {
     submission: null,
   });
   const [importOpen, setImportOpen] = useState(false);
+  const [ownership, setOwnership] = useState({});
+  const [ownershipFilter, setOwnershipFilter] = useState('all');
+  const [ownershipModal, setOwnershipModal] = useState({ isOpen: false, service: null });
   const [isRuleConflictModalOpen, setIsRuleConflictModalOpen] = useState(false);
 
   // Destructive action waiting for confirmation
@@ -106,7 +117,28 @@ const Admin = () => {
     setAuditLogs(getAuditLogs());
     setSubmissions(getServiceSubmissions());
     setCommunityAudits(getAuditReports());
+    setOwnership(getOwnershipMap());
   }, []);
+
+  const handleAssignOwnership = (serviceId, input) => {
+    const result = assignServiceOwnership(serviceId, input, {
+      users,
+      actorName: user?.username || 'SuperAdmin',
+    });
+    if (result.ok) {
+      setOwnership(getOwnershipMap());
+      setAuditLogs(getAuditLogs());
+      toast?.success?.('Review assignment saved. The public guide is unchanged.');
+    }
+    return result;
+  };
+
+  const handleClearOwnership = (serviceId) => {
+    clearServiceOwnership(serviceId, { actorName: user?.username || 'SuperAdmin' });
+    setOwnership(getOwnershipMap());
+    setAuditLogs(getAuditLogs());
+    toast?.success?.('Review assignment cleared.');
+  };
 
   const handleLogout = () => {
     logout();
@@ -661,12 +693,41 @@ const Admin = () => {
                   />
                 )}
 
+                <div className="ownership-filter">
+                  <label htmlFor="ownership-filter">Filter by reviewer or team</label>
+                  <select
+                    id="ownership-filter"
+                    className="input-field"
+                    value={ownershipFilter}
+                    onChange={(e) => setOwnershipFilter(e.target.value)}
+                  >
+                    {buildOwnershipFilterOptions(ownership, users).map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  <span role="status" className="ownership-filter__count">
+                    Showing {filterByOwnership(services, ownership, users, ownershipFilter).length} of {services.length} guides
+                  </span>
+                </div>
+
                 <ServiceRecordList
-                  services={services}
+                  services={filterByOwnership(services, ownership, users, ownershipFilter)}
+                  ownership={ownership}
+                  users={users}
+                  onAssign={(service) => setOwnershipModal({ isOpen: true, service })}
                   onEdit={(service) =>
                     setServiceModal({ isOpen: true, service })
                   }
                   onDelete={handleDeleteService}
+                />
+                <ServiceOwnershipModal
+                  isOpen={ownershipModal.isOpen}
+                  onClose={() => setOwnershipModal({ isOpen: false, service: null })}
+                  service={ownershipModal.service}
+                  current={ownershipModal.service ? ownership[ownershipModal.service.id] : null}
+                  users={users}
+                  onSave={handleAssignOwnership}
+                  onClear={handleClearOwnership}
                 />
                 <RuleConflictInspectorModal
                   isOpen={isRuleConflictModalOpen}
