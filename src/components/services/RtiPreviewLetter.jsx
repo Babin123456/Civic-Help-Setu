@@ -41,9 +41,39 @@ export default function RtiPreviewLetter({ rtiResult }) {
       )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-        <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1e293b' }}>
-          Statutory RTI Form 6(1) Draft
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1e293b' }}>
+            Statutory RTI Form 6(1) Draft
+          </span>
+          {rtiResult.exemptionDetails?.isExempt && (
+            <span
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: '4px',
+                background: '#dcfce7',
+                color: '#15803d',
+              }}
+            >
+              BPL Fee Exempt (Sec 7(5))
+            </span>
+          )}
+          {rtiResult.isLifeOrLiberty && (
+            <span
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: '4px',
+                background: '#fee2e2',
+                color: '#b91c1c',
+              }}
+            >
+              48-Hour Life/Liberty
+            </span>
+          )}
+        </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
             type="button"
