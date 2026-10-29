@@ -1,0 +1,34 @@
+rules_version = '2';
+
+// Cloud Storage rules for CivicBridge. Deny by default.
+// Access policy: docs/FIREBASE_RULES.md. Tests: firebase/emulator (npm run rules:test).
+//
+// The only thing stored is the document vault. Each person's files live under vault/{uid}/ and nobody
+// else can read, write or list them, admins included. Limits match src/services/vaultValidation.js.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isOwner(uid) {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider != 'anonymous'
+        && request.auth.uid == uid;
+    }
+
+    // PDF, JPEG or PNG, 1 byte to 5 MB, and a plain file name.
+    function validUpload() {
+      return request.resource.size > 0
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('application/pdf|image/jpeg|image/png');
+    }
+
+    match /vault/{uid}/{fileName} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validUpload() && fileName.size() <= 160;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -227,8 +227,8 @@ describe('vercel.json', () => {
     expect(toVercelConfig(current, options)).toEqual(current);
   });
 
-  it('keeps the single page app rewrite', () => {
-    expect(vercel().rewrites).toEqual([{ source: '/(.*)', destination: '/index.html' }]);
+  it('keeps the single page app rewrite, except for the /api serverless functions', () => {
+    expect(vercel().rewrites).toEqual([{ source: '/((?!api/).*)', destination: '/index.html' }]);
   });
 
   it('applies the headers to every route', () => {
