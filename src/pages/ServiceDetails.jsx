@@ -18,10 +18,7 @@ import SourceConflictCautionBanner from '../components/services/SourceConflictCa
 import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
 import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
 import ApplicabilityPanel from '../components/services/ApplicabilityPanel';
-import DocumentPreflightInspectionCard from '../components/services/DocumentPreflightInspectionCard';
-import OfflineCacheActionCard from '../components/services/OfflineCacheActionCard';
-import IntakeWindowPanel from '../components/services/IntakeWindowPanel';
-
+import BenefitEntitlementCalculator from '../components/services/BenefitEntitlementCalculator';
 const copyServiceLink = async (url) => {
   try {
     if (navigator?.clipboard?.writeText) {
@@ -526,6 +523,9 @@ const ServiceDetails = () => {
             serviceId={service.id}
             serviceName={service.name}
           />
+
+          {/* Statutory Welfare & Subsidy Benefit Estimator */}
+          <BenefitEntitlementCalculator serviceId={service.id} serviceName={service.name} />
 
           {/* Service Guide */}
           <ServiceGuide
