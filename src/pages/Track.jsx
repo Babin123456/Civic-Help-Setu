@@ -38,6 +38,7 @@ import { services } from '../data/services';
 import TrackEmptyState from '../components/tracking/TrackEmptyState';
 import TrackingReceiptModal from '../components/tracking/TrackingReceiptModal';
 import SlaBreachAlertWidget from '../components/tracking/SlaBreachAlertWidget';
+import AppellateEscalationLadder from '../components/tracking/AppellateEscalationLadder';
 import GrievanceEvidenceOrganizerModal from '../components/grievance/GrievanceEvidenceOrganizerModal';
 
 const Track = () => {
@@ -317,6 +318,8 @@ const Track = () => {
                     </button>
                   </form>
                 </div>
+
+                <AppellateEscalationLadder application={activeApp} />
 
                 {activeApp.status === 'sla-breach' && (
                   <SlaBreachAlertWidget app={activeApp} />
