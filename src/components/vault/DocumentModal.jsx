@@ -220,7 +220,7 @@ const DocumentModal = ({ isOpen, onClose, onSave, existingDocs = [] }) => {
                 style={{ fontSize: '0.95rem', padding: '0.75rem 1rem' }}
               />
             <p id="doc-number-hint" style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', marginTop: '0.35rem' }}>
-              Only the last 4 characters are saved on this device. The rest is masked.
+              Only the last 4 characters are saved on this device.
             </p>
             {renderFieldError('number')}
             </div>
