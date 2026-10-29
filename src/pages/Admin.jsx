@@ -22,6 +22,8 @@ import {
   saveAdminService,
   deleteAdminService,
   hasLocalServiceCopy,
+  archiveAdminServices,
+  restoreAdminServices,
   getReports,
   resolveReport,
   dismissReport,
@@ -40,9 +42,20 @@ import ServiceSubmissionReviewModal from '../components/admin/ServiceSubmissionR
 import AuditLogViewer from '../components/admin/AuditLogViewer';
 import ServiceImportPanel from '../components/admin/ServiceImportPanel';
 import ServiceRecordList from '../components/admin/ServiceRecordList';
+import ServiceLifecycleReview from '../components/admin/ServiceLifecycleReview';
+import { isArchived, planBulkArchive, planBulkRestore } from '../services/serviceLifecycle';
+import ServiceOwnershipModal from '../components/admin/ServiceOwnershipModal';
+import {
+  getOwnershipMap,
+  assignServiceOwnership,
+  clearServiceOwnership,
+  filterByOwnership,
+  buildOwnershipFilterOptions,
+} from '../services/serviceOwnershipService';
 import StaleRecordsReviewQueue from '../components/admin/StaleRecordsReviewQueue';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel';
+import AvailabilityNoticePanel from '../components/admin/AvailabilityNoticePanel';
 import { useToast } from '../context/ToastContext';
 import { getAuditReports, resolveAuditReport } from '../services/communityAuditService';
 import { describeAuditReport, countOpenAudits } from '../utils/auditReportView';
@@ -87,6 +100,18 @@ const Admin = () => {
     submission: null,
   });
   const [importOpen, setImportOpen] = useState(false);
+
+  // Catalog lifecycle states
+  const [catalogView, setCatalogView] = useState('active');
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [lifecycleReview, setLifecycleReview] = useState(null);
+  const [isLifecycleRunning, setIsLifecycleRunning] = useState(false);
+
+  // Ownership & Filtering states
+  const [ownership, setOwnership] = useState({});
+  const [ownershipFilter, setOwnershipFilter] = useState('all');
+  const [ownershipModal, setOwnershipModal] = useState({ isOpen: false, service: null });
+
   const [isRuleConflictModalOpen, setIsRuleConflictModalOpen] = useState(false);
 
   // Destructive action waiting for confirmation
@@ -106,7 +131,28 @@ const Admin = () => {
     setAuditLogs(getAuditLogs());
     setSubmissions(getServiceSubmissions());
     setCommunityAudits(getAuditReports());
+    setOwnership(getOwnershipMap());
   }, []);
+
+  const handleAssignOwnership = (serviceId, input) => {
+    const result = assignServiceOwnership(serviceId, input, {
+      users,
+      actorName: user?.username || 'SuperAdmin',
+    });
+    if (result.ok) {
+      setOwnership(getOwnershipMap());
+      setAuditLogs(getAuditLogs());
+      toast?.success?.('Review assignment saved. The public guide is unchanged.');
+    }
+    return result;
+  };
+
+  const handleClearOwnership = (serviceId) => {
+    clearServiceOwnership(serviceId, { actorName: user?.username || 'SuperAdmin' });
+    setOwnership(getOwnershipMap());
+    setAuditLogs(getAuditLogs());
+    toast?.success?.('Review assignment cleared.');
+  };
 
   const handleLogout = () => {
     logout();
@@ -144,6 +190,66 @@ const Admin = () => {
       );
     } else {
       toast?.warning?.(`Nothing was imported.${skipped}`);
+    }
+  };
+
+  const activeServices = services.filter((svc) => !isArchived(svc));
+  const archivedServices = services.filter(isArchived);
+  
+  // Combine catalog view and ownership filter logic safely
+  const currentCatalogBase = catalogView === 'archived' ? archivedServices : activeServices;
+  const shownServices = filterByOwnership(currentCatalogBase, ownership, users, ownershipFilter);
+
+  const changeCatalogView = (view) => {
+    setCatalogView(view);
+    setSelectedIds([]);
+    setLifecycleReview(null);
+  };
+
+  const toggleSelected = (id) => {
+    setLifecycleReview(null);
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const toggleAllSelected = (checked) => {
+    setLifecycleReview(null);
+    setSelectedIds(checked ? shownServices.map((svc) => svc.id) : []);
+  };
+
+  const reviewLifecycle = () => {
+    const kind = catalogView === 'archived' ? 'restore' : 'archive';
+    const plan = (kind === 'archive' ? planBulkArchive : planBulkRestore)(selectedIds, services);
+    setLifecycleReview({ kind, plan });
+  };
+
+  const applyLifecycle = () => {
+    if (!lifecycleReview || isLifecycleRunning) return;
+    const { kind } = lifecycleReview;
+    setIsLifecycleRunning(true);
+    try {
+      const actor = user?.username || 'SuperAdmin';
+      const result = (kind === 'archive' ? archiveAdminServices : restoreAdminServices)(selectedIds, actor);
+      setServices(result.services);
+      setAuditLogs(getAuditLogs());
+      if (!result.ok) {
+        toast?.error?.(result.error);
+        return;
+      }
+      const word = kind === 'archive' ? 'archived' : 'restored';
+      if (result.changed) {
+        const left = result.plan.invalid.length + result.plan.unknownIds.length;
+        toast?.success?.(
+          `${result.changed} service guide${result.changed === 1 ? '' : 's'} ${word}.${left ? ` ${left} skipped, see the audit log.` : ''}`
+        );
+      } else {
+        toast?.warning?.(`Nothing was ${word}.`);
+      }
+      setSelectedIds([]);
+      setLifecycleReview(null);
+    } catch {
+      toast?.error?.('That change was not allowed or could not be saved.');
+    } finally {
+      setIsLifecycleRunning(false);
     }
   };
 
@@ -336,6 +442,7 @@ const Admin = () => {
   ).length;
 
   const pendingAuditsCount = countOpenAudits(communityAudits);
+  
   return (
     <div
       className="section animate-fade-in"
@@ -468,7 +575,7 @@ const Admin = () => {
               { id: 'dashboard', label: 'Overview Metrics', badge: null },
               {
                 id: 'services',
-                label: `Service Catalog (${services.length})`,
+                label: `Service Catalog (${activeServices.length})`,
                 badge: null,
               },
               {
@@ -661,13 +768,97 @@ const Admin = () => {
                   />
                 )}
 
-                <ServiceRecordList
-                  services={services}
-                  onEdit={(service) =>
-                    setServiceModal({ isOpen: true, service })
-                  }
-                  onDelete={handleDeleteService}
+                {/* Combined Lifecycle Controls & Ownership Filter Bar */}
+                <div className="lifecycle-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+                  <div className="lifecycle-bar__views" role="group" aria-label="Catalog view">
+                    <button
+                      type="button"
+                      className={`btn ${catalogView === 'active' ? 'btn-primary' : 'btn-secondary'}`}
+                      aria-pressed={catalogView === 'active'}
+                      onClick={() => changeCatalogView('active')}
+                    >
+                      Active ({activeServices.length})
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn ${catalogView === 'archived' ? 'btn-primary' : 'btn-secondary'}`}
+                      aria-pressed={catalogView === 'archived'}
+                      onClick={() => changeCatalogView('archived')}
+                    >
+                      Archived ({archivedServices.length})
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                    <div className="ownership-filter" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <label htmlFor="ownership-filter" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Filter:</label>
+                      <select
+                        id="ownership-filter"
+                        className="input-field"
+                        style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem' }}
+                        value={ownershipFilter}
+                        onChange={(e) => setOwnershipFilter(e.target.value)}
+                      >
+                        {buildOwnershipFilterOptions(ownership, users).map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      disabled={selectedIds.length === 0}
+                      onClick={reviewLifecycle}
+                      style={{ fontSize: '0.85rem' }}
+                    >
+                      {catalogView === 'archived' ? 'Restore' : 'Archive'} selected ({selectedIds.length})
+                    </button>
+                  </div>
+                </div>
+
+                {lifecycleReview && (
+                  <ServiceLifecycleReview
+                    kind={lifecycleReview.kind}
+                    plan={lifecycleReview.plan}
+                    busy={isLifecycleRunning}
+                    onConfirm={applyLifecycle}
+                    onCancel={() => setLifecycleReview(null)}
+                  />
+                )}
+
+                {shownServices.length === 0 ? (
+                  <p className="lifecycle-empty" role="status">
+                    {catalogView === 'archived'
+                      ? 'No archived service guides matching filter. Archive a retired guide from the Active list.'
+                      : 'No active service guides matching filter.'}
+                  </p>
+                ) : (
+                  <ServiceRecordList
+                    services={shownServices}
+                    ownership={ownership}
+                    users={users}
+                    onAssign={(service) => setOwnershipModal({ isOpen: true, service })}
+                    onEdit={(service) =>
+                      setServiceModal({ isOpen: true, service })
+                    }
+                    onDelete={catalogView === 'archived' ? undefined : handleDeleteService}
+                    selectedIds={selectedIds}
+                    onToggleSelect={toggleSelected}
+                    onToggleAll={toggleAllSelected}
+                  />
+                )}
+
+                <ServiceOwnershipModal
+                  isOpen={ownershipModal.isOpen}
+                  onClose={() => setOwnershipModal({ isOpen: false, service: null })}
+                  service={ownershipModal.service}
+                  current={ownershipModal.service ? ownership[ownershipModal.service.id] : null}
+                  users={users}
+                  onSave={handleAssignOwnership}
+                  onClear={handleClearOwnership}
                 />
+
                 <RuleConflictInspectorModal
                   isOpen={isRuleConflictModalOpen}
                   onClose={() => setIsRuleConflictModalOpen(false)}
@@ -992,7 +1183,8 @@ const Admin = () => {
                 </div>
               </div>
             )}
-                        {/* Community Discrepancy Audits Tab */}
+            
+            {/* Community Discrepancy Audits Tab */}
             {activeTab === 'community-audits' && (
               <div>
                 <div
@@ -1379,6 +1571,7 @@ const Admin = () => {
             {activeTab === 'notices' && (
               <div>
                 <NoticeManagementPanel />
+                <AvailabilityNoticePanel />
               </div>
             )}
 
