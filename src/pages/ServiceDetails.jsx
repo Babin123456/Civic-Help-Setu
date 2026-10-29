@@ -19,6 +19,8 @@ import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
 import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
 import ApplicabilityPanel from '../components/services/ApplicabilityPanel';
 import OfflineCacheActionCard from '../components/services/OfflineCacheActionCard';
+import IntakeWindowPanel from '../components/services/IntakeWindowPanel';
+
 const copyServiceLink = async (url) => {
   try {
     if (navigator?.clipboard?.writeText) {
@@ -516,6 +518,8 @@ const ServiceDetails = () => {
 
           {/* Offline In-Office Visit Staging */}
           <OfflineCacheActionCard service={service} />
+          <IntakeWindowPanel service={service} />
+
           {/* Fee Transparency */}
           <FeeTransparencyCard
             serviceId={service.id}
