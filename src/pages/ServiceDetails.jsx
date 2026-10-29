@@ -18,7 +18,7 @@ import SourceConflictCautionBanner from '../components/services/SourceConflictCa
 import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
 import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
 import ApplicabilityPanel from '../components/services/ApplicabilityPanel';
-
+import BenefitEntitlementCalculator from '../components/services/BenefitEntitlementCalculator';
 const copyServiceLink = async (url) => {
   try {
     if (navigator?.clipboard?.writeText) {
@@ -512,7 +512,11 @@ const ServiceDetails = () => {
             serviceId={service.id}
           />
 
-          <ApplicabilityPanel service={service} />
+<ApplicabilityPanel service={service} />
+
+          {/* Offline In-Office Visit Staging */}
+          <OfflineCacheActionCard service={service} />
+          <IntakeWindowPanel service={service} />
 
           {/* Fee Transparency */}
           <FeeTransparencyCard
@@ -520,12 +524,17 @@ const ServiceDetails = () => {
             serviceName={service.name}
           />
 
+          {/* Statutory Welfare & Subsidy Benefit Estimator */}
+          <BenefitEntitlementCalculator serviceId={service.id} serviceName={service.name} />
+
           {/* Service Guide */}
           <ServiceGuide
             service={service}
             focusMode={focusMode}
             onToggleFocusMode={toggleFocusMode}
           />
+
+          <DocumentPreflightInspectionCard service={service} />
 
           {/* Civic Application Readiness Scorecard */}
           <ApplicationReadinessScorecard

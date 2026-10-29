@@ -74,7 +74,9 @@ const DocumentModal = ({ isOpen, onClose, onSave, existingDocs = [] }) => {
   const fieldProps = (name) => ({
     id: `doc-${name}`,
     'aria-invalid': fieldErrors[name] ? 'true' : undefined,
-    'aria-describedby': fieldErrors[name] ? `doc-${name}-error` : undefined,
+    'aria-describedby':
+      [name === 'number' ? 'doc-number-hint' : '', fieldErrors[name] ? `doc-${name}-error` : ''].filter(Boolean).join(' ') ||
+      undefined,
   });
 
   const renderFieldError = (name) =>
@@ -217,6 +219,9 @@ const DocumentModal = ({ isOpen, onClose, onSave, existingDocs = [] }) => {
                 onChange={(e) => setForm({ ...form, number: e.target.value })}
                 style={{ fontSize: '0.95rem', padding: '0.75rem 1rem' }}
               />
+            <p id="doc-number-hint" style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', marginTop: '0.35rem' }}>
+              Only the last 4 characters are saved on this device.
+            </p>
             {renderFieldError('number')}
             </div>
           </div>
