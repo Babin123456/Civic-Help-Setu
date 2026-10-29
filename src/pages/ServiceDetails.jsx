@@ -512,7 +512,11 @@ const ServiceDetails = () => {
             serviceId={service.id}
           />
 
-          <ApplicabilityPanel service={service} />
+<ApplicabilityPanel service={service} />
+
+          {/* Offline In-Office Visit Staging */}
+          <OfflineCacheActionCard service={service} />
+          <IntakeWindowPanel service={service} />
 
           {/* Fee Transparency */}
           <FeeTransparencyCard
@@ -529,6 +533,8 @@ const ServiceDetails = () => {
             focusMode={focusMode}
             onToggleFocusMode={toggleFocusMode}
           />
+
+          <DocumentPreflightInspectionCard service={service} />
 
           {/* Civic Application Readiness Scorecard */}
           <ApplicationReadinessScorecard

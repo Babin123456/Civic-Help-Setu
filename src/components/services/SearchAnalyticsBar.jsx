@@ -1,5 +1,5 @@
 import { Sparkles, HelpCircle, ArrowRight, Tag } from 'lucide-react';
-import { getDidYouMeanSuggestion } from '../../services/searchRankingEngine';
+import { getDidYouMeanSuggestion, getFuzzyMatchSummary } from '../../services/searchRankingEngine';
 
 const QUICK_CHIPS = [
   { label: 'Free Services', query: '', feeType: 'Free' },
@@ -16,9 +16,46 @@ const SearchAnalyticsBar = ({
   onSelectChip = () => {},
 }) => {
   const suggestion = getDidYouMeanSuggestion(searchQuery);
+  const fuzzySummary = getFuzzyMatchSummary(searchQuery);
 
   return (
     <div style={{ marginBottom: '1.25rem' }}>
+      {/* Regional & Phonetic Transliteration Banner */}
+      {fuzzySummary?.isTransliterated && (
+        <div
+          className="animate-fade-in"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.6rem',
+            padding: '0.5rem 1rem',
+            borderRadius: '99px',
+            background: 'rgba(16, 185, 129, 0.12)',
+            border: '1px solid rgba(16, 185, 129, 0.35)',
+            marginBottom: '0.85rem',
+            fontSize: '0.875rem',
+          }}
+        >
+          <Sparkles size={16} color="#10b981" />
+          <span style={{ color: 'var(--text-secondary)' }}>Matching civic term:</span>
+          <button
+            type="button"
+            onClick={() => onSelectSuggestion(fuzzySummary.suggestedTerm)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#34d399',
+              fontWeight: '700',
+              cursor: 'pointer',
+              textDecoration: 'underline',
+              padding: 0,
+            }}
+          >
+            &quot;{fuzzySummary.suggestedTerm}&quot;
+          </button>
+        </div>
+      )}
+
       {/* "Did you mean" suggestion card */}
       {suggestion && (
         <div

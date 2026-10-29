@@ -1,4 +1,5 @@
 import { resolveRole } from '../../src/services/roleService.js';
+import { clientKey, createSingleFlight } from './abuseGuard.js';
 
 /**
  * Turns a signed-in Clerk session into a Firebase custom token whose `role` claim the Firestore and
@@ -18,6 +19,9 @@ import { resolveRole } from '../../src/services/roleService.js';
  *  - If the role cannot be looked up, no token is issued. Falling back to "citizen" would silently
  *    demote an admin, and falling back to anything else is not acceptable.
  *  - Errors answer with a fixed code, never with the library's message.
+ *  - Abuse controls (optional, see abuseGuard.js): `ipLimiter` is checked before any Clerk call,
+ *    `userLimiter` after the session is verified. Over the limit answers 429 with `Retry-After`.
+ *    Concurrent requests from one user share a single role lookup and token mint.
  */
 
 const json = (status, body, extra = {}) => ({
@@ -34,13 +38,26 @@ export function bearerToken(headers = {}) {
   return match ? match[1] : null;
 }
 
-export function createFirebaseTokenHandler({ verifySession, getPublicMetadata, mintToken }) {
+const tooMany = (retryAfterSeconds) =>
+  json(429, { error: 'rate_limited', retryAfterSeconds }, { 'Retry-After': String(retryAfterSeconds) });
+
+export function createFirebaseTokenHandler({ verifySession, getPublicMetadata, mintToken, ipLimiter, userLimiter }) {
   for (const [name, fn] of Object.entries({ verifySession, getPublicMetadata, mintToken })) {
     if (typeof fn !== 'function') throw new TypeError(`createFirebaseTokenHandler needs ${name}`);
   }
 
+  const singleFlight = createSingleFlight();
+
   return async function handle({ method, headers }) {
     if (method !== 'POST') return json(405, { error: 'method_not_allowed' }, { Allow: 'POST' });
+
+    // No usable address: skip the per-address limit (a shared bucket would let one caller block all
+    // the others); the per-account limit below still applies.
+    const address = ipLimiter ? clientKey(headers) : null;
+    if (address) {
+      const verdict = ipLimiter.take(address);
+      if (!verdict.allowed) return tooMany(verdict.retryAfterSeconds);
+    }
 
     const sessionToken = bearerToken(headers);
     if (!sessionToken) return json(401, { error: 'missing_token' });
@@ -55,18 +72,25 @@ export function createFirebaseTokenHandler({ verifySession, getPublicMetadata, m
       return json(401, { error: 'invalid_token' });
     }
 
-    let role;
-    try {
-      role = resolveRole(await getPublicMetadata(userId));
-    } catch {
-      return json(502, { error: 'role_lookup_failed' });
+    if (userLimiter) {
+      const verdict = userLimiter.take(userId);
+      if (!verdict.allowed) return tooMany(verdict.retryAfterSeconds);
     }
 
-    try {
-      const token = await mintToken(userId, { role });
-      return json(200, { token });
-    } catch {
-      return json(502, { error: 'token_failed' });
-    }
+    return singleFlight.run(userId, async () => {
+      let role;
+      try {
+        role = resolveRole(await getPublicMetadata(userId));
+      } catch {
+        return json(502, { error: 'role_lookup_failed' });
+      }
+
+      try {
+        const token = await mintToken(userId, { role });
+        return json(200, { token });
+      } catch {
+        return json(502, { error: 'token_failed' });
+      }
+    });
   };
 }
