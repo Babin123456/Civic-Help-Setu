@@ -317,7 +317,7 @@ export default function EligibilityTestBenchPanel() {
     setNotice(
       summary.mismatch + summary.error === 0
         ? `All ${summary.total} cases give the expected result.`
-        : `${summary.pass} of ${summary.total} cases pass, ${summary.mismatch} give a different result, ${summary.error} could not run.`,
+        : `${summary.pass} of ${summary.total} cases pass. Different result: ${summary.mismatch}. Could not run: ${summary.error}.`,
     );
   };
 
