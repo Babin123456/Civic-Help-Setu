@@ -18,7 +18,7 @@ import SourceConflictCautionBanner from '../components/services/SourceConflictCa
 import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
 import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
 import ApplicabilityPanel from '../components/services/ApplicabilityPanel';
-
+import DocumentPreflightInspectionCard from '../components/services/DocumentPreflightInspectionCard';
 const copyServiceLink = async (url) => {
   try {
     if (navigator?.clipboard?.writeText) {
@@ -526,6 +526,8 @@ const ServiceDetails = () => {
             focusMode={focusMode}
             onToggleFocusMode={toggleFocusMode}
           />
+
+          <DocumentPreflightInspectionCard service={service} />
 
           {/* Civic Application Readiness Scorecard */}
           <ApplicationReadinessScorecard
