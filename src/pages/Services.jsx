@@ -10,6 +10,7 @@ import ComparisonFloatingTray from '../components/services/ComparisonFloatingTra
 import { comparisonService, MAX_COMPARE_LIMIT } from '../services/comparisonService';
 import { getSearchSuggestions, rankAndFilterServices } from '../services/searchRankingEngine';
 import { Layers, Scale } from 'lucide-react';
+import { parseServiceFilters, normalizeSearchQuery } from '../utils/searchParams';
 import RtiBuilderModal from '../components/services/RtiBuilderModal';
 
 const Services = () => {
@@ -47,16 +48,6 @@ const Services = () => {
     setCompareNotice('Comparison cleared.');
   };
 
-  // Read URL params or set defaults
-  const activeCategory = searchParams.get('cat') || 'All';
-  const searchQuery = searchParams.get('q') || '';
-  const selectedMode = searchParams.get('mode') || 'All';
-  const selectedDifficulty = searchParams.get('diff') || 'All';
-  const selectedDepartment = searchParams.get('dept') || 'All';
-  const selectedFee = searchParams.get('fee') || 'All';
-  const selectedSpeed = searchParams.get('speed') || 'All';
-  const sortBy = searchParams.get('sort') || 'relevance';
-
   // Built-in guides plus the ones the admin saved, read once when the page opens.
   const [allServices] = useState(getAllServices);
 
@@ -67,6 +58,22 @@ const Services = () => {
   const departments = useMemo(() => {
     return [...new Set(allServices.map((s) => s.department).filter(Boolean))];
   }, [allServices]);
+
+  // The address bar is untrusted: unknown filter or sort values fall back to the defaults and the
+  // search text is cleaned and capped (see src/utils/searchParams.js).
+  const {
+    searchQuery,
+    category: activeCategory,
+    department: selectedDepartment,
+    mode: selectedMode,
+    difficulty: selectedDifficulty,
+    fee: selectedFee,
+    speed: selectedSpeed,
+    sortBy,
+  } = useMemo(
+    () => parseServiceFilters(searchParams, { categories, departments }),
+    [searchParams, categories, departments]
+  );
 
   const searchSuggestions = useMemo(
     () => getSearchSuggestions(allServices, searchQuery),
@@ -84,7 +91,7 @@ const Services = () => {
   };
 
   const handleCategoryChange = (cat) => updateParam('cat', cat, 'All');
-  const handleSearchChange = (query) => updateParam('q', query, '');
+  const handleSearchChange = (query) => updateParam('q', normalizeSearchQuery(query), '');
   const handleModeChange = (mode) => updateParam('mode', mode, 'All');
   const handleDifficultyChange = (diff) => updateParam('diff', diff, 'All');
   const handleDepartmentChange = (dept) => updateParam('dept', dept, 'All');

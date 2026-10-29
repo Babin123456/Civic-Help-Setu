@@ -17,6 +17,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import OfflineBanner from './components/common/OfflineBanner';
 import BackToTop from './components/common/BackToTop';
 import RouteErrorFallback from './components/common/RouteErrorFallback';
+import RouteErrorBoundary from './components/common/RouteErrorBoundary';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -62,6 +63,7 @@ function AppRoot() {
                     <SkipToContent />
                     <Navbar />
                   <main id="main-content" style={{ flex: 1 }} tabIndex="-1">
+                    <RouteErrorBoundary>
                     <Routes>
                       <Route path="/" element={<Home />} />
                       <Route path="/login/*" element={<Login />} />
@@ -108,6 +110,7 @@ function AppRoot() {
 
                       <Route path="*" element={<NotFound />} />
                     </Routes>
+                    </RouteErrorBoundary>
                   </main>
                   <Footer />
                   <BackToTop />

@@ -5,6 +5,7 @@ import {
   getRedirectTarget,
   buildAuthPath,
   describeProtectedPath,
+  APPROVED_REDIRECT_ORIGINS,
 } from './authRedirect';
 
 const ORIGIN = 'https://civicbridge.example';
@@ -126,5 +127,69 @@ describe('describeProtectedPath', () => {
     expect(describeProtectedPath(null)).toBeNull();
     expect(describeProtectedPath('/')).toBeNull();
     expect(describeProtectedPath('/login')).toBeNull();
+  });
+});
+
+describe('sanitizeRedirectPath hardening', () => {
+  const rejected = [
+    ['a tab hidden inside //', '/\t/evil.example'],
+    ['a newline hidden inside //', '/\n/evil.example'],
+    ['a carriage return hidden inside //', '/\r/evil.example'],
+    ['a tab-separated backslash', '/\t\\evil.example'],
+    ['a null byte', '/saved\u0000'],
+    ['a unicode line separator', '/saved /x'],
+    ['an encoded slash after the first slash', '/%2Fevil.example'],
+    ['an encoded backslash after the first slash', '/%5Cevil.example'],
+    ['an encoded tab after the first slash', '/%09/evil.example'],
+    ['a double-encoded // path', '/%252F%252Fevil.example'],
+    ['a fully encoded //', '%2F%2Fevil.example'],
+    ['a javascript: url', 'javascript:alert(1)'],
+    ['a mixed-case javascript: url', 'JaVaScRiPt:alert(1)'],
+    ['a javascript: url with a tab', 'java\tscript:alert(1)'],
+    ['an encoded javascript: url', '%6Aavascript:alert(1)'],
+    ['a data: url', 'data:text/html,<script>alert(1)</script>'],
+    ['a vbscript: url', 'vbscript:msgbox(1)'],
+    ['a scheme hidden behind a slash', '/javascript:alert(1)'],
+    ['an encoded scheme behind a slash', '/%6Aavascript:alert(1)'],
+    ['a url with credentials that look like our host', 'https://app.example@evil.example/'],
+    ['an http url on another origin', 'http://evil.example/saved'],
+    ['an uppercase scheme on another origin', 'HTTPS://evil.example/saved'],
+    ['a different port on our host', 'https://app.example:8443/saved'],
+    ['a lookalike subdomain', 'https://app.example.evil.example/saved'],
+    ['a malformed url', 'https://'],
+    ['a malformed percent sequence', '/%E0%A4%A'],
+    ['a triple slash', '///evil.example'],
+    ['a slash, backslash, slash', '/\\/evil.example'],
+    ['an absurdly long value', `/${'a'.repeat(3000)}`],
+    ['whitespace only', '   '],
+  ];
+
+  it.each(rejected)('rejects %s', (_name, value) => {
+    expect(sanitizeRedirectPath(value, 'https://app.example')).toBeNull();
+  });
+
+  it('rejects encoded versions of the auth pages', () => {
+    expect(sanitizeRedirectPath('/%6Cogin')).toBeNull();
+    expect(sanitizeRedirectPath('/sso-callback%3Fx=1')).toBeNull();
+  });
+
+  it('still allows ordinary paths that need encoding', () => {
+    expect(sanitizeRedirectPath('/services/1?q=%E0%A4%AE%E0%A4%A6%E0%A4%A6')).toBe('/services/1?q=%E0%A4%AE%E0%A4%A6%E0%A4%A6');
+    expect(sanitizeRedirectPath('/track?ref=a%20b#top')).toBe('/track?ref=a%20b#top');
+    expect(sanitizeRedirectPath('/saved?next=https://evil.example')).toBe('/saved?next=https://evil.example');
+  });
+
+  it('accepts only origins on the approved list, and keeps them as full urls', () => {
+    const approved = ['https://apply.example.org'];
+    expect(sanitizeRedirectPath('https://apply.example.org/start?x=1', 'https://app.example', approved)).toBe(
+      'https://apply.example.org/start?x=1'
+    );
+    expect(sanitizeRedirectPath('https://apply.example.org.evil.example/', 'https://app.example', approved)).toBeNull();
+    expect(sanitizeRedirectPath('http://apply.example.org/', 'https://app.example', approved)).toBeNull();
+    expect(sanitizeRedirectPath('https://other.example.org/', 'https://app.example', approved)).toBeNull();
+  });
+
+  it('trusts no external origin by default', () => {
+    expect(APPROVED_REDIRECT_ORIGINS).toEqual([]);
   });
 });

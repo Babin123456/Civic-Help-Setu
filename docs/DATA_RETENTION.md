@@ -36,6 +36,7 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civic_grievance_evidence_drafts` | `grievanceEvidenceService.js` | Private user-controlled grievance preparation drafts and timelines | Drafts and in-progress work |
 | `civic_life_event_journeys` | `lifeEventNavigatorService.js` | Saved life-event roadmap progress, hidden tasks and regional selections | Drafts and in-progress work |
 | `civicbridge_eligibility_assessments` | `assessmentStorage.js` | Answers and results of eligibility checks | Drafts and in-progress work |
+| `civicbridge_applicant_profiles_v1` | `applicantProfileService.js` | Household and family member applicant profiles for scoped assessments | Drafts and in-progress work |
 | `civicbridge_applications` | `trackingService.js` | Applications the person tracks: reference id, service, status, stages | Tracking records |
 | `civicbridge_office_tokens` | `locationService.js` | Office visit tokens and appointments | Tracking records |
 | `civic_grievance_tickets` | `grievanceService.js` | Grievance tickets raised from the app | Tracking records |
@@ -53,6 +54,13 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_faq_votes` | `faqService.js` | Which FAQ answers were voted helpful | Reviews, votes and reports |
 | `civic_glossary_suggestions` | `civicGlossaryService.js` | User-submitted term clarification suggestions for editorial review | Reviews, votes and reports |
 | `civicbridge_community_audits` | `communityAuditService.js` | Audit reports and votes (seeded with sample reports on first read) | Reviews, votes and reports |
+| `civicbridge_barrier_reports` | `barrierReportService.js` | Citizen-reported accessibility and physical service delivery barriers | Reviews, votes and reports |
+| `civicbridge_bottleneck_feedback_v1` | `bottleneckFeedbackService.js` | Citizen bottleneck and delay feedback submissions | Reviews, votes and reports |
+| `civicbridge_checklist` | `dataPortabilityService.js` | Saved checklist items exported/imported across devices | Drafts and in-progress work |
+| `civicbridge_track_applications` | `dataPortabilityService.js` | Application tracking records staged for import or export | Tracking records |
+| `civicbridge_form_drafts` | `dataPortabilityService.js` | Form drafts prepared by citizen | Drafts and in-progress work |
+| `civicbridge_journey_handoffs_v1` | `journeyHandoffService.js` | Journey handoff bundles and shared checklist links | Drafts and in-progress work |
+| `civicbridge_readiness_scorecards` | `readinessScorecardService.js` | Citizen application readiness scores and missing document audits | Drafts and in-progress work |
 | `civicbridge_offline_cache` | `offlineCacheService.js` | Copies of saved guides and application stages for offline use | Offline copies and location |
 | `civicbridge_offline_last_sync` | `offlineCacheService.js` | Time of the last offline sync | Offline copies and location |
 | `civicbridge_cached_shelters` | `disasterReliefService.js` | Copy of the public relief shelter list (no personal data) | Offline copies and location |
@@ -66,12 +74,13 @@ After clearing, the sample reviews, sample audit reports and the sample vault do
 
 | Key | What it holds | Why it stays |
 |---|---|---|
-| `civicbridge_theme`, `civicbridge_lang`, `civicbridge_plain_lang`, `civicbridge_a11y_prefs`, `civicbridge_focus_mode` | Theme, language, plain language and accessibility settings | Display preferences, not records. Removing them would reset the page the person is looking at |
+| `civicbridge_theme`, `civicbridge_lang`, `civicbridge_plain_lang`, `civicbridge_a11y_prefs`, `civicbridge_focus_mode`, `civicbridge_active_applicant_profile_id_v1` | Theme, language, plain language, accessibility, and active applicant profile selection settings | Display preferences, not records. Removing them would reset the page the person is looking at |
 | `civicbridge_demo_user` | Demo sign-in session (only when Clerk is not configured) | Signing out is its own action |
 | `civicbridge_consent_preferences` | Privacy choices | Reset by the Full Account Purge only |
 | `civicbridge_privacy_audit_log` | Last 100 privacy events (consent change, export, clear). It holds ids, category names and counts, never record contents | Receipt that a deletion happened |
 | `civicbridge_error_reports` | Outdated-information reports sent from a service page, and the admin review queue | Shared review queue |
 | `civicbridge_custom_services`, `civicbridge_audit_logs`, `civicbridge_rbac_users`, `civicbridge_service_submissions` | Admin portal data | Not citizen data |
+| `civicbridge_barrier_audit_logs`, `civicbridge_freshness_trust_reviews_v1`, `civicbridge_public_notices_digest_v1`, `civicbridge_source_conflicts`, `civicbridge_conflict_audit_logs` | Admin barrier moderation, freshness reviews, public gazette digest cache, and source conflict audit queues | Admin portal moderation and public digest cache |
 | `civicbridge_location_denied` (sessionStorage) | A flag that the location permission was refused in this tab | No personal data, gone when the tab closes |
 
 ## Remote data

@@ -1,8 +1,10 @@
+import { requirePermission } from './accessControl';
 /**
  * Community Audit & Discrepancy Corroboration Service
  * Enables crowd-sourced verification of reported civic changes (e.g. fee updates, office closures)
  * with community consensus scoring and administrator resolution.
  */
+import { logDiagnostic } from '../utils/diagnostics';
 
 import { sanitizeTextFields } from '../utils/safeContent';
 const STORAGE_KEY = 'civicbridge_community_audits';
@@ -85,7 +87,7 @@ export function saveAuditReport(reportData) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch (err) {
-      console.warn('Storage write failed', err);
+      logDiagnostic('Storage write failed', err);
     }
   }
   return newReport;
@@ -127,6 +129,7 @@ export function voteAuditReport(reportId, voteType = 'UP') {
 }
 
 export function resolveAuditReport(reportId, adminNote = '', resolvedBy = 'SuperAdmin') {
+  requirePermission('communityAudits.resolve');
   const all = getAuditReports();
   const idx = all.findIndex(r => r.id === reportId);
   if (idx === -1) return null;

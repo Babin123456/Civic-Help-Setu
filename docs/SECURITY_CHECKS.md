@@ -108,3 +108,34 @@ npm run lint:security
 
 - These are three common checks, not a full security review. They do not look at server code (there is none in this repo), HTTP headers, or runtime behaviour.
 - The workflow could only be checked statically (`actionlint`) and by running each command locally. Its first real run will be on GitHub.
+
+## When a page crashes
+
+Page routes are wrapped in `RouteErrorBoundary` (`src/components/common/RouteErrorBoundary.jsx`, used in `App.jsx`). If a page throws while rendering, only that page is replaced by a short message with **Try again** and **Go to home**; the navigation bar, footer and accessibility toolbar stay usable, and moving to another page clears the error. If a page file cannot be downloaded (offline, or a new deployment), the button becomes **Reload page**. `RouteErrorFallback` remains the router's last-resort screen for anything outside a page.
+
+Rules for this screen:
+
+- It never shows the error, its message or its stack. The boundary does not even keep them in state. In development the error is written to the browser console; production logs nothing.
+- Do not add a "details" section or `error.message` to it. If production diagnostics are needed later, send them to a reporting service, not to the page.
+## Search and filter parameters
+
+Values in the address bar (`/services?q=...&sort=...`, `/track?id=...`, `/nearby?service=...`, `/assistant?q=...`) can be typed or shared by anyone, so they go through `src/utils/searchParams.js` before the page uses them:
+
+- **Search text** (`q`): control and hidden direction characters are replaced, whitespace is collapsed, and it is cut to 100 characters (500 for the assistant). The search box also has `maxLength`. It is only ever rendered as a React child, never as HTML.
+- **Filters and sort** (`cat`, `dept`, `mode`, `diff`, `fee`, `speed`, `sort`): matched case-insensitively against a fixed list (categories and departments come from the catalogue). Anything else, including repeated or empty values, falls back to the default ("All" / "relevance") and the page keeps working.
+- **Ids**: `service` must look like a slug (letters, digits, `.`, `-`, `_`, up to 64 characters). The tracking reference is cleaned and cut to 64 characters but not otherwise restricted, because references typed by hand have no fixed format.
+
+When you add a new filter or sort option, add it to `FILTER_OPTIONS` or `SORT_KEYS` in that file, or the page will treat it as unknown.
+## Redirect destinations after sign in
+
+Every login, sign-up and SSO return path goes through `sanitizeRedirectPath` in `src/utils/authRedirect.js`. Do not read `redirect_url`, `sign_in_force_redirect_url` or router state and pass it to `navigate` or Clerk directly.
+
+It accepts an in-app path (`/saved?folder=x`) or a full URL on this site's own origin. It returns `null` (callers fall back to `/`) for:
+
+- other origins, including look-alike hosts, other ports, `http://` downgrades and URLs with credentials (`https://app.example@evil.example`)
+- `//host`, `///host`, `/\host`, and the same with a tab, newline or other control character inside (browsers delete those, so `/<TAB>/evil.example` becomes `//evil.example`)
+- percent-encoded leading separators (`/%2Fevil.example`, `/%5C…`, double encoding) and malformed escapes
+- `javascript:`, `data:`, `vbscript:` and every other scheme, in any case or encoding
+- the sign-in pages themselves (loop), and anything over 2048 characters
+
+To trust another origin, add the full origin (`https://apply.example.org`) to `APPROVED_REDIRECT_ORIGINS` and say why in the pull request. The list is empty today.

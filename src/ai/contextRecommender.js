@@ -1,5 +1,6 @@
 import { MOCK_SERVICES } from '../data/services';
 import { redactPersonalData } from '../utils/dataMinimization';
+import { logDiagnostic } from '../utils/diagnostics';
 
 const PRIVACY_CONSENT_KEY = 'civicbridge_ai_context_consent';
 
@@ -16,7 +17,7 @@ export const setAIContextConsent = (enabled) => {
   try {
     localStorage.setItem(PRIVACY_CONSENT_KEY, JSON.stringify(enabled));
   } catch (err) {
-    console.error('Failed to set AI privacy consent:', err);
+    logDiagnostic('Failed to set AI privacy consent:', err);
   }
 };
 

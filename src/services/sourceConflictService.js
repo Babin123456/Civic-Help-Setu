@@ -1,3 +1,4 @@
+import { requirePermission } from './accessControl';
 /**
  * Civic Source Conflict and Confidence Review Queue Service (#149)
  *
@@ -10,6 +11,7 @@
  * - Enforces human review: system NEVER auto-adjudicates conflicts based on scraped text.
  * - Changes to verification state are strictly auditable with an immutable log.
  */
+import { logDiagnostic } from '../utils/diagnostics';
 
 export const SOURCE_CONFLICTS_STORAGE_KEY = 'civicbridge_source_conflicts';
 export const CONFLICT_AUDIT_LOGS_KEY = 'civicbridge_conflict_audit_logs';
@@ -98,7 +100,7 @@ const appendAuditLog = (entry, storage = getStorage()) => {
     });
     storage.setItem(CONFLICT_AUDIT_LOGS_KEY, JSON.stringify(logs));
   } catch (err) {
-    console.error('Failed to append conflict audit log', err);
+    logDiagnostic('Failed to append conflict audit log', err);
   }
 };
 
@@ -209,6 +211,7 @@ export const resolveSourceConflict = (
   },
   storage = getStorage()
 ) => {
+  requirePermission('sourceConflicts.review');
   // CRITICAL ACCEPTANCE CRITERIA:
   // "The system does not automatically choose a source solely based on scraped text."
   if (isAutomatedScraper) {
@@ -276,6 +279,7 @@ export const reopenSourceConflict = (
   { conflictId, reopenReason, actor = 'Administrator' },
   storage = getStorage()
 ) => {
+  requirePermission('sourceConflicts.review');
   if (!conflictId || !reopenReason) {
     throw new Error('Conflict ID and reason are required to re-open a conflict.');
   }

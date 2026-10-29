@@ -1,3 +1,4 @@
+import { requirePermission } from './accessControl';
 /**
  * Public Notice & Gazette Change Digest Service
  * 
@@ -236,6 +237,7 @@ export const validateNoticeInput = (data) => {
  * Adds a new reviewed notice
  */
 export const addNotice = (noticeInput, actor = 'Admin', customStorage) => {
+  requirePermission('notices.manage');
   const validation = validateNoticeInput(noticeInput);
   if (!validation.isValid) {
     throw new Error(validation.errors.join(' '));
@@ -280,6 +282,7 @@ export const addNotice = (noticeInput, actor = 'Admin', customStorage) => {
  * Updates an existing notice
  */
 export const updateNotice = (id, updates, actor = 'Admin', customStorage) => {
+  requirePermission('notices.manage');
   const notices = getNotices(customStorage);
   const index = notices.findIndex((n) => n.id === id);
   if (index === -1) {
@@ -321,6 +324,7 @@ export const updateNotice = (id, updates, actor = 'Admin', customStorage) => {
  * Changes notice review status
  */
 export const changeNoticeStatus = (id, newStatus, actor = 'Admin', note = '', customStorage) => {
+  requirePermission('notices.manage');
   if (!Object.values(NOTICE_STATUSES).includes(newStatus)) {
     throw new Error(`Invalid status: ${newStatus}`);
   }
@@ -416,6 +420,7 @@ export const getNoticeDigestStats = (customStorage) => {
  * Resets notices back to default state
  */
 export const resetNoticesToDefault = (customStorage) => {
+  requirePermission('notices.manage');
   const storage = getStorage(customStorage);
   if (!storage) return false;
   try {

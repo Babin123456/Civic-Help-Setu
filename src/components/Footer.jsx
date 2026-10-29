@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom';
 import { Shield } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
+import { can } from '../services/accessControl';
 
 const Footer = () => {
   const { t } = useLanguage();
+  const { user } = useAuth();
 
   return (
     <footer id="site-footer" aria-label="Site Footer" tabIndex="-1" style={{ borderTop: '1px solid var(--border-main)', padding: '3.5rem 0 2.5rem', marginTop: 'auto', backgroundColor: 'var(--bg-main)' }}>
@@ -27,7 +30,9 @@ const Footer = () => {
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.75rem', fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-secondary)' }}>
           <Link to="/privacy" style={{ transition: 'color 0.2s' }}>{t('footer.privacy', 'Privacy Policy')}</Link>
           <Link to="/open-source" style={{ transition: 'color 0.2s' }}>{t('footer.openSource', 'Open Source')}</Link>
-          <Link to="/admin" style={{ transition: 'color 0.2s' }}>{t('nav.admin', 'Admin Portal')}</Link>
+          {can('users.read', user) && (
+            <Link to="/admin" style={{ transition: 'color 0.2s' }}>{t('nav.admin', 'Admin Portal')}</Link>
+          )}
           <Link to="/services" style={{ transition: 'color 0.2s' }}>{t('nav.services', 'Services')}</Link>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { X, PlusCircle, FileText, Calendar, Tag, AlertCircle } from 'lucide-react';
 import { addManualApplication, DUPLICATE_APPLICATION } from '../../services/trackingService';
 import { useToast } from '../../context/ToastContext';
+import { logDiagnostic } from '../../utils/diagnostics';
 
 const ManualAddApplicationModal = ({
   isOpen,
@@ -52,7 +53,7 @@ const ManualAddApplicationModal = ({
         referenceInputRef.current?.focus();
         return;
       }
-      console.error(err);
+      logDiagnostic('Could not add the application', err);
       toast.error('Failed to register application.');
     }
   };

@@ -2,6 +2,7 @@
 import { createContext, useContext, useMemo, useState, useEffect, useCallback } from 'react';
 import { useUser, useClerk } from '@clerk/clerk-react';
 import { resolveRole } from '../services/roleService';
+import { setCurrentActor } from '../services/accessControl';
 
 const AuthContext = createContext(null);
 const DEMO_STORAGE_KEY = 'civicbridge_demo_user';
@@ -40,6 +41,11 @@ const ClerkAuthProvider = ({ children }) => {
       raw: clerkUser,
     };
   }, [isSignedIn, clerkUser]);
+
+  // The data layer reads who is signed in from here (see services/accessControl.js). It is set
+  // while rendering, not in an effect, because child effects (the admin page loading its data) run
+  // before a parent effect would.
+  setCurrentActor(activeUser);
 
   const logout = useCallback(async () => {
     if (clerk) {
@@ -87,6 +93,8 @@ const LocalFallbackAuthProvider = ({ children }) => {
       localStorage.removeItem(DEMO_STORAGE_KEY);
     }
   }, [demoUser]);
+
+  setCurrentActor(demoUser);
 
   const signInAsDemo = useCallback((options = {}) => {
     const role = options.role === 'admin' ? 'admin' : 'citizen';

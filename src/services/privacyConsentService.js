@@ -4,6 +4,7 @@
  * auditable security event logging (strictly without PII), complete data export,
  * and cascading account deletion according to the India DPDP Act 2023 & GDPR standards.
  */
+import { logDiagnostic } from '../utils/diagnostics';
 
 const CONSENT_STORAGE_KEY = 'civicbridge_consent_preferences';
 const AUDIT_STORAGE_KEY = 'civicbridge_privacy_audit_log';
@@ -56,6 +57,14 @@ export const USER_DATA_STORES = [
   { key: 'civic_life_event_journeys', category: 'drafts', exportAs: 'lifeEventJourneys', empty: {} }, // lifeEventNavigatorService.js
   { key: 'civicbridge_community_audits', category: 'activity', exportAs: null }, // communityAuditService.js
   { key: 'civic_service_fee_preferences', category: 'saved', exportAs: 'serviceFeePreferences', empty: {} }, // feeTransparencyService.js
+  { key: 'civicbridge_applicant_profiles_v1', category: 'drafts', exportAs: 'applicantProfiles', empty: [] }, // applicantProfileService.js
+  { key: 'civicbridge_barrier_reports', category: 'activity', exportAs: 'barrierReports', empty: [] }, // barrierReportService.js
+  { key: 'civicbridge_bottleneck_feedback_v1', category: 'activity', exportAs: 'bottleneckFeedback', empty: [] }, // bottleneckFeedbackService.js
+  { key: 'civicbridge_checklist', category: 'drafts', exportAs: 'checklistItems', empty: [] }, // dataPortabilityService.js
+  { key: 'civicbridge_track_applications', category: 'tracking', exportAs: 'importedTrackApplications', empty: [] }, // dataPortabilityService.js
+  { key: 'civicbridge_form_drafts', category: 'drafts', exportAs: 'formDrafts', empty: [] }, // dataPortabilityService.js
+  { key: 'civicbridge_journey_handoffs_v1', category: 'drafts', exportAs: 'journeyHandoffs', empty: [] }, // journeyHandoffService.js
+  { key: 'civicbridge_readiness_scorecards', category: 'drafts', exportAs: 'readinessScorecards', empty: [] }, // readinessScorecardService.js
 ];
 
 /**
@@ -127,6 +136,7 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_plain_lang',
   'civicbridge_a11y_prefs',
   'civicbridge_focus_mode',
+  'civicbridge_active_applicant_profile_id_v1',
   // Demo sign-in session, signing out is its own action
   'civicbridge_demo_user',
   // Admin portal data and the shared review queue for outdated-info reports
@@ -135,6 +145,11 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_audit_logs',
   'civicbridge_rbac_users',
   'civicbridge_service_submissions',
+  'civicbridge_barrier_audit_logs',
+  'civicbridge_freshness_trust_reviews_v1',
+  'civicbridge_public_notices_digest_v1',
+  'civicbridge_source_conflicts',
+  'civicbridge_conflict_audit_logs',
   // Handled by purge itself: consents are reset, the audit log keeps the deletion receipt
   CONSENT_STORAGE_KEY,
   AUDIT_STORAGE_KEY,
@@ -376,7 +391,7 @@ export function recordPrivacyAuditLog(action, metadata = {}, actorId = 'citizen_
     const updated = [entry, ...logs].slice(0, 100);
     storage.setItem(AUDIT_STORAGE_KEY, JSON.stringify(updated));
   } catch (err) {
-    console.error('Failed to write privacy audit log:', err);
+    logDiagnostic('Failed to write privacy audit log:', err);
   }
 }
 

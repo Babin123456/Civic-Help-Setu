@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { parseAssistantQuery } from '../utils/searchParams';
 import { useLocation, Link } from 'react-router-dom';
 import { Send, AlertCircle, Loader2, Sparkles, Mic, MicOff, BookOpen, RefreshCw, Pencil } from 'lucide-react';
 import ChatMessage from '../components/ChatMessage';
@@ -22,6 +23,7 @@ import {
   getUndoRemainingMs,
   restoreFromSnapshot,
 } from '../utils/chatSession';
+import { logDiagnostic } from '../utils/diagnostics';
 
 const Assistant = () => {
   const [messages, setMessages] = useState(() => loadChatHistory());
@@ -51,7 +53,7 @@ const Assistant = () => {
   // Handle URL query parameter ?q=
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
-    const query = searchParams.get('q');
+    const query = parseAssistantQuery(searchParams.get('q'));
 
     if (query) {
       handleSendMessage(query);
@@ -85,7 +87,7 @@ const Assistant = () => {
     try {
       response = await askGroundedCivicAssistant(resolved);
     } catch (groundingErr) {
-      console.warn('Grounded retrieval error, falling back to basic assistant:', groundingErr);
+      logDiagnostic('Grounded retrieval error, falling back to basic assistant:', groundingErr);
       response = await askCivicAssistant(resolved);
     }
     return {
@@ -128,7 +130,7 @@ const Assistant = () => {
       const assistantMessage = await getAnswer(query, history);
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err) {
-      console.error(err);
+      logDiagnostic('Assistant request failed', err);
       setError("We couldn't process your request. Please try again.");
       setFailedQuery(query);
     } finally {
@@ -195,7 +197,7 @@ const Assistant = () => {
 
       recognition.start();
     } catch (err) {
-      console.error('Failed to initialize speech recognition:', err);
+      logDiagnostic('Failed to initialize speech recognition:', err);
       setVoiceError('Could not start microphone recording. Please check browser settings.');
       setIsListening(false);
     }

@@ -58,6 +58,7 @@ import {
 } from '../utils/adminDestructiveActions';
 import SourceConflictReviewQueue from '../components/admin/SourceConflictReviewQueue';
 import BarrierInsightsDashboard from '../components/barriers/BarrierInsightsDashboard';
+import RuleConflictInspectorModal from '../components/admin/RuleConflictInspectorModal';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -86,6 +87,7 @@ const Admin = () => {
     submission: null,
   });
   const [importOpen, setImportOpen] = useState(false);
+  const [isRuleConflictModalOpen, setIsRuleConflictModalOpen] = useState(false);
 
   // Destructive action waiting for confirmation
   const [pendingAction, setPendingAction] = useState(null);
@@ -634,6 +636,19 @@ const Admin = () => {
                     >
                       <Plus size={16} /> Add New Service Guide
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsRuleConflictModalOpen(true)}
+                      className="btn btn-outline"
+                      style={{
+                        fontSize: '0.85rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                      }}
+                    >
+                      <AlertTriangle size={16} color="#f59e0b" /> Rule Conflict Inspector
+                    </button>
                   </div>
                 </div>
 
@@ -652,6 +667,11 @@ const Admin = () => {
                     setServiceModal({ isOpen: true, service })
                   }
                   onDelete={handleDeleteService}
+                />
+                <RuleConflictInspectorModal
+                  isOpen={isRuleConflictModalOpen}
+                  onClose={() => setIsRuleConflictModalOpen(false)}
+                  services={services}
                 />
               </div>
             )}

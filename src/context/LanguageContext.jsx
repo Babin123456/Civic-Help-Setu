@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { DICTIONARIES } from '../utils/translationCoverage';
 import { SUPPORTED_LANGUAGES, loadLanguage, saveLanguage } from '../utils/languagePreference';
+import { logDiagnostic } from '../utils/diagnostics';
 
 const en = DICTIONARIES.en;
 const LanguageContext = createContext(null);
@@ -30,7 +31,7 @@ export const LanguageProvider = ({ children }) => {
       try {
         localStorage.setItem(PLAIN_LANG_KEY, String(next));
       } catch (err) {
-        console.error('Failed to save plain language preference', err);
+        logDiagnostic('Failed to save plain language preference', err);
       }
       return next;
     });

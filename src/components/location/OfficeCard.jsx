@@ -17,6 +17,7 @@ import { formatDistance } from '../../services/locationService';
 import { useToast } from '../../context/ToastContext';
 import BestTimeToVisitCard from './BestTimeToVisitCard';
 import { OfficeAccessibilityDetails } from './AccessibilityFacilityPanel';
+import IntakeWindowBadge from './IntakeWindowBadge';
 
 const OfficeCard = ({
   office,
@@ -139,6 +140,8 @@ const OfficeCard = ({
             , {office.city}, {office.state} - {office.pincode}
           </span>
         </p>
+
+        <IntakeWindowBadge office={office} />
 
         {/* Metadata Details Grid */}
         <div

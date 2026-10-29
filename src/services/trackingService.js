@@ -1,3 +1,4 @@
+import { logDiagnostic } from '../utils/diagnostics';
 const STORAGE_KEY = 'civicbridge_applications';
 
 export const STATUS_META = {
@@ -339,7 +340,7 @@ export const getApplications = () => {
       )
       .map(normalizeApplication);
   } catch (err) {
-    console.error('Failed to parse applications from storage', err);
+    logDiagnostic('Failed to parse applications from storage', err);
     return DEFAULT_APPLICATIONS.map(normalizeApplication);
   }
 };

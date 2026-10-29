@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { parseReferenceParam } from '../utils/searchParams';
 import { useLocation } from 'react-router-dom';
 import {
   Search,
@@ -60,7 +61,7 @@ const Track = () => {
     setMetrics(getTrackingMetrics());
 
     const searchParams = new URLSearchParams(location.search);
-    const queryId = searchParams.get('id') || searchParams.get('ref');
+    const queryId = parseReferenceParam(searchParams.get('id') || searchParams.get('ref'));
 
     if (queryId) {
       setAppIdInput(queryId);

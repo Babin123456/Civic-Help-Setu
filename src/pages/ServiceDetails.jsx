@@ -11,6 +11,7 @@ import ServiceGuide from '../components/services/ServiceGuide';
 import DataFreshnessTrustBadge from '../components/services/DataFreshnessTrustBadge';
 import JourneyHandoffModal from '../components/journey/JourneyHandoffModal';
 import NoticeBadge from '../components/notices/NoticeBadge';
+import LowBandwidthShareModal from '../components/services/LowBandwidthShareModal';
 
 const copyServiceLink = async (url) => {
   try {
@@ -44,6 +45,7 @@ const ServiceDetails = () => {
   const [linkCopied, setLinkCopied] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [handoffModalOpen, setHandoffModalOpen] = useState(false);
+  const [showLowBandwidthModal, setShowLowBandwidthModal] = useState(false);
   const [service, setService] = useState(() => getServiceById(id));
 
   const [isSaved, setIsSaved] = useState(() =>
@@ -406,6 +408,30 @@ const ServiceDetails = () => {
 
                   {linkCopied ? 'Copied' : 'Copy link'}
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowLowBandwidthModal(true)}
+                  className="btn btn-secondary"
+                  aria-label="Low-bandwidth plain text and SMS instructions"
+                  style={{
+                    gridColumn: '1 / -1',
+                    padding: '0.65rem',
+                    fontSize: '0.875rem',
+                    background: 'var(--glass-bg)',
+                    color: 'var(--text-primary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.35rem',
+                  }}
+                >
+                  <Share2
+                    size={16}
+                    color="var(--accent-main)"
+                  />
+                  Low-Bandwidth & SMS Copy
+                </button>
               </div>
 
               <button
@@ -560,6 +586,12 @@ const ServiceDetails = () => {
         serviceName={service.name}
         availableTasks={service.steps || []}
         currentUser={user}
+      />
+
+      <LowBandwidthShareModal
+        isOpen={showLowBandwidthModal}
+        onClose={() => setShowLowBandwidthModal(false)}
+        service={service}
       />
     </div>
   );
