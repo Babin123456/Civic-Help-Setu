@@ -9,7 +9,6 @@ import {
   deleteApplicantProfile,
   RELATIONSHIP_TYPES,
 } from '../../services/applicantProfileService';
-import { logDiagnostic } from '../../utils/diagnostics';
 
 export default function ApplicantProfileSwitcher({ onProfileChanged }) {
   const [profiles, setProfiles] = useState(() => getApplicantProfiles());
