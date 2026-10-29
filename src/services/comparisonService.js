@@ -99,4 +99,21 @@ export const comparisonService = {
       values: serviceList.map(pick),
     }));
   },
+
+  getDifferencesSummary(serviceList) {
+    if (!serviceList || serviceList.length < 2) {
+      return { totalRows: 0, differingRows: 0, identicalRows: 0 };
+    }
+    const matrix = this.buildComparisonMatrix(serviceList);
+    let differingRows = 0;
+    for (const row of matrix) {
+      const distinct = new Set(row.values.map((v) => v.join('\n')));
+      if (distinct.size > 1) differingRows++;
+    }
+    return {
+      totalRows: matrix.length,
+      differingRows,
+      identicalRows: matrix.length - differingRows,
+    };
+  },
 };
