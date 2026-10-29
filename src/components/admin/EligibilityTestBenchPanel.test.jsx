@@ -54,6 +54,7 @@ describe("EligibilityTestBenchPanel", () => {
     expect(html).toContain("Expected eligible");
     expect(html).toContain("Land");
     expect(html).toContain("ownsAgriculturalLand: false → true");
+    expect(html).toContain("Example changes");
     expect(
       renderToStaticMarkup(<ResultDetails result={{ status: "pass" }} />),
     ).toBe("");

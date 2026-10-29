@@ -4,7 +4,6 @@ import {
   PROFILE_FIELDS,
   SERVICE_STATUSES,
   STATUSES,
-  addCase,
   coverageBySubject,
   listSubjects,
   loadCustomCases,
@@ -13,6 +12,12 @@ import {
   runSuite,
   serviceQuestions,
 } from "../../services/eligibilityTestBench";
+import {
+  answersFromCase,
+  saveFormCase,
+  suiteNotice,
+  withoutResult,
+} from "../../services/eligibilityTestBenchForm";
 
 const RESULT_LABEL = {
   pass: "Passes",
@@ -52,7 +57,7 @@ export const ResultDetails = ({ result }) => {
       {result.suggestions.length > 0 && (
         <>
           <h5 className="etb-subhead">
-            Changing one answer would give the expected result
+            Example changes: one answer that would give the expected result
           </h5>
           <ul className="etb-list">
             {result.suggestions.map((s) => (
@@ -73,7 +78,15 @@ const inputSummary = (input) =>
     .map(([k, v]) => `${k}: ${v === "" ? "not answered" : String(v)}`)
     .join(", ");
 
-const CaseRow = ({ testCase, subjects, result, custom, onRun, onRemove }) => (
+const CaseRow = ({
+  testCase,
+  subjects,
+  result,
+  custom,
+  onRun,
+  onEdit,
+  onRemove,
+}) => (
   <li className="etb-case">
     <div className="etb-case__head">
       <div className="etb-case__main">
@@ -103,6 +116,16 @@ const CaseRow = ({ testCase, subjects, result, custom, onRun, onRemove }) => (
           <button
             type="button"
             className="btn btn-outline etb-btn"
+            onClick={() => onEdit(testCase)}
+            aria-label={`Edit case ${testCase.name}`}
+          >
+            Edit
+          </button>
+        )}
+        {custom && (
+          <button
+            type="button"
+            className="btn btn-outline etb-btn"
             onClick={() => onRemove(testCase.id)}
             aria-label={`Delete case ${testCase.name}`}
           >
@@ -120,17 +143,23 @@ const CaseRow = ({ testCase, subjects, result, custom, onRun, onRemove }) => (
   </li>
 );
 
-const slugify = (text) =>
-  text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-const NewCaseForm = ({ subjects, shipped, onAdded }) => {
-  const [subjectIndex, setSubjectIndex] = useState(0);
-  const [name, setName] = useState("");
-  const [expected, setExpected] = useState("eligible");
-  const [answers, setAnswers] = useState({});
+const NewCaseForm = ({ subjects, shipped, editing, onSaved, onCancel }) => {
+  const [subjectIndex, setSubjectIndex] = useState(() =>
+    editing
+      ? Math.max(
+          0,
+          subjects.findIndex(
+            (s) =>
+              s.kind === editing.subject.kind && s.id === editing.subject.id,
+          ),
+        )
+      : 0,
+  );
+  const [name, setName] = useState(editing?.name ?? "");
+  const [expected, setExpected] = useState(editing?.expected ?? "eligible");
+  const [answers, setAnswers] = useState(() =>
+    editing ? answersFromCase(editing) : {},
+  );
   const [error, setError] = useState("");
 
   const subject = subjects[subjectIndex];
@@ -148,32 +177,17 @@ const NewCaseForm = ({ subjects, shipped, onAdded }) => {
 
   const submit = (event) => {
     event.preventDefault();
-    const input = {};
-    for (const [key, raw] of Object.entries(answers)) {
-      if (raw === undefined) continue;
-      const field = PROFILE_FIELDS.find((f) => f.key === key);
-      if (isScheme && field?.type === "number")
-        input[key] = raw === "" ? "" : Number(raw);
-      else if (isScheme && field?.type === "boolean")
-        input[key] = raw === "yes";
-      else if (raw !== "") input[key] = raw;
-    }
     try {
-      onAdded(
-        addCase(
-          {
-            id: slugify(`${subject.id}-${name}`),
-            name: name.trim(),
-            subject: { kind: subject.kind, id: subject.id },
-            input,
-            expected,
-            synthetic: true,
-          },
+      onSaved(
+        saveFormCase(
+          { editingId: editing?.id, subject, name, expected, answers },
           { shipped },
         ),
       );
-      setName("");
-      setAnswers({});
+      if (!editing) {
+        setName("");
+        setAnswers({});
+      }
       setError("");
     } catch (err) {
       setError(err.message);
@@ -181,14 +195,24 @@ const NewCaseForm = ({ subjects, shipped, onAdded }) => {
   };
 
   return (
-    <form className="etb-form" onSubmit={submit} aria-label="Add a test case">
-      <h4 className="etb-subhead">Add a case</h4>
+    <form
+      className="etb-form"
+      onSubmit={submit}
+      aria-label={editing ? "Edit a test case" : "Add a test case"}
+    >
+      <h4 className="etb-subhead">
+        {editing ? `Edit case: ${editing.name}` : "Add a case"}
+      </h4>
       <p className="etb-hint">
         Use made-up answers only. Never type a real person&apos;s details.
       </p>
       <label className="etb-field">
         Rule to test
-        <select value={subjectIndex} onChange={changeSubject}>
+        <select
+          value={subjectIndex}
+          onChange={changeSubject}
+          disabled={Boolean(editing)}
+        >
           {subjects.map((s, i) => (
             <option key={`${s.kind}:${s.id}`} value={i}>
               {s.name} (
@@ -284,8 +308,17 @@ const NewCaseForm = ({ subjects, shipped, onAdded }) => {
         </p>
       )}
       <button type="submit" className="btn btn-primary etb-btn">
-        Save case
+        {editing ? "Save changes" : "Save case"}
       </button>
+      {editing && (
+        <button
+          type="button"
+          className="btn btn-outline etb-btn"
+          onClick={onCancel}
+        >
+          Cancel
+        </button>
+      )}
     </form>
   );
 };
@@ -300,6 +333,7 @@ export default function EligibilityTestBenchPanel() {
   const [results, setResults] = useState({});
   const [filter, setFilter] = useState("all");
   const [notice, setNotice] = useState("");
+  const [editing, setEditing] = useState(null);
 
   const cases = useMemo(() => [...SHIPPED_CASES, ...custom], [custom]);
   const customIds = useMemo(() => new Set(custom.map((c) => c.id)), [custom]);
@@ -314,11 +348,7 @@ export default function EligibilityTestBenchPanel() {
   const runAll = () => {
     const { results: list, summary } = runSuite(cases);
     setResults(Object.fromEntries(list.map((r) => [r.caseId, r])));
-    setNotice(
-      summary.mismatch + summary.error === 0
-        ? `All ${summary.total} cases give the expected result.`
-        : `${summary.pass} of ${summary.total} cases pass. Different result: ${summary.mismatch}. Could not run: ${summary.error}.`,
-    );
+    setNotice(suiteNotice(summary));
   };
 
   const runOne = (testCase) => {
@@ -330,11 +360,19 @@ export default function EligibilityTestBenchPanel() {
   const remove = (id) => {
     try {
       setCustom(removeCase(id, { shipped: SHIPPED_CASES }));
-      setResults((prev) =>
-        Object.fromEntries(Object.entries(prev).filter(([key]) => key !== id)),
-      );
+      setResults((prev) => withoutResult(prev, id));
+      setEditing((cur) => (cur?.id === id ? null : cur));
     } catch (err) {
       setNotice(err.message);
+    }
+  };
+
+  const saved = (list) => {
+    setCustom(list);
+    if (editing) {
+      setResults((prev) => withoutResult(prev, editing.id));
+      setNotice(`Saved changes to "${editing.name}". Run it again to check.`);
+      setEditing(null);
     }
   };
 
@@ -415,6 +453,7 @@ export default function EligibilityTestBenchPanel() {
               result={results[c.id]}
               custom={customIds.has(c.id)}
               onRun={runOne}
+              onEdit={setEditing}
               onRemove={remove}
             />
           ))}
@@ -422,9 +461,12 @@ export default function EligibilityTestBenchPanel() {
       )}
 
       <NewCaseForm
+        key={editing?.id ?? "new"}
         subjects={subjects}
         shipped={SHIPPED_CASES}
-        onAdded={setCustom}
+        editing={editing}
+        onSaved={saved}
+        onCancel={() => setEditing(null)}
       />
     </section>
   );
