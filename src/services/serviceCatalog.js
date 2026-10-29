@@ -14,7 +14,12 @@ const isUsableService = (svc) =>
  * replaces the built-in one). Read it once per mount or per action, it does a
  * localStorage read and JSON parse each call.
  */
-export const getAllServices = () => {
+export const getAllServices = ({ includeArchived = false } = {}) => {
+  const all = readAllServices();
+  return includeArchived ? all : all.filter((s) => s.archived !== true);
+};
+
+const readAllServices = () => {
   try {
     const raw = localStorage.getItem(CUSTOM_SERVICES_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
@@ -33,4 +38,5 @@ export const getAllServices = () => {
   }
 };
 
-export const getServiceById = (id) => getAllServices().find((s) => s.id === id) || null;
+// Archived guides are still found by id, so direct links and saved references keep working.
+export const getServiceById = (id) => getAllServices({ includeArchived: true }).find((s) => s.id === id) || null;

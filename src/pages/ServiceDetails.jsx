@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, Users } from 'lucide-react';
 import { getServiceById } from '../services/serviceCatalog';
+import RetiredServiceNotice from '../components/common/RetiredServiceNotice';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import UntranslatedBadge from '../components/common/UntranslatedBadge';
@@ -11,6 +12,7 @@ import ServiceGuide from '../components/services/ServiceGuide';
 import DataFreshnessTrustBadge from '../components/services/DataFreshnessTrustBadge';
 import JourneyHandoffModal from '../components/journey/JourneyHandoffModal';
 import NoticeBadge from '../components/notices/NoticeBadge';
+import ServiceAvailabilityNotice from '../components/services/ServiceAvailabilityNotice';
 import LowBandwidthShareModal from '../components/services/LowBandwidthShareModal';
 import SourceConflictCautionBanner from '../components/services/SourceConflictCautionBanner';
 import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
@@ -201,6 +203,8 @@ const ServiceDetails = () => {
           </Link>
         </div>
 
+        <RetiredServiceNotice service={service} />
+
         <div
           className="glass-panel service-details__panel"
           style={{ borderRadius: '1.5rem' }}
@@ -274,6 +278,7 @@ const ServiceDetails = () => {
                 <DataFreshnessTrustBadge service={service} />
                 <NoticeBadge serviceId={service.id} serviceName={service.name} />
               </div>
+              <ServiceAvailabilityNotice serviceId={service.id} serviceName={service.name} />
             </div>
 
             <div

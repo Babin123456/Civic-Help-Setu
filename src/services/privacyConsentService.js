@@ -147,7 +147,9 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_service_submissions',
   'civicbridge_barrier_audit_logs',
   'civicbridge_freshness_trust_reviews_v1',
+  'civicbridge_service_ownership_v1',
   'civicbridge_public_notices_digest_v1',
+  'civicbridge_service_availability_notices_v1',
   'civicbridge_source_conflicts',
   'civicbridge_conflict_audit_logs',
   // Handled by purge itself: consents are reset, the audit log keeps the deletion receipt

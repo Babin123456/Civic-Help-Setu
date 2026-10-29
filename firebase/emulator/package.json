@@ -1,0 +1,15 @@
+{
+  "name": "civicbridge-firebase-rules-tests",
+  "private": true,
+  "type": "module",
+  "description": "Runs firebase/firestore.rules and firebase/storage.rules against the local Firebase emulators. Separate from the app's own package.json so the app does not depend on firebase-tools.",
+  "scripts": {
+    "test": "firebase emulators:exec --only auth,firestore,storage --project civicbridge-rules-test --config ../firebase.json \"node --test --test-concurrency=1 firestore-rules.test.mjs storage-rules.test.mjs cloud-records.test.mjs token-flow.test.mjs\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "3.0.4",
+    "firebase": "10.14.1",
+    "firebase-tools": "13.35.1",
+    "firebase-admin": "14.5.0"
+  }
+}
