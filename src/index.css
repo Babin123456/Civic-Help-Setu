@@ -1008,3 +1008,14 @@ html:not([data-theme="light"]) .cmd__result-row--cleared svg { color: #4ade80; }
   .cmd { padding: 1rem; }
   .cmd__danger, .cmd__retry { width: 100%; }
 }
+
+/* Requirement types on checklist items (#265) */
+.req-note { display: flex; flex-direction: column; gap: 0.25rem; margin-top: 0.35rem; font-size: 0.85rem; font-weight: 400; text-decoration: none; }
+.req-intro { margin: 0 0 0.5rem; font-size: 0.9rem; color: var(--text-secondary); }
+.req-badge { align-self: flex-start; padding: 0.1rem 0.6rem; border-radius: 999px; border: 1px solid var(--border-main); font-size: 0.75rem; font-weight: 600; color: var(--text-primary); }
+.req-badge--required { border-color: #ef4444; background: rgba(239, 68, 68, 0.08); }
+.req-badge--conditional { border-color: #f59e0b; background: rgba(245, 158, 11, 0.08); }
+.req-badge--optional { border-color: #38bdf8; background: rgba(56, 189, 248, 0.08); }
+.req-badge--unverified { border-style: dashed; }
+.req-explain { color: var(--text-secondary); line-height: 1.4; }
+.req-explain a { color: var(--accent-main); }

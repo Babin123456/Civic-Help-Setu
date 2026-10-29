@@ -32,6 +32,7 @@ import ActionRequiredAlert from '../components/tracking/ActionRequiredAlert';
 import LinkedDocumentsManager from '../components/tracking/LinkedDocumentsManager';
 import ManualAddApplicationModal from '../components/tracking/ManualAddApplicationModal';
 import Checklist from '../components/Checklist';
+import { toRequirementMap } from '../services/requirementTypes';
 import { services } from '../data/services';
 import TrackEmptyState from '../components/tracking/TrackEmptyState';
 import TrackingReceiptModal from '../components/tracking/TrackingReceiptModal';
@@ -137,9 +138,10 @@ const Track = () => {
 
   const pendingAction = activeApp ? resolveApplicationPendingAction(activeApp) : null;
   const statusMeta = activeApp ? getStatusMeta(activeApp.status) : null;
-  const requiredDocuments = activeApp
-    ? (services.find((svc) => svc.id === activeApp.serviceId)?.documents || [])
-    : [];
+  const activeService = activeApp
+    ? services.find((svc) => svc.id === activeApp.serviceId)
+    : null;
+  const requiredDocuments = activeService?.documents || [];
 
   if (!applications.length && !activeApp) {
     return (
@@ -279,6 +281,7 @@ const Track = () => {
                       key={activeApp.id}
                       checklistId={activeApp.id}
                       items={requiredDocuments}
+                      requirements={toRequirementMap(activeService)}
                       label={`Documents to prepare for ${activeApp.serviceName || 'this application'}`}
                     />
                   </section>
