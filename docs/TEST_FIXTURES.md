@@ -33,7 +33,6 @@ Valid means the record satisfies the [service data contract](SERVICE_DATA_CONTRA
 | `state-specific` | valid | Applies to one state only. |  |
 | `district-specific` | valid | Applies to one district. |  |
 | `local-body-specific` | valid | Applies to one local body. |  |
-| `text-jurisdiction` | valid | Jurisdiction in the original plain-text form. |  |
 | `conditional-eligibility` | valid | Documents and criteria that depend on the applicant. |  |
 | `free-and-instant` | valid | Zero fee and zero processing days (the edge of the number ranges). |  |
 | `long-text` | valid | Long names, descriptions and many steps, for layout tests. |  |
@@ -51,7 +50,8 @@ Valid means the record satisfies the [service data contract](SERVICE_DATA_CONTRA
 | `invalid-no-steps` | invalid | No steps. | `steps` |
 | `invalid-step-shape` | invalid | A step without a description. | `steps[0]` |
 | `invalid-publication-state` | invalid | A publication state that does not exist. | `publicationState` |
-| `invalid-jurisdiction-level` | invalid | A jurisdiction level that does not exist. | `jurisdiction.level` |
+| `invalid-jurisdiction-level` | invalid | A jurisdiction level that does not exist. | `jurisdiction` |
+| `legacy-text-jurisdiction` | invalid | Jurisdiction in the retired plain-text form. | `jurisdiction` |
 | `invalid-contact` | invalid | A contact with no way to reach it. | `contacts[0]` |
 | `invalid-personal-data` | invalid | A record that wrongly carries personal data (fictional values). | `email`, `phone` |
 | `invalid-wrong-types` | invalid | Fields with the wrong types. | `name`, `documents`, `fees` |

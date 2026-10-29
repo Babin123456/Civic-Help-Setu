@@ -17,11 +17,11 @@
  */
 import { SERVICE_CATEGORIES } from '../../data/serviceCategories.js';
 import { SERVICE_SCHEMA_VERSION } from '../../data/serviceContract.js';
+import { CUSTOM_SERVICES_KEY } from '../../services/serviceCatalog.js';
 
 export const DEFAULT_SEED = 20260101;
 export const FIXTURE_ID_PREFIX = 'sample-';
 export const FIXTURE_STORAGE_KEY = 'civicbridge_TEST_fixture_services';
-const PRODUCTION_CATALOGUE_KEY = 'civicbridge_custom_services';
 
 // ---- seeded random numbers (mulberry32): small, fast, and the same everywhere -------------------
 
@@ -56,7 +56,7 @@ function hashString(text) {
 const SUBJECTS = ['Garden', 'Lantern', 'River', 'Harvest', 'Library', 'Bridge', 'Orchard', 'Market', 'Meadow', 'Harbour', 'Workshop', 'Courtyard'];
 const DOCUMENT_KINDS = ['Permit', 'Licence', 'Certificate', 'Registration', 'Subsidy', 'Support Card'];
 const DEPARTMENTS = ['Department of Sample Affairs', 'Sample Municipal Office', 'Office of Example Services', 'Sample Welfare Board', 'Example Transport Authority'];
-const STATES = ['Sampleland', 'Exampleshire', 'Testvale'];
+const STATES = ['Goa', 'Kerala', 'Sikkim'];
 const DISTRICTS = ['North Sample District', 'Example Valley District', 'Test Coast District'];
 const LOCAL_BODIES = ['Sample Town Council', 'Example Village Panchayat'];
 const FICTIONAL_DATES = ['2025-03-14', '2025-08-02', '2025-11-21', '2026-01-09', '2026-04-27', '2026-07-15'];
@@ -152,7 +152,7 @@ registerScenario('local-body-specific', { description: 'Applies to one local bod
   ...baseService(rng, i),
   jurisdiction: { level: 'local', states: [rng.pick(STATES)], districts: [rng.pick(DISTRICTS)], localBody: rng.pick(LOCAL_BODIES) },
 }) });
-registerScenario('text-jurisdiction', { description: 'Jurisdiction in the original plain-text form.', valid: true, build: (rng, i) => ({ ...baseService(rng, i), jurisdiction: 'Sampleland' }) });
+registerScenario('legacy-text-jurisdiction', { description: 'Jurisdiction in the retired plain-text form.', valid: false, expectedErrors: ['jurisdiction'], build: (rng, i) => cloneWith(baseService(rng, i), { jurisdiction: 'Goa' }) });
 registerScenario('conditional-eligibility', { description: 'Documents and criteria that depend on the applicant.', valid: true, build: (rng, i) => {
   const record = baseService(rng, i);
   return {
@@ -193,7 +193,7 @@ registerScenario('invalid-date', { description: 'A date that does not exist.', v
 registerScenario('invalid-no-steps', { description: 'No steps.', valid: false, expectedErrors: ['steps'], build: (rng, i) => cloneWith(baseService(rng, i), { steps: [] }) });
 registerScenario('invalid-step-shape', { description: 'A step without a description.', valid: false, expectedErrors: ['steps[0]'], build: (rng, i) => cloneWith(baseService(rng, i), { steps: [{ title: 'Only a title' }] }) });
 registerScenario('invalid-publication-state', { description: 'A publication state that does not exist.', valid: false, expectedErrors: ['publicationState'], build: (rng, i) => cloneWith(baseService(rng, i), { publicationState: 'pending' }) });
-registerScenario('invalid-jurisdiction-level', { description: 'A jurisdiction level that does not exist.', valid: false, expectedErrors: ['jurisdiction.level'], build: (rng, i) => cloneWith(baseService(rng, i), { jurisdiction: { level: 'galaxy' } }) });
+registerScenario('invalid-jurisdiction-level', { description: 'A jurisdiction level that does not exist.', valid: false, expectedErrors: ['jurisdiction'], build: (rng, i) => cloneWith(baseService(rng, i), { jurisdiction: { level: 'galaxy' } }) });
 registerScenario('invalid-contact', { description: 'A contact with no way to reach it.', valid: false, expectedErrors: ['contacts[0]'], build: (rng, i) => cloneWith(baseService(rng, i), { contacts: [{ label: 'Sample Helpline' }] }) });
 registerScenario('invalid-personal-data', { description: 'A record that wrongly carries personal data (fictional values).', valid: false, expectedErrors: ['email', 'phone'], build: (rng, i) => cloneWith(baseService(rng, i), { email: 'person@example.org', phone: '000-000-0000' }) });
 registerScenario('invalid-wrong-types', { description: 'Fields with the wrong types.', valid: false, expectedErrors: ['name', 'documents', 'fees'], build: (rng, i) => cloneWith(baseService(rng, i), { name: 42, documents: 'Sample identity proof', fees: { amount: 5 } }) });
@@ -246,7 +246,7 @@ export function isSyntheticRecord(record) {
  */
 export function writeFixtureCatalogue(storage, catalogue, { key = FIXTURE_STORAGE_KEY } = {}) {
   if (!storage || typeof storage.setItem !== 'function') throw new TypeError('Pass the storage to write to; fixtures are never written anywhere by default.');
-  if (key === PRODUCTION_CATALOGUE_KEY) throw new Error('Refusing to write fixtures to the key the real catalogue uses.');
+  if (key === CUSTOM_SERVICES_KEY) throw new Error('Refusing to write fixtures to the key the real catalogue uses.');
   const services = Array.isArray(catalogue?.services) ? catalogue.services : [];
   const real = services.filter((record) => !isSyntheticRecord(record));
   if (real.length) throw new Error(`Refusing to write ${real.length} record(s) that do not look synthetic.`);
