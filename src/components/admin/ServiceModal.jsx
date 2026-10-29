@@ -5,7 +5,7 @@ import useUnsavedChangesGuard from '../../hooks/useUnsavedChangesGuard';
 import { isFormDirty } from '../../utils/formDraft';
 import UnsavedChangesDialog from '../common/UnsavedChangesDialog';
 import { INDIAN_STATES_AND_UTS, JURISDICTION_LEVELS, JURISDICTION_LEVEL_LABELS } from '../../data/jurisdictions';
-import { normalizeJurisdiction, validateJurisdiction } from '../../services/jurisdictionService';
+import { normalizeJurisdiction, validateJurisdiction, jurisdictionFromFormFields } from '../../services/jurisdictionService';
 import { CONTACT_TYPES, CONTACT_METHODS, validateContacts } from '../../services/contactDirectoryService';
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
@@ -115,12 +115,12 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
 
     let jurisdiction = null;
     if (form.jurisdictionLevel) {
-      jurisdiction = {
+      jurisdiction = jurisdictionFromFormFields({
         level: form.jurisdictionLevel,
-        states: form.jurisdictionLevel === 'national' ? [] : form.jurisdictionStates,
-        districts: form.jurisdictionDistrict.split(',').map((d) => d.trim()).filter(Boolean),
-        localBody: form.jurisdictionLocalBody.trim(),
-      };
+        states: form.jurisdictionStates,
+        district: form.jurisdictionDistrict,
+        localBody: form.jurisdictionLocalBody,
+      });
       const problems = validateJurisdiction(jurisdiction);
       if (problems.length > 0) {
         setError(problems[0]);
@@ -404,7 +404,7 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
               id="svc-jurisdiction-level"
               className="input-field"
               value={form.jurisdictionLevel}
-              onChange={(e) => setForm({ ...form, jurisdictionLevel: e.target.value, jurisdictionStates: [] })}
+              onChange={(e) => setForm({ ...form, jurisdictionLevel: e.target.value, jurisdictionStates: [], jurisdictionDistrict: '', jurisdictionLocalBody: '' })}
               style={{ background: 'var(--glass-bg)' }}
             >
               <option value="" style={{ background: 'var(--bg-main)' }}>Not specified (shown as unverified)</option>
