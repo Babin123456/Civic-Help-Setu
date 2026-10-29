@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { MAX_SEARCH_LENGTH } from '../../utils/searchParams';
 import { Search, X, ArrowUpDown } from 'lucide-react';
 import DepartmentFilterSelect from './DepartmentFilterSelect';
 import FeeAndSpeedFilter from './FeeAndSpeedFilter';
@@ -97,6 +98,7 @@ const FilterToolbar = ({
           <input
             type="text"
             aria-label="Search public services"
+            maxLength={MAX_SEARCH_LENGTH}
             placeholder="Search by title, documents, or keywords..."
             value={searchQuery}
             onChange={(e) => {

@@ -108,3 +108,13 @@ npm run lint:security
 
 - These are three common checks, not a full security review. They do not look at server code (there is none in this repo), HTTP headers, or runtime behaviour.
 - The workflow could only be checked statically (`actionlint`) and by running each command locally. Its first real run will be on GitHub.
+
+## Search and filter parameters
+
+Values in the address bar (`/services?q=...&sort=...`, `/track?id=...`, `/nearby?service=...`, `/assistant?q=...`) can be typed or shared by anyone, so they go through `src/utils/searchParams.js` before the page uses them:
+
+- **Search text** (`q`): control and hidden direction characters are replaced, whitespace is collapsed, and it is cut to 100 characters (500 for the assistant). The search box also has `maxLength`. It is only ever rendered as a React child, never as HTML.
+- **Filters and sort** (`cat`, `dept`, `mode`, `diff`, `fee`, `speed`, `sort`): matched case-insensitively against a fixed list (categories and departments come from the catalogue). Anything else, including repeated or empty values, falls back to the default ("All" / "relevance") and the page keeps working.
+- **Ids**: `service` must look like a slug (letters, digits, `.`, `-`, `_`, up to 64 characters). The tracking reference is cleaned and cut to 64 characters but not otherwise restricted, because references typed by hand have no fixed format.
+
+When you add a new filter or sort option, add it to `FILTER_OPTIONS` or `SORT_KEYS` in that file, or the page will treat it as unknown.
