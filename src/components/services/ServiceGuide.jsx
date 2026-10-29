@@ -1,6 +1,8 @@
 import FocusModeToggle from '../common/FocusModeToggle';
 import OfficialSourcesList from './OfficialSourcesList';
 import BottleneckFeedbackPrompt from '../feedback/BottleneckFeedbackPrompt';
+import { findJargonTerms } from '../../data/civicGlossary';
+import FormFieldExplainer from '../glossary/FormFieldExplainer';
 
 const hasItems = (list) => Array.isArray(list) && list.length > 0;
 
