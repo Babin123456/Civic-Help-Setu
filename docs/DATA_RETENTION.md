@@ -24,6 +24,25 @@ This document, the **Clear my data** screen (`src/services/clearMyDataService.js
 `src/services/clearMyDataService.test.js` scans `src/` and fails if a service starts writing a key that is in neither the owned list nor the retained list, and fails if a key is missing from this file.
 Only these keys are ever removed. The code never calls `localStorage.clear()` and refuses any key that is not on the list.
 
+## Fields cut down before they are stored (#212)
+
+Anything in `localStorage` can be read by the next person on the device and by a script running on the page, so identity and contact numbers are shortened before they are written. The code is in `src/services/dataMinimization.js`.
+
+| Field | Key | What is stored | Why the full value is not needed |
+|---|---|---|---|
+| Vault document number | `civicbridge_vault_docs` | The last 4 letters or digits, as `XXXX 1234`. Numbers of 4 characters or fewer are kept as typed | The vault only shows and searches the number so a person can tell documents apart. The document file is never stored |
+| Appointment mobile number | `civicbridge_office_tokens` | The last 4 digits, as `XXXXXX3210` | Nothing reads it back. The calendar link and visit pack only use the office, date, slot and token |
+
+Records saved before this change are shortened the first time they are read. Imported vault backups are shortened on import, and the backup export is built from the stored (already shortened) data.
+
+Decisions kept on purpose:
+
+- Applicant name, tracked reference IDs and free-text notes stay, because the tracking and vault screens are not usable without them. They are listed in the threat model as high sensitivity. The notice below tells people this.
+- The vault document `notes` (300 characters, free text) is not scanned. People can still type an identity number there.
+- Document file contents were never stored (only name, size and type).
+
+Shared-device notice: the Vault and Track pages show a short notice that records are saved in this browser, that other people using the device may see them, and a link to **Clear my data**. The Clear my data section only removes the keys in the owned list, never other site data.
+
 ## Data the "Clear my data" screen deletes
 
 Retention for all of these: until deleted by the person (no automatic expiry).

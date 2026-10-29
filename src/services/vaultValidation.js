@@ -1,3 +1,5 @@
+import { minimizeDocumentNumber } from './dataMinimization';
+
 export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 export const MAX_FILE_NAME_LENGTH = 120;
 export const MAX_TEXT_LENGTH = 100;
@@ -51,10 +53,11 @@ const normalise = (v) => String(v || '').trim().toLowerCase().replace(/\s+/g, ''
 /** True if another saved document has the same type and number. */
 export const isDuplicateDocument = (form, existingDocs = []) => {
   const type = normalise(form.type);
-  const number = normalise(form.number);
+  // Stored numbers keep only their last four characters, so compare on that (#212)
+  const number = normalise(minimizeDocumentNumber(form.number));
   if (!type || !number) return false;
   return existingDocs.some(
-    (d) => d.id !== form.id && normalise(d.type) === type && normalise(d.number) === number
+    (d) => d.id !== form.id && normalise(d.type) === type && normalise(minimizeDocumentNumber(d.number)) === number
   );
 };
 

@@ -1,5 +1,6 @@
 import { CIVIC_OFFICES } from '../data/locationOffices';
 import { logDiagnostic } from '../utils/diagnostics';
+import { minimizeAppointments, minimizePhoneNumber } from './dataMinimization';
 
 const APPOINTMENTS_STORAGE_KEY = 'civicbridge_office_tokens';
 const USER_LOCATION_CACHE_KEY = 'civicbridge_user_coords';
@@ -323,7 +324,18 @@ export const filterCivicOffices = ({
 export const getOfficeAppointments = () => {
   try {
     const raw = localStorage.getItem(APPOINTMENTS_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const stored = JSON.parse(raw);
+    // Older bookings kept the full mobile number, cut them down once (#212)
+    const minimized = minimizeAppointments(stored);
+    if (minimized !== stored) {
+      try {
+        localStorage.setItem(APPOINTMENTS_STORAGE_KEY, JSON.stringify(minimized));
+      } catch {
+        // still return the minimized copy
+      }
+    }
+    return minimized;
   } catch {
     return [];
   }
@@ -355,7 +367,7 @@ export const bookOfficeAppointment = ({
     directionsUrl: directionsUrl || '',
     serviceName,
     applicantName,
-    contactNumber,
+    contactNumber: minimizePhoneNumber(contactNumber),
     appointmentDate,
     timeSlot,
     status: 'Confirmed',

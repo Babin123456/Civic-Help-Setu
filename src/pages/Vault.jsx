@@ -17,6 +17,7 @@ import DocumentModal from '../components/vault/DocumentModal';
 import DocumentPreviewModal from '../components/vault/DocumentPreviewModal';
 import ExpiringDocumentsAlert from '../components/vault/ExpiringDocumentsAlert';
 import VaultBackupRestoreModal from '../components/vault/VaultBackupRestoreModal';
+import SharedDeviceNotice from '../components/privacy/SharedDeviceNotice';
 import ServiceTaggingModal from '../components/vault/ServiceTaggingModal';
 import DocumentPreflightChecker from '../components/vault/DocumentPreflightChecker';
 
@@ -126,7 +127,7 @@ const Vault = () => {
         >
           <div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-main)', fontSize: '0.875rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>
-              <ShieldCheck size={18} /> Encrypted Citizen Storage
+              <ShieldCheck size={18} /> Stored on this device
             </div>
             <h1 style={{ fontSize: 'clamp(2.25rem, 5vw, 3rem)', fontWeight: '800' }}>
               Digital Document Vault
@@ -134,6 +135,7 @@ const Vault = () => {
             <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
               Store, organize, and inspect your civic credentials with expiration warnings.
             </p>
+            <SharedDeviceNotice what="document details (only the last 4 characters of each number)" />
             {user && (
               <div
                 style={{
