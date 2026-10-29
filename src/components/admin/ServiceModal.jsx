@@ -6,10 +6,27 @@ import { isFormDirty } from '../../utils/formDraft';
 import UnsavedChangesDialog from '../common/UnsavedChangesDialog';
 import { INDIAN_STATES_AND_UTS, JURISDICTION_LEVELS, JURISDICTION_LEVEL_LABELS } from '../../data/jurisdictions';
 import { normalizeJurisdiction, validateJurisdiction } from '../../services/jurisdictionService';
+import { normalizeWindow, validateWindows } from '../../services/applicationWindowService';
 import { CONTACT_TYPES, CONTACT_METHODS, validateContacts } from '../../services/contactDirectoryService';
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 const MODES = ['Online', 'Offline', 'Online / Offline'];
+
+const EMPTY_WINDOW = { label: '', startDate: '', endDate: '', status: '', noticeTitle: '', noticeUrl: '', reviewedOn: '' };
+
+const windowToRow = (raw) => {
+  const w = normalizeWindow(raw);
+  return { label: w.label, startDate: w.startDate, endDate: w.endDate, status: w.status, noticeTitle: w.notice.title, noticeUrl: w.notice.url, reviewedOn: w.reviewedOn };
+};
+
+const rowToWindow = (row) => ({
+  label: row.label,
+  startDate: row.startDate,
+  endDate: row.endDate,
+  status: row.status,
+  notice: { title: row.noticeTitle, url: row.noticeUrl },
+  reviewedOn: row.reviewedOn,
+});
 
 const EMPTY_CONTACT = { type: 'helpdesk', method: 'phone', value: '', hours: '', sourceUrl: '', lastVerified: '' };
 
@@ -38,6 +55,7 @@ const buildForm = (service) =>
         portalName: service.officialSources?.[0]?.name || 'Official Government Portal',
         documentsText: (service.documents || []).join('\n'),
         eligibilityText: (service.eligibility || []).join('\n'),
+        intakeWindows: Array.isArray(service.intakeWindows) ? service.intakeWindows.map(windowToRow) : [],
         contacts: Array.isArray(service.contacts) ? service.contacts.map((c) => ({ ...EMPTY_CONTACT, ...c })) : [],
       }
     : {
@@ -53,6 +71,7 @@ const buildForm = (service) =>
         portalName: 'National Government Services Portal',
         documentsText: 'Proof of Identity (Aadhaar / Voter ID)\nProof of Address\nPassport size photograph',
         eligibilityText: 'Indian citizen or resident\nValid identification proof',
+        intakeWindows: [],
         contacts: [],
       };
 
@@ -110,6 +129,12 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
     }
     if (!form.shortDescription.trim()) {
       setError('Short description is required');
+      return;
+    }
+
+    const windowProblems = validateWindows(form.intakeWindows.map(rowToWindow));
+    if (windowProblems.length > 0) {
+      setError(windowProblems[0]);
       return;
     }
 
@@ -179,6 +204,10 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
     };
 
     // No level chosen means "not specified", so the field is removed rather than guessed.
+    // No rounds means "no window data", so the field is removed rather than stored empty.
+    if (form.intakeWindows.length > 0) servicePayload.intakeWindows = form.intakeWindows.map((r) => normalizeWindow(rowToWindow(r)));
+    else delete servicePayload.intakeWindows;
+
     if (jurisdiction) servicePayload.jurisdiction = jurisdiction;
     else delete servicePayload.jurisdiction;
 
@@ -396,6 +425,41 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
               />
             </div>
           </div>
+
+          <fieldset className="intake-fields">
+            <legend>Application intake windows</legend>
+            <p className="ownership-form__hint">
+              Only enter dates the official notice publishes. Leave a date empty when it is not published; it will not be guessed.
+            </p>
+            {form.intakeWindows.map((row, i) => {
+              const set = (patch) =>
+                setForm({ ...form, intakeWindows: form.intakeWindows.map((r, j) => (j === i ? { ...r, ...patch } : r)) });
+              return (
+                <div key={i} className="intake-fields__round" role="group" aria-label={`Intake round ${i + 1}`}>
+                  <label>Round name<input type="text" maxLength={80} className="input-field" value={row.label} onChange={(e) => set({ label: e.target.value })} /></label>
+                  <label>Start date<input type="date" className="input-field" value={row.startDate} onChange={(e) => set({ startDate: e.target.value })} /></label>
+                  <label>End date<input type="date" className="input-field" value={row.endDate} onChange={(e) => set({ endDate: e.target.value })} /></label>
+                  <label>
+                    Status when no dates are published
+                    <select className="input-field" value={row.status} onChange={(e) => set({ status: e.target.value })} style={{ background: 'var(--glass-bg)' }}>
+                      <option value="" style={{ background: 'var(--bg-main)' }}>Not published</option>
+                      <option value="open" style={{ background: 'var(--bg-main)' }}>Open</option>
+                      <option value="closed" style={{ background: 'var(--bg-main)' }}>Closed</option>
+                    </select>
+                  </label>
+                  <label>Official notice title<input type="text" maxLength={160} className="input-field" value={row.noticeTitle} onChange={(e) => set({ noticeTitle: e.target.value })} /></label>
+                  <label>Official notice link (https)<input type="url" className="input-field" value={row.noticeUrl} onChange={(e) => set({ noticeUrl: e.target.value })} /></label>
+                  <label>Last reviewed on<input type="date" className="input-field" value={row.reviewedOn} onChange={(e) => set({ reviewedOn: e.target.value })} /></label>
+                  <button type="button" className="btn btn-secondary" onClick={() => setForm({ ...form, intakeWindows: form.intakeWindows.filter((_, j) => j !== i) })}>
+                    Remove round {i + 1}
+                  </button>
+                </div>
+              );
+            })}
+            <button type="button" className="btn btn-secondary" onClick={() => setForm({ ...form, intakeWindows: [...form.intakeWindows, { ...EMPTY_WINDOW }] })}>
+              Add intake round
+            </button>
+          </fieldset>
 
           <fieldset className="jurisdiction-fields">
             <legend>Where this service applies</legend>
