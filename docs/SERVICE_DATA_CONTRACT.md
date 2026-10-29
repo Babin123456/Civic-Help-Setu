@@ -36,7 +36,7 @@ Required unless marked optional.
 | `warnings` | string[] | optional, fallback `[]` |
 | `popularityScore` | number | optional, 0 to 100 |
 | `eligibilityRuleKey` | string | optional, key into `eligibilityRules.js` |
-| `jurisdiction` | string or `{level, states, districts, localBody}` | optional, fallback `India`. The object form is the applicability metadata: `level` is one of `national`, `state`, `district`, `local`; `states` and `districts` are string arrays; `localBody` is a string |
+| `jurisdiction` | `{level, states, districts, localBody}` | optional, no fallback: a record without it is "unknown", never nationwide. Checked with the app's own `validateJurisdiction` (a `state` level needs a state, a `national` one lists none, and so on). A legacy plain string such as `India` is rejected |
 | `publicationState` | string | optional: `draft`, `published`, `archived`; fallback `published` |
 | `contacts` | `{label, phone?, email?, url?}[]` | optional, fallback `[]`; each needs a label and at least one way to reach it |
 
