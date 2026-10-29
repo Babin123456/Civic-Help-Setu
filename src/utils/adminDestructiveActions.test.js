@@ -9,6 +9,10 @@ import {
 } from './adminDestructiveActions';
 import { deleteAdminService, getAdminServices, getReports, dismissReport, saveAdminService } from '../services/adminService';
 import { MOCK_SERVICES } from '../data/services';
+import { setCurrentActor } from '../services/accessControl';
+
+// These tests are about what the admin features do; who may use them is tested in accessControl.test.js.
+setCurrentActor({ role: 'admin', username: 'Test Admin' });
 
 const makeStorage = () => {
   const data = new Map();

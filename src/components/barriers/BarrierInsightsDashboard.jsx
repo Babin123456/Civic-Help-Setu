@@ -18,6 +18,7 @@ import {
   BARRIER_STATUS,
 } from '../../services/barrierReportService';
 import { useAuth } from '../../context/AuthContext';
+import { can } from '../../services/accessControl';
 import { useToast } from '../../context/ToastContext';
 
 const BarrierInsightsDashboard = () => {
@@ -28,8 +29,7 @@ const BarrierInsightsDashboard = () => {
   const [reports, setReports] = useState([]);
   const [moderationNotes, setModerationNotes] = useState({});
 
-  const isModerator =
-    user?.role === 'admin' || user?.role === 'moderator' || user?.role === 'superadmin';
+  const isModerator = can('barriers.moderate', user);
 
   const refreshData = () => {
     setReports(getAllBarrierReports());
@@ -54,7 +54,6 @@ const BarrierInsightsDashboard = () => {
         reportId,
         action,
         reviewerNotes: notes,
-        userRole: user?.role || 'citizen',
         reviewerName: user?.username || 'Community Moderator',
       });
 

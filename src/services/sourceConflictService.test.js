@@ -11,6 +11,10 @@ import {
   SOURCE_CONFLICTS_STORAGE_KEY,
   CONFLICT_AUDIT_LOGS_KEY,
 } from './sourceConflictService';
+import { setCurrentActor } from './accessControl';
+
+// These tests are about what the admin features do; who may use them is tested in accessControl.test.js.
+setCurrentActor({ role: 'admin', username: 'Test Admin' });
 
 const makeStorage = () => {
   const store = new Map();

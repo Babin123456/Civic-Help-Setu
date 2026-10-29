@@ -1,3 +1,4 @@
+import { requirePermission } from './accessControl';
 /**
  * Civic Service Data Freshness and Trust Indicator Service
  * 
@@ -90,6 +91,7 @@ export const saveServiceReviewOverrides = (overrides, customStorage) => {
  * Records a maintainer review timestamp and notes for a service
  */
 export const recordServiceReview = (serviceId, reviewer = 'Admin', notes = '', customStorage) => {
+  requirePermission('freshness.review');
   if (!serviceId) throw new Error('Service ID is required to record a review.');
 
   const overrides = getServiceReviewOverrides(customStorage);

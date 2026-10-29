@@ -175,7 +175,7 @@ Likelihood and impact are rough: Low, Medium, High. Status is what the code does
 - **What:** `/admin` is wrapped in `<ProtectedRoute requiredRole="admin">`, which checks `user.role` in the browser. With Clerk the role comes from `publicMetadata` only (`roleService.js`), which citizens cannot edit, so that part is right. But:
   - If the app is built **without** a Clerk key, `LocalFallbackAuthProvider` is used, and the login page lets anyone choose the Admin role (`Login.jsx`, `handleDemoSubmit` and `handleQuickDemo`). A production deploy that is missing the env var would silently turn into this.
   - All admin data (services, reports, audit trail, role list) is in `localStorage`. Anyone can edit it with the browser dev tools. Today that only affects their own browser. Once the admin data moves to a shared backend, the same UI check would not protect it.
-- **Mitigation today:** the role source for Clerk users is correct. The login page labels demo mode as "Local Demo Authentication Mode", so it is not hidden, but it is still fully usable.
+- **Mitigation today:** the role source for Clerk users is correct. Admin reads and writes are also refused in the data layer for anyone who is not an admin (`src/services/accessControl.js`, inventory in [ACCESS_CONTROL.md](../ACCESS_CONTROL.md)), so the UI is no longer the only check. That still does not stop someone editing `localStorage` by hand. The login page labels demo mode as "Local Demo Authentication Mode", so it is not hidden, but it is still fully usable.
 - **Remediation:** proposed F1 (block demo admin in production builds) and F2 (enforce roles on the server when a backend is added). #220 applies at that point if the backend is Firebase.
 
 ### T3: Shared-device exposure

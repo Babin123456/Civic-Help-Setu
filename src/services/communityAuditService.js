@@ -1,3 +1,4 @@
+import { requirePermission } from './accessControl';
 /**
  * Community Audit & Discrepancy Corroboration Service
  * Enables crowd-sourced verification of reported civic changes (e.g. fee updates, office closures)
@@ -125,6 +126,7 @@ export function voteAuditReport(reportId, voteType = 'UP') {
 }
 
 export function resolveAuditReport(reportId, adminNote = '', resolvedBy = 'SuperAdmin') {
+  requirePermission('communityAudits.resolve');
   const all = getAuditReports();
   const idx = all.findIndex(r => r.id === reportId);
   if (idx === -1) return null;

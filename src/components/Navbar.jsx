@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Shield, Menu, X, LogOut, User, Sun, Moon, WifiOff, Wifi, HardDrive, PhoneCall, Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { can } from '../services/accessControl';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useNetwork } from '../context/NetworkContext';
@@ -130,7 +131,7 @@ const Navbar = () => {
             </Link>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: '0.5rem' }}>
-              {user.role === 'admin' && (
+              {can('users.read', user) && (
                 <Link to="/admin" className="nav-link" style={{ color: 'var(--accent-main)', fontWeight: '600' }}>
                   {t('nav.admin', 'Admin Portal')}
                 </Link>
@@ -205,7 +206,7 @@ const Navbar = () => {
           {user && <Link to="/vault" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>{t('nav.vault', 'Document Vault')}</Link>}
           {user && <Link to="/saved" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>{t('nav.saved', 'Saved Guides')}</Link>}
           {user && <Link to="/profile" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>{t('nav.profile', 'My Profile')}</Link>}
-          {user && user.role === 'admin' && <Link to="/admin" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--accent-main)' }}>{t('nav.admin', 'Admin Portal')}</Link>}
+          {user && can('users.read', user) && <Link to="/admin" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--accent-main)' }}>{t('nav.admin', 'Admin Portal')}</Link>}
 
           <div style={{ width: '100%', height: '1px', background: 'var(--border-main)', margin: '0.5rem 0' }}></div>
 

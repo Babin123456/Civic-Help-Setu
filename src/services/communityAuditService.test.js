@@ -5,6 +5,10 @@ import {
   voteAuditReport,
   resolveAuditReport
 } from './communityAuditService';
+import { setCurrentActor } from './accessControl';
+
+// These tests are about what the admin features do; who may use them is tested in accessControl.test.js.
+setCurrentActor({ role: 'admin', username: 'Test Admin' });
 
 describe('communityAuditService - Crowdsourced Discrepancy Audits', () => {
   it('retrieves default verified audit reports for services', () => {
