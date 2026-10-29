@@ -1,0 +1,43 @@
+name: Firebase rules
+
+# Runs the Firestore and Cloud Storage rules tests on the Firebase emulators.
+# Policy and instructions: docs/FIREBASE_RULES.md. Locally: npm run rules:test
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'firebase/**'
+      - 'docs/FIREBASE_RULES.md'
+      - '.github/workflows/firebase-rules.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'firebase/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-rules-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  emulator:
+    name: Rules tests (emulators)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: firebase/emulator/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Run the rules tests
+        run: npm run rules:test
