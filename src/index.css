@@ -1217,3 +1217,27 @@ html:not([data-theme="light"]) .cmd__result-row--cleared svg { color: #4ade80; }
 .etb-field--inline { min-width: 200px; }
 .etb-field input, .etb-field select { padding: 0.5rem 0.7rem; border-radius: 0.5rem; border: 1px solid var(--border-main); background: var(--bg-tertiary); color: var(--text-primary); }
 .etb-error { margin: 0; font-size: 0.85rem; color: var(--text-primary); border-left: 3px solid #ef4444; padding-left: 0.5rem; }
+/* ---- Shared device notice (#212) ---- */
+.sdn { display: flex; gap: 0.6rem; align-items: flex-start; border: 1px solid var(--border-main); background: var(--glass-bg-subtle); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin: 1rem 0; min-width: 0; }
+.sdn__icon { flex: none; margin-top: 0.15rem; color: var(--accent-main); }
+.sdn__text { margin: 0; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; overflow-wrap: anywhere; }
+.sdn__text a { color: var(--accent-main); text-decoration: underline; }
+/* ---- Service intake windows (#256) ---- */
+.intake-panel { border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; background: var(--glass-bg-subtle); }
+.intake-panel__title { display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; font-weight: 700; margin: 0 0 0.5rem; }
+.intake-panel__intro { margin: 0 0 0.75rem; color: var(--text-secondary); font-size: 0.9rem; }
+.intake-panel__warning { margin: 0 0 0.75rem; padding: 0.5rem 0.75rem; border: 1px dashed var(--border-main); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--text-primary); }
+.intake-panel__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+.intake-window { border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 0.75rem 1rem; background: var(--glass-bg); }
+.intake-window--open { border-left: 4px solid var(--accent-main); }
+.intake-window--unpublished { border-style: dashed; }
+.intake-window p { margin: 0; }
+.intake-window__head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; font-weight: 700; color: var(--text-primary); }
+.intake-window__name { color: var(--text-secondary); font-weight: 600; }
+.intake-window__unconfirmed { padding: 0.1rem 0.5rem; border: 1px dashed var(--border-main); border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); }
+.intake-window__range { margin-top: 0.25rem; color: var(--text-primary); overflow-wrap: anywhere; }
+.intake-window__meta { margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.intake-fields { border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 0.75rem 1rem 1rem; display: flex; flex-direction: column; gap: 0.75rem; min-width: 0; }
+.intake-fields legend { font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); padding: 0 0.4rem; }
+.intake-fields__round { display: grid; gap: 0.4rem; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-light); }
+.intake-fields__round label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); min-width: 0; }

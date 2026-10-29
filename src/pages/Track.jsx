@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import SharedDeviceNotice from '../components/privacy/SharedDeviceNotice';
 import { parseReferenceParam } from '../utils/searchParams';
 import { useLocation } from 'react-router-dom';
 import {
@@ -37,6 +38,7 @@ import { services } from '../data/services';
 import TrackEmptyState from '../components/tracking/TrackEmptyState';
 import TrackingReceiptModal from '../components/tracking/TrackingReceiptModal';
 import SlaBreachAlertWidget from '../components/tracking/SlaBreachAlertWidget';
+import AppellateEscalationLadder from '../components/tracking/AppellateEscalationLadder';
 import GrievanceEvidenceOrganizerModal from '../components/grievance/GrievanceEvidenceOrganizerModal';
 
 const Track = () => {
@@ -163,6 +165,7 @@ const Track = () => {
                 Application Tracking
               </p>
               <h1 style={{ margin: 0, fontSize: 'clamp(2rem, 4vw, 3rem)' }}>Track your civic service status</h1>
+              <SharedDeviceNotice what="tracked applications" />
             </div>
 
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -315,6 +318,8 @@ const Track = () => {
                     </button>
                   </form>
                 </div>
+
+                <AppellateEscalationLadder application={activeApp} />
 
                 {activeApp.status === 'sla-breach' && (
                   <SlaBreachAlertWidget app={activeApp} />
