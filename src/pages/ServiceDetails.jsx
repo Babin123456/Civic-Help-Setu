@@ -14,6 +14,10 @@ import JourneyHandoffModal from '../components/journey/JourneyHandoffModal';
 import NoticeBadge from '../components/notices/NoticeBadge';
 import ServiceAvailabilityNotice from '../components/services/ServiceAvailabilityNotice';
 import LowBandwidthShareModal from '../components/services/LowBandwidthShareModal';
+import SourceConflictCautionBanner from '../components/services/SourceConflictCautionBanner';
+import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
+import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
+import ApplicabilityPanel from '../components/services/ApplicabilityPanel';
 
 const copyServiceLink = async (url) => {
   try {
@@ -507,6 +511,8 @@ const ServiceDetails = () => {
           <SourceConflictCautionBanner
             serviceId={service.id}
           />
+
+          <ApplicabilityPanel service={service} />
 
           {/* Fee Transparency */}
           <FeeTransparencyCard

@@ -1008,6 +1008,24 @@ html:not([data-theme="light"]) .cmd__result-row--cleared svg { color: #4ade80; }
   .cmd { padding: 1rem; }
   .cmd__danger, .cmd__retry { width: 100%; }
 }
+/* ---- Service applicability by jurisdiction (#260) ---- */
+.applicability-badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem 0.6rem; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700; border: 1px solid var(--border-main); background: var(--glass-bg); color: var(--text-secondary); max-width: 100%; overflow-wrap: anywhere; }
+.applicability-badge--national { border-color: var(--accent-main); color: var(--accent-main); background: var(--accent-light); }
+.applicability-badge--unknown { border-style: dashed; }
+.applicability-panel { border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; background: var(--glass-bg-subtle); }
+.applicability-panel--unknown { border-style: dashed; border-color: var(--border-main); }
+.applicability-panel__title { display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; font-weight: 700; margin: 0 0 0.75rem; }
+.applicability-panel__level { margin: 0 0 0.4rem; font-weight: 700; color: var(--text-primary); }
+.applicability-panel__label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-right: 0.5rem; }
+.applicability-panel__summary { margin: 0; color: var(--text-secondary); }
+.applicability-panel__rows { margin: 0.75rem 0 0; display: grid; gap: 0.5rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.applicability-panel__rows dt { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
+.applicability-panel__rows dd { margin: 0; font-weight: 600; color: var(--text-primary); overflow-wrap: anywhere; }
+.jurisdiction-filter { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem; }
+.jurisdiction-filter__select { padding: 0.4rem 0.75rem; font-size: 0.85rem; border-radius: var(--radius-full); background: var(--glass-bg); border: 1px solid var(--border-light); color: var(--text-primary); cursor: pointer; max-width: 100%; }
+.jurisdiction-fields { border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 0.75rem 1rem 1rem; display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; }
+.jurisdiction-fields legend { font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); padding: 0 0.4rem; }
+.jurisdiction-fields label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-top: 0.4rem; }
 
 /* ===== Contact Escalation Directory (#266) ===== */
 .contact-dir { border: 1px solid var(--border-main); border-radius: var(--radius-md); background: var(--glass-bg-subtle); padding: 1.5rem; margin-bottom: 2rem; }

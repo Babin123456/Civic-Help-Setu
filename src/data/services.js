@@ -32,6 +32,7 @@ export const MOCK_SERVICES = [
   },
   {
     id: 'aadhaar-card',
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
     name: 'Aadhaar Card Enrollment',
     shortDescription: '12-digit unique identity number based on biometric and demographic data.',
     category: 'Identity',
@@ -95,6 +96,7 @@ export const MOCK_SERVICES = [
   },
   {
     id: 'pan-card',
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
     name: 'PAN Card (Permanent Account Number)',
     shortDescription: '10-digit alphanumeric identity issued by the Income Tax Department.',
     category: 'Identity',
@@ -126,6 +128,7 @@ export const MOCK_SERVICES = [
   },
   {
     id: 'voter-id',
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
     name: 'Voter ID Registration',
     shortDescription: 'EPIC card required to cast a vote in democratic elections.',
     category: 'Identity',
@@ -157,6 +160,7 @@ export const MOCK_SERVICES = [
   },
   {
     id: 'passport',
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
     name: 'New Passport Application',
     shortDescription: 'Travel document issued by the Government for international travel.',
     category: 'Identity',
@@ -251,6 +255,7 @@ export const MOCK_SERVICES = [
   },
   {
     id: 'pf-withdrawal',
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
     name: 'EPF Withdrawal',
     shortDescription: 'Process to withdraw Provident Fund savings online.',
     category: 'Employment',
@@ -311,6 +316,7 @@ export const MOCK_SERVICES = [
   },
   {
     id: 'udyam-registration',
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
     name: 'Udyam Registration (MSME)',
     shortDescription: 'Official registration for Micro, Small and Medium Enterprises in India.',
     category: 'Business',
@@ -342,6 +348,7 @@ export const MOCK_SERVICES = [
   },
   {
     id: 'pm-kisan',
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
     name: 'PM Kisan Samman Nidhi',
     shortDescription: 'Financial benefit scheme providing ₹6,000 per year to eligible farmer families.',
     category: 'Agriculture',

@@ -1,3 +1,5 @@
+import { matchesJurisdiction } from './jurisdictionService';
+
 export const CIVIC_SYNONYMS = {
   dl: ['driving license', 'license', 'rto', 'vehicle', 'driving'],
   license: ['driving license', 'dl', 'rto', 'permit'],
@@ -183,6 +185,8 @@ export const rankAndFilterServices = (
     difficulty = 'All',
     feeType = 'All',
     speedFilter = 'All',
+    state = 'All',
+    district = 'All',
     sortBy = 'relevance',
   }
 ) => {
@@ -233,6 +237,11 @@ export const rankAndFilterServices = (
       if (speedFilter === 'Standard') return days > 7;
       return true;
     });
+  }
+
+  // 6b. Jurisdiction filter: unknown scope never matches a selected place
+  if (state && state !== 'All') {
+    result = result.filter((s) => matchesJurisdiction(s, { state, district }));
   }
 
   // 7. Relevance scoring if search query is present
