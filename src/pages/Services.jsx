@@ -11,6 +11,7 @@ import { comparisonService, MAX_COMPARE_LIMIT } from '../services/comparisonServ
 import { getSearchSuggestions, rankAndFilterServices } from '../services/searchRankingEngine';
 import { Layers, Scale } from 'lucide-react';
 import { parseServiceFilters, normalizeSearchQuery } from '../utils/searchParams';
+import { parseJurisdictionFilters } from '../services/jurisdictionService';
 import RtiBuilderModal from '../components/services/RtiBuilderModal';
 
 const Services = () => {
@@ -75,6 +76,12 @@ const Services = () => {
     [searchParams, categories, departments]
   );
 
+  const {
+    state: selectedState,
+    district: selectedDistrict,
+    districtOptions,
+  } = useMemo(() => parseJurisdictionFilters(searchParams, allServices), [searchParams, allServices]);
+
   const searchSuggestions = useMemo(
     () => getSearchSuggestions(allServices, searchQuery),
     [allServices, searchQuery]
@@ -95,6 +102,14 @@ const Services = () => {
   const handleModeChange = (mode) => updateParam('mode', mode, 'All');
   const handleDifficultyChange = (diff) => updateParam('diff', diff, 'All');
   const handleDepartmentChange = (dept) => updateParam('dept', dept, 'All');
+  const handleStateChange = (state) => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('district');
+    if (!state || state === 'All') nextParams.delete('state');
+    else nextParams.set('state', state);
+    setSearchParams(nextParams, { replace: true });
+  };
+  const handleDistrictChange = (district) => updateParam('district', district, 'All');
   const handleFeeChange = (fee) => updateParam('fee', fee, 'All');
   const handleSpeedChange = (speed) => updateParam('speed', speed, 'All');
   const handleSortChange = (sort) => updateParam('sort', sort, 'relevance');
@@ -119,6 +134,7 @@ const Services = () => {
     selectedDepartment !== 'All' ||
     selectedFee !== 'All' ||
     selectedSpeed !== 'All' ||
+    selectedState !== 'All' ||
     sortBy !== 'relevance'
   );
 
@@ -131,6 +147,8 @@ const Services = () => {
       difficulty: selectedDifficulty,
       feeType: selectedFee,
       speedFilter: selectedSpeed,
+      state: selectedState,
+      district: selectedDistrict,
       sortBy,
     });
   }, [
@@ -142,6 +160,8 @@ const Services = () => {
     selectedDifficulty,
     selectedFee,
     selectedSpeed,
+    selectedState,
+    selectedDistrict,
     sortBy,
   ]);
 
@@ -254,6 +274,11 @@ const Services = () => {
           departments={departments}
           selectedDepartment={selectedDepartment}
           onDepartmentChange={handleDepartmentChange}
+          selectedState={selectedState}
+          selectedDistrict={selectedDistrict}
+          districtOptions={districtOptions}
+          onStateChange={handleStateChange}
+          onDistrictChange={handleDistrictChange}
           feeType={selectedFee}
           onFeeTypeChange={handleFeeChange}
           speedFilter={selectedSpeed}

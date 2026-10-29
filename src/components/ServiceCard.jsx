@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, Clock, Gauge, Sparkles } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import UntranslatedBadge from './common/UntranslatedBadge';
+import ApplicabilityBadge from './services/ApplicabilityBadge';
 
 const getDifficultyBadge = (diff = '') => {
   const d = diff.toLowerCase();
@@ -115,6 +116,9 @@ const ServiceCard = ({ service, isCompared = false, compareDisabled = false, onT
         >
           {service.shortDescription}
         </p>
+        <div style={{ marginBottom: '0.75rem' }}>
+          <ApplicabilityBadge service={service} />
+        </div>
         <UntranslatedBadge />
       </div>
 

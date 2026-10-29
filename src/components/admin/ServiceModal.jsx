@@ -4,12 +4,25 @@ import { SERVICE_CATEGORIES } from '../../data/serviceCategories';
 import useUnsavedChangesGuard from '../../hooks/useUnsavedChangesGuard';
 import { isFormDirty } from '../../utils/formDraft';
 import UnsavedChangesDialog from '../common/UnsavedChangesDialog';
+import { INDIAN_STATES_AND_UTS, JURISDICTION_LEVELS, JURISDICTION_LEVEL_LABELS } from '../../data/jurisdictions';
+import { normalizeJurisdiction, validateJurisdiction } from '../../services/jurisdictionService';
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 const MODES = ['Online', 'Offline', 'Online / Offline'];
+
+const jurisdictionFields = (service) => {
+  const j = normalizeJurisdiction(service?.jurisdiction);
+  return {
+    jurisdictionLevel: j?.level || '',
+    jurisdictionStates: j?.states || [],
+    jurisdictionDistrict: (j?.districts || []).join(', '),
+    jurisdictionLocalBody: j?.localBody || '',
+  };
+};
 
 const buildForm = (service) =>
   service
     ? {
+        ...jurisdictionFields(service),
         name: service.name || '',
         category: service.category || 'Certificates',
         type: service.type || 'Online / Offline',
@@ -23,6 +36,7 @@ const buildForm = (service) =>
         eligibilityText: (service.eligibility || []).join('\n'),
       }
     : {
+        ...jurisdictionFields(null),
         name: '',
         category: 'Certificates',
         type: 'Online / Offline',
@@ -85,6 +99,22 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
       return;
     }
 
+    let jurisdiction = null;
+    if (form.jurisdictionLevel) {
+      jurisdiction = {
+        level: form.jurisdictionLevel,
+        states: form.jurisdictionLevel === 'national' ? [] : form.jurisdictionStates,
+        districts: form.jurisdictionDistrict.split(',').map((d) => d.trim()).filter(Boolean),
+        localBody: form.jurisdictionLocalBody.trim(),
+      };
+      const problems = validateJurisdiction(jurisdiction);
+      if (problems.length > 0) {
+        setError(problems[0]);
+        return;
+      }
+      jurisdiction = normalizeJurisdiction(jurisdiction);
+    }
+
     const documents = form.documentsText
       .split('\n')
       .map((d) => d.trim())
@@ -119,6 +149,10 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
         { title: 'Verification & Issuance', description: 'Officer reviews records and issues the certificate.' },
       ],
     };
+
+    // No level chosen means "not specified", so the field is removed rather than guessed.
+    if (jurisdiction) servicePayload.jurisdiction = jurisdiction;
+    else delete servicePayload.jurisdiction;
 
     onSave(servicePayload);
     onClose();
@@ -336,6 +370,75 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
               />
             </div>
           </div>
+
+          <fieldset className="jurisdiction-fields">
+            <legend>Where this service applies</legend>
+            <label htmlFor="svc-jurisdiction-level">Jurisdiction level</label>
+            <select
+              id="svc-jurisdiction-level"
+              className="input-field"
+              value={form.jurisdictionLevel}
+              onChange={(e) => setForm({ ...form, jurisdictionLevel: e.target.value, jurisdictionStates: [] })}
+              style={{ background: 'var(--glass-bg)' }}
+            >
+              <option value="" style={{ background: 'var(--bg-main)' }}>Not specified (shown as unverified)</option>
+              {JURISDICTION_LEVELS.map((l) => (
+                <option key={l} value={l} style={{ background: 'var(--bg-main)' }}>{JURISDICTION_LEVEL_LABELS[l]}</option>
+              ))}
+            </select>
+            {['state', 'district', 'local'].includes(form.jurisdictionLevel) && (
+              <>
+                <label htmlFor="svc-jurisdiction-states">
+                  {form.jurisdictionLevel === 'state' ? 'States / UTs (hold Ctrl or Cmd to pick several)' : 'State / UT'}
+                </label>
+                <select
+                  id="svc-jurisdiction-states"
+                  className="input-field"
+                  multiple={form.jurisdictionLevel === 'state'}
+                  size={form.jurisdictionLevel === 'state' ? 6 : undefined}
+                  value={form.jurisdictionLevel === 'state' ? form.jurisdictionStates : form.jurisdictionStates[0] || ''}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      jurisdictionStates: Array.from(e.target.selectedOptions, (o) => o.value).filter(Boolean),
+                    })
+                  }
+                  style={{ background: 'var(--glass-bg)' }}
+                >
+                  {form.jurisdictionLevel !== 'state' && <option value="">Select a state / UT</option>}
+                  {INDIAN_STATES_AND_UTS.map((st) => (
+                    <option key={st} value={st} style={{ background: 'var(--bg-main)' }}>{st}</option>
+                  ))}
+                </select>
+              </>
+            )}
+            {['district', 'local'].includes(form.jurisdictionLevel) && (
+              <>
+                <label htmlFor="svc-jurisdiction-district">District</label>
+                <input
+                  id="svc-jurisdiction-district"
+                  type="text"
+                  maxLength={80}
+                  className="input-field"
+                  value={form.jurisdictionDistrict}
+                  onChange={(e) => setForm({ ...form, jurisdictionDistrict: e.target.value })}
+                />
+              </>
+            )}
+            {form.jurisdictionLevel === 'local' && (
+              <>
+                <label htmlFor="svc-jurisdiction-local">Local body (municipality, panchayat or ward)</label>
+                <input
+                  id="svc-jurisdiction-local"
+                  type="text"
+                  maxLength={80}
+                  className="input-field"
+                  value={form.jurisdictionLocalBody}
+                  onChange={(e) => setForm({ ...form, jurisdictionLocalBody: e.target.value })}
+                />
+              </>
+            )}
+          </fieldset>
 
           <div>
             <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
