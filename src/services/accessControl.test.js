@@ -27,6 +27,7 @@ import {
   rejectServiceSubmission,
   submitErrorReport,
 } from './adminService';
+import { getOwnershipMap, assignServiceOwnership } from './serviceOwnershipService';
 import { resolveAuditReport, getAuditReports } from './communityAuditService';
 import { resolveSourceConflict, reopenSourceConflict } from './sourceConflictService';
 import {
@@ -92,6 +93,8 @@ const CALLS = {
   'feedback.moderate': () => reviewBottleneckFeedback('f1', 'reviewed', 'Mod', '', moduleStorage),
   'notices.manage': () => resetNoticesToDefault(moduleStorage),
   'freshness.review': () => recordServiceReview('svc', 'Rev', '', moduleStorage),
+  'ownership.read': () => getOwnershipMap(moduleStorage),
+  'ownership.manage': () => assignServiceOwnership('svc', { team: 'Docs' }, { storage: moduleStorage }),
 };
 
 const outcome = (fn) => {

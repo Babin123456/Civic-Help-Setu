@@ -11,11 +11,21 @@
  * The hidden layout uses display: none, so it is out of the tab order and the
  * accessibility tree. Edit and Delete use the same handlers in both layouts.
  */
+import { describeOwner, QUEUE_STATUSES, normalizeOwnership } from '../../services/serviceOwnershipService';
+
 const deliveryLabel = (svc) => svc.type || 'Online / Offline';
 
 const cellPadding = { padding: '0.85rem 1rem' };
 
-const ServiceRecordList = ({ services, onEdit, onDelete }) => (
+const ownerText = (ownership, users, svc) => {
+  const record = normalizeOwnership(ownership?.[svc.id]);
+  const owner = describeOwner(record, users);
+  const status = record && record.queueStatus !== 'none' ? QUEUE_STATUSES[record.queueStatus] : '';
+  return { owner, status };
+};
+
+// ownership, users and onAssign are optional: without onAssign the list looks exactly as before.
+const ServiceRecordList = ({ services, onEdit, onDelete, ownership = {}, users = [], onAssign }) => (
   <div className="glass-panel admin-records" style={{ borderRadius: '0.85rem', overflow: 'hidden' }}>
     <table
       className="admin-records__table"
@@ -26,6 +36,7 @@ const ServiceRecordList = ({ services, onEdit, onDelete }) => (
           <th style={{ ...cellPadding, fontWeight: '700' }}>Service Name</th>
           <th style={{ ...cellPadding, fontWeight: '700' }}>Category</th>
           <th style={{ ...cellPadding, fontWeight: '700' }}>Delivery Mode</th>
+          {onAssign && <th style={{ ...cellPadding, fontWeight: '700' }}>Reviewer / Team</th>}
           <th style={{ ...cellPadding, fontWeight: '700', textAlign: 'right' }}>Actions</th>
         </tr>
       </thead>
@@ -43,7 +54,30 @@ const ServiceRecordList = ({ services, onEdit, onDelete }) => (
                 {deliveryLabel(svc)}
               </span>
             </td>
+            {onAssign && (
+              <td style={{ ...cellPadding, color: 'var(--text-secondary)', overflowWrap: 'anywhere' }}>
+                {(() => {
+                  const { owner, status } = ownerText(ownership, users, svc);
+                  return (
+                    <>
+                      <span className={`ownership-tag ownership-tag--${owner.state}`}>{owner.label}</span>
+                      {status && <span className="ownership-status">{status}</span>}
+                    </>
+                  );
+                })()}
+              </td>
+            )}
             <td style={{ ...cellPadding, textAlign: 'right', whiteSpace: 'nowrap' }}>
+              {onAssign && (
+                <button
+                  type="button"
+                  aria-label={`Assign reviewer for ${svc.name}`}
+                  onClick={() => onAssign(svc)}
+                  style={{ background: 'none', border: 'none', color: 'var(--accent-main)', fontWeight: '600', marginRight: '0.85rem', cursor: 'pointer' }}
+                >
+                  Assign
+                </button>
+              )}
               <button
                 type="button"
                 aria-label={`Edit ${svc.name}`}
@@ -81,8 +115,34 @@ const ServiceRecordList = ({ services, onEdit, onDelete }) => (
                 <span className="admin-record-card__badge">{deliveryLabel(svc)}</span>
               </dd>
             </div>
+            {onAssign && (
+              <div>
+                <dt>Reviewer / team</dt>
+                <dd>
+                  {(() => {
+                    const { owner, status } = ownerText(ownership, users, svc);
+                    return (
+                      <>
+                        <span className={`ownership-tag ownership-tag--${owner.state}`}>{owner.label}</span>
+                        {status && <span className="ownership-status">{status}</span>}
+                      </>
+                    );
+                  })()}
+                </dd>
+              </div>
+            )}
           </dl>
           <div className="admin-record-card__actions">
+            {onAssign && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                aria-label={`Assign reviewer for ${svc.name}`}
+                onClick={() => onAssign(svc)}
+              >
+                Assign
+              </button>
+            )}
             <button
               type="button"
               className="btn btn-secondary"

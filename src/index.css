@@ -1008,3 +1008,19 @@ html:not([data-theme="light"]) .cmd__result-row--cleared svg { color: #4ade80; }
   .cmd { padding: 1rem; }
   .cmd__danger, .cmd__retry { width: 100%; }
 }
+
+/* ---- Service ownership and review assignment (admin catalogue) ---- */
+.ownership-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.85rem; margin-bottom: 1rem; }
+.ownership-filter label { font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); }
+.ownership-filter .input-field { width: auto; min-width: 12rem; max-width: 100%; }
+.ownership-filter__count { font-size: 0.8rem; color: var(--text-tertiary); }
+.ownership-tag { display: inline-block; font-weight: 600; color: var(--text-primary); overflow-wrap: anywhere; }
+.ownership-tag--unassigned { color: var(--text-tertiary); font-weight: 500; }
+.ownership-tag--unavailable { color: #f59e0b; }
+.ownership-status { display: block; font-size: 0.75rem; color: var(--text-tertiary); }
+.ownership-form { display: flex; flex-direction: column; gap: 1rem; }
+.ownership-form__field { display: flex; flex-direction: column; gap: 0.35rem; }
+.ownership-form__field label { font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); }
+.ownership-form__hint { margin: 0; font-size: 0.75rem; color: var(--text-tertiary); }
+.ownership-form__error { margin: 0; font-size: 0.8rem; color: var(--error, #ef4444); }
+.ownership-form__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
