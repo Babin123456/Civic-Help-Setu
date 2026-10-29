@@ -1,0 +1,332 @@
+rules_version = '2';
+
+// Firestore security rules for CivicBridge. Deny by default.
+// Access policy, field lists and the sign-in assumptions: docs/FIREBASE_RULES.md
+// Tests: firebase/emulator (npm run rules:test) and scripts/firebaseRules.test.js
+//
+// Sign-in assumption: users sign in with Clerk and the app exchanges the Clerk session for a Firebase
+// custom token. The token carries `role` ("admin" or "citizen") copied from Clerk publicMetadata
+// by the token service, never from a Firestore document and never from the browser. Anonymous Firebase
+// sessions may only file reports and feedback.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- who is asking ----------
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAnonymous() {
+      return signedIn() && request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
+
+    // A real (non-anonymous) account.
+    function isMember() {
+      return signedIn() && !isAnonymous();
+    }
+
+    function isOwner(uid) {
+      return isMember() && request.auth.uid == uid;
+    }
+
+    // The role only ever comes from the signed token. `get` so a token without the claim is a citizen.
+    function isAdmin() {
+      return isMember() && request.auth.token.get('role', 'citizen') == 'admin';
+    }
+
+    // ---------- what is being written ----------
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function stored() {
+      return resource.data;
+    }
+
+    function onlyKeys(allowed) {
+      return incoming().keys().hasOnly(allowed);
+    }
+
+    function hasKeys(required) {
+      return incoming().keys().hasAll(required);
+    }
+
+    function changedOnly(allowed) {
+      return incoming().diff(stored()).affectedKeys().hasOnly(allowed);
+    }
+
+    function text(field, max) {
+      return incoming()[field] is string && incoming()[field].size() > 0 && incoming()[field].size() <= max;
+    }
+
+    // Optional text field: absent, or a string within the limit.
+    function maybeText(field, max) {
+      return !(field in incoming()) || (incoming()[field] is string && incoming()[field].size() <= max);
+    }
+
+    function serverTime(field) {
+      return incoming()[field] == request.time;
+    }
+
+    // Fields nobody may store, in any document, at any depth we can check: stops a client from
+    // writing itself a role or a verified flag.
+    function noPrivilegedKeys(map) {
+      return !map.keys().hasAny(['role', 'roles', 'isAdmin', 'admin', 'superadmin', 'moderator', 'verified', 'permissions', 'uid', 'ownerId']);
+    }
+
+    // ---------- personal records: users/{uid}/... ----------
+    // Everything a signed-in citizen keeps (the "Clear my data" categories in the app). Only that
+    // person can read or change it. Admins have NO access: this is private citizen data.
+
+    function ownedCollections() {
+      return [
+        'vaultDocs',        // document vault metadata (the file itself is in Storage: vault/{uid}/...)
+        'saved',            // saved and compared guides
+        'applications',     // tracked applications
+        'officeTokens',     // office appointments
+        'reminders',
+        'settings',         // notification settings, language, fee preferences
+        'assessments',      // eligibility checks
+        'grievanceTickets',
+        'checklists',
+        'drafts',           // form drafts, journeys, visit plans, hand-offs
+        'applicantProfiles',
+        'scorecards',
+        'assistantChats'
+      ];
+    }
+
+    // The record envelope: one allowed set of top-level fields, and a `data` map of bounded size.
+    function validRecord() {
+      return onlyKeys(['data', 'schemaVersion', 'createdAt', 'updatedAt'])
+        && hasKeys(['data', 'schemaVersion', 'updatedAt'])
+        && incoming().data is map
+        && incoming().data.size() <= 60
+        && noPrivilegedKeys(incoming().data)
+        && incoming().schemaVersion is int
+        && incoming().schemaVersion >= 1
+        && incoming().schemaVersion <= 100
+        && serverTime('updatedAt')
+        && (!('createdAt' in incoming()) || incoming().createdAt is timestamp);
+    }
+
+    match /users/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && onlyKeys(['displayName', 'language', 'theme', 'createdAt', 'updatedAt'])
+        && hasKeys(['createdAt'])
+        && serverTime('createdAt')
+        && maybeText('displayName', 100)
+        && maybeText('language', 10)
+        && maybeText('theme', 20);
+      allow update: if isOwner(uid)
+        && onlyKeys(['displayName', 'language', 'theme', 'createdAt', 'updatedAt'])
+        && incoming().createdAt == stored().createdAt
+        && maybeText('displayName', 100)
+        && maybeText('language', 10)
+        && maybeText('theme', 20);
+
+      match /{collection}/{docId} {
+        allow read, delete: if isOwner(uid) && collection in ownedCollections();
+        allow create: if isOwner(uid) && collection in ownedCollections() && validRecord();
+        allow update: if isOwner(uid) && collection in ownedCollections() && validRecord()
+          && incoming().get('createdAt', null) == stored().get('createdAt', null);
+      }
+
+      // Privacy audit trail: the person can add entries and read them, never edit or delete one.
+      match /privacyAudit/{entryId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid)
+          && onlyKeys(['action', 'category', 'createdAt'])
+          && hasKeys(['action', 'createdAt'])
+          && text('action', 60)
+          && maybeText('category', 60)
+          && serverTime('createdAt');
+        allow update, delete: if false;
+      }
+    }
+
+    // ---------- public reference data ----------
+
+    // Service guides: anyone can read, only admins change them.
+    match /services/{serviceId} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && incoming().keys().size() <= 60
+        && text('name', 200)
+        && text('category', 100)
+        && maybeText('shortDescription', 2000);
+      allow delete: if isAdmin();
+    }
+
+    // Gazette and public notices: only approved ones are public.
+    match /notices/{noticeId} {
+      allow read: if stored().status == 'approved' || isAdmin();
+      allow create, update: if isAdmin()
+        && incoming().keys().size() <= 30
+        && text('title', 300)
+        && incoming().status in ['pending_review', 'approved', 'rejected', 'archived'];
+      allow delete: if isAdmin();
+    }
+
+    // Published aggregate numbers (no personal data), written only by the server.
+    match /barrierInsights/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ---------- citizen submissions ----------
+    // Filing is open to any session, anonymous ones included, because reporting a broken link or a
+    // barrier must not need an account. The filer can read their own report back; admins read and
+    // moderate all of them; nobody else can read them (they may hold an e-mail address).
+
+    function filedBy() {
+      return signedIn() && incoming().reporterId == request.auth.uid;
+    }
+
+    match /errorReports/{reportId} {
+      allow create: if filedBy()
+        && onlyKeys(['reporterId', 'serviceId', 'serviceName', 'issueType', 'description', 'reporterEmail', 'status', 'createdAt'])
+        && hasKeys(['reporterId', 'serviceId', 'issueType', 'description', 'status', 'createdAt'])
+        && text('serviceId', 100)
+        && maybeText('serviceName', 200)
+        && text('issueType', 100)
+        && text('description', 2000)
+        && maybeText('reporterEmail', 200)
+        && incoming().status == 'pending'
+        && serverTime('createdAt');
+      allow read: if isAdmin() || (signedIn() && stored().reporterId == request.auth.uid);
+      allow update: if isAdmin()
+        && changedOnly(['status', 'resolutionNotes', 'resolvedAt'])
+        && incoming().status in ['pending', 'resolved']
+        && maybeText('resolutionNotes', 1000);
+      allow delete: if isAdmin();
+    }
+
+    match /serviceSubmissions/{submissionId} {
+      allow create: if filedBy()
+        && onlyKeys(['reporterId', 'name', 'category', 'shortDescription', 'processingTime', 'fees', 'officialUrl', 'contributorEmail', 'status', 'createdAt'])
+        && hasKeys(['reporterId', 'name', 'category', 'status', 'createdAt'])
+        && text('name', 200)
+        && text('category', 100)
+        && maybeText('shortDescription', 2000)
+        && maybeText('processingTime', 100)
+        && maybeText('fees', 100)
+        && maybeText('officialUrl', 2000)
+        && maybeText('contributorEmail', 200)
+        && incoming().status == 'pending'
+        && serverTime('createdAt');
+      allow read: if isAdmin() || (signedIn() && stored().reporterId == request.auth.uid);
+      allow update: if isAdmin()
+        && changedOnly(['status', 'reviewNotes', 'reviewedAt'])
+        && incoming().status in ['pending', 'approved', 'rejected']
+        && maybeText('reviewNotes', 1000);
+      allow delete: if isAdmin();
+    }
+
+    match /barrierReports/{reportId} {
+      allow create: if filedBy()
+        && onlyKeys(['reporterId', 'serviceId', 'barrierCategory', 'severity', 'description', 'trackingCodeHash', 'status', 'createdAt'])
+        && hasKeys(['reporterId', 'serviceId', 'barrierCategory', 'status', 'createdAt'])
+        && text('serviceId', 100)
+        && text('barrierCategory', 60)
+        && maybeText('severity', 20)
+        && maybeText('description', 2000)
+        && maybeText('trackingCodeHash', 128)
+        && incoming().status == 'pending'
+        && serverTime('createdAt');
+      allow read: if isAdmin() || (signedIn() && stored().reporterId == request.auth.uid);
+      allow update: if isAdmin()
+        && changedOnly(['status', 'reviewerNotes', 'reviewedAt', 'reviewedBy'])
+        && incoming().status in ['pending', 'approved', 'rejected'];
+      allow delete: if isAdmin();
+    }
+
+    match /bottleneckFeedback/{feedbackId} {
+      allow create: if filedBy()
+        && onlyKeys(['reporterId', 'serviceId', 'category', 'message', 'status', 'createdAt'])
+        && hasKeys(['reporterId', 'serviceId', 'category', 'message', 'status', 'createdAt'])
+        && text('serviceId', 100)
+        && text('category', 60)
+        && text('message', 1500)
+        && incoming().status == 'new'
+        && serverTime('createdAt');
+      allow read: if isAdmin() || (signedIn() && stored().reporterId == request.auth.uid);
+      allow update: if isAdmin()
+        && changedOnly(['status', 'adminNotes', 'reviewedAt', 'reviewedBy'])
+        && incoming().status in ['new', 'reviewed', 'addressed', 'dismissed'];
+      allow delete: if isAdmin();
+    }
+
+    // Community discrepancy audits: readable by everyone (they are shown on the guide), filed by
+    // signed-in accounts, resolved by admins. One vote per account, kept in a subcollection so a
+    // client never edits a counter.
+    match /communityAudits/{auditId} {
+      allow read: if true;
+      allow create: if isMember()
+        && incoming().reporterId == request.auth.uid
+        && onlyKeys(['reporterId', 'serviceId', 'category', 'title', 'description', 'status', 'createdAt'])
+        && hasKeys(['reporterId', 'serviceId', 'category', 'title', 'status', 'createdAt'])
+        && text('serviceId', 100)
+        && text('category', 60)
+        && text('title', 200)
+        && maybeText('description', 2000)
+        && incoming().status == 'PENDING_CORROBORATION'
+        && serverTime('createdAt');
+      allow update: if isAdmin()
+        && changedOnly(['status', 'adminNote', 'resolvedBy', 'resolvedAt'])
+        && incoming().status in ['PENDING_CORROBORATION', 'CORROBORATED', 'RESOLVED']
+        && maybeText('adminNote', 1000);
+      allow delete: if isAdmin();
+
+      match /votes/{voterId} {
+        allow read: if isOwner(voterId) || isAdmin();
+        allow create, update: if isOwner(voterId)
+          && onlyKeys(['vote', 'updatedAt'])
+          && hasKeys(['vote', 'updatedAt'])
+          && incoming().vote in ['UP', 'DOWN']
+          && serverTime('updatedAt');
+        allow delete: if isOwner(voterId);
+      }
+    }
+
+    // ---------- admin only ----------
+
+    // Roles come from the identity provider. Nothing in the app can change them through Firestore.
+    match /roles/{uid} {
+      allow read: if isAdmin() || isOwner(uid);
+      allow write: if false;
+    }
+
+    // Append-only audit trail: admins add entries as themselves, and read them. No edits, no deletes.
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && onlyKeys(['action', 'actorId', 'target', 'details', 'createdAt'])
+        && hasKeys(['action', 'actorId', 'createdAt'])
+        && incoming().actorId == request.auth.uid
+        && text('action', 60)
+        && maybeText('target', 300)
+        && maybeText('details', 1000)
+        && serverTime('createdAt');
+      allow update, delete: if false;
+    }
+
+    match /sourceConflicts/{conflictId} {
+      allow read, delete: if isAdmin();
+      allow create, update: if isAdmin() && incoming().keys().size() <= 40;
+    }
+
+    match /reviewOverrides/{serviceId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ---------- everything else ----------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

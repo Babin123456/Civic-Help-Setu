@@ -28,6 +28,7 @@ import {
   submitErrorReport,
 } from './adminService';
 import { deleteAvailabilityNotice } from './serviceAvailabilityNoticeService';
+import { getOwnershipMap, assignServiceOwnership } from './serviceOwnershipService';
 import { resolveAuditReport, getAuditReports } from './communityAuditService';
 import { resolveSourceConflict, reopenSourceConflict } from './sourceConflictService';
 import {
@@ -94,6 +95,8 @@ const CALLS = {
   'notices.manage': () => resetNoticesToDefault(moduleStorage),
   'availabilityNotices.manage': () => deleteAvailabilityNotice('n1', moduleStorage),
   'freshness.review': () => recordServiceReview('svc', 'Rev', '', moduleStorage),
+  'ownership.read': () => getOwnershipMap(moduleStorage),
+  'ownership.manage': () => assignServiceOwnership('svc', { team: 'Docs' }, { storage: moduleStorage }),
 };
 
 const outcome = (fn) => {
