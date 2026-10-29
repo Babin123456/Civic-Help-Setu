@@ -183,6 +183,9 @@ const SavedItemCard = ({
         >
           {service.name}
         </h3>
+        {service.archived === true && (
+          <p className="retired-badge">Retired guide, no longer in the directory</p>
+        )}
 
         <p
           style={{

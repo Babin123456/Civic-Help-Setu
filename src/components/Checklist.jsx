@@ -4,6 +4,8 @@ import {
   CHECKLIST_STORAGE_KEY,
   createChecklistSession,
 } from '../services/checklistStorage';
+import { summarizeRequirementProgress } from '../services/requirementTypes';
+import RequirementNote from './RequirementNote';
 
 const STATUS_TEXT = {
   saving: 'Saving...',
@@ -13,7 +15,10 @@ const STATUS_TEXT = {
 
 // `items` is an array of labels. Pass `checklistId` to save progress in the
 // browser; without it the list only lives in memory, as before.
-const Checklist = ({ items = [], checklistId, label = 'Checklist' }) => {
+// `requirements` is an optional map of item label -> { type, condition, source }
+// (see requirementTypes.js). When given, each item shows its type and progress
+// counts official requirements only.
+const Checklist = ({ items = [], checklistId, label = 'Checklist', requirements }) => {
   const itemsKey = items.join('\u0000');
   const session = useMemo(
     () => createChecklistSession({ id: checklistId, items }),
@@ -39,12 +44,28 @@ const Checklist = ({ items = [], checklistId, label = 'Checklist' }) => {
 
   const done = items.filter((item) => checked.includes(item)).length;
   const blocked = status === 'conflict';
+  const summary = requirements
+    ? summarizeRequirementProgress(items, checked, requirements)
+    : null;
 
   return (
     <div className="cl-root">
       <p className="cl-progress">
-        {done} of {items.length} completed
+        {summary
+          ? `${summary.mandatoryDone} of ${summary.mandatoryTotal} official requirements completed`
+          : `${done} of ${items.length} completed`}
       </p>
+      {summary && (summary.conditionalCount + summary.optionalCount + summary.unverifiedCount > 0) && (
+        <p className="cl-progress">
+          Not counted above:
+          {[
+            summary.conditionalCount && ` ${summary.conditionalCount} conditional`,
+            summary.optionalCount && ` ${summary.optionalCount} optional`,
+            summary.unverifiedCount && ` ${summary.unverifiedCount} not verified`,
+          ].filter(Boolean).join(',')}
+          .
+        </p>
+      )}
       <ul className="cl-list" aria-label={label}>
         {items.map((item) => {
           const isChecked = checked.includes(item);
@@ -61,7 +82,10 @@ const Checklist = ({ items = [], checklistId, label = 'Checklist' }) => {
                 <span className="cl-box" aria-hidden="true">
                   {isChecked ? <CheckSquare size={22} /> : <Square size={22} />}
                 </span>
-                <span className="cl-text">{item}</span>
+                <span className="cl-text">
+                  {item}
+                  {requirements && <RequirementNote requirement={requirements[item]} />}
+                </span>
                 <span className="cl-state">{isChecked ? 'Done' : 'To do'}</span>
               </label>
             </li>

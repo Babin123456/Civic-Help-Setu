@@ -33,7 +33,8 @@ const Saved = () => {
   const { toast } = useToast();
   const confirm = useConfirm();
   // Built-in guides plus the ones the admin saved, read once when the page opens.
-  const [allServices] = useState(getAllServices);
+  // Archived guides are kept so an existing saved reference still resolves (shown as retired).
+  const [allServices] = useState(() => getAllServices({ includeArchived: true }));
   const [savedItems, setSavedItems] = useState([]);
   const [reminders, setReminders] = useState([]);
   const [activeFolder, setActiveFolder] = useState(ALL_COLLECTION);

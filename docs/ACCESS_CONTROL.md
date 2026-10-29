@@ -29,6 +29,7 @@ The rules live in one file: [`src/services/accessControl.js`](../src/services/ac
 | `barriers.moderate` | admin | approving or rejecting a barrier report | `moderateBarrierReport` |
 | `feedback.moderate` | admin | bottleneck feedback review queue | `reviewBottleneckFeedback`, `queryFeedbackForModeration`, `resetFeedbackDefaults` |
 | `notices.manage` | admin | notice digest | `addNotice`, `updateNotice`, `changeNoticeStatus`, `resetNoticesToDefault` |
+| `availabilityNotices.manage` | admin | service availability notices | `addAvailabilityNotice`, `updateAvailabilityNotice`, `publishAvailabilityNotice`, `withdrawAvailabilityNotice`, `deleteAvailabilityNotice` |
 | `freshness.review` | admin | "this guide was reviewed" records | `recordServiceReview` |
 | `links.check` | admin | official link check results | `saveLinkCheck`, `recordManualCheck`, `reviewRedirect` |
 
