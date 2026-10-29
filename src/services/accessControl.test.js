@@ -15,6 +15,7 @@ import {
   saveAdminService,
   importAdminServices,
   deleteAdminService,
+  archiveAdminServices,
   getReports,
   resolveReport,
   dismissReport,
@@ -27,6 +28,8 @@ import {
   rejectServiceSubmission,
   submitErrorReport,
 } from './adminService';
+import { deleteAvailabilityNotice } from './serviceAvailabilityNoticeService';
+import { getOwnershipMap, assignServiceOwnership } from './serviceOwnershipService';
 import { resolveAuditReport, getAuditReports } from './communityAuditService';
 import { resolveSourceConflict, reopenSourceConflict } from './sourceConflictService';
 import {
@@ -37,6 +40,7 @@ import {
 import { addNotice, updateNotice, changeNoticeStatus, resetNoticesToDefault } from './noticeDigestService';
 import { moderateBarrierReport } from './barrierReportService';
 import { recordServiceReview } from './dataFreshnessTrustService';
+import { saveLinkCheck } from './linkHealthService';
 
 const memoryStorage = () => {
   const data = new Map();
@@ -73,6 +77,7 @@ const CALLS = {
   'services.write': () => saveAdminService(service),
   'services.import': () => importAdminServices([service]),
   'services.delete': () => deleteAdminService('some-id'),
+  'services.archive': () => archiveAdminServices(['some-id']),
   'reports.read': () => getReports(),
   'reports.resolve': () => resolveReport('rep-101', 'done'),
   'reports.dismiss': () => dismissReport('rep-101'),
@@ -91,7 +96,11 @@ const CALLS = {
   'barriers.moderate': () => moderateBarrierReport({ reportId: 'b1', action: 'approve', userRole: 'admin' }, moduleStorage),
   'feedback.moderate': () => reviewBottleneckFeedback('f1', 'reviewed', 'Mod', '', moduleStorage),
   'notices.manage': () => resetNoticesToDefault(moduleStorage),
+  'availabilityNotices.manage': () => deleteAvailabilityNotice('n1', moduleStorage),
   'freshness.review': () => recordServiceReview('svc', 'Rev', '', moduleStorage),
+  'links.check': () => saveLinkCheck('svc:0', { url: 'https://a.gov.in/', status: 'reachable' }, moduleStorage),
+  'ownership.read': () => getOwnershipMap(moduleStorage),
+  'ownership.manage': () => assignServiceOwnership('svc', { team: 'Docs' }, { storage: moduleStorage }),
 };
 
 const outcome = (fn) => {

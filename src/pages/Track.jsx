@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import SharedDeviceNotice from '../components/privacy/SharedDeviceNotice';
 import { parseReferenceParam } from '../utils/searchParams';
 import { useLocation } from 'react-router-dom';
 import {
@@ -32,10 +33,12 @@ import ActionRequiredAlert from '../components/tracking/ActionRequiredAlert';
 import LinkedDocumentsManager from '../components/tracking/LinkedDocumentsManager';
 import ManualAddApplicationModal from '../components/tracking/ManualAddApplicationModal';
 import Checklist from '../components/Checklist';
+import { toRequirementMap } from '../services/requirementTypes';
 import { services } from '../data/services';
 import TrackEmptyState from '../components/tracking/TrackEmptyState';
 import TrackingReceiptModal from '../components/tracking/TrackingReceiptModal';
 import SlaBreachAlertWidget from '../components/tracking/SlaBreachAlertWidget';
+import AppellateEscalationLadder from '../components/tracking/AppellateEscalationLadder';
 import GrievanceEvidenceOrganizerModal from '../components/grievance/GrievanceEvidenceOrganizerModal';
 
 const Track = () => {
@@ -137,9 +140,10 @@ const Track = () => {
 
   const pendingAction = activeApp ? resolveApplicationPendingAction(activeApp) : null;
   const statusMeta = activeApp ? getStatusMeta(activeApp.status) : null;
-  const requiredDocuments = activeApp
-    ? (services.find((svc) => svc.id === activeApp.serviceId)?.documents || [])
-    : [];
+  const activeService = activeApp
+    ? services.find((svc) => svc.id === activeApp.serviceId)
+    : null;
+  const requiredDocuments = activeService?.documents || [];
 
   if (!applications.length && !activeApp) {
     return (
@@ -161,6 +165,7 @@ const Track = () => {
                 Application Tracking
               </p>
               <h1 style={{ margin: 0, fontSize: 'clamp(2rem, 4vw, 3rem)' }}>Track your civic service status</h1>
+              <SharedDeviceNotice what="tracked applications" />
             </div>
 
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -279,6 +284,7 @@ const Track = () => {
                       key={activeApp.id}
                       checklistId={activeApp.id}
                       items={requiredDocuments}
+                      requirements={toRequirementMap(activeService)}
                       label={`Documents to prepare for ${activeApp.serviceName || 'this application'}`}
                     />
                   </section>
@@ -312,6 +318,8 @@ const Track = () => {
                     </button>
                   </form>
                 </div>
+
+                <AppellateEscalationLadder application={activeApp} />
 
                 {activeApp.status === 'sla-breach' && (
                   <SlaBreachAlertWidget app={activeApp} />

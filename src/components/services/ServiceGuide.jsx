@@ -1,8 +1,11 @@
 import FocusModeToggle from '../common/FocusModeToggle';
 import OfficialSourcesList from './OfficialSourcesList';
+import ContactDirectory from './ContactDirectory';
 import BottleneckFeedbackPrompt from '../feedback/BottleneckFeedbackPrompt';
 import { findJargonTerms } from '../../data/civicGlossary';
 import FormFieldExplainer from '../glossary/FormFieldExplainer';
+import RequirementNote from '../RequirementNote';
+import { getDocumentRequirements } from '../../services/requirementTypes';
 
 const hasItems = (list) => Array.isArray(list) && list.length > 0;
 
@@ -10,6 +13,7 @@ const hasItems = (list) => Array.isArray(list) && list.length > 0;
 // layouts; focus mode only swaps the presentation class.
 const ServiceGuide = ({ service, focusMode = false, onToggleFocusMode }) => {
   const { eligibility, documents, steps, fees, processingTime, warnings } = service;
+  const requirements = getDocumentRequirements(service);
 
   return (
     <section
@@ -46,6 +50,10 @@ const ServiceGuide = ({ service, focusMode = false, onToggleFocusMode }) => {
       {hasItems(documents) && (
         <div className="service-guide__block">
           <h3>Documents you need</h3>
+          <p className="req-intro">
+            Each item is labelled as an official requirement, a conditional
+            requirement, an optional suggestion, or not verified.
+          </p>
           <ul>
             {documents.map((item, i) => {
               const terms = findJargonTerms(item);
@@ -53,6 +61,7 @@ const ServiceGuide = ({ service, focusMode = false, onToggleFocusMode }) => {
               return (
                 <li key={i}>
                   <span>{item}</span>
+                  <RequirementNote requirement={requirements[i]} />
                   {topTerm && (
                     <FormFieldExplainer
                       term={topTerm.term}
@@ -102,6 +111,8 @@ const ServiceGuide = ({ service, focusMode = false, onToggleFocusMode }) => {
       )}
 
       <OfficialSourcesList service={service} />
+
+      <ContactDirectory service={service} />
 
       <BottleneckFeedbackPrompt serviceId={service.id} serviceName={service.name} />
     </section>

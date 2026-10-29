@@ -3,6 +3,7 @@ import { MAX_SEARCH_LENGTH } from '../../utils/searchParams';
 import { Search, X, ArrowUpDown } from 'lucide-react';
 import DepartmentFilterSelect from './DepartmentFilterSelect';
 import FeeAndSpeedFilter from './FeeAndSpeedFilter';
+import JurisdictionFilterSelect from './JurisdictionFilterSelect';
 
 const FilterToolbar = ({
   searchQuery,
@@ -15,6 +16,11 @@ const FilterToolbar = ({
   departments = [],
   selectedDepartment = 'All',
   onDepartmentChange = () => {},
+  selectedState = 'All',
+  selectedDistrict = 'All',
+  districtOptions = [],
+  onStateChange = () => {},
+  onDistrictChange = () => {},
   feeType = 'All',
   onFeeTypeChange = () => {},
   speedFilter = 'All',
@@ -236,6 +242,14 @@ const FilterToolbar = ({
           departments={departments}
           selectedDepartment={selectedDepartment}
           onDepartmentChange={onDepartmentChange}
+        />
+
+        <JurisdictionFilterSelect
+          state={selectedState}
+          district={selectedDistrict}
+          districtOptions={districtOptions}
+          onStateChange={onStateChange}
+          onDistrictChange={onDistrictChange}
         />
 
         <FeeAndSpeedFilter

@@ -58,6 +58,78 @@ export function evaluateApplicationSla(application = {}) {
 }
 
 /**
+ * Returns the statutory 3-tier appellate escalation hierarchy for a civic service
+ */
+export function getAppellateEscalationHierarchy(serviceKey = 'default') {
+  const normalized = (serviceKey || 'default').toLowerCase().replace(/\s+/g, '-');
+  const slaRule = STATUTORY_SLA_DATA[normalized] || STATUTORY_SLA_DATA['default'];
+
+  return [
+    {
+      tier: 1,
+      title: 'Designated Public Officer / Service Desk',
+      authority: `${slaRule.serviceName} Designated Processing Officer`,
+      jurisdiction: 'Local Municipal / Tehsil Office',
+      windowDays: slaRule.statutoryDays,
+      legalBasis: `${slaRule.actName} - Initial Delivery Window`,
+      appealMode: 'Standard Online / In-Person Application Receipt',
+      filingFee: 'Prescribed Application Fee / Free',
+      description: `Original authority responsible for processing and issuing the certificate within ${slaRule.statutoryDays} working days.`
+    },
+    {
+      tier: 2,
+      title: 'First Appellate Authority (FAA)',
+      authority: slaRule.firstAppellateAuthority,
+      jurisdiction: 'Sub-Divisional / District Grievance Cell',
+      windowDays: 30,
+      legalBasis: `${slaRule.actName} - Section 15 / First Appeal`,
+      appealMode: 'State e-District Portal / Form 1 Appeal via Speed Post',
+      filingFee: 'Free (or ₹10 Court Fee Stamp)',
+      description: `Statutory officer empowered to review departmental inaction, summon application records, and order service disposal with penalty.`
+    },
+    {
+      tier: 3,
+      title: 'Second Appellate Authority (SAA) & State Commission',
+      authority: slaRule.secondAppellateAuthority,
+      jurisdiction: 'Divisional / State Commission / Lokayukta',
+      windowDays: 60,
+      legalBasis: `${slaRule.actName} - Second Appeal & Penal Sanctions`,
+      appealMode: 'State Administrative Tribunal / Right to Services Commission',
+      filingFee: 'Free',
+      description: `Apex appellate body with civil court powers. Can impose personal salary deductions (${slaRule.penaltyClause}) and grant direct compensation.`
+    }
+  ];
+}
+
+/**
+ * Evaluates active tier status and next legal escalation step for an application
+ */
+export function evaluateEscalationLadder(application = {}) {
+  const sla = evaluateApplicationSla(application);
+  const ladder = getAppellateEscalationHierarchy(sla.serviceKey);
+
+  let activeTier = 1;
+  let tierStatus = 'WITHIN_TIER_1';
+
+  if (sla.status === 'SLA_BREACHED') {
+    if (sla.overdueDays >= 30) {
+      activeTier = 3;
+      tierStatus = 'ELIGIBLE_FOR_SECOND_APPEAL';
+    } else {
+      activeTier = 2;
+      tierStatus = 'ELIGIBLE_FOR_FIRST_APPEAL';
+    }
+  }
+
+  return {
+    ...sla,
+    activeTier,
+    tierStatus,
+    ladder
+  };
+}
+
+/**
  * Generates official First Appeal Petition memorandum text under Right to Public Services Act
  */
 export function generateFirstAppealNotice(application = {}, citizenName = 'Concerned Citizen') {

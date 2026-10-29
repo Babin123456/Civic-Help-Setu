@@ -114,6 +114,8 @@ names, phones, reference IDs, grievance text or coordinates in events.
 
 ### Firebase / Firestore (planned, not in code)
 
+The security rules for it already exist and are tested on the Firebase emulators: see [FIREBASE_RULES.md](FIREBASE_RULES.md) (access policy per collection and storage path, how to run `npm run rules:test`, and the rule that rules are tested before every deploy).
+
 The maintainer plans Firestore with security rules. Nothing is wired yet. When it is:
 
 - The web config (`apiKey`, `authDomain`, `projectId`, ...) is public, not a secret.
@@ -135,9 +137,9 @@ The maintainer plans Firestore with security rules. Nothing is wired yet. When i
 | `VITE_CLERK_PUBLISHABLE_KEY` | public | only variable the app reads |
 | `VITE_OPENAI_API_KEY` | would be a secret | removed from `.env.example`, unused |
 | `VITE_API_BASE_URL` | public if ever used | removed from `.env.example`, unused |
-| `CLERK_SECRET_KEY`, any `sk_...` | secret | not used by this repo, server only |
+| `CLERK_SECRET_KEY`, any `sk_...` | secret | read only by `api/firebase-token.js` (Vercel function), never by the browser bundle |
 | Firebase web config | public | restrict the key, enforce rules and App Check |
-| Firebase Admin / service account | secret | server only |
+| `FIREBASE_SERVICE_ACCOUNT` (Firebase Admin service account JSON) | secret | read only by `api/firebase-token.js` (Vercel function) |
 
 `import.meta.env` is read in `src/main.jsx` and `AuthContext.jsx` (for
 `VITE_CLERK_PUBLISHABLE_KEY`) and in `src/utils/providerError.js` (only the built-in `DEV` flag). `vite.config.js` has no `define`.

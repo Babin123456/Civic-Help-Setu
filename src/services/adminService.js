@@ -2,6 +2,7 @@ import { requirePermission } from './accessControl';
 import { MOCK_SERVICES } from '../data/services';
 import { normalizeName } from './serviceImportService';
 import { CUSTOM_SERVICES_KEY, getAllServices } from './serviceCatalog';
+import { planBulkArchive, planBulkRestore, withArchived, withRestored, describePlan } from './serviceLifecycle';
 import { logDiagnostic } from '../utils/diagnostics';
 
 const SERVICES_KEY = CUSTOM_SERVICES_KEY;
@@ -108,7 +109,8 @@ const DEFAULT_SUBMISSIONS = [
 ];
 
 // Same merged list the public pages read, see serviceCatalog.js.
-export const getAdminServices = getAllServices;
+// The admin list includes archived guides; the lifecycle view separates them.
+export const getAdminServices = () => getAllServices({ includeArchived: true });
 
 export const saveAdminService = (serviceData, actorName = 'SuperAdmin') => {
   requirePermission('services.write');
@@ -250,6 +252,69 @@ export const deleteAdminService = (id, actorName = 'SuperAdmin') => {
     logDiagnostic('Failed to delete service', err);
     return getAdminServices();
   }
+};
+
+// Archive / restore. The record is kept (same id), only the `archived` flag
+// changes. The plan is recomputed from fresh storage, so stale ids and records
+// changed in another tab are skipped instead of failing the batch. A built-in
+// guide is archived through a saved copy on top of it, like an edit.
+const applyLifecycle = (kind, ids, actorName) => {
+  const archiving = kind === 'archive';
+  const failure = (error) => ({ ok: false, changed: 0, plan: null, error, services: getAdminServices() });
+  let custom;
+  try {
+    const raw = localStorage.getItem(SERVICES_KEY);
+    custom = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(custom)) throw new Error('stored services are not a list');
+  } catch (err) {
+    logDiagnostic('Failed to read services before archive/restore', err);
+    return failure('Existing service data could not be read, so nothing was changed.');
+  }
+
+  const all = getAdminServices();
+  const plan = archiving ? planBulkArchive(ids, all) : planBulkRestore(ids, all);
+  if (plan.toChange.length === 0) {
+    return { ok: true, changed: 0, plan, error: null, services: all };
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const changeIds = new Set(plan.toChange.map((c) => c.id));
+  const next = [...custom];
+  for (const svc of all) {
+    if (!changeIds.has(svc.id)) continue;
+    const updated = archiving ? withArchived(svc, today) : withRestored(svc);
+    const at = next.findIndex((c) => c.id === svc.id);
+    if (at >= 0) next[at] = updated;
+    else next.unshift(updated);
+  }
+
+  try {
+    localStorage.setItem(SERVICES_KEY, JSON.stringify(next));
+  } catch (err) {
+    logDiagnostic('Failed to save archive/restore', err);
+    return failure('Saving failed (browser storage may be full). Nothing was changed.');
+  }
+
+  const skipped = describePlan(plan);
+  addAuditLog({
+    action: archiving ? 'SERVICES_ARCHIVED' : 'SERVICES_RESTORED',
+    actor: actorName,
+    target: `${plan.toChange.length} service${plan.toChange.length === 1 ? '' : 's'}`,
+    details:
+      `${archiving ? 'Archived' : 'Restored'}: ${plan.toChange.map((c) => c.name).join(', ')}.` +
+      (skipped.length ? ` Skipped: ${skipped.join(', ')}.` : ''),
+  });
+  return { ok: true, changed: plan.toChange.length, plan, error: null, services: getAdminServices() };
+};
+
+export const archiveAdminServices = (ids, actorName = 'SuperAdmin') => {
+  requirePermission('services.archive');
+  return applyLifecycle('archive', ids, actorName);
+};
+
+export const restoreAdminServices = (ids, actorName = 'SuperAdmin') => {
+  requirePermission('services.archive');
+  return applyLifecycle('restore', ids, actorName);
 };
 
 const readReports = () => {

@@ -1,3 +1,5 @@
+import { matchesJurisdiction } from './jurisdictionService';
+
 export const CIVIC_SYNONYMS = {
   dl: ['driving license', 'license', 'rto', 'vehicle', 'driving'],
   license: ['driving license', 'dl', 'rto', 'permit'],
@@ -15,6 +17,26 @@ export const CIVIC_SYNONYMS = {
   ration: ['ration card', 'food subsidy', 'bpl', 'pds'],
   property: ['property tax', 'mutation', 'encumbrance', 'khata', 'patta'],
   free: ['no fee', 'zero cost', 'gratis'],
+};
+
+export const CIVIC_PHONETIC_TRANSLITERATIONS = {
+  rashan: ['ration card', 'ration'],
+  khadya: ['ration card', 'food'],
+  aay: ['income certificate', 'income'],
+  aaye: ['income certificate', 'income'],
+  jaati: ['caste certificate', 'caste'],
+  jati: ['caste certificate', 'caste'],
+  janm: ['birth certificate', 'birth'],
+  janam: ['birth certificate', 'birth'],
+  mrityu: ['death certificate', 'death'],
+  niwas: ['domicile', 'residence'],
+  nivas: ['domicile', 'residence'],
+  pehchan: ['voter id', 'identity'],
+  gaadi: ['driving license', 'vehicle'],
+  gadi: ['driving license', 'vehicle'],
+  parivahan: ['driving license', 'transport'],
+  kisan: ['pm-kisan', 'agriculture'],
+  kheti: ['pm-kisan', 'agriculture'],
 };
 
 const COMMON_CIVIC_DICTIONARY = [
@@ -160,6 +182,41 @@ export const calculateServiceRelevance = (service, query) => {
     }
   }
 
+  // 3. Phonetic transliteration bonus
+  for (const [transKey, canonicals] of Object.entries(CIVIC_PHONETIC_TRANSLITERATIONS)) {
+    if (q.includes(transKey)) {
+      for (const canon of canonicals) {
+        if (nameLower.includes(canon)) score += 20;
+        if (descLower.includes(canon)) score += 8;
+        if (catLower.includes(canon)) score += 6;
+      }
+    }
+  }
+
+  // 4. Token-by-token scoring & fuzzy typo matching
+  const serviceWords = nameLower.split(/[\s-]+/).concat(catLower.split(/[\s-]+/));
+  for (const token of tokens) {
+    let matched = false;
+    if (nameLower.includes(token)) { score += 6; matched = true; }
+    if (deptLower.includes(token)) { score += 4; matched = true; }
+    if (catLower.includes(token)) { score += 3; matched = true; }
+    if (descLower.includes(token)) { score += 2; matched = true; }
+    if (docs.some((d) => d.includes(token))) { score += 2; matched = true; }
+    if (eligibility.some((e) => e.includes(token))) { score += 1; matched = true; }
+
+    if (!matched && token.length >= 4) {
+      for (const word of serviceWords) {
+        if (word.length >= 4) {
+          const dist = getLevenshteinDistance(token, word);
+          if (dist === 1 || (dist === 2 && token.length >= 6)) {
+            score += 10;
+            break;
+          }
+        }
+      }
+    }
+  }
+  if (false) {
   // 3. Token-by-token scoring
   for (const token of tokens) {
     if (nameLower.includes(token)) score += 6;
@@ -168,6 +225,8 @@ export const calculateServiceRelevance = (service, query) => {
     if (descLower.includes(token)) score += 2;
     if (docs.some((d) => d.includes(token))) score += 2;
     if (eligibility.some((e) => e.includes(token))) score += 1;
+  }
+
   }
 
   return score;
@@ -183,6 +242,8 @@ export const rankAndFilterServices = (
     difficulty = 'All',
     feeType = 'All',
     speedFilter = 'All',
+    state = 'All',
+    district = 'All',
     sortBy = 'relevance',
   }
 ) => {
@@ -235,6 +296,11 @@ export const rankAndFilterServices = (
     });
   }
 
+  // 6b. Jurisdiction filter: unknown scope never matches a selected place
+  if (state && state !== 'All') {
+    result = result.filter((s) => matchesJurisdiction(s, { state, district }));
+  }
+
   // 7. Relevance scoring if search query is present
   if (searchQuery.trim()) {
     result = result
@@ -262,4 +328,35 @@ export const rankAndFilterServices = (
   }
 
   return result;
+};
+
+
+/**
+ * Detects whether a search query triggered a transliteration or typo match,
+ * returning a citizen-friendly message for feedback display.
+ */
+export const getFuzzyMatchSummary = (query = '') => {
+  const clean = query.toLowerCase().trim();
+  if (!clean || clean.length < 3) return null;
+
+  for (const [transKey, canonicals] of Object.entries(CIVIC_PHONETIC_TRANSLITERATIONS)) {
+    if (clean.includes(transKey)) {
+      return {
+        isTransliterated: true,
+        matchedPhrase: transKey,
+        suggestedTerm: canonicals[0],
+      };
+    }
+  }
+
+  const typo = getDidYouMeanSuggestion(clean);
+  if (typo && typo !== clean) {
+    return {
+      isTransliterated: false,
+      matchedPhrase: clean,
+      suggestedTerm: typo,
+    };
+  }
+
+  return null;
 };

@@ -33,11 +33,11 @@ Sensitivity: **High** means identity or contact data, or free text that people t
 | Email, display name (demo mode) | `SignUp.jsx`, `Login.jsx` demo form | `civicbridge_demo_user` (localStorage) | No | Medium |
 | First name, last name, phone, city, state, occupation, bio | `Profile.jsx` | Clerk (`firstName`, `lastName`, and `unsafeMetadata`: phone, city, state, occupation, bio) | Yes, to Clerk | High |
 | Profile photo | `Profile.jsx` avatar upload | Clerk (`setProfileImage`) | Yes, to Clerk | Medium |
-| Document type, document number, issuer, issue and expiry date, notes (300 chars max), file name, size and type | Vault (`DocumentModal.jsx`, `vaultStorage.js`) | `civicbridge_vault_docs` | No. Document files are **not** stored, only this metadata | High (the number field is where people put Aadhaar, PAN, licence numbers) |
+| Document type, document number, issuer, issue and expiry date, notes (300 chars max), file name, size and type | Vault (`DocumentModal.jsx`, `vaultStorage.js`) | `civicbridge_vault_docs` | No. Document files are **not** stored, only this metadata | High before #212. Only the last 4 characters of the number are stored now; the notes field is free text and can still hold anything |
 | Vault backup file | "Backup" in `VaultBackupRestoreModal.jsx` | A JSON file downloaded to the device | No, but it is a plain-text file in Downloads | High |
 | Applicant name, reference ID, service, status, notes, linked documents | Track page, `ManualAddApplicationModal.jsx`, `trackingService.js` | `civicbridge_applications` | No | High |
 | Ticked checklist items per application | `Checklist.jsx`, `checklistStorage.js` | `civicbridge_checklists` | No | Low |
-| Applicant name, mobile number, office, service, date, time slot, token | `AppointmentModal.jsx`, `locationService.js` | `civicbridge_office_tokens` | Only office, date, token and service go into the Google or Outlook calendar link if the user clicks it. Name and number do not | High |
+| Applicant name, mobile number (last 4 digits only since #212), office, service, date, time slot, token | `AppointmentModal.jsx`, `locationService.js` | `civicbridge_office_tokens` | Only office, date, token and service go into the Google or Outlook calendar link if the user clicks it. Name and number do not | High |
 | Citizen name, contact, free-text description, urgency | `GrievanceSubmissionModal.jsx`, `grievanceService.js` | `civic_grievance_tickets` | No. Nothing receives the grievance (see T6) | High |
 | Reporter email (optional), description, source URL | `ReportOutdatedInfoModal.jsx`, `reportService.js` | `civicbridge_error_reports` | No | High (email) |
 | Name, free-text discrepancy report | Community audit (`communityAuditService.js`) | `civicbridge_community_audits` | No | Medium |
@@ -176,7 +176,7 @@ Likelihood and impact are rough: Low, Medium, High. Status is what the code does
   - If the app is built **without** a Clerk key, `LocalFallbackAuthProvider` is used, and the login page lets anyone choose the Admin role (`Login.jsx`, `handleDemoSubmit` and `handleQuickDemo`). A production deploy that is missing the env var would silently turn into this.
   - All admin data (services, reports, audit trail, role list) is in `localStorage`. Anyone can edit it with the browser dev tools. Today that only affects their own browser. Once the admin data moves to a shared backend, the same UI check would not protect it.
 - **Mitigation today:** the role source for Clerk users is correct. Admin reads and writes are also refused in the data layer for anyone who is not an admin (`src/services/accessControl.js`, inventory in [ACCESS_CONTROL.md](../ACCESS_CONTROL.md)), so the UI is no longer the only check. That still does not stop someone editing `localStorage` by hand. The login page labels demo mode as "Local Demo Authentication Mode", so it is not hidden, but it is still fully usable.
-- **Remediation:** proposed F1 (block demo admin in production builds) and F2 (enforce roles on the server when a backend is added). #220 applies at that point if the backend is Firebase.
+- **Remediation:** proposed F1 (block demo admin in production builds) and F2 (enforce roles on the server when a backend is added). #220: the Firebase rules and emulator tests are in `firebase/` and documented in [FIREBASE_RULES.md](../FIREBASE_RULES.md).
 
 ### T3: Shared-device exposure
 
@@ -255,7 +255,7 @@ These are suggestions for new issues. They are **not filed yet**; the maintainer
 Existing issues that already cover part of this:
 
 - #219 Content Security Policy and security headers (T1 damage limit, T9)
-- #220 Firebase rules and access-control tests (applies once a Firestore backend exists, T2)
+- #220 Firebase rules and access-control tests: done as rules written ahead of the backend, see [FIREBASE_RULES.md](../FIREBASE_RULES.md)
 - #222 CI security checks for secrets, dependencies and unsafe JavaScript patterns (T7, T9)
 - #223 Privacy-safe deletion and retention controls (T3, T10; include the keys listed in section 4)
 - #225 Third-party integration review for data minimization and secret exposure (T7, T8)
