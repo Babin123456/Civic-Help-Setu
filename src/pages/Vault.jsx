@@ -19,6 +19,13 @@ import ExpiringDocumentsAlert from '../components/vault/ExpiringDocumentsAlert';
 import VaultBackupRestoreModal from '../components/vault/VaultBackupRestoreModal';
 import ServiceTaggingModal from '../components/vault/ServiceTaggingModal';
 import DocumentPreflightChecker from '../components/vault/DocumentPreflightChecker';
+import InactivityLockModal from '../components/vault/InactivityLockModal';
+import { Lock, Unlock, ShieldAlert } from 'lucide-react';
+import {
+  startInactivityTracker,
+  stopInactivityTracker,
+  resetInactivityTracker,
+} from '../services/sessionInactivityService';
 
 const CATEGORIES = ['All', 'Identity', 'Finance', 'Transport', 'Education', 'Welfare'];
 
@@ -56,6 +63,9 @@ const Vault = () => {
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [taggingDoc, setTaggingDoc] = useState(null);
   const [expiringDocs, setExpiringDocs] = useState(() => getExpiringDocuments());
+  const [isVaultLocked, setIsVaultLocked] = useState(false);
+  const [showInactivityWarning, setShowInactivityWarning] = useState(false);
+  const [warningSeconds, setWarningSeconds] = useState(30);
 
   const refreshVault = () => {
     const docs = getDocuments();
@@ -66,6 +76,30 @@ const Vault = () => {
   useEffect(() => {
     refreshVault();
   }, []);
+
+  useEffect(() => {
+    if (isVaultLocked) {
+      stopInactivityTracker();
+      return undefined;
+    }
+    startInactivityTracker({
+      timeoutSeconds: 300,
+      warningSeconds: 30,
+      onWarning: (remaining) => {
+        setWarningSeconds(remaining);
+        setShowInactivityWarning(true);
+      },
+      onTimeout: () => {
+        setShowInactivityWarning(false);
+        setIsVaultLocked(true);
+        setSelectedDoc(null);
+      },
+      onActivity: () => {
+        setShowInactivityWarning(false);
+      },
+    });
+    return () => stopInactivityTracker();
+  }, [isVaultLocked]);
 
   const handleSaveDocument = (docData) => {
     // saveDocument throws if browser storage is full; the modal shows the message
@@ -167,6 +201,16 @@ const Vault = () => {
             </button>
             <button
               type="button"
+              className="btn btn-secondary"
+              onClick={() => setIsVaultLocked(true)}
+              aria-label="Lock Vault for Privacy"
+              style={{ padding: '0.75rem 1.1rem', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <Lock size={16} />
+              <span>Lock Vault</span>
+            </button>
+            <button
+              type="button"
               className="btn btn-primary"
               onClick={() => setIsModalOpen(true)}
               style={{ padding: '0.75rem 1.75rem', fontSize: '1rem' }}
@@ -183,7 +227,56 @@ const Vault = () => {
         {/* Pre-flight Inspection & Format Check */}
         <DocumentPreflightChecker onAuditComplete={refreshVault} />
 
-        {/* Vault Stats Cards */}
+        {isVaultLocked ? (
+          <div
+            className="glass-panel"
+            role="alert"
+            style={{
+              padding: '3.5rem 2rem',
+              textAlign: 'center',
+              borderRadius: '1rem',
+              marginTop: '1.5rem',
+              background: 'var(--bg-card, rgba(30, 41, 59, 0.7))',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
+            }}
+          >
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'rgba(245, 158, 11, 0.15)',
+                color: '#f59e0b',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.25rem',
+              }}
+            >
+              <Lock size={36} aria-hidden="true" />
+            </div>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
+              Vault Locked for Privacy
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', maxWidth: '480px', margin: '0 auto 1.5rem', lineHeight: '1.6' }}>
+              Your credentials and document numbers were obscured to protect your identity privacy at public kiosks and shared terminals.
+            </p>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                setIsVaultLocked(false);
+                resetInactivityTracker();
+              }}
+              style={{ padding: '0.75rem 1.75rem', fontSize: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <Unlock size={18} />
+              <span>Unlock Vault</span>
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Vault Stats Cards */}
         <VaultStats documents={documents} />
 
         {/* Toolbar: Search and Filter Tabs */}
@@ -500,6 +593,9 @@ const Vault = () => {
           </div>
         )}
 
+          </>
+        )}
+
         {/* Add Document Modal */}
         <DocumentModal
           isOpen={isModalOpen}
@@ -521,6 +617,20 @@ const Vault = () => {
           isOpen={isBackupModalOpen}
           onClose={() => setIsBackupModalOpen(false)}
           onVaultUpdated={refreshVault}
+        />
+
+        {/* Inactivity Privacy Lock Modal */}
+        <InactivityLockModal
+          isOpen={showInactivityWarning}
+          secondsRemaining={warningSeconds}
+          onExtend={() => {
+            setShowInactivityWarning(false);
+            resetInactivityTracker();
+          }}
+          onLockNow={() => {
+            setShowInactivityWarning(false);
+            setIsVaultLocked(true);
+          }}
         />
 
         {/* Service Mapping / Tagging Modal */}
