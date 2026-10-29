@@ -18,7 +18,7 @@ import SourceConflictCautionBanner from '../components/services/SourceConflictCa
 import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
 import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
 import ApplicabilityPanel from '../components/services/ApplicabilityPanel';
-
+import OfflineCacheActionCard from '../components/services/OfflineCacheActionCard';
 const copyServiceLink = async (url) => {
   try {
     if (navigator?.clipboard?.writeText) {
@@ -512,8 +512,10 @@ const ServiceDetails = () => {
             serviceId={service.id}
           />
 
-          <ApplicabilityPanel service={service} />
+<ApplicabilityPanel service={service} />
 
+          {/* Offline In-Office Visit Staging */}
+          <OfflineCacheActionCard service={service} />
           {/* Fee Transparency */}
           <FeeTransparencyCard
             serviceId={service.id}
