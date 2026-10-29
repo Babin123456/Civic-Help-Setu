@@ -41,6 +41,7 @@ import AuditLogViewer from '../components/admin/AuditLogViewer';
 import ServiceImportPanel from '../components/admin/ServiceImportPanel';
 import ServiceRecordList from '../components/admin/ServiceRecordList';
 import StaleRecordsReviewQueue from '../components/admin/StaleRecordsReviewQueue';
+import LinkHealthPanel from '../components/admin/LinkHealthPanel';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel';
 import { useToast } from '../context/ToastContext';
@@ -489,6 +490,11 @@ const Admin = () => {
               {
                 id: 'freshness',
                 label: 'Freshness & Trust Queue',
+                badge: null,
+              },
+              {
+                id: 'link-health',
+                label: 'Official Link Health',
                 badge: null,
               },
               {
@@ -1367,6 +1373,9 @@ const Admin = () => {
                 <StaleRecordsReviewQueue />
               </div>
             )}
+
+            {/* Official application-link health check */}
+            {activeTab === 'link-health' && <LinkHealthPanel />}
 
             {/* Process Bottleneck Feedback Loop Tab */}
             {activeTab === 'bottlenecks' && (

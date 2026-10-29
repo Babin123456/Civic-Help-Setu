@@ -37,6 +37,7 @@ import {
 import { addNotice, updateNotice, changeNoticeStatus, resetNoticesToDefault } from './noticeDigestService';
 import { moderateBarrierReport } from './barrierReportService';
 import { recordServiceReview } from './dataFreshnessTrustService';
+import { saveLinkCheck } from './linkHealthService';
 
 const memoryStorage = () => {
   const data = new Map();
@@ -92,6 +93,7 @@ const CALLS = {
   'feedback.moderate': () => reviewBottleneckFeedback('f1', 'reviewed', 'Mod', '', moduleStorage),
   'notices.manage': () => resetNoticesToDefault(moduleStorage),
   'freshness.review': () => recordServiceReview('svc', 'Rev', '', moduleStorage),
+  'links.check': () => saveLinkCheck('svc:0', { url: 'https://a.gov.in/', status: 'reachable' }, moduleStorage),
 };
 
 const outcome = (fn) => {
