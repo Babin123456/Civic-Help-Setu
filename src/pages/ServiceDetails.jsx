@@ -18,6 +18,7 @@ import SourceConflictCautionBanner from '../components/services/SourceConflictCa
 import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
 import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
 import ApplicabilityPanel from '../components/services/ApplicabilityPanel';
+import DocumentPreflightInspectionCard from '../components/services/DocumentPreflightInspectionCard';
 import OfflineCacheActionCard from '../components/services/OfflineCacheActionCard';
 import IntakeWindowPanel from '../components/services/IntakeWindowPanel';
 
@@ -532,6 +533,8 @@ const ServiceDetails = () => {
             focusMode={focusMode}
             onToggleFocusMode={toggleFocusMode}
           />
+
+          <DocumentPreflightInspectionCard service={service} />
 
           {/* Civic Application Readiness Scorecard */}
           <ApplicationReadinessScorecard
