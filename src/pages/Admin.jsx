@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   CheckSquare,
   AlertTriangle,
@@ -144,15 +144,22 @@ const Admin = () => {
       setOwnership(getOwnershipMap());
       setAuditLogs(getAuditLogs());
       toast?.success?.('Review assignment saved. The public guide is unchanged.');
+    } else {
+      toast?.error?.('Review assignment was not saved.');
     }
     return result;
   };
 
   const handleClearOwnership = (serviceId) => {
-    clearServiceOwnership(serviceId, { actorName: user?.username || 'SuperAdmin' });
+    const cleared = clearServiceOwnership(serviceId, { actorName: user?.username || 'SuperAdmin' });
     setOwnership(getOwnershipMap());
     setAuditLogs(getAuditLogs());
-    toast?.success?.('Review assignment cleared.');
+    if (cleared) {
+      toast?.success?.('Review assignment cleared.');
+    } else {
+      toast?.error?.('Review assignment was not cleared.');
+    }
+    return cleared;
   };
 
   const handleLogout = () => {
@@ -194,12 +201,15 @@ const Admin = () => {
     }
   };
 
-  const activeServices = services.filter((svc) => !isArchived(svc));
-  const archivedServices = services.filter(isArchived);
+  const activeServices = useMemo(() => services.filter((svc) => !isArchived(svc)), [services]);
+  const archivedServices = useMemo(() => services.filter(isArchived), [services]);
   
   // Combine catalog view and ownership filter logic safely
   const currentCatalogBase = catalogView === 'archived' ? archivedServices : activeServices;
-  const shownServices = filterByOwnership(currentCatalogBase, ownership, users, ownershipFilter);
+  const shownServices = useMemo(
+    () => filterByOwnership(currentCatalogBase, ownership, users, ownershipFilter),
+    [currentCatalogBase, ownership, users, ownershipFilter]
+  );
 
   const changeCatalogView = (view) => {
     setCatalogView(view);
@@ -301,6 +311,7 @@ const Admin = () => {
         builtIn: pendingAction.builtIn,
         actor,
         deleteService: deleteAdminService,
+        clearOwnership: (serviceId) => clearServiceOwnership(serviceId, { actorName: actor }),
         hadLocalChanges: hasLocalServiceCopy(pendingAction.id),
       });
     });
