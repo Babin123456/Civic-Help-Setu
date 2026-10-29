@@ -1,5 +1,6 @@
 import FocusModeToggle from '../common/FocusModeToggle';
 import OfficialSourcesList from './OfficialSourcesList';
+import ContactDirectory from './ContactDirectory';
 import BottleneckFeedbackPrompt from '../feedback/BottleneckFeedbackPrompt';
 import { findJargonTerms } from '../../data/civicGlossary';
 import FormFieldExplainer from '../glossary/FormFieldExplainer';
@@ -102,6 +103,8 @@ const ServiceGuide = ({ service, focusMode = false, onToggleFocusMode }) => {
       )}
 
       <OfficialSourcesList service={service} />
+
+      <ContactDirectory service={service} />
 
       <BottleneckFeedbackPrompt serviceId={service.id} serviceName={service.name} />
     </section>

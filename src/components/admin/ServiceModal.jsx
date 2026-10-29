@@ -4,8 +4,11 @@ import { SERVICE_CATEGORIES } from '../../data/serviceCategories';
 import useUnsavedChangesGuard from '../../hooks/useUnsavedChangesGuard';
 import { isFormDirty } from '../../utils/formDraft';
 import UnsavedChangesDialog from '../common/UnsavedChangesDialog';
+import { CONTACT_TYPES, CONTACT_METHODS, validateContacts } from '../../services/contactDirectoryService';
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 const MODES = ['Online', 'Offline', 'Online / Offline'];
+
+const EMPTY_CONTACT = { type: 'helpdesk', method: 'phone', value: '', hours: '', sourceUrl: '', lastVerified: '' };
 
 const buildForm = (service) =>
   service
@@ -21,6 +24,7 @@ const buildForm = (service) =>
         portalName: service.officialSources?.[0]?.name || 'Official Government Portal',
         documentsText: (service.documents || []).join('\n'),
         eligibilityText: (service.eligibility || []).join('\n'),
+        contacts: Array.isArray(service.contacts) ? service.contacts.map((c) => ({ ...EMPTY_CONTACT, ...c })) : [],
       }
     : {
         name: '',
@@ -34,6 +38,7 @@ const buildForm = (service) =>
         portalName: 'National Government Services Portal',
         documentsText: 'Proof of Identity (Aadhaar / Voter ID)\nProof of Address\nPassport size photograph',
         eligibilityText: 'Indian citizen or resident\nValid identification proof',
+        contacts: [],
       };
 
 const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
@@ -42,12 +47,14 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
   const [baseline, setBaseline] = useState(() => buildForm(null));
   const [error, setError] = useState('');
   const [confirmClose, setConfirmClose] = useState(false);
+  const [showContactErrors, setShowContactErrors] = useState(false);
 
   useEffect(() => {
     const initial = buildForm(serviceToEdit);
     setForm(initial);
     setBaseline(initial);
     setConfirmClose(false);
+    setShowContactErrors(false);
   }, [serviceToEdit, isOpen]);
 
   const isDirty = isOpen && isFormDirty(form, baseline);
@@ -72,6 +79,12 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
     }
   };
 
+  const contactCheck = validateContacts(form.contacts);
+  const updateContact = (idx, patch) =>
+    setForm({ ...form, contacts: form.contacts.map((c, i) => (i === idx ? { ...c, ...patch } : c)) });
+  const removeContact = (idx) =>
+    setForm({ ...form, contacts: form.contacts.filter((_, i) => i !== idx) });
+
   if (!isOpen) return null;
 
   const handleSubmit = (e) => {
@@ -82,6 +95,12 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
     }
     if (!form.shortDescription.trim()) {
       setError('Short description is required');
+      return;
+    }
+
+    if (!contactCheck.valid) {
+      setShowContactErrors(true);
+      setError('Fix the highlighted contact channel fields before saving.');
       return;
     }
 
@@ -106,6 +125,14 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
       processingTime: form.processingTime.trim(),
       documents,
       eligibility,
+      contacts: form.contacts.map((c) => ({
+        type: c.type,
+        method: c.method,
+        value: c.value.trim(),
+        ...(c.hours.trim() ? { hours: c.hours.trim() } : {}),
+        sourceUrl: c.sourceUrl.trim(),
+        lastVerified: c.lastVerified.trim(),
+      })),
       officialSources: [
         {
           name: form.portalName.trim(),
@@ -350,6 +377,70 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
               style={{ fontSize: '0.85rem', padding: '0.75rem', borderRadius: '0.75rem', fontFamily: 'inherit' }}
             />
           </div>
+
+          <fieldset className="contact-form">
+            <legend>Contact channels (optional, official published details only)</legend>
+            {form.contacts.map((c, idx) => {
+              const errs = showContactErrors ? contactCheck.errorsByIndex[idx] || {} : {};
+              const field = (name) => `contact-${idx}-${name}`;
+              const errProps = (name) =>
+                errs[name] ? { 'aria-invalid': 'true', 'aria-describedby': `${field(name)}-err` } : {};
+              const err = (name) =>
+                errs[name] ? (
+                  <span id={`${field(name)}-err`} className="contact-form__err" role="alert">{errs[name]}</span>
+                ) : null;
+              return (
+                <div className="contact-form__row" key={idx} role="group" aria-label={`Contact channel ${idx + 1}`}>
+                  <div>
+                    <label htmlFor={field('type')}>Type</label>
+                    <select id={field('type')} className="input-field" value={c.type} onChange={(e) => updateContact(idx, { type: e.target.value })} {...errProps('type')}>
+                      {CONTACT_TYPES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+                    </select>
+                    {err('type')}
+                  </div>
+                  <div>
+                    <label htmlFor={field('method')}>Channel</label>
+                    <select id={field('method')} className="input-field" value={c.method} onChange={(e) => updateContact(idx, { method: e.target.value })} {...errProps('method')}>
+                      {CONTACT_METHODS.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+                    </select>
+                    {err('method')}
+                  </div>
+                  <div className="contact-form__full">
+                    <label htmlFor={field('value')}>Phone number, email or web address</label>
+                    <input id={field('value')} type="text" className="input-field" value={c.value} onChange={(e) => updateContact(idx, { value: e.target.value })} {...errProps('value')} />
+                    {err('value')}
+                  </div>
+                  <div>
+                    <label htmlFor={field('hours')}>Published hours (if official)</label>
+                    <input id={field('hours')} type="text" className="input-field" value={c.hours} onChange={(e) => updateContact(idx, { hours: e.target.value })} />
+                  </div>
+                  <div>
+                    <label htmlFor={field('lastVerified')}>Last verified (YYYY-MM-DD)</label>
+                    <input id={field('lastVerified')} type="text" inputMode="numeric" placeholder="2026-01-31" className="input-field" value={c.lastVerified} onChange={(e) => updateContact(idx, { lastVerified: e.target.value })} {...errProps('lastVerified')} />
+                    {err('lastVerified')}
+                  </div>
+                  <div className="contact-form__full">
+                    <label htmlFor={field('sourceUrl')}>Official source reference (URL)</label>
+                    <input id={field('sourceUrl')} type="text" placeholder="https://..." className="input-field" value={c.sourceUrl} onChange={(e) => updateContact(idx, { sourceUrl: e.target.value })} {...errProps('sourceUrl')} />
+                    {err('sourceUrl')}
+                  </div>
+                  <div className="contact-form__full contact-form__actions">
+                    <button type="button" className="btn btn-secondary" onClick={() => removeContact(idx)} style={{ fontSize: '0.8rem', padding: '0.4rem 0.85rem' }}>
+                      Remove channel {idx + 1}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setForm({ ...form, contacts: [...form.contacts, { ...EMPTY_CONTACT }] })}
+              style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}
+            >
+              <Plus size={14} aria-hidden="true" /> Add contact channel
+            </button>
+          </fieldset>
 
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
             <button
