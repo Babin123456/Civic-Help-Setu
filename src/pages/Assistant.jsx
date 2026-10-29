@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { parseAssistantQuery } from '../utils/searchParams';
 import { useLocation, Link } from 'react-router-dom';
 import { Send, AlertCircle, Loader2, Sparkles, Mic, MicOff, BookOpen, RefreshCw, Pencil } from 'lucide-react';
 import ChatMessage from '../components/ChatMessage';
@@ -51,7 +52,7 @@ const Assistant = () => {
   // Handle URL query parameter ?q=
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
-    const query = searchParams.get('q');
+    const query = parseAssistantQuery(searchParams.get('q'));
 
     if (query) {
       handleSendMessage(query);
