@@ -108,3 +108,17 @@ npm run lint:security
 
 - These are three common checks, not a full security review. They do not look at server code (there is none in this repo), HTTP headers, or runtime behaviour.
 - The workflow could only be checked statically (`actionlint`) and by running each command locally. Its first real run will be on GitHub.
+
+## Redirect destinations after sign in
+
+Every login, sign-up and SSO return path goes through `sanitizeRedirectPath` in `src/utils/authRedirect.js`. Do not read `redirect_url`, `sign_in_force_redirect_url` or router state and pass it to `navigate` or Clerk directly.
+
+It accepts an in-app path (`/saved?folder=x`) or a full URL on this site's own origin. It returns `null` (callers fall back to `/`) for:
+
+- other origins, including look-alike hosts, other ports, `http://` downgrades and URLs with credentials (`https://app.example@evil.example`)
+- `//host`, `///host`, `/\host`, and the same with a tab, newline or other control character inside (browsers delete those, so `/<TAB>/evil.example` becomes `//evil.example`)
+- percent-encoded leading separators (`/%2Fevil.example`, `/%5C…`, double encoding) and malformed escapes
+- `javascript:`, `data:`, `vbscript:` and every other scheme, in any case or encoding
+- the sign-in pages themselves (loop), and anything over 2048 characters
+
+To trust another origin, add the full origin (`https://apply.example.org`) to `APPROVED_REDIRECT_ORIGINS` and say why in the pull request. The list is empty today.
