@@ -40,6 +40,7 @@ import TrackingReceiptModal from '../components/tracking/TrackingReceiptModal';
 import SlaBreachAlertWidget from '../components/tracking/SlaBreachAlertWidget';
 import AppellateEscalationLadder from '../components/tracking/AppellateEscalationLadder';
 import GrievanceEvidenceOrganizerModal from '../components/grievance/GrievanceEvidenceOrganizerModal';
+import ApplicationMilestoneTracker from '../components/tracking/ApplicationMilestoneTracker';
 
 const Track = () => {
   const location = useLocation();
@@ -276,6 +277,8 @@ const Track = () => {
                   <ApplicationTimeline stages={activeApp.stages || []} currentStageIndex={activeApp.currentStageIndex || 0} />
                   <LinkedDocumentsManager documents={activeApp.linkedDocs || []} />
                 </div>
+
+                <ApplicationMilestoneTracker application={activeApp} />
 
                 {requiredDocuments.length > 0 && (
                   <section className="card" style={{ padding: '1.25rem' }} aria-labelledby="track-checklist-title">
