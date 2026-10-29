@@ -20,6 +20,7 @@ import {
   loadJourneyProgress,
   resetJourneyProgress,
 } from '../../services/journeyDependencyEngine.js';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 /**
  * JourneyPlannerModal Component (#79)
@@ -504,7 +505,7 @@ const JourneyPlannerModal = ({ isOpen, onClose }) => {
 
                       {task.officialSource?.url && (
                         <a
-                          href={task.officialSource.url}
+                          href={safeHttpUrl(task.officialSource.url) || undefined}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{

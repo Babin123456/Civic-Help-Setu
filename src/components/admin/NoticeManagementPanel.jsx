@@ -22,6 +22,7 @@ import {
   resetNoticesToDefault,
 } from '../../services/noticeDigestService';
 import { MOCK_SERVICES } from '../../data/services';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 const NoticeManagementPanel = () => {
   const [notices, setNotices] = useState([]);
@@ -625,7 +626,7 @@ const NoticeManagementPanel = () => {
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                   {notice.sourceUrl && (
                     <a
-                      href={notice.sourceUrl}
+                      href={safeHttpUrl(notice.sourceUrl) || undefined}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-secondary"

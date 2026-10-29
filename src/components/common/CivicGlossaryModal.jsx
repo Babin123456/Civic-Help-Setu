@@ -4,6 +4,7 @@ import { searchGlossary } from '../../data/civicGlossary.js';
 import { submitGlossarySuggestion } from '../../services/civicGlossaryService.js';
 import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../context/ToastContext';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 const CivicGlossaryModal = ({
   isOpen,
@@ -327,7 +328,7 @@ const CivicGlossaryModal = ({
                         <ShieldCheck size={13} color="var(--success)" />
                         <span style={{ color: 'var(--text-tertiary)' }}>Reviewed Source:</span>
                         <a
-                          href={item.reviewedSource.url}
+                          href={safeHttpUrl(item.reviewedSource.url) || undefined}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{ color: 'var(--accent-main)', display: 'inline-flex', alignItems: 'center', gap: '2px', textDecoration: 'underline' }}

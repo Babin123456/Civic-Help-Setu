@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
 import { ExternalLink, ChevronDown, Info } from 'lucide-react';
 import { buildSourcePanelModel } from './sourcePanelModel';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 /**
  * Expandable "Sources and limitations" disclosure for an assistant message.
@@ -41,7 +42,7 @@ const SourcesAndLimitations = ({ message, defaultOpen = false }) => {
               {model.sources.map((src, i) => (
                 <li key={`${src.url || src.name}-${i}`} className="sources-panel__item">
                   {src.url ? (
-                    <a href={src.url} target="_blank" rel="noopener noreferrer" className="sources-panel__link">
+                    <a href={safeHttpUrl(src.url) || undefined} target="_blank" rel="noopener noreferrer" className="sources-panel__link">
                       {src.name}
                       <span className="sr-only"> (opens in a new tab)</span>
                       <ExternalLink size={12} aria-hidden="true" />

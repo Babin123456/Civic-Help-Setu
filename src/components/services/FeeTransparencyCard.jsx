@@ -18,6 +18,7 @@ import {
   loadFeePreferences,
   saveFeePreferences,
 } from '../../services/feeTransparencyService';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 /**
  * FeeTransparencyCard (#145)
@@ -427,7 +428,7 @@ const FeeTransparencyCard = ({ serviceId, serviceName }) => {
                 </span>
                 {feeBreakdown.officialSource.url && (
                   <a
-                    href={feeBreakdown.officialSource.url}
+                    href={safeHttpUrl(feeBreakdown.officialSource.url) || undefined}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{

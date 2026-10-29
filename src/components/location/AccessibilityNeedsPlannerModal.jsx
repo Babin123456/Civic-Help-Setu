@@ -27,6 +27,7 @@ import {
   exportVisitPlanSummary,
 } from '../../services/accessibilityPlannerService.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 const AccessibilityNeedsPlannerModal = ({ isOpen, onClose, initialOfficeId = null }) => {
   const { toast } = useToast();
@@ -304,7 +305,7 @@ const AccessibilityNeedsPlannerModal = ({ isOpen, onClose, initialOfficeId = nul
                 <ShieldCheck size={15} color="var(--success)" />
                 <span style={{ color: 'var(--text-tertiary)' }}>Source:</span>
                 <a
-                  href={profile.officialSource.url}
+                  href={safeHttpUrl(profile.officialSource.url) || undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ color: 'var(--accent-main)', textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: '2px' }}

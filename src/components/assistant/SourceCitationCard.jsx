@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ExternalLink, BookOpen, ChevronDown, ChevronUp, CheckCircle, Info } from 'lucide-react';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 /**
  * SourceCitationCard Component (#77)
@@ -92,7 +93,7 @@ const SourceCitationCard = ({ chunks = [], sources = [], disclaimer }) => {
                 {chunk.sourceUrl && (
                   <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <a
-                      href={chunk.sourceUrl}
+                      href={safeHttpUrl(chunk.sourceUrl) || undefined}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{

@@ -11,6 +11,7 @@ import {
   getUnresolvedConflictsForService,
   CLAIM_FIELD_LABELS,
 } from '../../services/sourceConflictService';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 const SourceConflictCautionBanner = ({ serviceId }) => {
   const [conflicts, setConflicts] = useState([]);
@@ -174,7 +175,7 @@ const SourceConflictCautionBanner = ({ serviceId }) => {
                             )}
                             {src.sourceUrl && (
                               <a
-                                href={src.sourceUrl}
+                                href={safeHttpUrl(src.sourceUrl) || undefined}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{

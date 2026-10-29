@@ -32,6 +32,7 @@ import {
   exportJourneySummary,
 } from '../../services/lifeEventNavigatorService.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 const EVENT_ICONS = {
   Home: Home,
@@ -581,7 +582,7 @@ const LifeEventNavigatorModal = ({ isOpen, onClose }) => {
                         <ShieldCheck size={14} color="var(--success)" />
                         <span style={{ color: 'var(--text-tertiary)' }}>Verified Source:</span>
                         <a
-                          href={task.officialSource.url}
+                          href={safeHttpUrl(task.officialSource.url) || undefined}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{

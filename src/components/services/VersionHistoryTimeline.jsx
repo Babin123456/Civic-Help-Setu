@@ -1,5 +1,6 @@
 import { History, FileText, CheckCircle, ExternalLink, Calendar, ShieldCheck } from 'lucide-react';
 import { formatCircularCitation } from '../../services/serviceChangelogService';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 export default function VersionHistoryTimeline({ revisions = [] }) {
   if (!revisions.length) {
@@ -52,7 +53,7 @@ export default function VersionHistoryTimeline({ revisions = [] }) {
           {rev.sourceUrl && (
             <div style={{ marginTop: '10px' }}>
               <a
-                href={rev.sourceUrl}
+                href={safeHttpUrl(rev.sourceUrl) || undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
