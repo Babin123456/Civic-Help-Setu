@@ -1,4 +1,5 @@
 import { CIVIC_OFFICES } from '../data/locationOffices';
+import { logDiagnostic } from '../utils/diagnostics';
 
 const APPOINTMENTS_STORAGE_KEY = 'civicbridge_office_tokens';
 const USER_LOCATION_CACHE_KEY = 'civicbridge_user_coords';
@@ -365,7 +366,7 @@ export const bookOfficeAppointment = ({
   try {
     localStorage.setItem(APPOINTMENTS_STORAGE_KEY, JSON.stringify(appointments));
   } catch (err) {
-    console.error('Failed to store appointment', err);
+    logDiagnostic('Failed to store appointment', err);
   }
   return newAppointment;
 };
@@ -376,7 +377,7 @@ export const cancelOfficeAppointment = (appointmentId) => {
   try {
     localStorage.setItem(APPOINTMENTS_STORAGE_KEY, JSON.stringify(filtered));
   } catch (err) {
-    console.error('Failed to update appointments', err);
+    logDiagnostic('Failed to update appointments', err);
   }
   return filtered;
 };

@@ -26,6 +26,7 @@ import { useToast } from '../../context/ToastContext';
 import useUnsavedChangesGuard from '../../hooks/useUnsavedChangesGuard';
 import { isFormDirty } from '../../utils/formDraft';
 import UnsavedChangesDialog from '../common/UnsavedChangesDialog';
+import { logDiagnostic } from '../../utils/diagnostics';
 
 const INDIAN_STATES = [
   'Andhra Pradesh',
@@ -293,7 +294,7 @@ const UniversalEligibilityWizard = ({
       setIsSaved(false);
       setStep(3);
     } catch (error) {
-      console.error('Failed to evaluate scheme eligibility:', error);
+      logDiagnostic('Failed to evaluate scheme eligibility:', error);
 
       toast.error?.(
         'Unable to evaluate eligibility. Please try again.'
@@ -326,7 +327,7 @@ const UniversalEligibilityWizard = ({
 
       onAssessmentSaved();
     } catch (error) {
-      console.error('Failed to save eligibility assessment:', error);
+      logDiagnostic('Failed to save eligibility assessment:', error);
 
       toast.error?.(
         'Unable to save the assessment. Please try again.'

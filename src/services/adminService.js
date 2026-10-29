@@ -1,6 +1,7 @@
 import { MOCK_SERVICES } from '../data/services';
 import { normalizeName } from './serviceImportService';
 import { CUSTOM_SERVICES_KEY, getAllServices } from './serviceCatalog';
+import { logDiagnostic } from '../utils/diagnostics';
 
 const SERVICES_KEY = CUSTOM_SERVICES_KEY;
 const REPORTS_KEY = 'civicbridge_error_reports';
@@ -141,7 +142,7 @@ export const saveAdminService = (serviceData, actorName = 'SuperAdmin') => {
 
     return getAdminServices();
   } catch (err) {
-    console.error('Failed to save service', err);
+    logDiagnostic('Failed to save service', err);
     return getAdminServices();
   }
 };
@@ -157,7 +158,7 @@ export const importAdminServices = (services, actorName = 'SuperAdmin') => {
     custom = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(custom)) throw new Error('stored services are not a list');
   } catch (err) {
-    console.error('Failed to read services before import', err);
+    logDiagnostic('Failed to read services before import', err);
     return { ok: false, imported: 0, skipped: [], error: 'Existing service data could not be read, so nothing was imported.' };
   }
 
@@ -186,7 +187,7 @@ export const importAdminServices = (services, actorName = 'SuperAdmin') => {
   try {
     localStorage.setItem(SERVICES_KEY, JSON.stringify([...accepted, ...custom]));
   } catch (err) {
-    console.error('Failed to save imported services', err);
+    logDiagnostic('Failed to save imported services', err);
     return { ok: false, imported: 0, skipped, error: 'Saving failed (browser storage may be full). No services were imported.' };
   }
 
@@ -242,7 +243,7 @@ export const deleteAdminService = (id, actorName = 'SuperAdmin') => {
 
     return getAdminServices();
   } catch (err) {
-    console.error('Failed to delete service', err);
+    logDiagnostic('Failed to delete service', err);
     return getAdminServices();
   }
 };
@@ -256,7 +257,7 @@ export const getReports = () => {
     }
     return JSON.parse(raw);
   } catch (err) {
-    console.error('Failed to load error reports', err);
+    logDiagnostic('Failed to load error reports', err);
     return DEFAULT_REPORTS;
   }
 };
@@ -330,7 +331,7 @@ export const addAuditLog = ({ action, actor = 'SuperAdmin', target = '', details
   try {
     localStorage.setItem(AUDIT_LOGS_KEY, JSON.stringify(logs.slice(0, 150))); // Keep last 150
   } catch (err) {
-    console.error('Failed to save audit log:', err);
+    logDiagnostic('Failed to save audit log:', err);
   }
   return logs;
 };

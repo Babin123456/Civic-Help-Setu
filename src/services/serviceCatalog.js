@@ -1,4 +1,5 @@
 import { MOCK_SERVICES } from '../data/services';
+import { logDiagnostic } from '../utils/diagnostics';
 
 // Where the admin dashboard keeps guides it added or edited (see adminService).
 export const CUSTOM_SERVICES_KEY = 'civicbridge_custom_services';
@@ -25,7 +26,7 @@ export const getAllServices = () => {
       custom.filter((c) => !builtInIds.has(c.id))
     );
   } catch (err) {
-    console.error('Failed to load saved service guides', err);
+    logDiagnostic('Failed to load saved service guides', err);
     return [...MOCK_SERVICES];
   }
 };

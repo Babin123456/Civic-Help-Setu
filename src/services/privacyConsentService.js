@@ -4,6 +4,7 @@
  * auditable security event logging (strictly without PII), complete data export,
  * and cascading account deletion according to the India DPDP Act 2023 & GDPR standards.
  */
+import { logDiagnostic } from '../utils/diagnostics';
 
 const CONSENT_STORAGE_KEY = 'civicbridge_consent_preferences';
 const AUDIT_STORAGE_KEY = 'civicbridge_privacy_audit_log';
@@ -376,7 +377,7 @@ export function recordPrivacyAuditLog(action, metadata = {}, actorId = 'citizen_
     const updated = [entry, ...logs].slice(0, 100);
     storage.setItem(AUDIT_STORAGE_KEY, JSON.stringify(updated));
   } catch (err) {
-    console.error('Failed to write privacy audit log:', err);
+    logDiagnostic('Failed to write privacy audit log:', err);
   }
 }
 

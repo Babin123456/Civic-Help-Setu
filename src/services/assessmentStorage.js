@@ -1,3 +1,4 @@
+import { logDiagnostic } from '../utils/diagnostics';
 const STORAGE_KEY = 'civicbridge_eligibility_assessments';
 
 export const SCHEME_EVALUATION_RULES = [
@@ -234,7 +235,7 @@ export const getSavedAssessments = () => {
     if (!raw) return [];
     return JSON.parse(raw);
   } catch (err) {
-    console.error('Failed to parse assessments', err);
+    logDiagnostic('Failed to parse assessments', err);
     return [];
   }
 };

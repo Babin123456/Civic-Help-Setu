@@ -10,6 +10,7 @@
  * - Discloses data confidence penalties when service records have missing or unverified metadata.
  * - Supports saving and resuming progress locally.
  */
+import { logDiagnostic } from '../utils/diagnostics';
 
 export const READINESS_STORAGE_KEY = 'civicbridge_readiness_scorecards';
 
@@ -398,7 +399,7 @@ export const saveReadinessProgress = (serviceId, checkedIds = [], notes = '', st
     storage.setItem(READINESS_STORAGE_KEY, JSON.stringify(map));
     return record;
   } catch (err) {
-    console.error('Failed to save readiness scorecard', err);
+    logDiagnostic('Failed to save readiness scorecard', err);
     return null;
   }
 };

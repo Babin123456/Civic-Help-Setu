@@ -1,4 +1,5 @@
 import { isValidVaultRecord } from './vaultValidation';
+import { logDiagnostic } from '../utils/diagnostics';
 
 const STORAGE_KEY = 'civicbridge_vault_docs';
 
@@ -95,7 +96,7 @@ export const getDocuments = () => {
     }
     return JSON.parse(raw);
   } catch (err) {
-    console.error('Failed to load documents from vault storage', err);
+    logDiagnostic('Failed to load documents from vault storage', err);
     return DEFAULT_DOCUMENTS;
   }
 };
