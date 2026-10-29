@@ -4,6 +4,7 @@ import UniversalEligibilityWizard from '../components/eligibility/UniversalEligi
 import SavedAssessmentsList from '../components/eligibility/SavedAssessmentsList';
 import EntitlementCalculatorModal from '../components/eligibility/EntitlementCalculatorModal';
 import UnsavedChangesDialog from '../components/common/UnsavedChangesDialog';
+import ApplicantProfileSwitcher from '../components/eligibility/ApplicantProfileSwitcher';
 
 const Eligibility = () => {
   const [activeTab, setActiveTab] = useState('wizard');
@@ -144,6 +145,8 @@ const Eligibility = () => {
             <strong>Auditable & Private:</strong> Eligibility criteria are evaluated locally in your browser using verified government scheme guidelines. Your financial and demographic answers are not uploaded to any remote server.
           </span>
         </div>
+
+        <ApplicantProfileSwitcher onProfileChanged={() => setRefreshCount((c) => c + 1)} />
 
         {/* Content based on active tab */}
         {activeTab === 'wizard' ? (
