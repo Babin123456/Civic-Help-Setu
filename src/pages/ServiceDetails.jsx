@@ -11,6 +11,7 @@ import ServiceGuide from '../components/services/ServiceGuide';
 import DataFreshnessTrustBadge from '../components/services/DataFreshnessTrustBadge';
 import JourneyHandoffModal from '../components/journey/JourneyHandoffModal';
 import NoticeBadge from '../components/notices/NoticeBadge';
+import ServiceAvailabilityNotice from '../components/services/ServiceAvailabilityNotice';
 import LowBandwidthShareModal from '../components/services/LowBandwidthShareModal';
 
 const copyServiceLink = async (url) => {
@@ -270,6 +271,7 @@ const ServiceDetails = () => {
                 <DataFreshnessTrustBadge service={service} />
                 <NoticeBadge serviceId={service.id} serviceName={service.name} />
               </div>
+              <ServiceAvailabilityNotice serviceId={service.id} serviceName={service.name} />
             </div>
 
             <div
