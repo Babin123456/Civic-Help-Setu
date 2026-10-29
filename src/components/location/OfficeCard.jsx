@@ -12,6 +12,7 @@ import {
   UserCheck,
   CheckCircle2,
   ExternalLink,
+  Accessibility,
 } from 'lucide-react';
 import { formatDistance } from '../../services/locationService';
 import { useToast } from '../../context/ToastContext';
@@ -24,6 +25,7 @@ const OfficeCard = ({
   onBookAppointment,
   isSelected = false,
   onSelect = () => {},
+  onAuditAccessibility,
 }) => {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
@@ -316,6 +318,29 @@ const OfficeCard = ({
           <Calendar size={15} />
           Book Visit Token
         </button>
+
+        {onAuditAccessibility && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAuditAccessibility(office);
+            }}
+            className="btn btn-secondary"
+            title="Inspect & Rate Office Physical Accessibility"
+            style={{
+              padding: '0.55rem 0.75rem',
+              fontSize: '0.825rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              borderRadius: '0.5rem',
+            }}
+          >
+            <Accessibility size={15} />
+            <span>Audit</span>
+          </button>
+        )}
 
         <button
           type="button"

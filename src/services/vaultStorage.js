@@ -1,5 +1,6 @@
 import { isValidVaultRecord } from './vaultValidation';
 import { logDiagnostic } from '../utils/diagnostics';
+import { minimizeDocumentNumber, minimizeVaultDocuments } from './dataMinimization';
 
 const STORAGE_KEY = 'civicbridge_vault_docs';
 
@@ -22,7 +23,7 @@ const DEFAULT_DOCUMENTS = [
     id: 'doc-1',
     type: 'Aadhaar Card',
     category: 'Identity',
-    number: 'XXXX XXXX 1234',
+    number: 'XXXX 1234',
     issuer: 'UIDAI',
     issueDate: '2018-04-12',
     expiryDate: null,
@@ -36,7 +37,7 @@ const DEFAULT_DOCUMENTS = [
     id: 'doc-2',
     type: 'PAN Card',
     category: 'Finance',
-    number: 'ABCDE1234F',
+    number: 'XXXX 234F',
     issuer: 'Income Tax Department',
     issueDate: '2019-11-20',
     expiryDate: null,
@@ -50,7 +51,7 @@ const DEFAULT_DOCUMENTS = [
     id: 'doc-3',
     type: 'Driving License',
     category: 'Transport',
-    number: 'DL-142022019',
+    number: 'XXXX 2019',
     issuer: 'Ministry of Road Transport',
     issueDate: '2022-03-01',
     expiryDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // expiring in 45 days
@@ -94,7 +95,17 @@ export const getDocuments = () => {
       }
       return DEFAULT_DOCUMENTS;
     }
-    return JSON.parse(raw);
+    const stored = JSON.parse(raw);
+    // Older entries kept the full document number, cut them down once (#212)
+    const minimized = minimizeVaultDocuments(stored);
+    if (minimized !== stored) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(minimized));
+      } catch {
+        // still return the minimized copy
+      }
+    }
+    return minimized;
   } catch (err) {
     logDiagnostic('Failed to load documents from vault storage', err);
     return DEFAULT_DOCUMENTS;
@@ -105,10 +116,11 @@ export const saveDocument = (doc) => {
   const current = getDocuments();
   let updated;
   if (doc.id && current.some((d) => d.id === doc.id)) {
-    updated = current.map((d) => (d.id === doc.id ? { ...d, ...doc } : d));
+    updated = current.map((d) => (d.id === doc.id ? { ...d, ...doc, number: minimizeDocumentNumber(doc.number ?? d.number) } : d));
   } else {
     const newDoc = {
       ...doc,
+      number: minimizeDocumentNumber(doc.number),
       id: doc.id || `doc-${Date.now()}`,
       createdAt: new Date().toISOString(),
       verified: Boolean(doc.verified),
@@ -193,9 +205,9 @@ export const importVaultData = (jsonString) => {
       }
       if (existingIds.has(incoming.id)) {
         const idx = merged.findIndex((d) => d.id === incoming.id);
-        merged[idx] = { ...merged[idx], ...incoming };
+        merged[idx] = { ...merged[idx], ...incoming, number: minimizeDocumentNumber(incoming.number) };
       } else {
-        merged.push(incoming);
+        merged.push({ ...incoming, number: minimizeDocumentNumber(incoming.number) });
       }
     }
 
