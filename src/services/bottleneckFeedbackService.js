@@ -1,3 +1,4 @@
+import { requirePermission } from './accessControl';
 /**
  * Civic Service Process Bottleneck Feedback Service
  * 
@@ -348,6 +349,7 @@ export const reviewBottleneckFeedback = (
   adminNotes = '',
   customStorage
 ) => {
+  requirePermission('feedback.moderate');
   const list = getAllFeedback(customStorage);
   const index = list.findIndex((f) => f.id === id);
   if (index === -1) {
@@ -370,6 +372,7 @@ export const reviewBottleneckFeedback = (
  * Queries feedback list with moderation filters
  */
 export const queryFeedbackForModeration = (customStorage, options = {}) => {
+  requirePermission('feedback.moderate');
   const { status, category, serviceId, searchQuery } = options;
   let list = getAllFeedback(customStorage);
 
@@ -402,6 +405,7 @@ export const queryFeedbackForModeration = (customStorage, options = {}) => {
  * Resets feedback to defaults
  */
 export const resetFeedbackDefaults = (customStorage) => {
+  requirePermission('feedback.moderate');
   const storage = getStorage(customStorage);
   if (!storage) return false;
   try {

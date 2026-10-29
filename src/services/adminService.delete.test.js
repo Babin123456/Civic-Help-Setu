@@ -8,6 +8,10 @@ import {
 } from './adminService';
 import { removeServiceGuide } from '../utils/adminDestructiveActions';
 import { MOCK_SERVICES } from '../data/services';
+import { setCurrentActor } from './accessControl';
+
+// These tests are about what the admin features do; who may use them is tested in accessControl.test.js.
+setCurrentActor({ role: 'admin', username: 'Test Admin' });
 
 const SERVICES_KEY = 'civicbridge_custom_services';
 const AUDIT_KEY = 'civicbridge_audit_logs';

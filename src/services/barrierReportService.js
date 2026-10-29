@@ -1,3 +1,4 @@
+import { can } from './accessControl';
 /**
  * Citizen-Reported Service Barrier Insights Service (#148)
  *
@@ -211,11 +212,12 @@ export const getBarrierReportStatus = (trackingCode, storage = getStorage()) => 
  * Only admins or moderators can execute this function.
  */
 export const moderateBarrierReport = (
-  { reportId, action, reviewerNotes = '', userRole = 'citizen', reviewerName = 'Moderator' },
+  { reportId, action, reviewerNotes = '', reviewerName = 'Moderator' },
   storage = getStorage()
 ) => {
-  const allowedRoles = ['admin', 'moderator', 'superadmin'];
-  if (!allowedRoles.includes((userRole || '').toLowerCase())) {
+  // `userRole` is whatever the caller says it is, so it is not used to decide anything: the
+  // signed-in user's real role is checked instead (see accessControl.js).
+  if (!can('barriers.moderate')) {
     const error = new Error('Unauthorized: Only administrators or community moderators can moderate barrier reports.');
     error.code = 'UNAUTHORIZED_ACCESS';
     throw error;

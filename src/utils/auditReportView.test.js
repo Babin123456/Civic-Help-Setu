@@ -7,6 +7,10 @@ import {
   describeAuditReport,
 } from './auditReportView';
 import { MOCK_SERVICES } from '../data/services';
+import { setCurrentActor } from '../services/accessControl';
+
+// These tests are about what the admin features do; who may use them is tested in accessControl.test.js.
+setCurrentActor({ role: 'admin', username: 'Test Admin' });
 
 describe('formatAuditCategory', () => {
   it('replaces every underscore', () => {
@@ -137,6 +141,8 @@ describe('with the default records from communityAuditService', () => {
   });
 
   it('a report is resolved after resolveAuditReport', async () => {
+    const { setCurrentActor: signIn } = await import('../services/accessControl'); // fresh module copy after resetModules
+    signIn({ role: 'admin', username: 'Test Admin' });
     const { getAuditReports, resolveAuditReport } = await import('../services/communityAuditService');
     const first = getAuditReports()[0];
     resolveAuditReport(first.id, 'Fixed at the counter');

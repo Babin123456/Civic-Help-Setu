@@ -13,6 +13,12 @@ import {
   getAllBarrierReports,
   BARRIER_REPORTS_STORAGE_KEY,
 } from './barrierReportService';
+import { setCurrentActor } from './accessControl';
+
+// The role that counts is the signed-in user's, not a role passed in by the caller.
+const signInAs = (role) => setCurrentActor(role ? { role, username: 'Test User' } : null);
+signInAs('admin');
+
 
 const makeStorage = (initial = []) => {
   const store = new Map();
@@ -171,16 +177,21 @@ describe('Citizen-Reported Service Barrier Insights Service (#148)', () => {
         mockStorage
       );
 
-      expect(() =>
-        moderateBarrierReport(
-          {
-            reportId: submission.report.id,
-            action: 'approve',
-            userRole: 'citizen',
-          },
-          mockStorage
-        )
-      ).toThrow(/Unauthorized/);
+      signInAs('citizen');
+      try {
+        expect(() =>
+          moderateBarrierReport(
+            {
+              reportId: submission.report.id,
+              action: 'approve',
+              userRole: 'admin', // claiming to be an admin changes nothing
+            },
+            mockStorage
+          )
+        ).toThrow(/Unauthorized/);
+      } finally {
+        signInAs('admin');
+      }
     });
 
     it('throws when report ID does not exist', () => {

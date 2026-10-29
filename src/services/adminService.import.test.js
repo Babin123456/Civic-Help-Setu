@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getAdminServices, getAuditLogs, importAdminServices } from './adminService';
 import { MOCK_SERVICES } from '../data/services';
+import { setCurrentActor } from './accessControl';
+
+// These tests are about what the admin features do; who may use them is tested in accessControl.test.js.
+setCurrentActor({ role: 'admin', username: 'Test Admin' });
 
 const SERVICES_KEY = 'civicbridge_custom_services';
 

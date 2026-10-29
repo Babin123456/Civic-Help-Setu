@@ -1,3 +1,4 @@
+import { requirePermission } from './accessControl';
 /**
  * Civic Source Conflict and Confidence Review Queue Service (#149)
  *
@@ -209,6 +210,7 @@ export const resolveSourceConflict = (
   },
   storage = getStorage()
 ) => {
+  requirePermission('sourceConflicts.review');
   // CRITICAL ACCEPTANCE CRITERIA:
   // "The system does not automatically choose a source solely based on scraped text."
   if (isAutomatedScraper) {
@@ -276,6 +278,7 @@ export const reopenSourceConflict = (
   { conflictId, reopenReason, actor = 'Administrator' },
   storage = getStorage()
 ) => {
+  requirePermission('sourceConflicts.review');
   if (!conflictId || !reopenReason) {
     throw new Error('Conflict ID and reason are required to re-open a conflict.');
   }

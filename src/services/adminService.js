@@ -1,3 +1,4 @@
+import { requirePermission } from './accessControl';
 import { MOCK_SERVICES } from '../data/services';
 import { normalizeName } from './serviceImportService';
 import { CUSTOM_SERVICES_KEY, getAllServices } from './serviceCatalog';
@@ -109,6 +110,7 @@ const DEFAULT_SUBMISSIONS = [
 export const getAdminServices = getAllServices;
 
 export const saveAdminService = (serviceData, actorName = 'SuperAdmin') => {
+  requirePermission('services.write');
   try {
     const raw = localStorage.getItem(SERVICES_KEY);
     const custom = raw ? JSON.parse(raw) : [];
@@ -151,6 +153,7 @@ export const saveAdminService = (serviceData, actorName = 'SuperAdmin') => {
 // Duplicates are checked again here because the catalog can change between the
 // preview and the confirm (another tab or another admin).
 export const importAdminServices = (services, actorName = 'SuperAdmin') => {
+  requirePermission('services.import');
   let custom;
   try {
     const raw = localStorage.getItem(SERVICES_KEY);
@@ -221,6 +224,7 @@ export const hasLocalServiceCopy = (id) => {
 //   - custom guide: removed, logged as a deletion
 // A failed write is not logged either, the caller sees the unchanged list.
 export const deleteAdminService = (id, actorName = 'SuperAdmin') => {
+  requirePermission('services.delete');
   try {
     const raw = localStorage.getItem(SERVICES_KEY);
     const custom = raw ? JSON.parse(raw) : [];
@@ -247,7 +251,7 @@ export const deleteAdminService = (id, actorName = 'SuperAdmin') => {
   }
 };
 
-export const getReports = () => {
+const readReports = () => {
   try {
     const raw = localStorage.getItem(REPORTS_KEY);
     if (!raw) {
@@ -262,7 +266,7 @@ export const getReports = () => {
 };
 
 export const submitErrorReport = ({ serviceId, serviceName, issueType, description, reporterEmail }) => {
-  const current = getReports();
+  const current = readReports();
   const newReport = {
     id: `rep-${Date.now()}`,
     serviceId: serviceId || 'general',
@@ -279,7 +283,8 @@ export const submitErrorReport = ({ serviceId, serviceName, issueType, descripti
 };
 
 export const resolveReport = (id, resolution = 'Verified and updated', actorName = 'SuperAdmin') => {
-  const current = getReports();
+  requirePermission('reports.resolve');
+  const current = readReports();
   const updated = current.map((r) =>
     r.id === id ? { ...r, status: 'resolved', resolutionNotes: resolution } : r
   );
@@ -296,14 +301,15 @@ export const resolveReport = (id, resolution = 'Verified and updated', actorName
 };
 
 export const dismissReport = (id) => {
-  const current = getReports();
+  requirePermission('reports.dismiss');
+  const current = readReports();
   const updated = current.filter((r) => r.id !== id);
   localStorage.setItem(REPORTS_KEY, JSON.stringify(updated));
   return updated;
 };
 
 /* --- AUDIT LOGS --- */
-export const getAuditLogs = () => {
+const readAuditLogs = () => {
   try {
     const raw = localStorage.getItem(AUDIT_LOGS_KEY);
     if (!raw) {
@@ -317,7 +323,8 @@ export const getAuditLogs = () => {
 };
 
 export const addAuditLog = ({ action, actor = 'SuperAdmin', target = '', details = '' }) => {
-  const logs = getAuditLogs();
+  requirePermission('audit.write');
+  const logs = readAuditLogs();
   const newLog = {
     id: `log_${Date.now()}`,
     timestamp: new Date().toISOString(),
@@ -336,7 +343,7 @@ export const addAuditLog = ({ action, actor = 'SuperAdmin', target = '', details
 };
 
 /* --- USER RBAC ROLE MANAGEMENT --- */
-export const getUserList = () => {
+const readUsers = () => {
   try {
     const raw = localStorage.getItem(USERS_KEY);
     if (!raw) {
@@ -350,7 +357,8 @@ export const getUserList = () => {
 };
 
 export const updateUserRole = (userId, newRole, customPermissions = {}, actorName = 'SuperAdmin') => {
-  const users = getUserList();
+  requirePermission('users.updateRole');
+  const users = readUsers();
   const updated = users.map((u) =>
     u.id === userId ? { ...u, role: newRole, permissions: customPermissions } : u
   );
@@ -368,7 +376,7 @@ export const updateUserRole = (userId, newRole, customPermissions = {}, actorNam
 };
 
 /* --- COMMUNITY SUBMISSION REVIEW QUEUE --- */
-export const getServiceSubmissions = () => {
+const readSubmissions = () => {
   try {
     const raw = localStorage.getItem(SUBMISSIONS_KEY);
     if (!raw) {
@@ -382,7 +390,8 @@ export const getServiceSubmissions = () => {
 };
 
 export const approveServiceSubmission = (submissionId, reviewNotes = '', actorName = 'SuperAdmin') => {
-  const submissions = getServiceSubmissions();
+  requirePermission('submissions.review');
+  const submissions = readSubmissions();
   const target = submissions.find((s) => s.id === submissionId);
   if (!target) return submissions;
 
@@ -417,7 +426,8 @@ export const approveServiceSubmission = (submissionId, reviewNotes = '', actorNa
 };
 
 export const rejectServiceSubmission = (submissionId, reviewNotes = '', actorName = 'SuperAdmin') => {
-  const submissions = getServiceSubmissions();
+  requirePermission('submissions.review');
+  const submissions = readSubmissions();
   const target = submissions.find((s) => s.id === submissionId);
   const updated = submissions.map((s) =>
     s.id === submissionId ? { ...s, status: 'rejected', reviewNotes } : s
@@ -432,4 +442,25 @@ export const rejectServiceSubmission = (submissionId, reviewNotes = '', actorNam
   });
 
   return updated;
+};
+
+/* --- Guarded reads: admin-only data. Internal code uses the unguarded read* helpers above. --- */
+export const getReports = () => {
+  requirePermission('reports.read');
+  return readReports();
+};
+
+export const getAuditLogs = () => {
+  requirePermission('audit.read');
+  return readAuditLogs();
+};
+
+export const getUserList = () => {
+  requirePermission('users.read');
+  return readUsers();
+};
+
+export const getServiceSubmissions = () => {
+  requirePermission('submissions.read');
+  return readSubmissions();
 };

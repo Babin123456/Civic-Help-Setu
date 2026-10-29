@@ -9,6 +9,10 @@ import {
   getStaleReviewQueue,
   getCatalogFreshnessHealth,
 } from './dataFreshnessTrustService';
+import { setCurrentActor } from './accessControl';
+
+// These tests are about what the admin features do; who may use them is tested in accessControl.test.js.
+setCurrentActor({ role: 'admin', username: 'Test Admin' });
 
 const makeStorage = (initialData = {}) => {
   const map = new Map(Object.entries(initialData));
