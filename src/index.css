@@ -1009,6 +1009,29 @@ html:not([data-theme="light"]) .cmd__result-row--cleared svg { color: #4ade80; }
   .cmd__danger, .cmd__retry { width: 100%; }
 }
 
+/* --- SERVICE ARCHIVE AND RESTORE (admin lifecycle, retired notice) --- */
+.lifecycle-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+.lifecycle-bar__views { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.lifecycle-bar .btn { font-size: 0.85rem; min-height: 44px; }
+.lifecycle-bar .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.lifecycle-empty { color: var(--text-secondary); padding: 1rem 0; }
+.admin-records__check { width: 1.25rem; height: 1.25rem; accent-color: var(--accent-main); cursor: pointer; }
+.admin-records__check:focus-visible { outline: 2px solid var(--accent-main); outline-offset: 2px; }
+.admin-record-card__select { display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+.lifecycle-review { border: 1px solid var(--border-main); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1rem; background: var(--glass-bg); display: flex; flex-direction: column; gap: 0.75rem; }
+.lifecycle-review__title { font-size: 1.05rem; font-weight: 700; margin: 0; }
+.lifecycle-review__note, .lifecycle-review__empty { font-size: 0.9rem; color: var(--text-secondary); margin: 0; }
+.lifecycle-review__heading { font-size: 0.9rem; font-weight: 700; margin: 0 0 0.35rem; }
+.lifecycle-review__list { margin: 0; padding-left: 1.1rem; font-size: 0.875rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.lifecycle-review__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.lifecycle-review__actions .btn { min-height: 44px; }
+.retired-notice { border: 1px solid var(--border-main); border-left: 4px solid #b45309; border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin-bottom: 1.5rem; background: var(--glass-bg); display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+.retired-notice__title { font-size: 1.1rem; font-weight: 700; margin: 0; }
+.retired-notice__text { margin: 0; color: var(--text-secondary); font-size: 0.95rem; }
+.retired-badge { display: inline-block; font-size: 0.8rem; font-weight: 600; color: var(--text-primary); border: 1px solid var(--border-main); border-radius: 99px; padding: 0.15rem 0.6rem; margin: 0 0 0.5rem; }
+@media (max-width: 480px) {
+  .lifecycle-bar .btn, .lifecycle-review__actions .btn { width: 100%; }
+}
 /* Service availability notices (#274) */
 .avail-notice-list { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; max-width: 720px; }
 .avail-notice { border: 1px solid #b45309; border-left-width: 4px; border-radius: var(--radius-sm); padding: 1rem; background: var(--glass-bg); text-align: left; }
