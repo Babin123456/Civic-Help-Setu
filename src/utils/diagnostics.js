@@ -66,7 +66,7 @@ const matchesPattern = (pattern, segments) => {
 /** The route pattern for a path or URL: "/services/:id" for "/services/ration-card?x=1". */
 export const routeOf = (input) => {
   if (typeof input !== 'string') return UNKNOWN_ROUTE;
-  let pathname = '';
+  let pathname;
   try {
     pathname = new URL(input, 'http://localhost').pathname;
   } catch {
