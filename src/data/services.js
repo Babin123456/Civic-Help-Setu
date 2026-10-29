@@ -17,6 +17,10 @@ export const MOCK_SERVICES = [
       'Parents\' identity proof (Aadhaar/Voter ID)',
       'Marriage certificate of parents (in some regions)'
     ],
+    documentRequirements: {
+      'Proof of birth from hospital (if born in hospital)': { type: 'conditional', condition: 'The child was born in a hospital.' },
+      'Marriage certificate of parents (in some regions)': { type: 'conditional', condition: 'Your region asks for it. The service record says only some regions do.' }
+    },
     steps: [
       { title: 'Register the birth', description: 'Ensure the hospital has registered the birth, or register it locally within 21 days.' },
       { title: 'Gather documents', description: 'Collect hospital discharge summary and parents\' ID proofs.' },
