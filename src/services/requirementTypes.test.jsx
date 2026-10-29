@@ -102,3 +102,25 @@ describe('markup', () => {
     expect(plain).not.toContain('Official requirement</span>');
   });
 });
+
+describe('follow-up checks', () => {
+  it('keeps requirements aligned with documents when an entry is not a string', () => {
+    const svc = {
+      documents: ['A', null, 'B'],
+      documentRequirements: { A: { type: 'optional' }, B: { type: 'optional', } },
+    };
+    expect(getDocumentRequirements(svc).map((r) => r.type)).toEqual(['optional', 'unverified', 'optional']);
+  });
+  it('Checklist says no official requirements when none are confirmed', () => {
+    const html = renderToStaticMarkup(<Checklist items={['A']} requirements={{}} label="Docs" />);
+    expect(html).toContain('No official requirements confirmed');
+    expect(html).not.toContain('0 of 0');
+  });
+  it('every documentRequirements key in the catalogue matches a document label', () => {
+    for (const svc of MOCK_SERVICES) {
+      for (const key of Object.keys(svc.documentRequirements || {})) {
+        expect(svc.documents, `${svc.id}: ${key}`).toContain(key);
+      }
+    }
+  });
+});

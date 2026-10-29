@@ -67,9 +67,8 @@ export const classifyRequirement = (label, requirements) => {
 /** Returns every document of a service with its requirement type. */
 export const getDocumentRequirements = (service) => {
   const documents = Array.isArray(service?.documents) ? service.documents : [];
-  return documents
-    .filter((d) => typeof d === 'string')
-    .map((d) => classifyRequirement(d, service.documentRequirements));
+  // Map over every entry (no filtering) so results stay index-aligned with `documents`.
+  return documents.map((d) => classifyRequirement(typeof d === 'string' ? d : '', typeof d === 'string' ? service.documentRequirements : null));
 };
 
 /** Builds the label -> requirement map the checklist component expects. */
