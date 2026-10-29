@@ -44,9 +44,18 @@ import ServiceImportPanel from '../components/admin/ServiceImportPanel';
 import ServiceRecordList from '../components/admin/ServiceRecordList';
 import ServiceLifecycleReview from '../components/admin/ServiceLifecycleReview';
 import { isArchived, planBulkArchive, planBulkRestore } from '../services/serviceLifecycle';
+import ServiceOwnershipModal from '../components/admin/ServiceOwnershipModal';
+import {
+  getOwnershipMap,
+  assignServiceOwnership,
+  clearServiceOwnership,
+  filterByOwnership,
+  buildOwnershipFilterOptions,
+} from '../services/serviceOwnershipService';
 import StaleRecordsReviewQueue from '../components/admin/StaleRecordsReviewQueue';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel';
+import AvailabilityNoticePanel from '../components/admin/AvailabilityNoticePanel';
 import { useToast } from '../context/ToastContext';
 import { getAuditReports, resolveAuditReport } from '../services/communityAuditService';
 import { describeAuditReport, countOpenAudits } from '../utils/auditReportView';
@@ -91,11 +100,18 @@ const Admin = () => {
     submission: null,
   });
   const [importOpen, setImportOpen] = useState(false);
-  // Catalog lifecycle: which list is shown, what is ticked, and the pending review.
+
+  // Catalog lifecycle states
   const [catalogView, setCatalogView] = useState('active');
   const [selectedIds, setSelectedIds] = useState([]);
   const [lifecycleReview, setLifecycleReview] = useState(null);
   const [isLifecycleRunning, setIsLifecycleRunning] = useState(false);
+
+  // Ownership & Filtering states
+  const [ownership, setOwnership] = useState({});
+  const [ownershipFilter, setOwnershipFilter] = useState('all');
+  const [ownershipModal, setOwnershipModal] = useState({ isOpen: false, service: null });
+
   const [isRuleConflictModalOpen, setIsRuleConflictModalOpen] = useState(false);
 
   // Destructive action waiting for confirmation
@@ -115,7 +131,28 @@ const Admin = () => {
     setAuditLogs(getAuditLogs());
     setSubmissions(getServiceSubmissions());
     setCommunityAudits(getAuditReports());
+    setOwnership(getOwnershipMap());
   }, []);
+
+  const handleAssignOwnership = (serviceId, input) => {
+    const result = assignServiceOwnership(serviceId, input, {
+      users,
+      actorName: user?.username || 'SuperAdmin',
+    });
+    if (result.ok) {
+      setOwnership(getOwnershipMap());
+      setAuditLogs(getAuditLogs());
+      toast?.success?.('Review assignment saved. The public guide is unchanged.');
+    }
+    return result;
+  };
+
+  const handleClearOwnership = (serviceId) => {
+    clearServiceOwnership(serviceId, { actorName: user?.username || 'SuperAdmin' });
+    setOwnership(getOwnershipMap());
+    setAuditLogs(getAuditLogs());
+    toast?.success?.('Review assignment cleared.');
+  };
 
   const handleLogout = () => {
     logout();
@@ -158,7 +195,10 @@ const Admin = () => {
 
   const activeServices = services.filter((svc) => !isArchived(svc));
   const archivedServices = services.filter(isArchived);
-  const shownServices = catalogView === 'archived' ? archivedServices : activeServices;
+  
+  // Combine catalog view and ownership filter logic safely
+  const currentCatalogBase = catalogView === 'archived' ? archivedServices : activeServices;
+  const shownServices = filterByOwnership(currentCatalogBase, ownership, users, ownershipFilter);
 
   const changeCatalogView = (view) => {
     setCatalogView(view);
@@ -402,6 +442,7 @@ const Admin = () => {
   ).length;
 
   const pendingAuditsCount = countOpenAudits(communityAudits);
+  
   return (
     <div
       className="section animate-fade-in"
@@ -727,7 +768,8 @@ const Admin = () => {
                   />
                 )}
 
-                <div className="lifecycle-bar">
+                {/* Combined Lifecycle Controls & Ownership Filter Bar */}
+                <div className="lifecycle-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
                   <div className="lifecycle-bar__views" role="group" aria-label="Catalog view">
                     <button
                       type="button"
@@ -746,14 +788,33 @@ const Admin = () => {
                       Archived ({archivedServices.length})
                     </button>
                   </div>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    disabled={selectedIds.length === 0}
-                    onClick={reviewLifecycle}
-                  >
-                    {catalogView === 'archived' ? 'Restore' : 'Archive'} selected ({selectedIds.length})
-                  </button>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                    <div className="ownership-filter" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <label htmlFor="ownership-filter" style={{ fontSize: '0.85rem', fontWeight: '600' }}>Filter:</label>
+                      <select
+                        id="ownership-filter"
+                        className="input-field"
+                        style={{ padding: '0.35rem 0.5rem', fontSize: '0.85rem' }}
+                        value={ownershipFilter}
+                        onChange={(e) => setOwnershipFilter(e.target.value)}
+                      >
+                        {buildOwnershipFilterOptions(ownership, users).map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      disabled={selectedIds.length === 0}
+                      onClick={reviewLifecycle}
+                      style={{ fontSize: '0.85rem' }}
+                    >
+                      {catalogView === 'archived' ? 'Restore' : 'Archive'} selected ({selectedIds.length})
+                    </button>
+                  </div>
                 </div>
 
                 {lifecycleReview && (
@@ -769,12 +830,15 @@ const Admin = () => {
                 {shownServices.length === 0 ? (
                   <p className="lifecycle-empty" role="status">
                     {catalogView === 'archived'
-                      ? 'No archived service guides. Archive a retired guide from the Active list.'
-                      : 'No active service guides.'}
+                      ? 'No archived service guides matching filter. Archive a retired guide from the Active list.'
+                      : 'No active service guides matching filter.'}
                   </p>
                 ) : (
                   <ServiceRecordList
                     services={shownServices}
+                    ownership={ownership}
+                    users={users}
+                    onAssign={(service) => setOwnershipModal({ isOpen: true, service })}
                     onEdit={(service) =>
                       setServiceModal({ isOpen: true, service })
                     }
@@ -784,6 +848,17 @@ const Admin = () => {
                     onToggleAll={toggleAllSelected}
                   />
                 )}
+
+                <ServiceOwnershipModal
+                  isOpen={ownershipModal.isOpen}
+                  onClose={() => setOwnershipModal({ isOpen: false, service: null })}
+                  service={ownershipModal.service}
+                  current={ownershipModal.service ? ownership[ownershipModal.service.id] : null}
+                  users={users}
+                  onSave={handleAssignOwnership}
+                  onClear={handleClearOwnership}
+                />
+
                 <RuleConflictInspectorModal
                   isOpen={isRuleConflictModalOpen}
                   onClose={() => setIsRuleConflictModalOpen(false)}
@@ -1108,7 +1183,8 @@ const Admin = () => {
                 </div>
               </div>
             )}
-                        {/* Community Discrepancy Audits Tab */}
+            
+            {/* Community Discrepancy Audits Tab */}
             {activeTab === 'community-audits' && (
               <div>
                 <div
@@ -1495,6 +1571,7 @@ const Admin = () => {
             {activeTab === 'notices' && (
               <div>
                 <NoticeManagementPanel />
+                <AvailabilityNoticePanel />
               </div>
             )}
 

@@ -176,7 +176,7 @@ Likelihood and impact are rough: Low, Medium, High. Status is what the code does
   - If the app is built **without** a Clerk key, `LocalFallbackAuthProvider` is used, and the login page lets anyone choose the Admin role (`Login.jsx`, `handleDemoSubmit` and `handleQuickDemo`). A production deploy that is missing the env var would silently turn into this.
   - All admin data (services, reports, audit trail, role list) is in `localStorage`. Anyone can edit it with the browser dev tools. Today that only affects their own browser. Once the admin data moves to a shared backend, the same UI check would not protect it.
 - **Mitigation today:** the role source for Clerk users is correct. Admin reads and writes are also refused in the data layer for anyone who is not an admin (`src/services/accessControl.js`, inventory in [ACCESS_CONTROL.md](../ACCESS_CONTROL.md)), so the UI is no longer the only check. That still does not stop someone editing `localStorage` by hand. The login page labels demo mode as "Local Demo Authentication Mode", so it is not hidden, but it is still fully usable.
-- **Remediation:** proposed F1 (block demo admin in production builds) and F2 (enforce roles on the server when a backend is added). #220 applies at that point if the backend is Firebase.
+- **Remediation:** proposed F1 (block demo admin in production builds) and F2 (enforce roles on the server when a backend is added). #220: the Firebase rules and emulator tests are in `firebase/` and documented in [FIREBASE_RULES.md](../FIREBASE_RULES.md).
 
 ### T3: Shared-device exposure
 
@@ -255,7 +255,7 @@ These are suggestions for new issues. They are **not filed yet**; the maintainer
 Existing issues that already cover part of this:
 
 - #219 Content Security Policy and security headers (T1 damage limit, T9)
-- #220 Firebase rules and access-control tests (applies once a Firestore backend exists, T2)
+- #220 Firebase rules and access-control tests: done as rules written ahead of the backend, see [FIREBASE_RULES.md](../FIREBASE_RULES.md)
 - #222 CI security checks for secrets, dependencies and unsafe JavaScript patterns (T7, T9)
 - #223 Privacy-safe deletion and retention controls (T3, T10; include the keys listed in section 4)
 - #225 Third-party integration review for data minimization and secret exposure (T7, T8)

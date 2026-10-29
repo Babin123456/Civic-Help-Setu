@@ -28,6 +28,8 @@ import {
   rejectServiceSubmission,
   submitErrorReport,
 } from './adminService';
+import { deleteAvailabilityNotice } from './serviceAvailabilityNoticeService';
+import { getOwnershipMap, assignServiceOwnership } from './serviceOwnershipService';
 import { resolveAuditReport, getAuditReports } from './communityAuditService';
 import { resolveSourceConflict, reopenSourceConflict } from './sourceConflictService';
 import {
@@ -93,7 +95,10 @@ const CALLS = {
   'barriers.moderate': () => moderateBarrierReport({ reportId: 'b1', action: 'approve', userRole: 'admin' }, moduleStorage),
   'feedback.moderate': () => reviewBottleneckFeedback('f1', 'reviewed', 'Mod', '', moduleStorage),
   'notices.manage': () => resetNoticesToDefault(moduleStorage),
+  'availabilityNotices.manage': () => deleteAvailabilityNotice('n1', moduleStorage),
   'freshness.review': () => recordServiceReview('svc', 'Rev', '', moduleStorage),
+  'ownership.read': () => getOwnershipMap(moduleStorage),
+  'ownership.manage': () => assignServiceOwnership('svc', { team: 'Docs' }, { storage: moduleStorage }),
 };
 
 const outcome = (fn) => {
