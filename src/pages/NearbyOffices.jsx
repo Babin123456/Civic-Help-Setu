@@ -23,6 +23,7 @@ import InteractiveOfficeMap from '../components/location/InteractiveOfficeMap';
 import LocationFilterToolbar from '../components/location/LocationFilterToolbar';
 import OfficeCard from '../components/location/OfficeCard';
 import AppointmentModal from '../components/location/AppointmentModal';
+import OfficeAccessibilityRatingModal from '../components/location/OfficeAccessibilityRatingModal';
 import { AccessibilityFilterBar } from '../components/location/AccessibilityFacilityPanel';
 import { filterOfficesByAccessibilityAndLanguage } from '../services/accessibilityMapService';
 import LocationPermissionPanel, { LOCATION_REQUEST_BUTTON_ID } from '../components/location/LocationPermissionPanel';
@@ -62,6 +63,7 @@ const NearbyOffices = () => {
   // View & Modal State
   const [viewMode, setViewMode] = useState('split'); // 'split' | 'map' | 'list'
   const [selectedOffice, setSelectedOffice] = useState(null);
+  const [auditingOffice, setAuditingOffice] = useState(null);
   const [bookingOffice, setBookingOffice] = useState(null);
   const [isAccessibilityModalOpen, setIsAccessibilityModalOpen] = useState(false);
 
@@ -486,6 +488,7 @@ const NearbyOffices = () => {
                     isSelected={selectedOffice?.id === office.id}
                     onSelect={setSelectedOffice}
                     onBookAppointment={(off) => setBookingOffice(off)}
+                    onAuditAccessibility={(off) => setAuditingOffice(off)}
                   />
                 ))}
               </div>
@@ -548,6 +551,7 @@ const NearbyOffices = () => {
                     isSelected={selectedOffice?.id === office.id}
                     onSelect={setSelectedOffice}
                     onBookAppointment={(off) => setBookingOffice(off)}
+                    onAuditAccessibility={(off) => setAuditingOffice(off)}
                   />
                 ))
               )}
@@ -561,6 +565,13 @@ const NearbyOffices = () => {
           onClose={() => setBookingOffice(null)}
           office={bookingOffice}
           prefilledService={serviceFilter}
+        />
+
+        {/* Office Accessibility Rating & Audit Modal */}
+        <OfficeAccessibilityRatingModal
+          isOpen={Boolean(auditingOffice)}
+          office={auditingOffice}
+          onClose={() => setAuditingOffice(null)}
         />
 
         {/* Accessibility Needs Planner Modal */}

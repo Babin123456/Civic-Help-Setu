@@ -213,3 +213,124 @@ export const filterOfficesByAccessibilityAndLanguage = ({
       return true;
     });
 };
+
+
+export const OFFICE_AUDIT_STORAGE_KEY = 'civicbridge_office_accessibility_audits';
+
+let memoryStore = {};
+const getStorage = () => {
+  try {
+    if (typeof globalThis.localStorage !== 'undefined' && globalThis.localStorage !== null) {
+      return globalThis.localStorage;
+    }
+  } catch {
+    // fallback
+  }
+  return {
+    getItem: (key) => memoryStore[key] ?? null,
+    setItem: (key, val) => {
+      memoryStore[key] = String(val);
+    },
+    removeItem: (key) => {
+      delete memoryStore[key];
+    },
+    clear: () => {
+      memoryStore = {};
+    },
+  };
+};
+
+const FACILITY_WEIGHTS = {
+  [ACCESSIBILITY_FACILITIES.WHEELCHAIR_RAMP]: 25,
+  [ACCESSIBILITY_FACILITIES.ELEVATOR]: 25,
+  [ACCESSIBILITY_FACILITIES.ACCESSIBLE_RESTROOM]: 20,
+  [ACCESSIBILITY_FACILITIES.ACCESSIBLE_PARKING]: 15,
+  [ACCESSIBILITY_FACILITIES.TACTILE_PAVING]: 15,
+};
+
+export const getOfficeAccessibilityAudits = (officeId) => {
+  if (!officeId) return [];
+  try {
+    const raw = getStorage().getItem(OFFICE_AUDIT_STORAGE_KEY);
+    if (!raw) return [];
+    const all = JSON.parse(raw);
+    return all.filter((a) => a.officeId === String(officeId));
+  } catch {
+    return [];
+  }
+};
+
+export const recordOfficeAccessibilityAudit = (officeId, auditPayload = {}) => {
+  if (!officeId) return null;
+  const newAudit = {
+    id: `audit_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    officeId: String(officeId),
+    timestamp: new Date().toISOString(),
+    facilities: auditPayload.facilities || {},
+    notes: typeof auditPayload.notes === 'string' ? auditPayload.notes.slice(0, 300) : '',
+    verifiedByCitizen: true,
+  };
+
+  try {
+    const storage = getStorage();
+    const raw = storage.getItem(OFFICE_AUDIT_STORAGE_KEY);
+    const existing = raw ? JSON.parse(raw) : [];
+    const updated = [newAudit, ...existing].slice(0, 100);
+    storage.setItem(OFFICE_AUDIT_STORAGE_KEY, JSON.stringify(updated));
+    return newAudit;
+  } catch {
+    return newAudit;
+  }
+};
+
+export const calculateOfficeAccessibilityScore = (office) => {
+  if (!office) {
+    return { score: 0, level: 'UNKNOWN', color: '#64748b', badges: [] };
+  }
+
+  const record = normalizeAccessibilityRecord(office);
+  const communityAudits = getOfficeAccessibilityAudits(record.id);
+
+  let earnedPoints = 0;
+  let totalPossible = 0;
+  const badges = [];
+
+  for (const [facilityKey, weight] of Object.entries(FACILITY_WEIGHTS)) {
+    let status = record.accessibility[facilityKey];
+
+    if (communityAudits.length > 0 && communityAudits[0].facilities?.[facilityKey] !== undefined) {
+      status = communityAudits[0].facilities[facilityKey];
+    }
+
+    totalPossible += weight;
+    if (status === true) {
+      earnedPoints += weight;
+      badges.push({ id: facilityKey, label: FACILITY_LABELS[facilityKey], status: 'available' });
+    } else if (status === false) {
+      badges.push({ id: facilityKey, label: FACILITY_LABELS[facilityKey], status: 'unavailable' });
+    } else {
+      badges.push({ id: facilityKey, label: FACILITY_LABELS[facilityKey], status: 'unknown' });
+    }
+  }
+
+  const score = Math.round((earnedPoints / (totalPossible || 1)) * 100);
+  let level = 'LOW';
+  let color = '#ef4444';
+
+  if (score >= 70) {
+    level = 'HIGH';
+    color = '#10b981';
+  } else if (score >= 40) {
+    level = 'MODERATE';
+    color = '#f59e0b';
+  }
+
+  return {
+    score,
+    level,
+    color,
+    badges,
+    communityAuditsCount: communityAudits.length,
+    lastAudited: communityAudits[0]?.timestamp || record.auditMetadata.reviewDate || null,
+  };
+};
