@@ -54,6 +54,7 @@ import {
 } from '../services/serviceOwnershipService';
 import StaleRecordsReviewQueue from '../components/admin/StaleRecordsReviewQueue';
 import LinkHealthPanel from '../components/admin/LinkHealthPanel';
+import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
 import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchPanel';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel';
@@ -598,6 +599,11 @@ const Admin = () => {
               {
                 id: 'freshness',
                 label: 'Freshness & Trust Queue',
+                badge: null,
+              },
+              {
+                id: 'coverage',
+                label: 'Catalogue Coverage',
                 badge: null,
               },
               {
@@ -1570,6 +1576,11 @@ const Admin = () => {
               <div>
                 <StaleRecordsReviewQueue />
               </div>
+            )}
+
+            {/* Catalogue coverage and missing-data dashboard */}
+            {activeTab === 'coverage' && (
+              <CatalogueCoveragePanel services={services} onEditService={handleEditServiceFromReport} />
             )}
 
             {/* Official application-link health check */}
