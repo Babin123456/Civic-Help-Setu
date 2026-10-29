@@ -15,7 +15,12 @@ const deliveryLabel = (svc) => svc.type || 'Online / Offline';
 
 const cellPadding = { padding: '0.85rem 1rem' };
 
-const ServiceRecordList = ({ services, onEdit, onDelete }) => (
+const ServiceRecordList = ({ services, onEdit, onDelete, selectedIds, onToggleSelect, onToggleAll }) => {
+  // Selection is optional: without onToggleSelect the list looks and works as before.
+  const selectable = typeof onToggleSelect === 'function';
+  const isSelected = (id) => Boolean(selectedIds?.includes(id));
+  const allSelected = services.length > 0 && services.every((svc) => isSelected(svc.id));
+  return (
   <div className="glass-panel admin-records" style={{ borderRadius: '0.85rem', overflow: 'hidden' }}>
     <table
       className="admin-records__table"
@@ -23,6 +28,17 @@ const ServiceRecordList = ({ services, onEdit, onDelete }) => (
     >
       <thead>
         <tr style={{ borderBottom: '1px solid var(--border-light)', color: 'var(--text-tertiary)', background: 'rgba(0, 0, 0, 0.15)' }}>
+          {selectable && (
+            <th style={cellPadding}>
+              <input
+                type="checkbox"
+                className="admin-records__check"
+                aria-label="Select all listed service guides"
+                checked={allSelected}
+                onChange={() => onToggleAll?.(!allSelected)}
+              />
+            </th>
+          )}
           <th style={{ ...cellPadding, fontWeight: '700' }}>Service Name</th>
           <th style={{ ...cellPadding, fontWeight: '700' }}>Category</th>
           <th style={{ ...cellPadding, fontWeight: '700' }}>Delivery Mode</th>
@@ -32,6 +48,17 @@ const ServiceRecordList = ({ services, onEdit, onDelete }) => (
       <tbody>
         {services.map((svc) => (
           <tr key={svc.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
+            {selectable && (
+              <td style={cellPadding}>
+                <input
+                  type="checkbox"
+                  className="admin-records__check"
+                  aria-label={`Select ${svc.name}`}
+                  checked={isSelected(svc.id)}
+                  onChange={() => onToggleSelect(svc.id)}
+                />
+              </td>
+            )}
             <td style={{ ...cellPadding, fontWeight: '600', color: 'var(--text-primary)', overflowWrap: 'anywhere' }}>
               {svc.name}
             </td>
@@ -52,6 +79,7 @@ const ServiceRecordList = ({ services, onEdit, onDelete }) => (
               >
                 Edit
               </button>
+{onDelete && (
               <button
                 type="button"
                 aria-label={`Delete ${svc.name}`}
@@ -60,6 +88,7 @@ const ServiceRecordList = ({ services, onEdit, onDelete }) => (
               >
                 Delete
               </button>
+)}
             </td>
           </tr>
         ))}
@@ -68,7 +97,18 @@ const ServiceRecordList = ({ services, onEdit, onDelete }) => (
 
     <ul className="admin-records__cards" aria-label="Service guides">
       {services.map((svc) => (
-        <li key={svc.id} className="admin-record-card">
+          <li key={svc.id} className="admin-record-card">
+          {selectable && (
+            <label className="admin-record-card__select">
+              <input
+                type="checkbox"
+                className="admin-records__check"
+                checked={isSelected(svc.id)}
+                onChange={() => onToggleSelect(svc.id)}
+              />
+              <span>Select {svc.name}</span>
+            </label>
+          )}
           <h3 className="admin-record-card__name">{svc.name}</h3>
           <dl className="admin-record-card__meta">
             <div>
@@ -91,6 +131,7 @@ const ServiceRecordList = ({ services, onEdit, onDelete }) => (
             >
               Edit
             </button>
+{onDelete && (
             <button
               type="button"
               className="btn btn-secondary admin-record-card__delete"
@@ -99,11 +140,13 @@ const ServiceRecordList = ({ services, onEdit, onDelete }) => (
             >
               Delete
             </button>
+)}
           </div>
         </li>
       ))}
     </ul>
   </div>
-);
+  );
+};
 
 export default ServiceRecordList;
