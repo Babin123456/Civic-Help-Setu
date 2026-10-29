@@ -54,6 +54,8 @@ import {
 } from '../services/serviceOwnershipService';
 import StaleRecordsReviewQueue from '../components/admin/StaleRecordsReviewQueue';
 import LinkHealthPanel from '../components/admin/LinkHealthPanel';
+import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
+import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchPanel';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel';
 import AvailabilityNoticePanel from '../components/admin/AvailabilityNoticePanel';
@@ -600,8 +602,18 @@ const Admin = () => {
                 badge: null,
               },
               {
+                id: 'coverage',
+                label: 'Catalogue Coverage',
+                badge: null,
+              },
+              {
                 id: 'link-health',
                 label: 'Official Link Health',
+                badge: null,
+              },
+              {
+                id: 'eligibility-tests',
+                label: 'Eligibility Test Bench',
                 badge: null,
               },
               {
@@ -1566,8 +1578,16 @@ const Admin = () => {
               </div>
             )}
 
+            {/* Catalogue coverage and missing-data dashboard */}
+            {activeTab === 'coverage' && (
+              <CatalogueCoveragePanel services={services} onEditService={handleEditServiceFromReport} />
+            )}
+
             {/* Official application-link health check */}
             {activeTab === 'link-health' && <LinkHealthPanel />}
+
+            {/* Eligibility rule test bench */}
+            {activeTab === 'eligibility-tests' && <EligibilityTestBenchPanel />}
 
             {/* Process Bottleneck Feedback Loop Tab */}
             {activeTab === 'bottlenecks' && (

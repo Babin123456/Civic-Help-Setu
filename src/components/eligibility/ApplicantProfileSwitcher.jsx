@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { logDiagnostic } from '../../utils/diagnostics';
 import { Users, Plus, Check, Trash2, UserPlus, Sparkles, X } from 'lucide-react';
+import { logDiagnostic } from '../../utils/diagnostics';
 import {
   getApplicantProfiles,
   getActiveProfileId,
