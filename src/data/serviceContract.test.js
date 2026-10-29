@@ -96,3 +96,31 @@ describe('validateCatalogue', () => {
     expect(errors.some((e) => e.serviceId === 'other-service' && e.field === 'difficulty')).toBe(true);
   });
 });
+
+describe('jurisdiction', () => {
+  const base = () => structuredClone(MOCK_SERVICES[0]);
+  const withJurisdiction = (jurisdiction) => validateServiceRecord({ ...base(), jurisdiction }).map((e) => `${e.field} ${e.reason}`);
+
+  it('accepts the plain text form and the structured form', () => {
+    expect(withJurisdiction('India')).toEqual([]);
+    expect(withJurisdiction({ level: 'national', states: [], districts: [], localBody: '' })).toEqual([]);
+    expect(withJurisdiction({ level: 'state', states: ['Kerala'], districts: [], localBody: '' })).toEqual([]);
+    expect(withJurisdiction({ level: 'district', states: ['Kerala'], districts: ['Kochi'] })).toEqual([]);
+  });
+
+  it('rejects blank text, other types and a level that does not exist', () => {
+    expect(withJurisdiction('   ')[0]).toMatch(/^jurisdiction must be a non-empty string or/);
+    expect(withJurisdiction(5)[0]).toMatch(/^jurisdiction must be a non-empty string or/);
+    expect(withJurisdiction([])[0]).toMatch(/^jurisdiction must be a non-empty string or/);
+    expect(withJurisdiction(null)[0]).toMatch(/^jurisdiction must be a non-empty string or/);
+    expect(withJurisdiction({ level: 'galaxy' })[0]).toMatch(/^jurisdiction.level must be one of: national, state, district, local/);
+    expect(withJurisdiction({})[0]).toMatch(/^jurisdiction.level/);
+  });
+
+  it('checks the lists and the local body of the structured form', () => {
+    expect(withJurisdiction({ level: 'state', states: 'Kerala' })[0]).toMatch(/^jurisdiction.states must be an array/);
+    expect(withJurisdiction({ level: 'state', states: ['Kerala', ''] })[0]).toMatch(/^jurisdiction.states must contain only non-empty strings/);
+    expect(withJurisdiction({ level: 'district', districts: [1] })[0]).toMatch(/^jurisdiction.districts must contain only non-empty strings/);
+    expect(withJurisdiction({ level: 'local', localBody: 5 })[0]).toMatch(/^jurisdiction.localBody must be a string/);
+  });
+});

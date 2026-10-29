@@ -36,11 +36,11 @@ Required unless marked optional.
 | `warnings` | string[] | optional, fallback `[]` |
 | `popularityScore` | number | optional, 0 to 100 |
 | `eligibilityRuleKey` | string | optional, key into `eligibilityRules.js` |
-| `jurisdiction` | string | optional, fallback `India` |
+| `jurisdiction` | string or `{level, states, districts, localBody}` | optional, fallback `India`. The object form is the applicability metadata: `level` is one of `national`, `state`, `district`, `local`; `states` and `districts` are string arrays; `localBody` is a string |
 | `publicationState` | string | optional: `draft`, `published`, `archived`; fallback `published` |
 | `contacts` | `{label, phone?, email?, url?}[]` | optional, fallback `[]`; each needs a label and at least one way to reach it |
 
-The current catalogue does not yet carry `jurisdiction`, `publicationState` or
+The current catalogue carries the structured `jurisdiction` on its built-in guides but not `publicationState` or
 `contacts`; they are optional so existing records stay valid. Use
 `applyServiceDefaults(record)` to read them safely.
 

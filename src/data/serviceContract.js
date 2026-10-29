@@ -4,6 +4,7 @@
 // Full field reference: docs/SERVICE_DATA_CONTRACT.md
 
 import { SERVICE_CATEGORIES } from './serviceCategories';
+import { JURISDICTION_LEVELS } from './jurisdictions';
 
 export const SERVICE_SCHEMA_VERSION = 1;
 export const SUPPORTED_SCHEMA_VERSIONS = [1];
@@ -47,6 +48,27 @@ function isRealDate(value) {
   const [y, m, d] = match.slice(1).map(Number);
   const date = new Date(Date.UTC(y, m - 1, d));
   return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
+}
+
+/**
+ * `jurisdiction` is either a plain text such as "India" (the original form) or the structured form
+ * from the applicability metadata (#260): { level, states, districts, localBody }.
+ */
+function validateJurisdiction(value, fail) {
+  if (typeof value === 'string') {
+    if (!isText(value)) fail('jurisdiction', 'must be a non-empty string or { level, states, districts, localBody } when present');
+    return;
+  }
+  if (!isObject(value)) {
+    fail('jurisdiction', 'must be a non-empty string or { level, states, districts, localBody } when present');
+    return;
+  }
+  if (!JURISDICTION_LEVELS.includes(value.level)) fail('jurisdiction.level', `must be one of: ${JURISDICTION_LEVELS.join(', ')}`);
+  for (const key of ['states', 'districts']) {
+    if (value[key] !== undefined && !Array.isArray(value[key])) fail(`jurisdiction.${key}`, 'must be an array of strings when present');
+    else if (Array.isArray(value[key]) && !value[key].every(isText)) fail(`jurisdiction.${key}`, 'must contain only non-empty strings');
+  }
+  if (value.localBody !== undefined && typeof value.localBody !== 'string') fail('jurisdiction.localBody', 'must be a string when present');
 }
 
 /**
@@ -106,7 +128,7 @@ export function validateServiceRecord(record) {
     fail('popularityScore', 'must be a number from 0 to 100 when present');
   }
   if (record.eligibilityRuleKey !== undefined && !isText(record.eligibilityRuleKey)) fail('eligibilityRuleKey', 'must be a non-empty string when present');
-  if (record.jurisdiction !== undefined && !isText(record.jurisdiction)) fail('jurisdiction', 'must be a non-empty string when present');
+  if (record.jurisdiction !== undefined) validateJurisdiction(record.jurisdiction, fail);
   if (record.publicationState !== undefined && !PUBLICATION_STATES.includes(record.publicationState)) {
     fail('publicationState', `must be one of: ${PUBLICATION_STATES.join(', ')} when present`);
   }
