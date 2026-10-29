@@ -4,7 +4,7 @@
 // Full field reference: docs/SERVICE_DATA_CONTRACT.md
 
 import { SERVICE_CATEGORIES } from './serviceCategories';
-import { JURISDICTION_LEVELS } from './jurisdictions';
+import { validateJurisdiction as validateAppJurisdiction } from '../services/jurisdictionService';
 
 export const SERVICE_SCHEMA_VERSION = 1;
 export const SUPPORTED_SCHEMA_VERSIONS = [1];
@@ -16,7 +16,6 @@ export const PUBLICATION_STATES = ['draft', 'published', 'archived'];
 // Used when an optional field is missing; see applyServiceDefaults.
 export const SERVICE_FALLBACKS = Object.freeze({
   publicationState: 'published',
-  jurisdiction: 'India',
 });
 
 // Personal data must never be part of a service record.
@@ -51,24 +50,32 @@ function isRealDate(value) {
 }
 
 /**
- * `jurisdiction` is either a plain text such as "India" (the original form) or the structured form
- * from the applicability metadata (#260): { level, states, districts, localBody }.
+ * `jurisdiction` is the structured applicability metadata (#260): { level, states, districts, localBody }.
+ * The rules are the app's own (validateJurisdiction in jurisdictionService), so the contract cannot
+ * drift from what the admin form and the catalogue accept. A legacy plain string such as "India" is
+ * rejected: the app treats it as "unknown" and never as nationwide, so the contract does not either.
  */
 function validateJurisdiction(value, fail) {
-  if (typeof value === 'string') {
-    if (!isText(value)) fail('jurisdiction', 'must be a non-empty string or { level, states, districts, localBody } when present');
-    return;
-  }
   if (!isObject(value)) {
-    fail('jurisdiction', 'must be a non-empty string or { level, states, districts, localBody } when present');
+    fail('jurisdiction', 'must be { level, states, districts, localBody } when present (plain text is no longer accepted)');
     return;
   }
-  if (!JURISDICTION_LEVELS.includes(value.level)) fail('jurisdiction.level', `must be one of: ${JURISDICTION_LEVELS.join(', ')}`);
-  for (const key of ['states', 'districts']) {
-    if (value[key] !== undefined && !Array.isArray(value[key])) fail(`jurisdiction.${key}`, 'must be an array of strings when present');
-    else if (Array.isArray(value[key]) && !value[key].every(isText)) fail(`jurisdiction.${key}`, 'must contain only non-empty strings');
+  for (const message of validateAppJurisdiction(value)) fail('jurisdiction', message);
+}
+
+// Personal-data keys are rejected at any depth. A contact may carry a phone or an email: those two are
+// the only keys allowed below, and only directly on a contacts[i] entry.
+function scanForbidden(node, path, fail, allowed = []) {
+  if (Array.isArray(node)) {
+    node.forEach((item, i) => scanForbidden(item, `${path}[${i}]`, fail, path === 'contacts' ? ['phone', 'email'] : []));
+    return;
   }
-  if (value.localBody !== undefined && typeof value.localBody !== 'string') fail('jurisdiction.localBody', 'must be a string when present');
+  if (!isObject(node)) return;
+  for (const [key, child] of Object.entries(node)) {
+    const where = path ? `${path}.${key}` : key;
+    if (FORBIDDEN_FIELDS.includes(key) && !allowed.includes(key)) fail(where, 'personal or sensitive data is not allowed in a service record');
+    else scanForbidden(child, where, fail);
+  }
 }
 
 /**
@@ -84,9 +91,7 @@ export function validateServiceRecord(record) {
     return errors;
   }
 
-  for (const key of FORBIDDEN_FIELDS) {
-    if (key in record) fail(key, 'personal or sensitive data is not allowed in a service record');
-  }
+  scanForbidden(record, '', fail);
 
   if (!isText(record.id) || !ID_PATTERN.test(record.id)) fail('id', 'is required and must be a lowercase slug such as "birth-certificate"');
   if (!isText(record.name)) fail('name', 'is required and must be a non-empty string');
@@ -141,8 +146,8 @@ export function validateServiceRecord(record) {
           fail(`contacts[${i}].label`, 'is required');
           return;
         }
-        if (!c.phone && !c.email && !c.url) fail(`contacts[${i}]`, 'needs at least one of phone, email or url');
-        if (c.email !== undefined && !EMAIL_PATTERN.test(c.email)) fail(`contacts[${i}].email`, 'is not a valid email address');
+        if (c.phone === undefined && c.email === undefined && c.url === undefined) fail(`contacts[${i}]`, 'needs at least one of phone, email or url');
+        if (c.email !== undefined && !(typeof c.email === 'string' && EMAIL_PATTERN.test(c.email))) fail(`contacts[${i}].email`, 'is not a valid email address');
         if (c.url !== undefined && !isHttpsUrl(c.url)) fail(`contacts[${i}].url`, 'must be an https URL');
         if (c.phone !== undefined && !isText(c.phone)) fail(`contacts[${i}].phone`, 'must be a non-empty string');
       });
@@ -156,7 +161,6 @@ export function validateServiceRecord(record) {
 export function applyServiceDefaults(record) {
   return {
     ...record,
-    jurisdiction: record.jurisdiction ?? SERVICE_FALLBACKS.jurisdiction,
     publicationState: record.publicationState ?? SERVICE_FALLBACKS.publicationState,
     warnings: record.warnings ?? [],
     contacts: record.contacts ?? [],
