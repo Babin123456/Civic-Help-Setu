@@ -17,6 +17,7 @@ import {
   getNoticesForService,
   queryNotices,
 } from '../../services/noticeDigestService';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 /**
  * Formats ISO date string to human-readable locale format
@@ -297,7 +298,7 @@ const PublicNoticeDigestModal = ({ isOpen, onClose, serviceId = null, serviceNam
 
                   {notice.sourceUrl && (
                     <a
-                      href={notice.sourceUrl}
+                      href={safeHttpUrl(notice.sourceUrl) || undefined}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-secondary"

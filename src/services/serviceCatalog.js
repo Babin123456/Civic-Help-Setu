@@ -1,4 +1,5 @@
 import { MOCK_SERVICES } from '../data/services';
+import { sanitizeTextFields } from '../utils/safeContent';
 import { logDiagnostic } from '../utils/diagnostics';
 
 // Where the admin dashboard keeps guides it added or edited (see adminService).
@@ -17,7 +18,8 @@ export const getAllServices = () => {
   try {
     const raw = localStorage.getItem(CUSTOM_SERVICES_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
-    const custom = Array.isArray(parsed) ? parsed.filter(isUsableService) : [];
+    // Saved guides are plain text: anything that parses as markup is removed on the way in.
+    const custom = Array.isArray(parsed) ? parsed.filter(isUsableService).map((svc) => sanitizeTextFields(svc)) : [];
     if (custom.length === 0) return [...MOCK_SERVICES];
     const customById = new Map(custom.map((c) => [c.id, c]));
     const builtInIds = new Set(MOCK_SERVICES.map((b) => b.id));

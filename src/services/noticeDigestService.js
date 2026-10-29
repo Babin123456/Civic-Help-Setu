@@ -13,6 +13,7 @@ import { requirePermission } from './accessControl';
  * - Clear legal disclaimer that digests are informational and not legal advice
  */
 
+import { sanitizeTextFields } from '../utils/safeContent';
 const STORAGE_KEY = 'civicbridge_public_notices_digest_v1';
 
 export const LEGAL_DISCLAIMER =
@@ -135,7 +136,7 @@ export const getNotices = (customStorage) => {
       return [...DEFAULT_NOTICES];
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [...DEFAULT_NOTICES];
+    return Array.isArray(parsed) ? sanitizeTextFields(parsed) : [...DEFAULT_NOTICES];
   } catch {
     return [...DEFAULT_NOTICES];
   }

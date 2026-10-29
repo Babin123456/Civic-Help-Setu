@@ -10,6 +10,7 @@ import {
   User,
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 const ServiceSubmissionReviewModal = ({
   isOpen,
@@ -140,7 +141,7 @@ const ServiceSubmissionReviewModal = ({
                 Primary Official Government Source:
               </span>
               <a
-                href={submission.officialUrl}
+                href={safeHttpUrl(submission.officialUrl) || undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{

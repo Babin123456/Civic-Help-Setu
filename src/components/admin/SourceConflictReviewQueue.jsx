@@ -21,6 +21,7 @@ import {
 } from '../../services/sourceConflictService';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 const SourceConflictReviewQueue = () => {
   const { user } = useAuth();
@@ -358,7 +359,7 @@ const SourceConflictReviewQueue = () => {
                       </div>
                       {src.sourceUrl && (
                         <a
-                          href={src.sourceUrl}
+                          href={safeHttpUrl(src.sourceUrl) || undefined}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{

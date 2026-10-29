@@ -15,6 +15,7 @@ import {
   submitGlossarySuggestion,
 } from '../../services/civicGlossaryService.js';
 import { useToast } from '../../context/ToastContext.jsx';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 /**
  * FormFieldExplainer Component (#142)
@@ -309,7 +310,7 @@ const FormFieldExplainer = ({
                         <span style={{ color: 'var(--text-secondary)' }}>Reviewed Official Source:</span>
                       </div>
                       <a
-                        href={explanation.entry.reviewedSource.url}
+                        href={safeHttpUrl(explanation.entry.reviewedSource.url) || undefined}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
@@ -359,7 +360,7 @@ const FormFieldExplainer = ({
                     {explanation.safeFallback?.officialPortal && (
                       <div style={{ marginTop: '0.35rem' }}>
                         <a
-                          href={explanation.safeFallback.officialPortal.url}
+                          href={safeHttpUrl(explanation.safeFallback.officialPortal.url) || undefined}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="btn btn-secondary"

@@ -6,6 +6,7 @@ import { requirePermission } from './accessControl';
  */
 import { logDiagnostic } from '../utils/diagnostics';
 
+import { sanitizeTextFields } from '../utils/safeContent';
 const STORAGE_KEY = 'civicbridge_community_audits';
 
 const DEFAULT_AUDIT_REPORTS = [
@@ -45,7 +46,8 @@ export function getAuditReports(serviceId = null) {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        list = JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        list = Array.isArray(parsed) ? sanitizeTextFields(parsed) : list;
       } else {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_AUDIT_REPORTS));
       }
