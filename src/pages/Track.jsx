@@ -39,6 +39,7 @@ import TrackEmptyState from '../components/tracking/TrackEmptyState';
 import TrackingReceiptModal from '../components/tracking/TrackingReceiptModal';
 import SlaBreachAlertWidget from '../components/tracking/SlaBreachAlertWidget';
 import AppellateEscalationLadder from '../components/tracking/AppellateEscalationLadder';
+import GrievanceEscalationAlertBanner from '../components/tracking/GrievanceEscalationAlertBanner';
 import GrievanceEvidenceOrganizerModal from '../components/grievance/GrievanceEvidenceOrganizerModal';
 
 const Track = () => {
@@ -271,6 +272,8 @@ const Track = () => {
                     onAction={pendingAction.onAction}
                   />
                 )}
+
+                <GrievanceEscalationAlertBanner application={activeApp} />
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
                   <ApplicationTimeline stages={activeApp.stages || []} currentStageIndex={activeApp.currentStageIndex || 0} />
