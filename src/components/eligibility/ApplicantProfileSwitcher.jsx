@@ -9,6 +9,7 @@ import {
   deleteApplicantProfile,
   RELATIONSHIP_TYPES,
 } from '../../services/applicantProfileService';
+import { logDiagnostic } from '../../utils/diagnostics';
 
 export default function ApplicantProfileSwitcher({ onProfileChanged }) {
   const [profiles, setProfiles] = useState(() => getApplicantProfiles());
@@ -41,7 +42,7 @@ export default function ApplicantProfileSwitcher({ onProfileChanged }) {
         onProfileChanged(selected);
       }
     } catch (err) {
-      logDiagnostic('ApplicantProfileSwitcher error', err);
+      logDiagnostic('Could not switch the applicant profile', err);
     }
   };
 
@@ -81,7 +82,7 @@ export default function ApplicantProfileSwitcher({ onProfileChanged }) {
         onProfileChanged(getApplicantProfiles()[0]);
       }
     } catch (err) {
-      logDiagnostic('ApplicantProfileSwitcher error', err);
+      logDiagnostic('Could not update the applicant profiles', err);
     }
   };
 
