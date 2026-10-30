@@ -55,8 +55,12 @@ const getServiceUrl = (serviceId) => {
   return `${window.location.origin}/services/${encodeURIComponent(serviceId)}`;
 };
 
-const ServiceDetails = () => {
-  const { id } = useParams();
+// `previewService` renders a record that is not published yet (the admin draft preview) with this same
+// page. In that mode links and buttons do nothing, so a preview never saves, shares or applies for anything.
+const ServiceDetails = ({ previewService = null }) => {
+  const { id: routeId } = useParams();
+  const isPreview = Boolean(previewService);
+  const id = previewService?.id ?? routeId;
   const navigate = useNavigate();
 
   const { user } = useAuth();
@@ -69,21 +73,21 @@ const ServiceDetails = () => {
   const [showLowBandwidthModal, setShowLowBandwidthModal] = useState(false);
   const [showBarrierModal, setShowBarrierModal] = useState(false);
   const [showVisitPackModal, setShowVisitPackModal] = useState(false);
-  const [service, setService] = useState(() => getServiceById(id));
+  const [service, setService] = useState(() => previewService ?? getServiceById(id));
 
   const [isSaved, setIsSaved] = useState(() =>
     getSavedServices().some((savedService) => savedService.id === id)
   );
 
   useEffect(() => {
-    setService(getServiceById(id));
+    setService(previewService ?? getServiceById(id));
 
     const savedServices = getSavedServices();
 
     setIsSaved(
       savedServices.some((savedService) => savedService.id === id)
     );
-  }, [id]);
+  }, [id, previewService]);
 
   useEffect(() => {
     if (!linkCopied) return undefined;
@@ -192,12 +196,21 @@ const ServiceDetails = () => {
     );
   }
 
+  const blockPreviewActions = (event) => {
+    if (event.target.closest?.('a, button, input, select, textarea, summary')) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
   return (
     <div
       className={`section animate-fade-in${
         focusMode ? ' service-details--focus' : ''
       }`}
-      style={{ paddingBottom: '6rem' }}
+      style={{ paddingBottom: isPreview ? '1rem' : '6rem' }}
+      onClickCapture={isPreview ? blockPreviewActions : undefined}
+      data-preview={isPreview ? 'true' : undefined}
     >
       <div
         className="container"
