@@ -54,6 +54,7 @@ import {
 } from '../services/serviceOwnershipService';
 import StaleRecordsReviewQueue from '../components/admin/StaleRecordsReviewQueue';
 import LinkHealthPanel from '../components/admin/LinkHealthPanel';
+import CatalogueMigrationPanel from '../components/admin/CatalogueMigrationPanel';
 import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
 import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchPanel';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
@@ -614,6 +615,11 @@ const Admin = () => {
               {
                 id: 'eligibility-tests',
                 label: 'Eligibility Test Bench',
+                badge: null,
+              },
+              {
+                id: 'migrations',
+                label: 'Data Migrations',
                 badge: null,
               },
               {
@@ -1585,6 +1591,16 @@ const Admin = () => {
 
             {/* Official application-link health check */}
             {activeTab === 'link-health' && <LinkHealthPanel />}
+
+            {/* Catalogue data migrations: dry run, backup, apply, rollback */}
+            {activeTab === 'migrations' && (
+              <CatalogueMigrationPanel
+                onChanged={() => {
+                  setServices(getAdminServices());
+                  setAuditLogs(getAuditLogs());
+                }}
+              />
+            )}
 
             {/* Eligibility rule test bench */}
             {activeTab === 'eligibility-tests' && <EligibilityTestBenchPanel />}
