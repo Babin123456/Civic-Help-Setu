@@ -9,6 +9,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { describeProviderError, logProviderError } from '../utils/providerError';
 import ClearMyDataPanel from '../components/privacy/ClearMyDataPanel';
 import DataPortabilityModal from '../components/profile/DataPortabilityModal';
+import CivicEntitlementReadinessCard from '../components/profile/CivicEntitlementReadinessCard';
 
 /* ─────────────────────────── helpers ─────────────────────────── */
 const Field = ({ icon: Icon, label, value, placeholder, editing, name, onChange, type = 'text' }) => (
@@ -250,6 +251,9 @@ const Profile = () => {
             <span style={{ fontSize: '0.9rem' }}>{saveError}</span>
           </div>
         )}
+
+        {/* ── Civic Entitlement Readiness & Document Gap Analyzer ── */}
+        <CivicEntitlementReadinessCard profile={form} />
 
         <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '2rem', alignItems: 'start' }}>
 
