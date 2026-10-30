@@ -1,7 +1,12 @@
 import { useMemo, useRef, useState } from 'react';
 import ServiceDetails from '../../pages/ServiceDetails';
 import { discardDraft, listDrafts, publishDraft, reviewDraft } from '../../services/serviceDrafts';
+import { approveDraft, returnDraft, reviewerCan, submitForReview, withdrawReview } from '../../services/serviceReview';
+import { actorLabel } from '../../services/accessControl';
+import { HIGH_IMPACT_FIELDS, REASON_MAX, SOURCE_REFERENCE_MAX } from '../../data/reviewPolicy';
+import { safeHttpUrl } from '../../utils/safeContent';
 
+const REVIEW_CHIP = { pending: 'Waiting for review', approved: 'Approved', returned: 'Returned for changes' };
 const KIND_LABEL = { added: 'Added', removed: 'Removed', changed: 'Changed' };
 const KIND_MARK = { added: '+', removed: '−', changed: '~' };
 
@@ -70,6 +75,135 @@ export const DraftPreview = ({ record }) => (
   </div>
 );
 
+const APPROVAL_TEXT = {
+  'not-needed': 'No high-impact field changed, so no second reviewer is needed.',
+  none: 'This change touches high-impact fields. Another admin must approve it before it can be published.',
+  pending: 'Waiting for a second reviewer. It cannot be published yet.',
+  returned: 'A reviewer returned this change. Edit the draft, then send it for review again.',
+  approved: 'Approved by a second reviewer. It can be published.',
+  outdated: 'The approval no longer applies: the draft or the published guide changed after it was given. Send it for review again.',
+};
+
+const when = (iso) => {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleString();
+};
+
+/** Status, who did what, and the controls the signed-in admin may use on the second-reviewer step. */
+export const ReviewControls = ({ state, viewer, onAct }) => {
+  const [sourceReference, setSourceReference] = useState('');
+  const [reason, setReason] = useState('');
+  const { draft, approval, highImpact, reviewRequired } = state;
+  const review = draft.review;
+  const decision = reviewerCan(draft, viewer);
+  const sources = Array.isArray(draft.record.officialSources) ? draft.record.officialSources : [];
+  const canSend = reviewRequired && ['none', 'returned', 'outdated'].includes(approval);
+  const isSender = review?.submittedBy && String(review.submittedBy).trim().toLowerCase() === String(viewer).trim().toLowerCase();
+
+  return (
+    <section className="sdp-review-box" aria-labelledby="sdp-second-review">
+      <h5 id="sdp-second-review" className="sdp-subhead">
+        Second review
+      </h5>
+      <p className={`sdp-status sdp-status--${approval}`} role="status">
+        {APPROVAL_TEXT[approval]}
+      </p>
+
+      {reviewRequired && (
+        <>
+          <p className="sdp-hint">High-impact fields changed:</p>
+          <ul className="sdp-lines">
+            {highImpact.map((c) => (
+              <li key={c.key}>
+                <strong>{c.label}</strong>: {HIGH_IMPACT_FIELDS.find((f) => f.key === c.key)?.why}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {review && (
+        <dl className="sdp-facts">
+          <dt>Sent by</dt>
+          <dd>
+            {review.submittedBy}, {when(review.submittedAt)}
+          </dd>
+          <dt>Source for the changed facts</dt>
+          <dd>{review.sourceReference}</dd>
+          {review.reviewer && (
+            <>
+              <dt>{review.status === 'approved' ? 'Approved by' : 'Returned by'}</dt>
+              <dd>
+                {review.reviewer}, {when(review.decidedAt)}
+              </dd>
+              <dt>Reason</dt>
+              <dd>{review.reason}</dd>
+            </>
+          )}
+        </dl>
+      )}
+
+      {reviewRequired && sources.length > 0 && (
+        <>
+          <p className="sdp-hint">Official sources on this guide, to check the changes against:</p>
+          <ul className="sdp-lines">
+            {sources.map((src, i) => {
+              const href = safeHttpUrl(src?.url || '');
+              return (
+                <li key={`${src?.url}:${i}`}>
+                  {href ? (
+                    <a href={href} target="_blank" rel="noopener noreferrer">
+                      {src.name || href}
+                    </a>
+                  ) : (
+                    src?.name || 'Source'
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+
+      {canSend && (
+        <div className="sdp-form">
+          <label htmlFor="sdp-source-ref">Where do the changed facts come from? (official notice, circular or page)</label>
+          <textarea id="sdp-source-ref" rows={2} maxLength={SOURCE_REFERENCE_MAX} value={sourceReference} onChange={(e) => setSourceReference(e.target.value)} />
+          <button type="button" className="btn btn-primary sdp-btn" onClick={() => onAct(() => submitForReview(draft.draftId, { sourceReference }), 'Sent for second review.')}>
+            Send for second review
+          </button>
+        </div>
+      )}
+
+      {approval === 'pending' && decision.allowed && (
+        <div className="sdp-form">
+          <label htmlFor="sdp-reason">Reason for your decision (required)</label>
+          <textarea id="sdp-reason" rows={2} maxLength={REASON_MAX} value={reason} onChange={(e) => setReason(e.target.value)} />
+          <div className="sdp-actions">
+            <button type="button" className="btn btn-primary sdp-btn" onClick={() => onAct(() => approveDraft(draft.draftId, { reason }), 'Approved. The change can now be published.')}>
+              Approve
+            </button>
+            <button type="button" className="btn btn-outline sdp-btn" onClick={() => onAct(() => returnDraft(draft.draftId, { reason }), 'Returned for changes. The published guide is unchanged.')}>
+              Return for changes
+            </button>
+          </div>
+        </div>
+      )}
+
+      {approval === 'pending' && !decision.allowed && (
+        <div className="sdp-form">
+          <p className="sdp-hint">{decision.why}</p>
+          {isSender && (
+            <button type="button" className="btn btn-outline sdp-btn" onClick={() => onAct(() => withdrawReview(draft.draftId), 'Taken back from review.')}>
+              Withdraw from review
+            </button>
+          )}
+        </div>
+      )}
+    </section>
+  );
+};
+
 const Review = ({ draftId, refreshKey, onEditDraft, onClose, onChanged, actor }) => {
   // Read again when the parent saved the draft (refreshKey), so editing from this screen shows the new result.
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -83,6 +217,18 @@ const Review = ({ draftId, refreshKey, onEditDraft, onClose, onChanged, actor })
   if (!review) return <p className="sdp-hint">That draft no longer exists.</p>;
   const { draft, errors, changes, stale, newerChanges, isNew, removedFromCatalogue } = review;
   const title = draft.record.name || 'Untitled guide';
+  const viewer = actorLabel('');
+
+  // Runs a review step and shows its error, if any, where the controls are.
+  const act = (fn, okText) => {
+    try {
+      fn();
+      setMessage('');
+      onChanged(okText);
+    } catch (err) {
+      setMessage(err.message);
+    }
+  };
 
   const startPublish = () => {
     setMessage('');
@@ -160,6 +306,8 @@ const Review = ({ draftId, refreshKey, onEditDraft, onClose, onChanged, actor })
         </div>
       )}
 
+      <ReviewControls state={review} viewer={viewer} onAct={act} />
+
       <h5 className="sdp-subhead">Before and after</h5>
       <DiffTable changes={changes} />
 
@@ -170,7 +318,7 @@ const Review = ({ draftId, refreshKey, onEditDraft, onClose, onChanged, actor })
         <button type="button" className="btn btn-outline sdp-btn" onClick={() => onEditDraft(draft, null)}>
           Edit draft
         </button>
-        <button type="button" className="btn btn-primary sdp-btn" onClick={startPublish} disabled={removedFromCatalogue || changes.length === 0}>
+        <button type="button" className="btn btn-primary sdp-btn" onClick={startPublish} disabled={removedFromCatalogue || changes.length === 0 || (review.reviewRequired && review.approval !== 'approved')}>
           Publish…
         </button>
       </div>
@@ -242,7 +390,7 @@ export default function ServiceDraftsPanel({ onEditDraft, onChanged = () => {}, 
       <Review
         key={reviewing}
         draftId={reviewing}
-        refreshKey={refreshKey}
+        refreshKey={refreshKey + version}
         actor={actor}
         onEditDraft={onEditDraft}
         onClose={() => {
@@ -278,6 +426,7 @@ export default function ServiceDraftsPanel({ onEditDraft, onChanged = () => {}, 
                 <div className="sdp-item__main">
                   <div className="sdp-item__name">{name}</div>
                   <div className="sdp-item__meta">
+                    {d.review?.status ? `${REVIEW_CHIP[d.review.status]} · ` : ''}
                     {d.serviceId ? 'Edit of a published guide' : 'New guide'} · saved {formatTime(d.updatedAt)}
                     {d.author ? ` by ${d.author}` : ''}
                   </div>

@@ -55,4 +55,4 @@ A failed write keeps the draft and says why.
   tamper-proof (see `ACCESS_CONTROL.md`). At most 50 drafts.
 - The editor does not yet edit the steps or the eligibility text; they are carried over unchanged and shown in
   the comparison if they differ.
-- Two-person approval is a separate issue (#261) and builds on this draft state.
+- Edits to high-impact fields need a second admin's approval before publishing, see [SERVICE_REVIEW.md](SERVICE_REVIEW.md).
