@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Send,
   Compass,
+  Scale,
 } from 'lucide-react';
 
 import { useToast } from '../context/ToastContext';
@@ -42,6 +43,8 @@ import AppellateEscalationLadder from '../components/tracking/AppellateEscalatio
 import GrievanceEscalationAlertBanner from '../components/tracking/GrievanceEscalationAlertBanner';
 import GrievanceEvidenceOrganizerModal from '../components/grievance/GrievanceEvidenceOrganizerModal';
 import ApplicationMilestoneTracker from '../components/tracking/ApplicationMilestoneTracker';
+import StatutoryCompensationClaimModal from '../components/tracking/StatutoryCompensationClaimModal';
+import { calculateStatutoryCompensation } from '../services/statutoryCompensationService';
 
 const Track = () => {
   const location = useLocation();
@@ -59,6 +62,7 @@ const Track = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isJourneyModalOpen, setIsJourneyModalOpen] = useState(false);
   const [isGrievanceModalOpen, setIsGrievanceModalOpen] = useState(false);
+  const [isCompensationModalOpen, setIsCompensationModalOpen] = useState(false);
 
   useEffect(() => {
     const freshApps = getApplications();
@@ -142,6 +146,7 @@ const Track = () => {
 
   const pendingAction = activeApp ? resolveApplicationPendingAction(activeApp) : null;
   const statusMeta = activeApp ? getStatusMeta(activeApp.status) : null;
+  const compensationClaim = activeApp ? calculateStatutoryCompensation(activeApp) : null;
   const activeService = activeApp
     ? services.find((svc) => svc.id === activeApp.serviceId)
     : null;
@@ -236,6 +241,23 @@ const Track = () => {
                     </div>
 
                     <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                      {compensationClaim?.isEligible && (
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={() => setIsCompensationModalOpen(true)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            color: '#dc2626',
+                            borderColor: '#fca5a5',
+                            backgroundColor: 'rgba(239, 68, 68, 0.05)'
+                          }}
+                        >
+                          <Scale size={16} /> Claim Delay Compensation
+                        </button>
+                      )}
                       <button type="button" className="btn btn-secondary" onClick={handleCopyId}>
                         <Copy size={16} /> Copy ID
                       </button>
@@ -328,7 +350,7 @@ const Track = () => {
                 <AppellateEscalationLadder application={activeApp} />
 
                 {activeApp.status === 'sla-breach' && (
-                  <SlaBreachAlertWidget app={activeApp} />
+                  <SlaBreachAlertWidget app={activeApp} application={activeApp} citizenName={activeApp.applicantName} />
                 )}
               </div>
             </>
@@ -356,6 +378,12 @@ const Track = () => {
         isOpen={isGrievanceModalOpen}
         onClose={() => setIsGrievanceModalOpen(false)}
         defaultServiceId={activeApp?.serviceId}
+      />
+
+      <StatutoryCompensationClaimModal
+        isOpen={isCompensationModalOpen}
+        onClose={() => setIsCompensationModalOpen(false)}
+        application={activeApp}
       />
     </section>
   );
