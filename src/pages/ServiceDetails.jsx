@@ -19,6 +19,7 @@ import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
 import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
 import ApplicabilityPanel from '../components/services/ApplicabilityPanel';
 import BenefitEntitlementCalculator from '../components/services/BenefitEntitlementCalculator';
+import ServicePrintPacketModal from '../components/services/ServicePrintPacketModal';
 const copyServiceLink = async (url) => {
   try {
     if (navigator?.clipboard?.writeText) {
@@ -51,6 +52,7 @@ const ServiceDetails = () => {
   const [linkCopied, setLinkCopied] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [handoffModalOpen, setHandoffModalOpen] = useState(false);
+  const [showPrintPacketModal, setShowPrintPacketModal] = useState(false);
   const [showLowBandwidthModal, setShowLowBandwidthModal] = useState(false);
   const [service, setService] = useState(() => getServiceById(id));
 
@@ -445,6 +447,23 @@ const ServiceDetails = () => {
 
               <button
                 type="button"
+                onClick={() => setShowPrintPacketModal(true)}
+                className="btn btn-outline"
+                style={{
+                  padding: '0.6rem 1rem',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                }}
+              >
+                <Printer size={16} />
+                <span>Print CSC Checklist</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setShowVisitPackModal(true)}
                 className="btn btn-outline"
                 style={{
@@ -606,6 +625,12 @@ const ServiceDetails = () => {
         serviceName={service.name}
         availableTasks={service.steps || []}
         currentUser={user}
+      />
+
+      <ServicePrintPacketModal
+        isOpen={showPrintPacketModal}
+        onClose={() => setShowPrintPacketModal(false)}
+        service={service}
       />
 
       <LowBandwidthShareModal
