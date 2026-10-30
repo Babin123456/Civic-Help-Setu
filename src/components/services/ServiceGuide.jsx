@@ -1,4 +1,5 @@
 import FocusModeToggle from '../common/FocusModeToggle';
+import CopyServiceInstructions from './CopyServiceInstructions';
 import OfficialSourcesList from './OfficialSourcesList';
 import ContactDirectory from './ContactDirectory';
 import BottleneckFeedbackPrompt from '../feedback/BottleneckFeedbackPrompt';
@@ -24,6 +25,8 @@ const ServiceGuide = ({ service, focusMode = false, onToggleFocusMode }) => {
         <h2 id="service-guide-heading">How to apply</h2>
         <FocusModeToggle enabled={focusMode} onToggle={onToggleFocusMode} />
       </div>
+
+      <CopyServiceInstructions service={service} />
 
       {hasItems(warnings) && (
         <div className="service-guide__warnings" role="note" aria-label="Important notes">

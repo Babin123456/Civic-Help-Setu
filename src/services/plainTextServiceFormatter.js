@@ -5,6 +5,44 @@
  * and offline .txt file sharing in low-connectivity areas.
  */
 
+import { getApplicabilityLabel, getApplicabilityLevel } from './jurisdictionService';
+import { getDocumentRequirements, REQUIREMENT_LABELS } from './requirementTypes';
+import { safeHttpUrl, sanitizePlainText } from '../utils/safeContent';
+
+const instructionText = (value) => typeof value === 'string'
+  ? sanitizePlainText(value, { multiline: false })
+  : '';
+
+/** Deterministic public instructions only; never reads notes, profiles or vault data. */
+export function formatServiceInstructions(record) {
+  const service = record && typeof record === 'object' ? record : {};
+  const sections = [instructionText(service.name) || 'Service instructions'];
+
+  if (getApplicabilityLevel(service) !== 'unknown') {
+    sections.push(`Jurisdiction: ${instructionText(getApplicabilityLabel(service))}`);
+  }
+
+  const steps = (Array.isArray(service.steps) ? service.steps : [])
+    .map((step) => typeof step === 'string' ? instructionText(step)
+      : [instructionText(step?.title), instructionText(step?.description)].filter(Boolean).join(': '))
+    .filter(Boolean);
+  if (steps.length) sections.push(`Steps:\n${steps.map((step, i) => `${i + 1}. ${step}`).join('\n')}`);
+
+  const items = getDocumentRequirements(service)
+    .filter((item) => instructionText(item.label))
+    .map((item) => `- ${instructionText(item.label)} (${REQUIREMENT_LABELS[item.type]}${item.condition ? `: ${instructionText(item.condition)}` : ''})`);
+  if (items.length) sections.push(`Documents and items:\n${items.join('\n')}`);
+
+  const sources = (Array.isArray(service.officialSources) ? service.officialSources : [])
+    .filter((source) => safeHttpUrl(source?.url))
+    .map((source) => [instructionText(source.name), safeHttpUrl(source.url)].filter(Boolean).join(': '));
+  if (!sources.length && safeHttpUrl(service.officialLink)) sources.push(safeHttpUrl(service.officialLink));
+  if (sources.length) sections.push(`Official sources:\n${sources.map((source) => `- ${source}`).join('\n')}`);
+
+  sections.push('Verify current steps, requirements and local applicability with the official source before applying.');
+  return sections.join('\n\n');
+}
+
 /**
  * Format a service guide for messaging apps (WhatsApp, Telegram, Signal)
  */
