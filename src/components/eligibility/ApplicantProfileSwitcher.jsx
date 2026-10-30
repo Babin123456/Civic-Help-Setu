@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logDiagnostic } from '../../utils/diagnostics';
 import { Users, Plus, Check, Trash2, UserPlus, Sparkles, X } from 'lucide-react';
 import { logDiagnostic } from '../../utils/diagnostics';
 import {
@@ -41,7 +42,7 @@ export default function ApplicantProfileSwitcher({ onProfileChanged }) {
         onProfileChanged(selected);
       }
     } catch (err) {
-      logDiagnostic('Could not switch the applicant profile', err);
+      logDiagnostic('ApplicantProfileSwitcher:handleSelect', err);
     }
   };
 
@@ -81,7 +82,7 @@ export default function ApplicantProfileSwitcher({ onProfileChanged }) {
         onProfileChanged(getApplicantProfiles()[0]);
       }
     } catch (err) {
-      logDiagnostic('Could not update the applicant profiles', err);
+      logDiagnostic('ApplicantProfileSwitcher:handleDelete', err);
     }
   };
 
