@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   CheckSquare,
   AlertTriangle,
@@ -54,6 +54,8 @@ import {
 } from '../services/serviceOwnershipService';
 import StaleRecordsReviewQueue from '../components/admin/StaleRecordsReviewQueue';
 import LinkHealthPanel from '../components/admin/LinkHealthPanel';
+import ServiceDraftsPanel from '../components/admin/ServiceDraftsPanel';
+import { getDraftForService, listDrafts, saveDraft } from '../services/serviceDrafts';
 import CatalogueMigrationPanel from '../components/admin/CatalogueMigrationPanel';
 import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
 import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchPanel';
@@ -87,10 +89,24 @@ const Admin = () => {
   const [communityAudits, setCommunityAudits] = useState([]);
 
   // Modals
+  // serviceId/draftId say where "Save as draft" goes; focusField is set when opened from a validation message.
   const [serviceModal, setServiceModal] = useState({
     isOpen: false,
     service: null,
+    serviceId: null,
+    draftId: null,
+    focusField: null,
   });
+  const [draftsVersion, setDraftsVersion] = useState(0);
+  const draftCount = useMemo(() => {
+    try {
+      return listDrafts().length;
+    } catch {
+      return 0;
+    }
+    // draftsVersion changes whenever a draft is saved, discarded or published
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftsVersion]);
   const [reportModal, setReportModal] = useState({
     isOpen: false,
     report: null,
@@ -161,6 +177,56 @@ const Admin = () => {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const findDraft = (serviceId) => {
+    try {
+      return getDraftForService(serviceId);
+    } catch {
+      return null;
+    }
+  };
+
+  // Editing a guide starts from its saved draft when there is one, otherwise from the published record.
+  const openServiceEditor = (service) => {
+    const draft = findDraft(service.id);
+    setServiceModal({
+      isOpen: true,
+      service: draft ? draft.record : service,
+      serviceId: service.id,
+      draftId: draft ? draft.draftId : null,
+      focusField: null,
+    });
+  };
+
+  const handleEditDraft = (draft, focusField) =>
+    setServiceModal({
+      isOpen: true,
+      service: draft.record,
+      serviceId: draft.serviceId,
+      draftId: draft.draftId,
+      focusField,
+    });
+
+  const handleSaveDraft = (record) => {
+    try {
+      saveDraft(record, {
+        serviceId: serviceModal.serviceId,
+        draftId: serviceModal.draftId,
+        author: user?.username || 'SuperAdmin',
+      });
+      setDraftsVersion((v) => v + 1);
+      toast?.success?.('Draft saved. The public guide is unchanged until you review and publish it in the Drafts tab.');
+    } catch (err) {
+      toast?.error?.(err.message);
+    }
+  };
+
+  const handleDraftsChanged = (text) => {
+    setServices(getAdminServices());
+    setAuditLogs(getAuditLogs());
+    setDraftsVersion((v) => v + 1);
+    if (text) toast?.success?.(text);
   };
 
   const handleSaveService = (serviceData) => {
@@ -379,10 +445,7 @@ const Admin = () => {
     const target = services.find((service) => service.id === serviceId);
 
     if (target) {
-      setServiceModal({
-        isOpen: true,
-        service: target,
-      });
+      openServiceEditor(target);
     }
   };
 
@@ -633,6 +696,11 @@ const Admin = () => {
                 badge: null,
               },
               {
+                id: 'drafts',
+                label: `Drafts (${draftCount})`,
+                badge: null,
+              },
+              {
                 id: 'users',
                 label: `User Roles (${users.length})`,
                 badge: null,
@@ -755,7 +823,7 @@ const Admin = () => {
                     <button
                       type="button"
                       onClick={() =>
-                        setServiceModal({ isOpen: true, service: null })
+                        setServiceModal({ isOpen: true, service: null, serviceId: null, draftId: null, focusField: null })
                       }
                       className="btn btn-primary"
                       style={{
@@ -864,7 +932,7 @@ const Admin = () => {
                     users={users}
                     onAssign={(service) => setOwnershipModal({ isOpen: true, service })}
                     onEdit={(service) =>
-                      setServiceModal({ isOpen: true, service })
+                      openServiceEditor(service)
                     }
                     onDelete={catalogView === 'archived' ? undefined : handleDeleteService}
                     selectedIds={selectedIds}
@@ -1592,6 +1660,13 @@ const Admin = () => {
             {/* Official application-link health check */}
             {activeTab === 'link-health' && <LinkHealthPanel />}
 
+            {/* Private drafts of service guides: review, preview and publish */}
+            {activeTab === 'drafts' && (
+              <ServiceDraftsPanel
+                onEditDraft={handleEditDraft}
+                onChanged={handleDraftsChanged}
+                actor={user?.username || 'SuperAdmin'}
+                refreshKey={draftsVersion}
             {/* Catalogue data migrations: dry run, backup, apply, rollback */}
             {activeTab === 'migrations' && (
               <CatalogueMigrationPanel
@@ -1652,9 +1727,11 @@ const Admin = () => {
           isOpen={serviceModal.isOpen}
           serviceToEdit={serviceModal.service}
           onClose={() =>
-            setServiceModal({ isOpen: false, service: null })
+            setServiceModal({ isOpen: false, service: null, serviceId: null, draftId: null, focusField: null })
           }
           onSave={handleSaveService}
+          onSaveDraft={handleSaveDraft}
+          focusField={serviceModal.focusField}
         />
 
         <ReportResolutionModal

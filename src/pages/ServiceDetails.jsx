@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, Users } from 'lucide-react';
+import { AlertOctagon, ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, Users } from 'lucide-react';
 import { getServiceById } from '../services/serviceCatalog';
 import RetiredServiceNotice from '../components/common/RetiredServiceNotice';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +19,21 @@ import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
 import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
 import ApplicabilityPanel from '../components/services/ApplicabilityPanel';
 import BenefitEntitlementCalculator from '../components/services/BenefitEntitlementCalculator';
+import DocumentPreflightInspectionCard from '../components/services/DocumentPreflightInspectionCard';
+import OfflineCacheActionCard from '../components/services/OfflineCacheActionCard';
+import IntakeWindowPanel from '../components/services/IntakeWindowPanel';
+import AppointmentVisitPackModal from '../components/location/AppointmentVisitPackModal';
+import BarrierReportModal from '../components/barriers/BarrierReportModal';
+
+const getSavedServices = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem('civicbridge_saved') || '[]');
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+};
+
 import ServicePrintPacketModal from '../components/services/ServicePrintPacketModal';
 const copyServiceLink = async (url) => {
   try {
@@ -41,8 +56,12 @@ const getServiceUrl = (serviceId) => {
   return `${window.location.origin}/services/${encodeURIComponent(serviceId)}`;
 };
 
-const ServiceDetails = () => {
-  const { id } = useParams();
+// `previewService` renders a record that is not published yet (the admin draft preview) with this same
+// page. In that mode links and buttons do nothing, so a preview never saves, shares or applies for anything.
+const ServiceDetails = ({ previewService = null }) => {
+  const { id: routeId } = useParams();
+  const isPreview = Boolean(previewService);
+  const id = previewService?.id ?? routeId;
   const navigate = useNavigate();
 
   const { user } = useAuth();
@@ -54,21 +73,23 @@ const ServiceDetails = () => {
   const [handoffModalOpen, setHandoffModalOpen] = useState(false);
   const [showPrintPacketModal, setShowPrintPacketModal] = useState(false);
   const [showLowBandwidthModal, setShowLowBandwidthModal] = useState(false);
-  const [service, setService] = useState(() => getServiceById(id));
+  const [showBarrierModal, setShowBarrierModal] = useState(false);
+  const [showVisitPackModal, setShowVisitPackModal] = useState(false);
+  const [service, setService] = useState(() => previewService ?? getServiceById(id));
 
   const [isSaved, setIsSaved] = useState(() =>
     getSavedServices().some((savedService) => savedService.id === id)
   );
 
   useEffect(() => {
-    setService(getServiceById(id));
+    setService(previewService ?? getServiceById(id));
 
     const savedServices = getSavedServices();
 
     setIsSaved(
       savedServices.some((savedService) => savedService.id === id)
     );
-  }, [id]);
+  }, [id, previewService]);
 
   useEffect(() => {
     if (!linkCopied) return undefined;
@@ -177,12 +198,21 @@ const ServiceDetails = () => {
     );
   }
 
+  const blockPreviewActions = (event) => {
+    if (event.target.closest?.('a, button, input, select, textarea, summary')) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
   return (
     <div
       className={`section animate-fade-in${
         focusMode ? ' service-details--focus' : ''
       }`}
-      style={{ paddingBottom: '6rem' }}
+      style={{ paddingBottom: isPreview ? '1rem' : '6rem' }}
+      onClickCapture={isPreview ? blockPreviewActions : undefined}
+      data-preview={isPreview ? 'true' : undefined}
     >
       <div
         className="container"
@@ -636,6 +666,18 @@ const ServiceDetails = () => {
       <LowBandwidthShareModal
         isOpen={showLowBandwidthModal}
         onClose={() => setShowLowBandwidthModal(false)}
+        service={service}
+      />
+
+      <AppointmentVisitPackModal
+        isOpen={showVisitPackModal}
+        onClose={() => setShowVisitPackModal(false)}
+        service={service}
+      />
+
+      <BarrierReportModal
+        isOpen={showBarrierModal}
+        onClose={() => setShowBarrierModal(false)}
         service={service}
       />
     </div>
