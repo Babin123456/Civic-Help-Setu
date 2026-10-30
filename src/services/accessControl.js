@@ -24,6 +24,7 @@ export const PERMISSIONS = {
   'services.import': { roles: ['admin'], resource: 'civicbridge_custom_services', description: 'Bulk import service guides' },
   'services.delete': { roles: ['admin'], resource: 'civicbridge_custom_services', description: 'Remove a service guide' },
   'services.archive': { roles: ['admin'], resource: 'civicbridge_custom_services', description: 'Archive or restore service guides' },
+  'catalogue.migrate': { roles: ['admin'], resource: 'civicbridge_custom_services', description: 'Preview, apply or roll back a catalogue data migration' },
   'reports.read': { roles: ['admin'], resource: 'civicbridge_error_reports', description: 'Read the error report queue (holds reporter emails)' },
   'reports.resolve': { roles: ['admin'], resource: 'civicbridge_error_reports', description: 'Resolve an error report' },
   'reports.dismiss': { roles: ['admin'], resource: 'civicbridge_error_reports', description: 'Dismiss an error report' },

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Versioned catalogue migration utility (issue #267): dry run with changed / unchanged / invalid counts, an automatic backup before any write, one-click rollback, and explicit confirmation. Never runs on its own. See `docs/CATALOGUE_MIGRATIONS.md`.
 - Admin catalogue coverage and missing-data dashboard: required and optional fields scored separately, filters, links to the affected records and a CSV summary (issue #264). See `docs/CATALOGUE_COVERAGE.md`.
 - Admin eligibility-rule test bench (issue #259): run fictional applicant cases through the live scheme and service eligibility rules, see which requirement changed a result, and spot rules that have no regression case. See `docs/ELIGIBILITY_TEST_BENCH.md`.
 - Deterministic synthetic service fixtures for tests, demos and development: named scenarios (complete, partial, draft, archived, region-specific, conditional and invalid records) generated from a seed, with no real data and no writes to production storage (issue #273). See `docs/TEST_FIXTURES.md`.

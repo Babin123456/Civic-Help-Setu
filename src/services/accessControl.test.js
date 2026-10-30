@@ -28,6 +28,7 @@ import {
   rejectServiceSubmission,
   submitErrorReport,
 } from './adminService';
+import { planMigration } from './catalogueMigration';
 import { deleteAvailabilityNotice } from './serviceAvailabilityNoticeService';
 import { getOwnershipMap, assignServiceOwnership } from './serviceOwnershipService';
 import { resolveAuditReport, getAuditReports } from './communityAuditService';
@@ -99,6 +100,7 @@ const CALLS = {
   'availabilityNotices.manage': () => deleteAvailabilityNotice('n1', moduleStorage),
   'freshness.review': () => recordServiceReview('svc', 'Rev', '', moduleStorage),
   'links.check': () => saveLinkCheck('svc:0', { url: 'https://a.gov.in/', status: 'reachable' }, moduleStorage),
+  'catalogue.migrate': () => planMigration({ storage: moduleStorage }),
   'ownership.read': () => getOwnershipMap(moduleStorage),
   'ownership.manage': () => assignServiceOwnership('svc', { team: 'Docs' }, { storage: moduleStorage }),
 };
