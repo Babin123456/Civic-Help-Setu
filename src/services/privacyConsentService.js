@@ -65,6 +65,7 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_form_drafts', category: 'drafts', exportAs: 'formDrafts', empty: [] }, // dataPortabilityService.js
   { key: 'civicbridge_journey_handoffs_v1', category: 'drafts', exportAs: 'journeyHandoffs', empty: [] }, // journeyHandoffService.js
   { key: 'civicbridge_readiness_scorecards', category: 'drafts', exportAs: 'readinessScorecards', empty: [] }, // readinessScorecardService.js
+  { key: 'civicbridge_office_accessibility_audits', category: 'activity', exportAs: 'officeAccessibilityAudits', empty: [] }, // accessibilityMapService.js
 ];
 
 /**
@@ -149,6 +150,7 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_freshness_trust_reviews_v1',
   'civicbridge_link_health_v1',
   'civicbridge_service_drafts_v1',
+  'civicbridge_catalogue_snapshots_v1',
   'civicbridge_eligibility_test_cases_v1',
   'civicbridge_service_ownership_v1',
   'civicbridge_public_notices_digest_v1',

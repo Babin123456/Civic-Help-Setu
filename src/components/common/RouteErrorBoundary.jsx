@@ -2,7 +2,7 @@
 import { Component, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { AlertTriangle } from 'lucide-react';
-import { logDiagnostic, reportError } from '../../utils/diagnostics';
+import { logDiagnostic } from '../../utils/diagnostics';
 
 /**
  * Catches a crash inside one page and shows a short, safe message in its place, so the navigation
@@ -75,7 +75,6 @@ export class RouteErrorBoundaryCore extends Component {
   componentDidCatch(error) {
     if (import.meta.env.DEV) {
       // Development only: the console is the right place for the details, the page is not.
-      reportError(error, { route: typeof window !== 'undefined' ? window.location?.pathname : '/' });
       logDiagnostic('[RouteErrorBoundary]', error);
     }
   }

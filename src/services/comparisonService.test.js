@@ -81,3 +81,17 @@ describe('buildComparisonMatrix', () => {
     expect(get('Required documents')).toEqual(['ID proof']);
   });
 });
+
+describe('getDifferencesSummary', () => {
+  it('returns zeroes when less than 2 services are compared', () => {
+    expect(comparisonService.getDifferencesSummary([])).toEqual({ totalRows: 0, differingRows: 0, identicalRows: 0 });
+    expect(comparisonService.getDifferencesSummary([services[0]])).toEqual({ totalRows: 0, differingRows: 0, identicalRows: 0 });
+  });
+
+  it('accurately tallies differing and identical attributes between two services', () => {
+    const summary = comparisonService.getDifferencesSummary([services[0], services[1]]);
+    expect(summary.totalRows).toBe(10);
+    expect(summary.differingRows).toBeGreaterThan(0);
+    expect(summary.totalRows).toBe(summary.differingRows + summary.identicalRows);
+  });
+});

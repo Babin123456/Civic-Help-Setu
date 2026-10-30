@@ -73,6 +73,7 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_faq_votes` | `faqService.js` | Which FAQ answers were voted helpful | Reviews, votes and reports |
 | `civic_glossary_suggestions` | `civicGlossaryService.js` | User-submitted term clarification suggestions for editorial review | Reviews, votes and reports |
 | `civicbridge_community_audits` | `communityAuditService.js` | Audit reports and votes (seeded with sample reports on first read) | Reviews, votes and reports |
+| `civicbridge_office_accessibility_audits` | `accessibilityMapService.js` | Citizen-submitted accessibility audits and venue feedback | Reviews, votes and reports |
 | `civicbridge_barrier_reports` | `barrierReportService.js` | Citizen-reported accessibility and physical service delivery barriers | Reviews, votes and reports |
 | `civicbridge_bottleneck_feedback_v1` | `bottleneckFeedbackService.js` | Citizen bottleneck and delay feedback submissions | Reviews, votes and reports |
 | `civicbridge_checklist` | `dataPortabilityService.js` | Saved checklist items exported/imported across devices | Drafts and in-progress work |
@@ -100,6 +101,7 @@ After clearing, the sample reviews, sample audit reports and the sample vault do
 | `civicbridge_error_reports` | Outdated-information reports sent from a service page, and the admin review queue | Shared review queue |
 | `civicbridge_eligibility_test_cases_v1` | Fictional test cases a maintainer saved in the admin eligibility test bench. Holds made-up answers only, never a citizen's | Admin portal data |
 | `civicbridge_service_drafts_v1` | Unpublished drafts of service guide edits, private to the admin's browser. Hold guide content only, never a citizen's data | Admin portal data |
+| `civicbridge_catalogue_snapshots_v1` | The last 5 backups of the saved service catalogue, taken before a data migration or rollback. Guide content only, never a citizen's data | Admin portal data |
 | `civicbridge_custom_services`, `civicbridge_audit_logs`, `civicbridge_rbac_users`, `civicbridge_service_submissions` | Admin portal data | Not citizen data |
 | `civicbridge_barrier_audit_logs`, `civicbridge_freshness_trust_reviews_v1`, `civicbridge_link_health_v1`, `civicbridge_public_notices_digest_v1`, `civicbridge_source_conflicts`, `civicbridge_conflict_audit_logs` | Admin barrier moderation, freshness reviews, official link check results, public gazette digest cache, and source conflict audit queues | Admin portal moderation and public digest cache |
 | `civicbridge_barrier_audit_logs`, `civicbridge_freshness_trust_reviews_v1`, `civicbridge_public_notices_digest_v1`, `civicbridge_service_availability_notices_v1`, `civicbridge_source_conflicts`, `civicbridge_conflict_audit_logs` | Admin barrier moderation, freshness reviews, public gazette digest cache, and source conflict audit queues | Admin portal moderation and public digest cache |

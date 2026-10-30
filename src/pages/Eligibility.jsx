@@ -5,6 +5,7 @@ import SavedAssessmentsList from '../components/eligibility/SavedAssessmentsList
 import EntitlementCalculatorModal from '../components/eligibility/EntitlementCalculatorModal';
 import UnsavedChangesDialog from '../components/common/UnsavedChangesDialog';
 import ApplicantProfileSwitcher from '../components/eligibility/ApplicantProfileSwitcher';
+import WelfareEligibilityMatrixTable from '../components/eligibility/WelfareEligibilityMatrixTable';
 
 const Eligibility = () => {
   const [activeTab, setActiveTab] = useState('wizard');
@@ -87,6 +88,23 @@ const Eligibility = () => {
           </button>
           <button
             type="button"
+            onClick={() => requestTab('matrix')}
+            style={{
+              padding: '0.6rem 1.5rem',
+              borderRadius: '99px',
+              fontWeight: '700',
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              border: activeTab === 'matrix' ? '1px solid var(--accent-main)' : '1px solid var(--border-light)',
+              background: activeTab === 'matrix' ? 'var(--accent-main)' : 'var(--glass-bg)',
+              color: activeTab === 'matrix' ? 'var(--bg-main)' : 'var(--text-secondary)',
+              transition: 'all 0.2s',
+            }}
+          >
+            Scheme Matrix
+          </button>
+          <button
+            type="button"
             onClick={() => requestTab('saved')}
             style={{
               padding: '0.6rem 1.5rem',
@@ -149,9 +167,13 @@ const Eligibility = () => {
         <ApplicantProfileSwitcher onProfileChanged={() => setRefreshCount((c) => c + 1)} />
 
         {/* Content based on active tab */}
-        {activeTab === 'wizard' ? (
+        {activeTab === 'wizard' && (
           <UniversalEligibilityWizard onAssessmentSaved={handleAssessmentSaved} onDirtyChange={setWizardDirty} />
-        ) : (
+        )}
+        {activeTab === 'matrix' && (
+          <WelfareEligibilityMatrixTable />
+        )}
+        {activeTab === 'saved' && (
           <SavedAssessmentsList refreshTrigger={refreshCount} />
         )}
 
