@@ -1662,11 +1662,13 @@ const Admin = () => {
 
             {/* Private drafts of service guides: review, preview and publish */}
             {activeTab === 'drafts' && (
-              <ServiceDraftsPanel
-                onEditDraft={handleEditDraft}
-                onChanged={handleDraftsChanged}
-                actor={user?.username || 'SuperAdmin'}
-                refreshKey={draftsVersion}
+  <ServiceDraftsPanel
+    onEditDraft={handleEditDraft}
+    onChanged={handleDraftsChanged}
+    actor={user?.username || 'SuperAdmin'}
+    refreshKey={draftsVersion}
+  />
+)}
             {/* Catalogue data migrations: dry run, backup, apply, rollback */}
             {activeTab === 'migrations' && (
               <CatalogueMigrationPanel
