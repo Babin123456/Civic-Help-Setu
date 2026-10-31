@@ -212,3 +212,9 @@ export const getApplicationLinks = (service) => {
 
 export const needsAttention = (rec) =>
   !!rec && (rec.status === 'unavailable' || rec.status === 'invalid' || (rec.status === 'redirected' && !rec.reviewed));
+
+/** Storage key for a link: the service plus the link's address, never its position, so edits and reordering cannot reuse an old result. */
+export const linkRecordKey = (serviceId, link) => `${serviceId}:${String(link?.raw ?? '').trim()}`;
+
+/** Result saved for this exact address, or undefined. */
+export const getLinkRecord = (records, serviceId, link) => records?.[linkRecordKey(serviceId, link)];

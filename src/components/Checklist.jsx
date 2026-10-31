@@ -52,7 +52,9 @@ const Checklist = ({ items = [], checklistId, label = 'Checklist', requirements 
     <div className="cl-root">
       <p className="cl-progress">
         {summary
-          ? `${summary.mandatoryDone} of ${summary.mandatoryTotal} official requirements completed`
+          ? summary.mandatoryTotal === 0
+            ? 'No official requirements confirmed'
+            : `${summary.mandatoryDone} of ${summary.mandatoryTotal} official requirements completed`
           : `${done} of ${items.length} completed`}
       </p>
       {summary && (summary.conditionalCount + summary.optionalCount + summary.unverifiedCount > 0) && (

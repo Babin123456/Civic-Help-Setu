@@ -9,6 +9,8 @@ import {
   getLinkHealthRecords,
   getApplicationLinks,
   needsAttention,
+  linkRecordKey,
+  getLinkRecord,
 } from './linkHealthService';
 import { setCurrentActor } from './accessControl';
 
@@ -178,5 +180,20 @@ describe('getApplicationLinks', () => {
 
   it('handles a service with no sources', () => {
     expect(getApplicationLinks({})).toEqual([]);
+  });
+});
+
+describe('records are tied to the link address', () => {
+  const link = (raw) => ({ raw, url: raw });
+  it('keeps a result when links are reordered, drops it when the url is replaced', () => {
+    const st = makeStorage();
+    saveLinkCheck(linkRecordKey('s1', link('https://a.gov.in/')), { url: 'https://a.gov.in/', status: 'reachable' }, st);
+    const records = getLinkHealthRecords(st);
+    // reordered: a is now second, still found
+    expect(getLinkRecord(records, 's1', link('https://a.gov.in/'))?.status).toBe('reachable');
+    // a different link taking the old position has no result
+    expect(getLinkRecord(records, 's1', link('https://b.gov.in/'))).toBeUndefined();
+    // same address on another service is separate
+    expect(getLinkRecord(records, 's2', link('https://a.gov.in/'))).toBeUndefined();
   });
 });
