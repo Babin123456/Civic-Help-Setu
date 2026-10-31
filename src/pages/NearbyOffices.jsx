@@ -25,6 +25,7 @@ import OfficeCard from '../components/location/OfficeCard';
 import AppointmentModal from '../components/location/AppointmentModal';
 import OfficeAccessibilityRatingModal from '../components/location/OfficeAccessibilityRatingModal';
 import TransitDirectionsGuideModal from '../components/location/TransitDirectionsGuideModal';
+import OfficeFootfallAdvisorModal from '../components/location/OfficeFootfallAdvisorModal';
 import { AccessibilityFilterBar } from '../components/location/AccessibilityFacilityPanel';
 import { filterOfficesByAccessibilityAndLanguage } from '../services/accessibilityMapService';
 import LocationPermissionPanel, { LOCATION_REQUEST_BUTTON_ID } from '../components/location/LocationPermissionPanel';
@@ -66,6 +67,7 @@ const NearbyOffices = () => {
   const [selectedOffice, setSelectedOffice] = useState(null);
   const [auditingOffice, setAuditingOffice] = useState(null);
   const [transitOffice, setTransitOffice] = useState(null);
+  const [footfallOffice, setFootfallOffice] = useState(null);
   const [bookingOffice, setBookingOffice] = useState(null);
   const [isAccessibilityModalOpen, setIsAccessibilityModalOpen] = useState(false);
 
@@ -492,6 +494,7 @@ const NearbyOffices = () => {
                     onBookAppointment={(off) => setBookingOffice(off)}
                     onAuditAccessibility={(off) => setAuditingOffice(off)}
                     onShowTransit={(off) => setTransitOffice(off)}
+                    onShowFootfall={(off) => setFootfallOffice(off)}
                   />
                 ))}
               </div>
@@ -556,6 +559,7 @@ const NearbyOffices = () => {
                     onBookAppointment={(off) => setBookingOffice(off)}
                     onAuditAccessibility={(off) => setAuditingOffice(off)}
                     onShowTransit={(off) => setTransitOffice(off)}
+                    onShowFootfall={(off) => setFootfallOffice(off)}
                   />
                 ))
               )}
@@ -590,6 +594,11 @@ const NearbyOffices = () => {
           isOpen={isAccessibilityModalOpen}
           onClose={() => setIsAccessibilityModalOpen(false)}
           initialOfficeId={selectedOffice?.id}
+        />
+        <OfficeFootfallAdvisorModal
+          isOpen={Boolean(footfallOffice)}
+          onClose={() => setFootfallOffice(null)}
+          office={footfallOffice}
         />
       </div>
     </div>

@@ -1,51 +1,68 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Trash2, CheckCircle2, AlertTriangle, ArrowRight, BookOpen } from 'lucide-react';
-import { getSavedAssessments, deleteAssessment } from '../../services/assessmentStorage';
+import { getSavedAssessments, getAssessmentsForApplicant, deleteAssessment } from '../../services/assessmentStorage';
 import { useToast } from '../../context/ToastContext';
 import { Link } from 'react-router-dom';
 
 const SavedAssessmentsList = ({
   refreshTrigger = 0,
+  applicantId = null,
+  applicantName = '',
 }) => {
   const { toast } = useToast();
   const [assessments, setAssessments] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
 
+  // Only the selected applicant's records are shown, so one person's results never appear under another.
+  const load = () => (applicantId ? getAssessmentsForApplicant(applicantId) : getSavedAssessments());
+
   useEffect(() => {
-    setAssessments(getSavedAssessments());
-  }, [refreshTrigger]);
+    setAssessments(load());
+    setExpandedId(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshTrigger, applicantId]);
 
   const handleDelete = (id) => {
-    const updated = deleteAssessment(id);
-    setAssessments(updated);
+    deleteAssessment(id);
+    setAssessments(load());
     toast.info('Assessment record removed from profile.');
   };
 
+  const whose = applicantName ? (
+    <p style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+      Showing saved assessments for <strong>{applicantName}</strong>
+    </p>
+  ) : null;
+
   if (assessments.length === 0) {
     return (
-      <div
-        className="card"
-        style={{
-          textAlign: 'center',
-          padding: '3rem 2rem',
-          borderRadius: '1.25rem',
-          background: 'var(--glass-bg)',
-          border: '1px solid var(--border-light)',
-        }}
-      >
-        <BookOpen size={36} color="var(--text-tertiary)" style={{ margin: '0 auto 1rem' }} />
-        <h3 style={{ fontSize: '1.2rem', fontWeight: '700', margin: '0 0 0.5rem' }}>
-          No Saved Eligibility Assessments
-        </h3>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '420px', margin: '0 auto' }}>
-          Run the interactive eligibility wizard and click "Save Assessment to Profile" to preserve your personalized entitlement records here.
-        </p>
-      </div>
+      <>
+        {whose}
+        <div
+          className="card"
+          style={{
+            textAlign: 'center',
+            padding: '3rem 2rem',
+            borderRadius: '1.25rem',
+            background: 'var(--glass-bg)',
+            border: '1px solid var(--border-light)',
+          }}
+        >
+          <BookOpen size={36} color="var(--text-tertiary)" style={{ margin: '0 auto 1rem' }} />
+          <h3 style={{ fontSize: '1.2rem', fontWeight: '700', margin: '0 0 0.5rem' }}>
+            {applicantName ? `No saved assessments for ${applicantName}` : 'No Saved Eligibility Assessments'}
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '420px', margin: '0 auto' }}>
+            Run the interactive eligibility wizard and click "Save Assessment to Profile" to preserve your personalized entitlement records here.
+          </p>
+        </div>
+      </>
     );
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {whose}
       {assessments.map((item) => {
         const isExpanded = expandedId === item.id;
         return (

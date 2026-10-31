@@ -61,6 +61,7 @@ export const DEVICE_ONLY_STORES = [
   { key: 'civicbridge_community_audits', reason: 'Sent as a submission to communityAudits, not kept as a personal record.' },
   { key: 'civicbridge_barrier_reports', reason: 'Sent as a submission to barrierReports, not kept as a personal record.' },
   { key: 'civicbridge_bottleneck_feedback_v1', reason: 'Sent as a submission to bottleneckFeedback, not kept as a personal record.' },
+  { key: 'civicbridge_office_accessibility_audits', reason: 'Crowdsourced office accessibility ratings are community data kept on device.' },
 ];
 
 const byKey = new Map(CLOUD_STORES.map((store) => [store.key, store]));

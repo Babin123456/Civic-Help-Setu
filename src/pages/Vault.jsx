@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
   FileBadge, ShieldCheck, Upload, CreditCard, Car, FileText,
-  Plus, Search, Eye, AlertTriangle, Layers, Download, Tag
+  Plus, Search, Eye, AlertTriangle, Layers, Download, Tag, Stamp
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../context/ConfirmationDialogContext';
@@ -22,6 +22,7 @@ import SharedDeviceNotice from '../components/privacy/SharedDeviceNotice';
 import ServiceTaggingModal from '../components/vault/ServiceTaggingModal';
 import DocumentPreflightChecker from '../components/vault/DocumentPreflightChecker';
 import InactivityLockModal from '../components/vault/InactivityLockModal';
+import WatermarkAttestationModal from '../components/vault/WatermarkAttestationModal';
 import { Lock, Unlock, ShieldAlert } from 'lucide-react';
 import {
   startInactivityTracker,
@@ -64,6 +65,7 @@ const Vault = () => {
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [taggingDoc, setTaggingDoc] = useState(null);
+  const [watermarkDoc, setWatermarkDoc] = useState(null);
   const [expiringDocs, setExpiringDocs] = useState(() => getExpiringDocuments());
   const [isVaultLocked, setIsVaultLocked] = useState(false);
   const [showInactivityWarning, setShowInactivityWarning] = useState(false);
@@ -412,6 +414,18 @@ const Vault = () => {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
+                        setWatermarkDoc(doc);
+                      }}
+                      style={{ color: 'var(--accent-main)', padding: '0.35rem', background: 'none', border: 'none', cursor: 'pointer' }}
+                      title="Watermark & Attest for Submission"
+                      aria-label={`Watermark and attest ${doc.name || 'document'}`}
+                    >
+                      <Stamp size={17} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setSelectedDoc(doc);
                       }}
                       style={{ color: 'var(--text-tertiary)', padding: '0.35rem', background: 'none', border: 'none', cursor: 'pointer' }}
@@ -616,6 +630,14 @@ const Vault = () => {
           isOpen={Boolean(selectedDoc)}
           onClose={() => setSelectedDoc(null)}
           onDelete={handleDeleteDocument}
+        />
+
+        {/* Purpose Watermark & Attestation Modal */}
+        <WatermarkAttestationModal
+          doc={watermarkDoc}
+          isOpen={Boolean(watermarkDoc)}
+          onClose={() => setWatermarkDoc(null)}
+          defaultCitizenName={user?.name || user?.email?.split('@')[0] || ''}
         />
 
         {/* Secure Backup & Restore Modal */}

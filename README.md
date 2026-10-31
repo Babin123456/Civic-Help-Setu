@@ -68,6 +68,8 @@ Explore a catalog of civic and government services through a structured interfac
 
 Understand service eligibility, requirements, application steps, and other relevant information through dedicated service pages.
 
+Use **Copy instructions** under **How to apply** for a plain-text summary of the service's steps, document requirements, jurisdiction (when verified), and official sources. If automatic copying is unavailable, the page selects a read-only text area so you can copy manually. This summary uses public service details only; saved notes, assessment answers, and vault data are not included. Always verify current requirements with the official source.
+
 ### ❤️ 4. Saved Services
 
 Save useful services for convenient access and revisit important information when needed.

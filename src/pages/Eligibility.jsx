@@ -6,6 +6,7 @@ import EntitlementCalculatorModal from '../components/eligibility/EntitlementCal
 import UnsavedChangesDialog from '../components/common/UnsavedChangesDialog';
 import ApplicantProfileSwitcher from '../components/eligibility/ApplicantProfileSwitcher';
 import WelfareEligibilityMatrixTable from '../components/eligibility/WelfareEligibilityMatrixTable';
+import { getActiveApplicantProfile } from '../services/applicantProfileService';
 
 const Eligibility = () => {
   const [activeTab, setActiveTab] = useState('wizard');
@@ -14,6 +15,27 @@ const Eligibility = () => {
 
   const [wizardDirty, setWizardDirty] = useState(false);
   const [pendingTab, setPendingTab] = useState(null);
+
+  // Whose assessment this page is showing. The wizard and the saved list follow it.
+  const [applicant, setApplicant] = useState(() => getActiveApplicantProfile());
+  const [pendingChange, setPendingChange] = useState(null);
+
+  // Switching, adding or editing the applicant restarts the wizard, so unsaved answers need a warning too.
+  const guardApplicantChange = (run) => {
+    if (activeTab === 'wizard' && wizardDirty) setPendingChange({ run });
+    else run();
+  };
+
+  const discardAndChangeApplicant = () => {
+    const { run } = pendingChange;
+    setPendingChange(null);
+    run();
+  };
+
+  const handleProfileChanged = () => {
+    setApplicant(getActiveApplicantProfile());
+    setRefreshCount((count) => count + 1);
+  };
 
   // Switching tabs unmounts the wizard, so unsaved answers need the same warning.
   const requestTab = (tab) => {
@@ -164,23 +186,37 @@ const Eligibility = () => {
           </span>
         </div>
 
-        <ApplicantProfileSwitcher onProfileChanged={() => setRefreshCount((c) => c + 1)} />
+        <ApplicantProfileSwitcher onProfileChanged={handleProfileChanged} onBeforeChange={guardApplicantChange} />
 
         {/* Content based on active tab */}
         {activeTab === 'wizard' && (
-          <UniversalEligibilityWizard onAssessmentSaved={handleAssessmentSaved} onDirtyChange={setWizardDirty} />
+          <UniversalEligibilityWizard
+            key={`${applicant.id}:${applicant.updatedAt}`}
+            applicant={applicant}
+            onAssessmentSaved={handleAssessmentSaved}
+            onDirtyChange={setWizardDirty}
+          />
         )}
         {activeTab === 'matrix' && (
           <WelfareEligibilityMatrixTable />
         )}
         {activeTab === 'saved' && (
-          <SavedAssessmentsList refreshTrigger={refreshCount} />
+          <SavedAssessmentsList
+            refreshTrigger={refreshCount}
+            applicantId={applicant.id}
+            applicantName={applicant.name}
+          />
         )}
 
         <UnsavedChangesDialog
           isOpen={pendingTab !== null}
           onStay={() => setPendingTab(null)}
           onDiscard={discardAndSwitch}
+        />
+        <UnsavedChangesDialog
+          isOpen={pendingChange !== null}
+          onStay={() => setPendingChange(null)}
+          onDiscard={discardAndChangeApplicant}
         />
 
         {/* Welfare Entitlement Maximizer Modal */}
