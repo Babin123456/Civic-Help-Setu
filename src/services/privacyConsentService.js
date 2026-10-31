@@ -153,6 +153,7 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_catalogue_snapshots_v1',
   'civicbridge_eligibility_test_cases_v1',
   'civicbridge_service_ownership_v1',
+  'civicbridge_dismissed_recommendations',
   'civicbridge_public_notices_digest_v1',
   'civicbridge_service_availability_notices_v1',
   'civicbridge_source_conflicts',
