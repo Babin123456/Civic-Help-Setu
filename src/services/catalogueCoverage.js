@@ -103,7 +103,7 @@ export const OPTIONAL_RULES = COVERAGE_RULES.filter((rule) => rule.level === 'op
 export const isBlocker = (rule, extraBlockers = []) => rule.level === 'required' || extraBlockers.includes(rule.field);
 
 const publicationStateOf = (record) => (PUBLICATION_STATES.includes(record.publicationState) ? record.publicationState : SERVICE_FALLBACKS.publicationState);
-const jurisdictionOf = (record) => jurisdictionLabel(record.jurisdiction) ?? SERVICE_FALLBACKS.jurisdiction;
+const jurisdictionOf = (record) => jurisdictionLabel(record.jurisdiction) ?? SERVICE_FALLBACKS.jurisdiction ?? 'India';
 
 /** Gaps of one record: [{ field, label, level, severity, blocker, detail }]. Nothing is filled in. */
 export function findGaps(record, extraBlockers = []) {
