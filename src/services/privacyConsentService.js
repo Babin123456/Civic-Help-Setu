@@ -137,6 +137,7 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_plain_lang',
   'civicbridge_a11y_prefs',
   'civicbridge_focus_mode',
+  'civicbridge_reader_preferences',
   'civicbridge_active_applicant_profile_id_v1',
   // Demo sign-in session, signing out is its own action
   'civicbridge_demo_user',
@@ -157,6 +158,7 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_service_availability_notices_v1',
   'civicbridge_source_conflicts',
   'civicbridge_conflict_audit_logs',
+  'civicbridge_duplicate_review_states',
   // Handled by purge itself: consents are reset, the audit log keeps the deletion receipt
   CONSENT_STORAGE_KEY,
   AUDIT_STORAGE_KEY,

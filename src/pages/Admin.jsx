@@ -79,6 +79,7 @@ import {
 import SourceConflictReviewQueue from '../components/admin/SourceConflictReviewQueue';
 import BarrierInsightsDashboard from '../components/barriers/BarrierInsightsDashboard';
 import RuleConflictInspectorModal from '../components/admin/RuleConflictInspectorModal';
+import DuplicateServiceDetectorPanel from '../components/admin/DuplicateServiceDetectorPanel';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -718,6 +719,7 @@ const Admin = () => {
                 label: `User Roles (${users.length})`,
                 badge: null,
               },
+              { id: 'duplicates', label: 'Duplicate Detection', badge: null },
               { id: 'audit', label: 'Audit Trail Logs', badge: null },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
@@ -1672,6 +1674,9 @@ const Admin = () => {
 
             {/* Official application-link health check */}
             {activeTab === 'link-health' && <LinkHealthPanel />}
+            {activeTab === 'duplicates' && (
+              <DuplicateServiceDetectorPanel services={services} onRefresh={() => setServices(getAdminServices())} />
+            )}
 
             {/* Private drafts of service guides: review, preview and publish */}
             {activeTab === 'drafts' && (
