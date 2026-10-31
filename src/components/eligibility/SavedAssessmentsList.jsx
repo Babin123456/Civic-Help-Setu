@@ -3,6 +3,7 @@ import { Calendar, Trash2, CheckCircle2, AlertTriangle, ArrowRight, BookOpen } f
 import { getSavedAssessments, getAssessmentsForApplicant, deleteAssessment } from '../../services/assessmentStorage';
 import { useToast } from '../../context/ToastContext';
 import { Link } from 'react-router-dom';
+import GroundedEligibilityExplanationCard from './GroundedEligibilityExplanationCard';
 
 const SavedAssessmentsList = ({
   refreshTrigger = 0,
@@ -164,6 +165,7 @@ const SavedAssessmentsList = ({
                     <div>
                       <strong style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>{res.schemeName}</strong>
                       <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{res.reason}</p>
+                      <GroundedEligibilityExplanationCard assessment={res} />
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
