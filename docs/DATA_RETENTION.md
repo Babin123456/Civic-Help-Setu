@@ -53,6 +53,7 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civic_journey_progress_<journeyId>` (one per journey) | `journeyDependencyEngine.js` | Completed tasks of a journey plan | Drafts and in-progress work |
 | `civic_accessibility_visit_plans` | `accessibilityPlannerService.js` | Saved citizen accessibility needs, accommodations, and office pre-visit confirmation checklists | Drafts and in-progress work |
 | `civic_grievance_evidence_drafts` | `grievanceEvidenceService.js` | Private user-controlled grievance preparation drafts and timelines | Drafts and in-progress work |
+| `civic_grievance_drafts_v1` | `civicGrievanceDraftingService.js` | User-controlled formal civic grievance drafts and facts | Drafts and in-progress work |
 | `civic_life_event_journeys` | `lifeEventNavigatorService.js` | Saved life-event roadmap progress, hidden tasks and regional selections | Drafts and in-progress work |
 | `civicbridge_eligibility_assessments` | `assessmentStorage.js` | Answers and results of eligibility checks | Drafts and in-progress work |
 | `civicbridge_applicant_profiles_v1` | `applicantProfileService.js` | Household and family member applicant profiles for scoped assessments | Drafts and in-progress work |
@@ -94,7 +95,7 @@ After clearing, the sample reviews, sample audit reports and the sample vault do
 
 | Key | What it holds | Why it stays |
 |---|---|---|
-| `civicbridge_theme`, `civicbridge_lang`, `civicbridge_plain_lang`, `civicbridge_a11y_prefs`, `civicbridge_focus_mode`, `civicbridge_active_applicant_profile_id_v1` | Theme, language, plain language, accessibility, and active applicant profile selection settings | Display preferences, not records. Removing them would reset the page the person is looking at |
+| `civicbridge_theme`, `civicbridge_lang`, `civicbridge_plain_lang`, `civicbridge_a11y_prefs`, `civicbridge_focus_mode`, `civicbridge_reader_preferences`, `civicbridge_active_applicant_profile_id_v1` | Theme, language, plain language, accessibility, and active applicant profile selection settings | Display preferences, not records. Removing them would reset the page the person is looking at |
 | `civicbridge_demo_user` | Demo sign-in session (only when Clerk is not configured) | Signing out is its own action |
 | `civicbridge_consent_preferences` | Privacy choices | Reset by the Full Account Purge only |
 | `civicbridge_privacy_audit_log` | Last 100 privacy events (consent change, export, clear). It holds ids, category names and counts, never record contents | Receipt that a deletion happened |
