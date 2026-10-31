@@ -58,6 +58,7 @@ import ServiceDraftsPanel from '../components/admin/ServiceDraftsPanel';
 import { getDraftForService, listDrafts, saveDraft } from '../services/serviceDrafts';
 import CatalogueMigrationPanel from '../components/admin/CatalogueMigrationPanel';
 import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
+import CatalogueCompletenessPanel from '../components/admin/CatalogueCompletenessPanel';
 import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchPanel';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel';
@@ -1667,7 +1668,10 @@ const Admin = () => {
 
             {/* Catalogue coverage and missing-data dashboard */}
             {activeTab === 'coverage' && (
-              <CatalogueCoveragePanel services={services} onEditService={handleEditServiceFromReport} />
+              <>
+                <CatalogueCompletenessPanel services={services} onEditService={handleEditServiceFromReport} />
+                <CatalogueCoveragePanel services={services} onEditService={handleEditServiceFromReport} />
+              </>
             )}
 
             {/* Official application-link health check */}
