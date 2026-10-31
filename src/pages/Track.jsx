@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Send,
   Compass,
+  FileCheck2,
 } from 'lucide-react';
 
 import { useToast } from '../context/ToastContext';
@@ -42,6 +43,7 @@ import AppellateEscalationLadder from '../components/tracking/AppellateEscalatio
 import GrievanceEscalationAlertBanner from '../components/tracking/GrievanceEscalationAlertBanner';
 import GrievanceEvidenceOrganizerModal from '../components/grievance/GrievanceEvidenceOrganizerModal';
 import ApplicationMilestoneTracker from '../components/tracking/ApplicationMilestoneTracker';
+import DeficiencyCureModal from '../components/tracking/DeficiencyCureModal';
 
 const Track = () => {
   const location = useLocation();
@@ -59,6 +61,7 @@ const Track = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isJourneyModalOpen, setIsJourneyModalOpen] = useState(false);
   const [isGrievanceModalOpen, setIsGrievanceModalOpen] = useState(false);
+  const [isCureModalOpen, setIsCureModalOpen] = useState(false);
 
   useEffect(() => {
     const freshApps = getApplications();
@@ -274,6 +277,20 @@ const Track = () => {
                   />
                 )}
 
+                {pendingAction && (
+                  <div style={{ marginTop: '0.5rem', marginBottom: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setIsCureModalOpen(true)}
+                      style={{ fontSize: '0.82rem', padding: '0.4rem 0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                    >
+                      <FileCheck2 size={15} color="#ef4444" />
+                      Statutory Objection Resolution & Rectification
+                    </button>
+                  </div>
+                )}
+
                 <GrievanceEscalationAlertBanner application={activeApp} />
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
@@ -356,6 +373,12 @@ const Track = () => {
         isOpen={isGrievanceModalOpen}
         onClose={() => setIsGrievanceModalOpen(false)}
         defaultServiceId={activeApp?.serviceId}
+      />
+      <DeficiencyCureModal
+        application={activeApp}
+        isOpen={isCureModalOpen}
+        onClose={() => setIsCureModalOpen(false)}
+        citizenName={activeApp?.applicantName || 'Citizen Applicant'}
       />
     </section>
   );
