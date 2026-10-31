@@ -28,6 +28,7 @@ import TransitDirectionsGuideModal from '../components/location/TransitDirection
 import OfficeFootfallAdvisorModal from '../components/location/OfficeFootfallAdvisorModal';
 import { AccessibilityFilterBar } from '../components/location/AccessibilityFacilityPanel';
 import { filterOfficesByAccessibilityAndLanguage } from '../services/accessibilityMapService';
+import { getServiceById } from '../services/serviceCatalog';
 import LocationPermissionPanel, { LOCATION_REQUEST_BUTTON_ID } from '../components/location/LocationPermissionPanel';
 import {
   LOCATION_STATUS,
@@ -52,6 +53,7 @@ const NearbyOffices = () => {
   const [onlyOpenNow, setOnlyOpenNow] = useState(false);
   const [onlyWheelchair, setOnlyWheelchair] = useState(false);
   const [serviceFilter, setServiceFilter] = useState('');
+  const activeSelectedService = useMemo(() => (serviceFilter ? getServiceById(serviceFilter) : null), [serviceFilter]);
   const [selectedFacilities, setSelectedFacilities] = useState([]);
   const [selectedLanguages, setSelectedLanguages] = useState([]);
 
@@ -489,6 +491,7 @@ const NearbyOffices = () => {
                   <OfficeCard
                     key={office.id}
                     office={office}
+                    selectedService={activeSelectedService}
                     isSelected={selectedOffice?.id === office.id}
                     onSelect={setSelectedOffice}
                     onBookAppointment={(off) => setBookingOffice(off)}
@@ -554,6 +557,7 @@ const NearbyOffices = () => {
                   <OfficeCard
                     key={office.id}
                     office={office}
+                    selectedService={activeSelectedService}
                     isSelected={selectedOffice?.id === office.id}
                     onSelect={setSelectedOffice}
                     onBookAppointment={(off) => setBookingOffice(off)}
