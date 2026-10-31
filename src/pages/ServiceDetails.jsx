@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { AlertOctagon, ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, Users } from 'lucide-react';
+import { AlertOctagon, ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, Users, Calculator } from 'lucide-react';
 import { getServiceById } from '../services/serviceCatalog';
 import RetiredServiceNotice from '../components/common/RetiredServiceNotice';
 import { useAuth } from '../context/AuthContext';
@@ -24,6 +24,7 @@ import OfflineCacheActionCard from '../components/services/OfflineCacheActionCar
 import IntakeWindowPanel from '../components/services/IntakeWindowPanel';
 import AppointmentVisitPackModal from '../components/location/AppointmentVisitPackModal';
 import BarrierReportModal from '../components/barriers/BarrierReportModal';
+import InteractiveFeeEstimatorModal from '../components/services/InteractiveFeeEstimatorModal';
 
 const getSavedServices = () => {
   try {
@@ -75,6 +76,7 @@ const ServiceDetails = ({ previewService = null }) => {
   const [showLowBandwidthModal, setShowLowBandwidthModal] = useState(false);
   const [showBarrierModal, setShowBarrierModal] = useState(false);
   const [showVisitPackModal, setShowVisitPackModal] = useState(false);
+  const [showFeeEstimatorModal, setShowFeeEstimatorModal] = useState(false);
   const [service, setService] = useState(() => previewService ?? getServiceById(id));
 
   const [isSaved, setIsSaved] = useState(() =>
@@ -566,6 +568,17 @@ const ServiceDetails = ({ previewService = null }) => {
           {/* Offline In-Office Visit Staging */}
           <OfflineCacheActionCard service={service} />
           <IntakeWindowPanel service={service} />
+          <div style={{ margin: '0.5rem 0', textAlign: 'right' }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setShowFeeEstimatorModal(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}
+            >
+              <Calculator size={15} color="var(--accent-main)" />
+              Calculate Total Costs & Concessions
+            </button>
+          </div>
 
           {/* Fee Transparency */}
           <FeeTransparencyCard
@@ -672,6 +685,12 @@ const ServiceDetails = ({ previewService = null }) => {
       <AppointmentVisitPackModal
         isOpen={showVisitPackModal}
         onClose={() => setShowVisitPackModal(false)}
+        service={service}
+      />
+
+      <InteractiveFeeEstimatorModal
+        isOpen={showFeeEstimatorModal}
+        onClose={() => setShowFeeEstimatorModal(false)}
         service={service}
       />
 
