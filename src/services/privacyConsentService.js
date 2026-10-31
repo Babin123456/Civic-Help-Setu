@@ -66,6 +66,7 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_journey_handoffs_v1', category: 'drafts', exportAs: 'journeyHandoffs', empty: [] }, // journeyHandoffService.js
   { key: 'civicbridge_readiness_scorecards', category: 'drafts', exportAs: 'readinessScorecards', empty: [] }, // readinessScorecardService.js
   { key: 'civicbridge_office_accessibility_audits', category: 'activity', exportAs: 'officeAccessibilityAudits', empty: [] }, // accessibilityMapService.js
+  { key: 'civicbridge_preparation_plans_v1', category: 'drafts', exportAs: 'preparationPlans', empty: {} }, // applicationPreparationPlanService.js
 ];
 
 /**
@@ -137,6 +138,7 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_plain_lang',
   'civicbridge_a11y_prefs',
   'civicbridge_focus_mode',
+  'civicbridge_reader_preferences',
   'civicbridge_active_applicant_profile_id_v1',
   // Demo sign-in session, signing out is its own action
   'civicbridge_demo_user',
