@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AlertCircle, Clock, ShieldAlert, Copy, Check, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
+import { safeHttpUrl } from '../../utils/safeContent';
 import {
   calculateSlaStatus,
   generateEscalationNoticeDraft,
@@ -120,7 +121,7 @@ export default function GrievanceEscalationAlertBanner({ application, citizenNam
             {showDraft ? 'Hide Notice' : 'Prepare Escalation'}
           </button>
           <a
-            href={channel.url}
+            href={safeHttpUrl(channel.url) || undefined}
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-primary"
