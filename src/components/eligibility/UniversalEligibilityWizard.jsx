@@ -16,6 +16,11 @@ import {
 } from '../../services/assessmentStorage';
 
 import {
+  toEligibilityAnswers,
+  saveEligibilityAnswers,
+} from '../../services/applicantProfileService';
+
+import {
   applyCriteria,
   RESULT_STATUS_LABELS,
 } from '../../services/eligibilityCriteria';
@@ -65,6 +70,12 @@ const DEFAULT_PROFILE = {
   hasLearnerLicense: false,
   hasIncomeCertificate: false,
 };
+
+// The answers a profile already holds win over the generic defaults, so each person starts from their own.
+const seedProfile = (applicant) => ({
+  ...DEFAULT_PROFILE,
+  ...(applicant ? toEligibilityAnswers(applicant) : {}),
+});
 
 // Keep cleared number fields empty instead of converting them to zero.
 const toAnswer = (raw) => {
@@ -138,20 +149,17 @@ const FILTER_OPTIONS = [
 ];
 
 const UniversalEligibilityWizard = ({
+  applicant = null,
   onAssessmentSaved = () => {},
   onDirtyChange = () => {},
 }) => {
   const { toast } = useToast();
 
   const [step, setStep] = useState(1);
-  const [profile, setProfile] = useState(() => ({
-    ...DEFAULT_PROFILE,
-  }));
+  const [profile, setProfile] = useState(() => seedProfile(applicant));
 
   // The baseline represents the answers associated with the last save.
-  const [baseline, setBaseline] = useState(() => ({
-    ...DEFAULT_PROFILE,
-  }));
+  const [baseline, setBaseline] = useState(() => seedProfile(applicant));
 
   const [evaluations, setEvaluations] = useState(null);
   const [filterStatus, setFilterStatus] = useState('all');
@@ -316,7 +324,12 @@ const UniversalEligibilityWizard = ({
         return stored;
       });
 
-      saveAssessment(profile, storedEvaluations);
+      saveAssessment(profile, storedEvaluations, applicant ?? undefined);
+
+      // Keep these answers with this applicant for the next time they are selected.
+      if (applicant) {
+        saveEligibilityAnswers(applicant.id, profile);
+      }
 
       setBaseline({ ...profile });
       setIsSaved(true);
@@ -425,6 +438,18 @@ const UniversalEligibilityWizard = ({
             {step === 3 &&
               'Assessment Results & Scheme Recommendations'}
           </h2>
+
+          {applicant && (
+            <p
+              style={{
+                margin: '0.35rem 0 0',
+                fontSize: '0.85rem',
+                color: 'var(--text-secondary)',
+              }}
+            >
+              Assessing for <strong>{applicant.name}</strong>
+            </p>
+          )}
         </div>
 
         <div

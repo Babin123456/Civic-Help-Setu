@@ -35,6 +35,8 @@ export const DEFAULT_SELF_PROFILE = {
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
+const ASSESSMENTS_STORAGE_KEY = 'civicbridge_eligibility_assessments';
+
 const safeStorage = () => {
   try {
     return globalThis.localStorage ?? null;
@@ -42,6 +44,42 @@ const safeStorage = () => {
     return null;
   }
 };
+
+const toBoundedNumber = (value, max) => {
+  if (value == null || String(value).trim() === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 && n <= max ? n : null;
+};
+
+/**
+ * Make one stored profile safe to use. An entry that is not an object or has no id is dropped
+ * (null). Age and income that are missing or invalid become '' instead of an invented number,
+ * so the wizard asks for them rather than assuming.
+ */
+export function normalizeApplicantProfile(raw) {
+  if (!raw || typeof raw !== 'object' || typeof raw.id !== 'string' || !raw.id) return null;
+  const age = toBoundedNumber(raw.age, 120);
+  const income = toBoundedNumber(raw.annualIncome, Number.MAX_SAFE_INTEGER);
+  const relationship = RELATIONSHIP_TYPES.some((r) => r.id === raw.relationship) ? raw.relationship : 'other';
+  return {
+    ...raw,
+    name: String(raw.name ?? '').trim() || 'Unnamed applicant',
+    relationship: raw.id === 'prof_self' ? 'self' : relationship,
+    age: age ?? '',
+    annualIncome: income ?? '',
+    isSeniorCitizen: age != null && age >= 60,
+  };
+}
+
+function normalizeApplicantProfiles(list) {
+  if (!Array.isArray(list)) return [];
+  const seen = new Set();
+  return list.map(normalizeApplicantProfile).filter((profile) => {
+    if (!profile || seen.has(profile.id)) return false;
+    seen.add(profile.id);
+    return true;
+  });
+}
 
 /**
  * Retrieve all configured applicant profiles.
@@ -54,9 +92,9 @@ export function getApplicantProfiles(storage = safeStorage()) {
       storage.setItem(APPLICANT_PROFILES_STORAGE_KEY, JSON.stringify([DEFAULT_SELF_PROFILE]));
       return [DEFAULT_SELF_PROFILE];
     }
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
+    const usable = normalizeApplicantProfiles(JSON.parse(raw));
+    if (usable.length > 0) {
+      return usable;
     }
     storage.setItem(APPLICANT_PROFILES_STORAGE_KEY, JSON.stringify([DEFAULT_SELF_PROFILE]));
     return [DEFAULT_SELF_PROFILE];
@@ -174,17 +212,16 @@ export function updateApplicantProfile(profileId, updates = {}, storage = safeSt
   }
 
   const existing = profiles[index];
-  const age = updates.age !== undefined ? Number(updates.age) : existing.age;
+  if (updates.name !== undefined && !String(updates.name).trim()) {
+    throw new Error('Applicant name is required.');
+  }
 
-  const updatedProfile = {
+  const updatedProfile = normalizeApplicantProfile({
     ...existing,
     ...updates,
     id: existing.id, // Immutable ID
-    relationship: existing.id === 'prof_self' ? 'self' : (updates.relationship || existing.relationship),
-    age,
-    isSeniorCitizen: age >= 60,
     updatedAt: new Date().toISOString(),
-  };
+  });
 
   profiles[index] = updatedProfile;
 
@@ -218,12 +255,12 @@ export function deleteApplicantProfile(profileId, storage = safeStorage()) {
       storage.setItem(APPLICANT_PROFILES_STORAGE_KEY, JSON.stringify(filtered));
 
       // Cascade remove assessments linked to this profile
-      const rawAssessments = storage.getItem('civicbridge_eligibility_assessments');
+      const rawAssessments = storage.getItem(ASSESSMENTS_STORAGE_KEY);
       if (rawAssessments) {
         const assessments = JSON.parse(rawAssessments);
         if (Array.isArray(assessments)) {
           const cleanedAssessments = assessments.filter((a) => a.applicantId !== profileId);
-          storage.setItem('civicbridge_eligibility_assessments', JSON.stringify(cleanedAssessments));
+          storage.setItem(ASSESSMENTS_STORAGE_KEY, JSON.stringify(cleanedAssessments));
         }
       }
 
@@ -252,4 +289,57 @@ export function filterAssessmentsByProfile(assessments = [], profileId = 'prof_s
     }
     return item.applicantId === profileId;
   });
+}
+
+/**
+ * How many saved assessments belong to a profile, so the delete prompt can say what goes with it.
+ */
+export function countAssessmentsForProfile(profileId, storage = safeStorage()) {
+  if (!storage) return 0;
+  try {
+    const raw = storage.getItem(ASSESSMENTS_STORAGE_KEY);
+    if (!raw) return 0;
+    return filterAssessmentsByProfile(JSON.parse(raw), profileId).length;
+  } catch {
+    return 0;
+  }
+}
+
+const TEXT_ANSWER_KEYS = ['employment', 'category', 'state'];
+const FLAG_ANSWER_KEYS = [
+  'isStudent',
+  'ownsAgriculturalLand',
+  'hasAadhaar',
+  'hasPan',
+  'hasLearnerLicense',
+  'hasIncomeCertificate',
+];
+
+/**
+ * The wizard answers held by a profile. A missing age or income comes back as '' so the wizard
+ * asks for it; every other answer is only included when the profile actually has it.
+ */
+export function toEligibilityAnswers(profile) {
+  const normalized = normalizeApplicantProfile(profile);
+  if (!normalized) return {};
+  const answers = { age: normalized.age, annualIncome: normalized.annualIncome };
+  TEXT_ANSWER_KEYS.forEach((key) => {
+    if (typeof normalized[key] === 'string' && normalized[key]) answers[key] = normalized[key];
+  });
+  FLAG_ANSWER_KEYS.forEach((key) => {
+    if (typeof normalized[key] === 'boolean') answers[key] = normalized[key];
+  });
+  return answers;
+}
+
+/**
+ * Keep the wizard answers with the applicant they were entered for, so switching profiles
+ * and coming back restores them instead of mixing them with another person's.
+ */
+export function saveEligibilityAnswers(profileId, answers, storage = safeStorage()) {
+  const picked = {};
+  ['age', 'annualIncome', ...TEXT_ANSWER_KEYS, ...FLAG_ANSWER_KEYS].forEach((key) => {
+    if (answers[key] !== undefined) picked[key] = answers[key];
+  });
+  return updateApplicantProfile(profileId, picked, storage);
 }
