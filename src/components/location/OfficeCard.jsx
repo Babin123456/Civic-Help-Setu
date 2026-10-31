@@ -26,6 +26,8 @@ const OfficeCard = ({
   isSelected = false,
   onSelect = () => {},
   onAuditAccessibility,
+  onShowTransit,
+  onShowFootfall,
 }) => {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
@@ -339,6 +341,51 @@ const OfficeCard = ({
           >
             <Accessibility size={15} />
             <span>Audit</span>
+          </button>
+        )}
+
+        {onShowTransit && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onShowTransit(office);
+            }}
+            className="btn btn-secondary"
+            title="Transit & Directions Guide"
+            style={{
+              padding: '0.55rem 0.75rem',
+              fontSize: '0.825rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              borderRadius: '0.5rem',
+            }}
+          >
+            <Navigation size={15} />
+            <span>Transit</span>
+          </button>
+        )}
+        {onShowFootfall && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onShowFootfall(office);
+            }}
+            className="btn btn-secondary"
+            title="Hourly Footfall & Queue Wait Time Advisor"
+            style={{
+              padding: '0.55rem 0.75rem',
+              fontSize: '0.825rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              borderRadius: '0.5rem',
+            }}
+          >
+            <Clock size={15} />
+            <span>Rush</span>
           </button>
         )}
 

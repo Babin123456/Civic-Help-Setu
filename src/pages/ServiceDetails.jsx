@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { AlertOctagon, ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, Users } from 'lucide-react';
+import { AlertOctagon, ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, Users, Eye } from 'lucide-react';
 import { getServiceById } from '../services/serviceCatalog';
 import RetiredServiceNotice from '../components/common/RetiredServiceNotice';
 import { useAuth } from '../context/AuthContext';
@@ -24,6 +24,9 @@ import OfflineCacheActionCard from '../components/services/OfflineCacheActionCar
 import IntakeWindowPanel from '../components/services/IntakeWindowPanel';
 import AppointmentVisitPackModal from '../components/location/AppointmentVisitPackModal';
 import BarrierReportModal from '../components/barriers/BarrierReportModal';
+import AccessibleReaderPreferencesModal from '../components/services/AccessibleReaderPreferencesModal';
+import { getReaderPreferences, computeReaderStyle } from '../services/accessibleReaderService';
+import InteractiveFeeEstimatorModal from '../components/services/InteractiveFeeEstimatorModal';
 
 const getSavedServices = () => {
   try {
@@ -34,6 +37,7 @@ const getSavedServices = () => {
   }
 };
 
+import ServicePrintPacketModal from '../components/services/ServicePrintPacketModal';
 const copyServiceLink = async (url) => {
   try {
     if (navigator?.clipboard?.writeText) {
@@ -70,9 +74,13 @@ const ServiceDetails = ({ previewService = null }) => {
   const [linkCopied, setLinkCopied] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [handoffModalOpen, setHandoffModalOpen] = useState(false);
+  const [showPrintPacketModal, setShowPrintPacketModal] = useState(false);
   const [showLowBandwidthModal, setShowLowBandwidthModal] = useState(false);
   const [showBarrierModal, setShowBarrierModal] = useState(false);
   const [showVisitPackModal, setShowVisitPackModal] = useState(false);
+  const [showReaderModal, setShowReaderModal] = useState(false);
+  const [readerStyle, setReaderStyle] = useState(() => computeReaderStyle(getReaderPreferences()));
+  const [showFeeEstimatorModal, setShowFeeEstimatorModal] = useState(false);
   const [service, setService] = useState(() => previewService ?? getServiceById(id));
 
   const [isSaved, setIsSaved] = useState(() =>
@@ -475,6 +483,23 @@ const ServiceDetails = ({ previewService = null }) => {
 
               <button
                 type="button"
+                onClick={() => setShowPrintPacketModal(true)}
+                className="btn btn-outline"
+                style={{
+                  padding: '0.6rem 1rem',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                }}
+              >
+                <Printer size={16} />
+                <span>Print CSC Checklist</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setShowVisitPackModal(true)}
                 className="btn btn-outline"
                 style={{
@@ -547,6 +572,17 @@ const ServiceDetails = ({ previewService = null }) => {
           {/* Offline In-Office Visit Staging */}
           <OfflineCacheActionCard service={service} />
           <IntakeWindowPanel service={service} />
+          <div style={{ margin: '0.5rem 0', textAlign: 'right' }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setShowFeeEstimatorModal(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}
+            >
+              <Calculator size={15} color="var(--accent-main)" />
+              Calculate Total Costs & Concessions
+            </button>
+          </div>
 
           {/* Fee Transparency */}
           <FeeTransparencyCard
@@ -558,11 +594,24 @@ const ServiceDetails = ({ previewService = null }) => {
           <BenefitEntitlementCalculator serviceId={service.id} serviceName={service.name} />
 
           {/* Service Guide */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setShowReaderModal(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem' }}
+            >
+              <Eye size={15} color="var(--accent-main)" />
+              Accessible Reader Preferences
+            </button>
+          </div>
+          <div style={readerStyle}>
           <ServiceGuide
             service={service}
             focusMode={focusMode}
             onToggleFocusMode={toggleFocusMode}
           />
+          </div>
 
           <DocumentPreflightInspectionCard service={service} />
 
@@ -638,6 +687,12 @@ const ServiceDetails = ({ previewService = null }) => {
         currentUser={user}
       />
 
+      <ServicePrintPacketModal
+        isOpen={showPrintPacketModal}
+        onClose={() => setShowPrintPacketModal(false)}
+        service={service}
+      />
+
       <LowBandwidthShareModal
         isOpen={showLowBandwidthModal}
         onClose={() => setShowLowBandwidthModal(false)}
@@ -650,10 +705,21 @@ const ServiceDetails = ({ previewService = null }) => {
         service={service}
       />
 
+      <InteractiveFeeEstimatorModal
+        isOpen={showFeeEstimatorModal}
+        onClose={() => setShowFeeEstimatorModal(false)}
+        service={service}
+      />
+
       <BarrierReportModal
         isOpen={showBarrierModal}
         onClose={() => setShowBarrierModal(false)}
         service={service}
+      />
+      <AccessibleReaderPreferencesModal
+        isOpen={showReaderModal}
+        onClose={() => setShowReaderModal(false)}
+        onPreferencesChange={(updated) => setReaderStyle(computeReaderStyle(updated))}
       />
     </div>
   );

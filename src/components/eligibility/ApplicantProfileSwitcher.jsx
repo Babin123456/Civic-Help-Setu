@@ -1,20 +1,25 @@
 import { useState, useEffect } from 'react';
-import { Users, Plus, Check, Trash2, UserPlus, Sparkles, X } from 'lucide-react';
 import { logDiagnostic } from '../../utils/diagnostics';
+import { Users, Plus, Check, Trash2, UserPlus, Sparkles, X } from 'lucide-react';
 import {
   getApplicantProfiles,
   getActiveProfileId,
   setActiveProfileId,
   createApplicantProfile,
+  updateApplicantProfile,
   deleteApplicantProfile,
+  countAssessmentsForProfile,
   RELATIONSHIP_TYPES,
 } from '../../services/applicantProfileService';
 
-export default function ApplicantProfileSwitcher({ onProfileChanged }) {
+// onBeforeChange(run) lets the page hold a change back (for example to warn about unsaved answers)
+// and call run() once the user agrees. Without it the change happens straight away.
+export default function ApplicantProfileSwitcher({ onProfileChanged, onBeforeChange }) {
   const [profiles, setProfiles] = useState(() => getApplicantProfiles());
   const [activeId, setActiveId] = useState(() => getActiveProfileId());
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [editingId, setEditingId] = useState(null);
 
   // Form State
   const [name, setName] = useState('');
@@ -32,7 +37,49 @@ export default function ApplicantProfileSwitcher({ onProfileChanged }) {
     setActiveId(freshActiveId);
   };
 
+  const requestChange = (run) => (onBeforeChange ? onBeforeChange(run) : run());
+
+  const resetForm = () => {
+    setName('');
+    setRelationship('parent');
+    setAge('60');
+    setEmployment('retired');
+    setAnnualIncome('150000');
+    setCategory('General');
+    setFormError('');
+  };
+
+  const openAdd = () =>
+    requestChange(() => {
+      resetForm();
+      setEditingId(null);
+      setIsAddModalOpen(true);
+    });
+
+  const openEdit = (prof) =>
+    requestChange(() => {
+      setEditingId(prof.id);
+      setName(prof.name);
+      setRelationship(prof.relationship);
+      setAge(String(prof.age));
+      setEmployment(prof.employment || 'unemployed');
+      setAnnualIncome(String(prof.annualIncome));
+      setCategory(prof.category || 'General');
+      setFormError('');
+      setIsAddModalOpen(true);
+    });
+
+  const closeModal = () => {
+    setIsAddModalOpen(false);
+    setEditingId(null);
+  };
+
   const handleSelect = (id) => {
+    if (id === activeId) return;
+    requestChange(() => selectProfile(id));
+  };
+
+  const selectProfile = (id) => {
     try {
       setActiveProfileId(id);
       setActiveId(id);
@@ -41,34 +88,47 @@ export default function ApplicantProfileSwitcher({ onProfileChanged }) {
         onProfileChanged(selected);
       }
     } catch (err) {
-      logDiagnostic('Could not switch the applicant profile', err);
+      logDiagnostic('ApplicantProfileSwitcher:handleSelect', err);
     }
   };
 
-  const handleAddSubmit = (e) => {
+  const handleFormSubmit = (e) => {
     e.preventDefault();
     setFormError('');
     if (!name.trim()) {
       setFormError('Please enter applicant name.');
       return;
     }
+    const ageValue = age === '' ? NaN : Number(age);
+    if (!Number.isFinite(ageValue) || ageValue < 1 || ageValue > 110) {
+      setFormError('Enter an age between 1 and 110.');
+      return;
+    }
+    const incomeValue = annualIncome === '' ? NaN : Number(annualIncome);
+    if (!Number.isFinite(incomeValue) || incomeValue < 0) {
+      setFormError('Enter an annual income of 0 or more.');
+      return;
+    }
 
     try {
-      const created = createApplicantProfile({
+      const details = {
         name,
         relationship,
-        age: Number(age) || 30,
+        age: ageValue,
         employment,
-        annualIncome: Number(annualIncome) || 0,
+        annualIncome: incomeValue,
         category,
-      });
+      };
+      const saved = editingId
+        ? updateApplicantProfile(editingId, details)
+        : createApplicantProfile(details);
 
       refreshState();
-      setIsAddModalOpen(false);
-      setName('');
-      if (onProfileChanged) onProfileChanged(created);
+      closeModal();
+      resetForm();
+      if (onProfileChanged) onProfileChanged(saved);
     } catch (err) {
-      setFormError(err.message || 'Failed to create applicant profile.');
+      setFormError(err.message || 'Failed to save applicant profile.');
     }
   };
 
@@ -81,11 +141,13 @@ export default function ApplicantProfileSwitcher({ onProfileChanged }) {
         onProfileChanged(getApplicantProfiles()[0]);
       }
     } catch (err) {
-      logDiagnostic('Could not update the applicant profiles', err);
+      logDiagnostic('ApplicantProfileSwitcher:handleDelete', err);
     }
   };
 
   const activeProfile = profiles.find((p) => p.id === activeId) || profiles[0];
+  const deleteTarget = confirmDeleteId ? profiles.find((p) => p.id === confirmDeleteId) : null;
+  const deleteCount = deleteTarget ? countAssessmentsForProfile(deleteTarget.id) : 0;
 
   return (
     <div
@@ -142,6 +204,26 @@ export default function ApplicantProfileSwitcher({ onProfileChanged }) {
               >
                 {activeProfile?.relationship}
               </span>
+              {activeProfile && (
+                <button
+                  type="button"
+                  onClick={() => openEdit(activeProfile)}
+                  aria-label={`Edit applicant ${activeProfile.name}`}
+                  style={{
+                    marginLeft: '0.5rem',
+                    padding: '0.1rem 0.6rem',
+                    borderRadius: '99px',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    background: 'transparent',
+                    color: 'var(--primary-color, #60a5fa)',
+                    border: '1px solid var(--border-color, #475569)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Edit
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -200,7 +282,7 @@ export default function ApplicantProfileSwitcher({ onProfileChanged }) {
 
           <button
             type="button"
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={openAdd}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -236,11 +318,23 @@ export default function ApplicantProfileSwitcher({ onProfileChanged }) {
             fontSize: '0.85rem',
           }}
         >
-          <span>Are you sure? Removing this profile will also remove its saved eligibility records.</span>
+          <span role="alert">
+            {deleteTarget
+              ? `Remove ${deleteTarget.name}? ${
+                  deleteCount > 0
+                    ? `This also deletes ${deleteCount} saved eligibility ${deleteCount === 1 ? 'assessment' : 'assessments'} for this applicant from this browser.`
+                    : 'No saved assessments are linked to this applicant.'
+                }`
+              : 'This applicant no longer exists.'}
+          </span>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button
               type="button"
-              onClick={() => handleDelete(confirmDeleteId)}
+              onClick={() =>
+                confirmDeleteId === activeId
+                  ? requestChange(() => handleDelete(confirmDeleteId))
+                  : handleDelete(confirmDeleteId)
+              }
               style={{
                 padding: '0.25rem 0.6rem',
                 borderRadius: '4px',
@@ -301,11 +395,11 @@ export default function ApplicantProfileSwitcher({ onProfileChanged }) {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
               <h3 id="add-applicant-modal-title" style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <UserPlus size={20} color="var(--primary-color, #3b82f6)" /> Add Household Applicant
+                <UserPlus size={20} color="var(--primary-color, #3b82f6)" /> {editingId ? 'Edit Applicant' : 'Add Household Applicant'}
               </h3>
               <button
                 type="button"
-                onClick={() => setIsAddModalOpen(false)}
+                onClick={closeModal}
                 style={{ background: 'none', border: 'none', color: 'var(--text-muted, #94a3b8)', cursor: 'pointer' }}
                 aria-label="Close modal"
               >
@@ -319,7 +413,7 @@ export default function ApplicantProfileSwitcher({ onProfileChanged }) {
               </div>
             )}
 
-            <form onSubmit={handleAddSubmit}>
+            <form onSubmit={handleFormSubmit}>
               <div style={{ marginBottom: '1rem' }}>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.35rem' }}>
                   Applicant Full Name *
@@ -346,24 +440,28 @@ export default function ApplicantProfileSwitcher({ onProfileChanged }) {
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.35rem' }}>
                     Relationship
                   </label>
-                  <select
-                    value={relationship}
-                    onChange={(e) => setRelationship(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.6rem 0.75rem',
-                      borderRadius: '8px',
-                      border: '1px solid var(--border-color, #475569)',
-                      background: 'rgba(0, 0, 0, 0.2)',
-                      color: 'var(--text-main, #f8fafc)',
-                    }}
-                  >
-                    {RELATIONSHIP_TYPES.filter((r) => r.id !== 'self').map((rel) => (
-                      <option key={rel.id} value={rel.id} style={{ background: '#1e293b' }}>
-                        {rel.label}
-                      </option>
-                    ))}
-                  </select>
+                  {editingId === 'prof_self' ? (
+                    <div style={{ padding: '0.6rem 0.75rem', color: 'var(--text-muted, #94a3b8)' }}>Self</div>
+                  ) : (
+                    <select
+                      value={relationship}
+                      onChange={(e) => setRelationship(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '0.6rem 0.75rem',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-color, #475569)',
+                        background: 'rgba(0, 0, 0, 0.2)',
+                        color: 'var(--text-main, #f8fafc)',
+                      }}
+                    >
+                      {RELATIONSHIP_TYPES.filter((r) => r.id !== 'self').map((rel) => (
+                        <option key={rel.id} value={rel.id} style={{ background: '#1e293b' }}>
+                          {rel.label}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.35rem' }}>
@@ -437,7 +535,7 @@ export default function ApplicantProfileSwitcher({ onProfileChanged }) {
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
                 <button
                   type="button"
-                  onClick={() => setIsAddModalOpen(false)}
+                  onClick={closeModal}
                   style={{
                     padding: '0.6rem 1.25rem',
                     borderRadius: '8px',
@@ -461,7 +559,7 @@ export default function ApplicantProfileSwitcher({ onProfileChanged }) {
                     cursor: 'pointer',
                   }}
                 >
-                  Save Profile
+                  {editingId ? 'Save Changes' : 'Save Profile'}
                 </button>
               </div>
             </form>

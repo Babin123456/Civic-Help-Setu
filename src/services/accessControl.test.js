@@ -29,6 +29,7 @@ import {
   submitErrorReport,
 } from './adminService';
 import { decideReview } from './serviceReview';
+import { planMigration } from './catalogueMigration';
 import { deleteAvailabilityNotice } from './serviceAvailabilityNoticeService';
 import { getOwnershipMap, assignServiceOwnership } from './serviceOwnershipService';
 import { resolveAuditReport, getAuditReports } from './communityAuditService';
@@ -101,6 +102,7 @@ const CALLS = {
   'freshness.review': () => recordServiceReview('svc', 'Rev', '', moduleStorage),
   'links.check': () => saveLinkCheck('svc:0', { url: 'https://a.gov.in/', status: 'reachable' }, moduleStorage),
   'services.review': () => decideReview('draft-that-does-not-exist', 'approved', { reason: 'Checked against the notice' }),
+  'catalogue.migrate': () => planMigration({ storage: moduleStorage }),
   'ownership.read': () => getOwnershipMap(moduleStorage),
   'ownership.manage': () => assignServiceOwnership('svc', { team: 'Docs' }, { storage: moduleStorage }),
 };

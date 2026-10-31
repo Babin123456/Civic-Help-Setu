@@ -44,6 +44,39 @@ export function auditRtiQuestions(questions = []) {
 }
 
 /**
+ * Evaluates fee exemptions and statutory disposal windows under the RTI Act, 2005.
+ */
+export function evaluateRtiFeeExemption({ isBpl = false, bplCardNumber = '', isLifeOrLiberty = false } = {}) {
+  const statutoryWindow = isLifeOrLiberty ? '48 Hours' : '30 Calendar Days';
+  const legalBasis = isLifeOrLiberty
+    ? 'Proviso to Section 7(1) of the RTI Act, 2005'
+    : 'Section 7(1) of the RTI Act, 2005';
+
+  if (isBpl) {
+    const cardStr = bplCardNumber ? ` No. ${bplCardNumber}` : '';
+    return {
+      feeAmount: 0,
+      isExempt: true,
+      exemptionReason: 'Section 7(5) BPL Statutory Fee Waiver',
+      statutoryWindow,
+      legalBasis,
+      requiredEnclosure: `Attested copy of BPL Card${cardStr}`,
+      clauseText: `Application fee is NOT payable under Section 7(5) of the RTI Act, 2005 as applicant belongs to Below Poverty Line (BPL) category (Attested copy of BPL Card${cardStr} enclosed).`,
+    };
+  }
+
+  return {
+    feeAmount: 10,
+    isExempt: false,
+    exemptionReason: 'Standard Statutory Application Fee',
+    statutoryWindow,
+    legalBasis,
+    requiredEnclosure: 'Indian Postal Order (IPO) / Court Fee Stamp / Treasury Challan of ₹10',
+    clauseText: 'An application fee of ₹10/- has been deposited.',
+  };
+}
+
+/**
  * Generates official formatted Section 6(1) RTI application text
  */
 export function buildRtiApplication(payload = {}) {
@@ -55,8 +88,10 @@ export function buildRtiApplication(payload = {}) {
     questions = [],
     isBpl = false,
     bplCardNumber = '',
+    isLifeOrLiberty = false,
     paymentMode = 'Indian Postal Order (IPO) No. ________ of ₹10'
   } = payload;
+  const exemption = evaluateRtiFeeExemption({ isBpl, bplCardNumber, isLifeOrLiberty });
 
   const dept = RTI_DEPARTMENT_DIRECTORY.find(d => d.id === departmentId) || RTI_DEPARTMENT_DIRECTORY[0];
   const audit = auditRtiQuestions(questions);
@@ -65,10 +100,14 @@ export function buildRtiApplication(payload = {}) {
   const formattedQuestions = audit.validQueries.map((q, i) => `   (${i + 1}) ${q}`).join('\n\n');
 
   const feeClause = isBpl
-    ? `An application fee is NOT payable as the applicant belongs to the Below Poverty Line (BPL) category. (Attested copy of BPL Card No. ${bplCardNumber || 'attached'} enclosed).`
+    ? exemption.clauseText
     : `An application fee of ₹10/- has been deposited vide: ${paymentMode}.`;
 
-  const applicationText = `APPLICATION FOR INFORMATION UNDER SECTION 6(1) OF THE RIGHT TO INFORMATION ACT, 2005
+  const urgentHeader = isLifeOrLiberty
+    ? '*** URGENT: INFORMATION SOUGHT CONCERNS LIFE OR LIBERTY — MANDATORY DISPOSAL WITHIN 48 HOURS UNDER PROVISO TO SECTION 7(1) ***\n\n'
+    : '';
+
+  const applicationText = `${urgentHeader}APPLICATION FOR INFORMATION UNDER SECTION 6(1) OF THE RIGHT TO INFORMATION ACT, 2005
 
 To,
 The Public Information Officer (PIO),
@@ -94,7 +133,10 @@ ${formattedQuestions}
 6. Application Fee Details:
    ${feeClause}
 
-7. Statutory Declaration:
+7. Statutory Timeline:
+   Mandatory response time: ${exemption.statutoryWindow} under ${exemption.legalBasis}.
+
+8. Statutory Declaration:
    I hereby state and declare that I am a citizen of India and the information sought does not fall under any of the exemptions specified under Section 8 or Section 9 of the RTI Act, 2005.
 
 Place: ________________________
@@ -109,6 +151,8 @@ Signature of Applicant:
     department: dept,
     audit,
     applicationText,
-    isBpl
+    isBpl,
+    isLifeOrLiberty,
+    exemptionDetails: exemption,
   };
 }

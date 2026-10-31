@@ -56,6 +56,7 @@ import StaleRecordsReviewQueue from '../components/admin/StaleRecordsReviewQueue
 import LinkHealthPanel from '../components/admin/LinkHealthPanel';
 import ServiceDraftsPanel from '../components/admin/ServiceDraftsPanel';
 import { getDraftForService, listDrafts, saveDraft } from '../services/serviceDrafts';
+import CatalogueMigrationPanel from '../components/admin/CatalogueMigrationPanel';
 import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
 import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchPanel';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
@@ -677,6 +678,11 @@ const Admin = () => {
               {
                 id: 'eligibility-tests',
                 label: 'Eligibility Test Bench',
+                badge: null,
+              },
+              {
+                id: 'migrations',
+                label: 'Data Migrations',
                 badge: null,
               },
               {
@@ -1656,11 +1662,20 @@ const Admin = () => {
 
             {/* Private drafts of service guides: review, preview and publish */}
             {activeTab === 'drafts' && (
-              <ServiceDraftsPanel
-                onEditDraft={handleEditDraft}
-                onChanged={handleDraftsChanged}
-                actor={user?.username || 'SuperAdmin'}
-                refreshKey={draftsVersion}
+  <ServiceDraftsPanel
+    onEditDraft={handleEditDraft}
+    onChanged={handleDraftsChanged}
+    actor={user?.username || 'SuperAdmin'}
+    refreshKey={draftsVersion}
+  />
+)}
+            {/* Catalogue data migrations: dry run, backup, apply, rollback */}
+            {activeTab === 'migrations' && (
+              <CatalogueMigrationPanel
+                onChanged={() => {
+                  setServices(getAdminServices());
+                  setAuditLogs(getAuditLogs());
+                }}
               />
             )}
 
