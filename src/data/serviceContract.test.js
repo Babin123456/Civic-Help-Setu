@@ -24,7 +24,7 @@ describe('validateServiceRecord', () => {
 
   it('accepts optional fields when valid', () => {
     const r = {
-      ...valid(), jurisdiction: 'Delhi', publicationState: 'draft', warnings: ['Carry originals'],
+      ...valid(), jurisdiction: { level: 'state', states: ['Delhi'], districts: [], localBody: '' }, publicationState: 'draft', warnings: ['Carry originals'],
       contacts: [{ label: 'Helpline', phone: '1950' }, { label: 'Web', url: 'https://eci.gov.in' }],
     };
     expect(validateServiceRecord(r)).toEqual([]);
@@ -67,7 +67,8 @@ describe('applyServiceDefaults', () => {
   it('fills optional fields without mutating the input', () => {
     const input = valid();
     const out = applyServiceDefaults(input);
-    expect(out).toMatchObject({ publicationState: 'published', jurisdiction: 'India', warnings: [], contacts: [] });
+    expect(out).toMatchObject({ publicationState: 'published', warnings: [], contacts: [] });
+    expect(out.jurisdiction).toBeUndefined();
     expect(input.publicationState).toBeUndefined();
   });
 });
@@ -94,5 +95,55 @@ describe('validateCatalogue', () => {
     const { errors } = validateCatalogue({ schemaVersion: 1, services: [valid(), valid(), bad] });
     expect(errors.some((e) => e.field === 'id' && /duplicates/.test(e.reason))).toBe(true);
     expect(errors.some((e) => e.serviceId === 'other-service' && e.field === 'difficulty')).toBe(true);
+  });
+});
+
+describe('jurisdiction', () => {
+  const base = () => structuredClone(MOCK_SERVICES[0]);
+  const withJurisdiction = (jurisdiction) => validateServiceRecord({ ...base(), jurisdiction }).map((e) => `${e.field} ${e.reason}`);
+
+  it('accepts valid structured jurisdictions', () => {
+    expect(withJurisdiction({ level: 'national', states: [], districts: [], localBody: '' })).toEqual([]);
+    expect(withJurisdiction({ level: 'state', states: ['Kerala'], districts: [], localBody: '' })).toEqual([]);
+    expect(withJurisdiction({ level: 'district', states: ['Kerala'], districts: ['Kochi'] })).toEqual([]);
+  });
+
+  it('rejects legacy text and other types', () => {
+    for (const v of ['India', '   ', 5, [], null]) {
+      expect(withJurisdiction(v)[0]).toMatch(/^jurisdiction must be \{ level/);
+    }
+    expect(withJurisdiction({ level: 'galaxy' })[0]).toMatch(/^jurisdiction /);
+    expect(withJurisdiction({})[0]).toMatch(/^jurisdiction /);
+  });
+
+  it('applies the same rules as the app', () => {
+    expect(withJurisdiction({ level: 'state' })[0]).toMatch(/at least one state/);
+    expect(withJurisdiction({ level: 'national', states: ['Kerala'] })[0]).toMatch(/national service cannot list/);
+    expect(withJurisdiction({ level: 'state', states: ['Atlantis'] })[0]).toMatch(/not a recognised state/);
+  });
+
+});
+
+describe('personal data in nested objects', () => {
+  const base = () => structuredClone(MOCK_SERVICES[0]);
+  const fields = (r) => validateServiceRecord(r).map((e) => e.field);
+
+  it('rejects forbidden keys inside steps and contacts', () => {
+    const r = base();
+    r.steps = [{ title: 'a', description: 'b', aadhaar: '1234' }];
+    r.contacts = [{ label: 'x', phone: '1950', address: 'Some street' }];
+    expect(fields(r)).toEqual(expect.arrayContaining(['steps[0].aadhaar', 'contacts[0].address']));
+  });
+
+  it('still allows phone and email on a contact, but not elsewhere nested', () => {
+    const ok = { ...base(), contacts: [{ label: 'x', phone: '1950', email: 'help@gov.in' }] };
+    expect(validateServiceRecord(ok)).toEqual([]);
+    const bad = { ...base(), steps: [{ title: 'a', description: 'b', email: 'me@x.in' }] };
+    expect(fields(bad)).toContain('steps[0].email');
+  });
+
+  it('does not let a falsy phone or a non-string email count as contact details', () => {
+    const r = { ...base(), contacts: [{ label: 'x', phone: 0 }, { label: 'y', email: '' }, { label: 'z', email: 5 }] };
+    expect(fields(r)).toEqual(expect.arrayContaining(['contacts[0].phone', 'contacts[1].email', 'contacts[2].email']));
   });
 });

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
   FileBadge, ShieldCheck, Upload, CreditCard, Car, FileText,
-  Plus, Search, Eye, AlertTriangle, Layers, Download, Tag
+  Plus, Search, Eye, AlertTriangle, Layers, Download, Tag, Stamp
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../context/ConfirmationDialogContext';
@@ -16,9 +16,19 @@ import VaultStats from '../components/vault/VaultStats';
 import DocumentModal from '../components/vault/DocumentModal';
 import DocumentPreviewModal from '../components/vault/DocumentPreviewModal';
 import ExpiringDocumentsAlert from '../components/vault/ExpiringDocumentsAlert';
+import VaultRenewalReminderBanner from '../components/vault/VaultRenewalReminderBanner';
 import VaultBackupRestoreModal from '../components/vault/VaultBackupRestoreModal';
+import SharedDeviceNotice from '../components/privacy/SharedDeviceNotice';
 import ServiceTaggingModal from '../components/vault/ServiceTaggingModal';
 import DocumentPreflightChecker from '../components/vault/DocumentPreflightChecker';
+import InactivityLockModal from '../components/vault/InactivityLockModal';
+import WatermarkAttestationModal from '../components/vault/WatermarkAttestationModal';
+import { Lock, Unlock, ShieldAlert } from 'lucide-react';
+import {
+  startInactivityTracker,
+  stopInactivityTracker,
+  resetInactivityTracker,
+} from '../services/sessionInactivityService';
 
 const CATEGORIES = ['All', 'Identity', 'Finance', 'Transport', 'Education', 'Welfare'];
 
@@ -55,7 +65,11 @@ const Vault = () => {
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [taggingDoc, setTaggingDoc] = useState(null);
+  const [watermarkDoc, setWatermarkDoc] = useState(null);
   const [expiringDocs, setExpiringDocs] = useState(() => getExpiringDocuments());
+  const [isVaultLocked, setIsVaultLocked] = useState(false);
+  const [showInactivityWarning, setShowInactivityWarning] = useState(false);
+  const [warningSeconds, setWarningSeconds] = useState(30);
 
   const refreshVault = () => {
     const docs = getDocuments();
@@ -66,6 +80,30 @@ const Vault = () => {
   useEffect(() => {
     refreshVault();
   }, []);
+
+  useEffect(() => {
+    if (isVaultLocked) {
+      stopInactivityTracker();
+      return undefined;
+    }
+    startInactivityTracker({
+      timeoutSeconds: 300,
+      warningSeconds: 30,
+      onWarning: (remaining) => {
+        setWarningSeconds(remaining);
+        setShowInactivityWarning(true);
+      },
+      onTimeout: () => {
+        setShowInactivityWarning(false);
+        setIsVaultLocked(true);
+        setSelectedDoc(null);
+      },
+      onActivity: () => {
+        setShowInactivityWarning(false);
+      },
+    });
+    return () => stopInactivityTracker();
+  }, [isVaultLocked]);
 
   const handleSaveDocument = (docData) => {
     // saveDocument throws if browser storage is full; the modal shows the message
@@ -126,7 +164,7 @@ const Vault = () => {
         >
           <div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-main)', fontSize: '0.875rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>
-              <ShieldCheck size={18} /> Encrypted Citizen Storage
+              <ShieldCheck size={18} /> Stored on this device
             </div>
             <h1 style={{ fontSize: 'clamp(2.25rem, 5vw, 3rem)', fontWeight: '800' }}>
               Digital Document Vault
@@ -134,6 +172,7 @@ const Vault = () => {
             <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginTop: '0.35rem' }}>
               Store, organize, and inspect your civic credentials with expiration warnings.
             </p>
+            <SharedDeviceNotice what="document details (only the last 4 characters of each number)" />
             {user && (
               <div
                 style={{
@@ -167,6 +206,16 @@ const Vault = () => {
             </button>
             <button
               type="button"
+              className="btn btn-secondary"
+              onClick={() => setIsVaultLocked(true)}
+              aria-label="Lock Vault for Privacy"
+              style={{ padding: '0.75rem 1.1rem', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <Lock size={16} />
+              <span>Lock Vault</span>
+            </button>
+            <button
+              type="button"
               className="btn btn-primary"
               onClick={() => setIsModalOpen(true)}
               style={{ padding: '0.75rem 1.75rem', fontSize: '1rem' }}
@@ -177,13 +226,65 @@ const Vault = () => {
           </div>
         </div>
 
+        {/* Statutory Document Renewal Reminders */}
+        <VaultRenewalReminderBanner documents={documents} />
+
         {/* Document Expiration Warnings */}
         <ExpiringDocumentsAlert expiringList={expiringDocs} />
 
         {/* Pre-flight Inspection & Format Check */}
         <DocumentPreflightChecker onAuditComplete={refreshVault} />
 
-        {/* Vault Stats Cards */}
+        {isVaultLocked ? (
+          <div
+            className="glass-panel"
+            role="alert"
+            style={{
+              padding: '3.5rem 2rem',
+              textAlign: 'center',
+              borderRadius: '1rem',
+              marginTop: '1.5rem',
+              background: 'var(--bg-card, rgba(30, 41, 59, 0.7))',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
+            }}
+          >
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'rgba(245, 158, 11, 0.15)',
+                color: '#f59e0b',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.25rem',
+              }}
+            >
+              <Lock size={36} aria-hidden="true" />
+            </div>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
+              Vault Locked for Privacy
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', maxWidth: '480px', margin: '0 auto 1.5rem', lineHeight: '1.6' }}>
+              Your credentials and document numbers were obscured to protect your identity privacy at public kiosks and shared terminals.
+            </p>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                setIsVaultLocked(false);
+                resetInactivityTracker();
+              }}
+              style={{ padding: '0.75rem 1.75rem', fontSize: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <Unlock size={18} />
+              <span>Unlock Vault</span>
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Vault Stats Cards */}
         <VaultStats documents={documents} />
 
         {/* Toolbar: Search and Filter Tabs */}
@@ -308,6 +409,18 @@ const Vault = () => {
                       title="Tag to Civic Services"
                     >
                       <Tag size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setWatermarkDoc(doc);
+                      }}
+                      style={{ color: 'var(--accent-main)', padding: '0.35rem', background: 'none', border: 'none', cursor: 'pointer' }}
+                      title="Watermark & Attest for Submission"
+                      aria-label={`Watermark and attest ${doc.name || 'document'}`}
+                    >
+                      <Stamp size={17} />
                     </button>
                     <button
                       type="button"
@@ -500,6 +613,9 @@ const Vault = () => {
           </div>
         )}
 
+          </>
+        )}
+
         {/* Add Document Modal */}
         <DocumentModal
           isOpen={isModalOpen}
@@ -516,11 +632,33 @@ const Vault = () => {
           onDelete={handleDeleteDocument}
         />
 
+        {/* Purpose Watermark & Attestation Modal */}
+        <WatermarkAttestationModal
+          doc={watermarkDoc}
+          isOpen={Boolean(watermarkDoc)}
+          onClose={() => setWatermarkDoc(null)}
+          defaultCitizenName={user?.name || user?.email?.split('@')[0] || ''}
+        />
+
         {/* Secure Backup & Restore Modal */}
         <VaultBackupRestoreModal
           isOpen={isBackupModalOpen}
           onClose={() => setIsBackupModalOpen(false)}
           onVaultUpdated={refreshVault}
+        />
+
+        {/* Inactivity Privacy Lock Modal */}
+        <InactivityLockModal
+          isOpen={showInactivityWarning}
+          secondsRemaining={warningSeconds}
+          onExtend={() => {
+            setShowInactivityWarning(false);
+            resetInactivityTracker();
+          }}
+          onLockNow={() => {
+            setShowInactivityWarning(false);
+            setIsVaultLocked(true);
+          }}
         />
 
         {/* Service Mapping / Tagging Modal */}

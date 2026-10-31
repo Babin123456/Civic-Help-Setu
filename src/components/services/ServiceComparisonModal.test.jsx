@@ -41,6 +41,13 @@ describe('ServiceComparisonModal', () => {
     expect(html).toContain('data-label="Bare Service"');
     expect(html).not.toContain('Identity &amp; Address Proof');
   });
+
+  it('displays difference summary and diff badges when multiple services are compared', () => {
+    const html = renderModal([services[0], services[1]]);
+    expect(html).toContain('fields differ');
+    expect(html).toContain('Show only differences');
+    expect(html).toContain('Differs');
+  });
 });
 
 describe('ComparisonFloatingTray', () => {

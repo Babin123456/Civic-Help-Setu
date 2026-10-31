@@ -11,6 +11,8 @@ import { CONTACT_TYPES, CONTACT_METHODS, validateContacts } from '../../services
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 const MODES = ['Online', 'Offline', 'Online / Offline'];
 
+const EMPTY_WINDOW = { label: '', startDate: '', endDate: '', status: '', noticeTitle: '', noticeUrl: '', reviewedOn: '' };
+
 const EMPTY_CONTACT = { type: 'helpdesk', method: 'phone', value: '', hours: '', sourceUrl: '', lastVerified: '' };
 
 const jurisdictionFields = (service) => {
@@ -38,6 +40,7 @@ const buildForm = (service) =>
         portalName: service.officialSources?.[0]?.name || 'Official Government Portal',
         documentsText: (service.documents || []).join('\n'),
         eligibilityText: (service.eligibility || []).join('\n'),
+        intakeWindows: Array.isArray(service.intakeWindows) ? service.intakeWindows.map(windowToRow) : [],
         contacts: Array.isArray(service.contacts) ? service.contacts.map((c) => ({ ...EMPTY_CONTACT, ...c })) : [],
       }
     : {
@@ -53,10 +56,11 @@ const buildForm = (service) =>
         portalName: 'National Government Services Portal',
         documentsText: 'Proof of Identity (Aadhaar / Voter ID)\nProof of Address\nPassport size photograph',
         eligibilityText: 'Indian citizen or resident\nValid identification proof',
+        intakeWindows: [],
         contacts: [],
       };
 
-const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
+const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave, onSaveDraft = null, focusField = null }) => {
   const [form, setForm] = useState(() => buildForm(null));
   // Last saved/initial values; the form is dirty only when it differs from this.
   const [baseline, setBaseline] = useState(() => buildForm(null));
@@ -71,6 +75,13 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
     setConfirmClose(false);
     setShowContactErrors(false);
   }, [serviceToEdit, isOpen]);
+
+  // Opened from a validation message: put the cursor in the field it is about.
+  useEffect(() => {
+    if (!isOpen || !focusField) return undefined;
+    const timer = setTimeout(() => document.getElementById(focusField)?.focus(), 50);
+    return () => clearTimeout(timer);
+  }, [isOpen, focusField]);
 
   const isDirty = isOpen && isFormDirty(form, baseline);
   const guard = useUnsavedChangesGuard(isDirty);
@@ -102,15 +113,22 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.name.trim()) {
+  // Builds the record from the form, or sets the error and returns null.
+  // `forDraft` skips the two checks a half-written draft may still fail.
+  const buildPayload = ({ forDraft = false } = {}) => {
+    if (!forDraft && !form.name.trim()) {
       setError('Service name is required');
-      return;
+      return null;
     }
-    if (!form.shortDescription.trim()) {
+    if (!forDraft && !form.shortDescription.trim()) {
       setError('Short description is required');
-      return;
+      return null;
+    }
+
+    const windowProblems = validateWindows(form.intakeWindows.map(rowToWindow));
+    if (windowProblems.length > 0) {
+      setError(windowProblems[0]);
+      return null;
     }
 
     let jurisdiction = null;
@@ -124,7 +142,7 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
       const problems = validateJurisdiction(jurisdiction);
       if (problems.length > 0) {
         setError(problems[0]);
-        return;
+        return null;
       }
       jurisdiction = normalizeJurisdiction(jurisdiction);
     }
@@ -132,7 +150,7 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
     if (!contactCheck.valid) {
       setShowContactErrors(true);
       setError('Fix the highlighted contact channel fields before saving.');
-      return;
+      return null;
     }
 
     const documents = form.documentsText
@@ -178,13 +196,32 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
       ],
     };
 
+    // No rounds means "no window data", so the field is removed rather than stored empty.
+    if (form.intakeWindows.length > 0) servicePayload.intakeWindows = form.intakeWindows.map((r) => normalizeWindow(rowToWindow(r)));
+    else delete servicePayload.intakeWindows;
+
     // No level chosen means "not specified", so the field is removed rather than guessed.
     if (jurisdiction) servicePayload.jurisdiction = jurisdiction;
     else delete servicePayload.jurisdiction;
 
-    onSave(servicePayload);
+    return servicePayload;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const payload = buildPayload();
+    if (!payload) return;
+    onSave(payload);
     onClose();
   };
+
+  const handleSaveDraft = () => {
+    const payload = buildPayload({ forDraft: true });
+    if (!payload) return;
+    onSaveDraft(payload);
+    onClose();
+  };
+
 
   return (
     <div
@@ -253,10 +290,11 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+            <label htmlFor="svc-name" style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
               Service Name *
             </label>
             <input
+              id="svc-name"
               type="text"
               required
               placeholder="e.g. Caste Certificate, Income Certificate"
@@ -269,10 +307,11 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+              <label htmlFor="svc-category" style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                 Category
               </label>
               <select
+                id="svc-category"
                 className="input-field"
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -290,10 +329,11 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+              <label htmlFor="svc-type" style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                 Mode
               </label>
               <select
+                id="svc-type"
                 className="input-field"
                 value={form.type}
                 onChange={(e) => setForm({ ...form, type: e.target.value })}
@@ -306,10 +346,11 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+              <label htmlFor="svc-difficulty" style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                 Difficulty
               </label>
               <select
+                id="svc-difficulty"
                 className="input-field"
                 value={form.difficulty}
                 onChange={(e) => setForm({ ...form, difficulty: e.target.value })}
@@ -323,10 +364,11 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+            <label htmlFor="svc-summary" style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
               Plain Language Summary *
             </label>
             <textarea
+              id="svc-summary"
               rows={2}
               required
               placeholder="Explain the service clearly in 1 or 2 sentences."
@@ -339,10 +381,11 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+              <label htmlFor="svc-fees" style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                 Expected Fees
               </label>
               <input
+                id="svc-fees"
                 type="text"
                 placeholder="e.g. ₹50 (varies by state)"
                 className="input-field"
@@ -353,10 +396,11 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+              <label htmlFor="svc-processing" style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                 Processing Duration
               </label>
               <input
+                id="svc-processing"
                 type="text"
                 placeholder="e.g. 7 - 21 days"
                 className="input-field"
@@ -369,10 +413,11 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+              <label htmlFor="svc-portal-name" style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                 Official Portal Name
               </label>
               <input
+                id="svc-portal-name"
                 type="text"
                 placeholder="e.g. UIDAI Official Portal"
                 className="input-field"
@@ -383,10 +428,11 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+              <label htmlFor="svc-official-url" style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
                 Official Portal URL
               </label>
               <input
+                id="svc-official-url"
                 type="url"
                 placeholder="https://..."
                 className="input-field"
@@ -396,6 +442,44 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
               />
             </div>
           </div>
+
+          <fieldset className="intake-fields">
+            <legend>Application intake windows</legend>
+            <p className="ownership-form__hint">
+              Only enter dates the official notice publishes. Leave a date empty when it is not published; it will not be guessed.
+            </p>
+            {windowWarnings(form.intakeWindows.map(rowToWindow)).map((m) => (
+              <p key={m} className="ownership-form__hint" role="note">{m}</p>
+            ))}
+            {form.intakeWindows.map((row, i) => {
+              const set = (patch) =>
+                setForm({ ...form, intakeWindows: form.intakeWindows.map((r, j) => (j === i ? { ...r, ...patch } : r)) });
+              return (
+                <div key={i} className="intake-fields__round" role="group" aria-label={`Intake round ${i + 1}`}>
+                  <label>Round name<input type="text" maxLength={80} className="input-field" value={row.label} onChange={(e) => set({ label: e.target.value })} /></label>
+                  <label>Start date<input type="date" className="input-field" value={row.startDate} onChange={(e) => set({ startDate: e.target.value })} /></label>
+                  <label>End date<input type="date" className="input-field" value={row.endDate} onChange={(e) => set({ endDate: e.target.value })} /></label>
+                  <label>
+                    Status when no dates are published
+                    <select className="input-field" value={row.status} onChange={(e) => set({ status: e.target.value })} style={{ background: 'var(--glass-bg)' }}>
+                      <option value="" style={{ background: 'var(--bg-main)' }}>Not published</option>
+                      <option value="open" style={{ background: 'var(--bg-main)' }}>Open</option>
+                      <option value="closed" style={{ background: 'var(--bg-main)' }}>Closed</option>
+                    </select>
+                  </label>
+                  <label>Official notice title<input type="text" maxLength={160} className="input-field" value={row.noticeTitle} onChange={(e) => set({ noticeTitle: e.target.value })} /></label>
+                  <label>Official notice link (https)<input type="url" className="input-field" value={row.noticeUrl} onChange={(e) => set({ noticeUrl: e.target.value })} /></label>
+                  <label>Last reviewed on<input type="date" className="input-field" value={row.reviewedOn} onChange={(e) => set({ reviewedOn: e.target.value })} /></label>
+                  <button type="button" className="btn btn-secondary" onClick={() => setForm({ ...form, intakeWindows: form.intakeWindows.filter((_, j) => j !== i) })}>
+                    Remove round {i + 1}
+                  </button>
+                </div>
+              );
+            })}
+            <button type="button" className="btn btn-secondary" onClick={() => setForm({ ...form, intakeWindows: [...form.intakeWindows, { ...EMPTY_WINDOW }] })}>
+              Add intake round
+            </button>
+          </fieldset>
 
           <fieldset className="jurisdiction-fields">
             <legend>Where this service applies</legend>
@@ -467,10 +551,11 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
           </fieldset>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
+            <label htmlFor="svc-documents" style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>
               Required Documents (one item per line)
             </label>
             <textarea
+              id="svc-documents"
               rows={3}
               placeholder="e.g. Aadhaar Card&#10;Proof of Residence&#10;Salary Certificate"
               className="input-field"
@@ -553,12 +638,22 @@ const ServiceModal = ({ isOpen, serviceToEdit, onClose, onSave }) => {
             >
               Cancel
             </button>
+            {onSaveDraft && (
+              <button
+                type="button"
+                onClick={handleSaveDraft}
+                className="btn btn-primary"
+                style={{ flex: 1, padding: '0.75rem', fontSize: '0.9rem' }}
+              >
+                <Save size={16} /> Save as draft
+              </button>
+            )}
             <button
               type="submit"
-              className="btn btn-primary"
+              className={onSaveDraft ? 'btn btn-secondary' : 'btn btn-primary'}
               style={{ flex: 1, padding: '0.75rem', fontSize: '0.9rem' }}
             >
-              <Save size={16} /> Save to Directory
+              {onSaveDraft ? 'Publish now' : <><Save size={16} /> Save to Directory</>}
             </button>
           </div>
         </form>

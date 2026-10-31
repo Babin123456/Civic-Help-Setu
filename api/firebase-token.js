@@ -1,9 +1,11 @@
 /* global process */
 import { createFirebaseTokenHandler } from './_lib/firebaseToken.js';
+import { createRateLimiter } from './_lib/abuseGuard.js';
 
 /**
  * POST /api/firebase-token
  *   Authorization: Bearer <Clerk session token>
+ * -> 429 { error: "rate_limited", retryAfterSeconds } with a Retry-After header when called too often
  * -> 200 { token }   a Firebase custom token with the claim { role: "admin" | "citizen" }
  *
  * Server-only configuration (set in the Vercel project; the build never exposes these to the browser):
@@ -32,6 +34,9 @@ async function build() {
     },
     getPublicMetadata: async (userId) => (await clerk.users.getUser(userId)).publicMetadata,
     mintToken: (userId, claims) => getAuth(app).createCustomToken(userId, claims),
+    // Per address before Clerk is called, and per account after. See docs/ABUSE_CONTROLS.md.
+    ipLimiter: createRateLimiter({ limit: 30, windowMs: 60_000 }),
+    userLimiter: createRateLimiter({ limit: 10, windowMs: 60_000 }),
   });
 }
 
