@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getAllServices } from '../services/serviceCatalog';
-import { BookmarkMinus, Bookmark, Search, Layers, Sparkles, Folder } from 'lucide-react';
+import { BookmarkMinus, Bookmark, Search, Layers, Sparkles, Folder, GitMerge } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   getSavedItems,
@@ -20,6 +20,7 @@ import SavedEmptyState from '../components/saved/SavedEmptyState';
 import SavedItemCard from '../components/saved/SavedItemCard';
 import ReminderScheduleModal from '../components/saved/ReminderScheduleModal';
 import FavoritesQuickBar from '../components/saved/FavoritesQuickBar';
+import DependencyRoadmapModal from '../components/saved/DependencyRoadmapModal';
 import {
   ALL_COLLECTION,
   buildCollections,
@@ -47,6 +48,7 @@ const Saved = () => {
   // Modals state
   const [editingModal, setEditingModal] = useState({ isOpen: false, item: null, service: null });
   const [reminderModal, setReminderModal] = useState({ isOpen: false, service: null });
+  const [isRoadmapModalOpen, setIsRoadmapModalOpen] = useState(false);
 
   useEffect(() => {
     setSavedItems(getSavedItems());
@@ -266,6 +268,15 @@ const Saved = () => {
               onSelect={setActiveFolder}
               onCreate={handleCreateCollection}
             />
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setIsRoadmapModalOpen(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem' }}
+            >
+              <GitMerge size={15} color="#a855f7" />
+              Prerequisite Roadmap Planner
+            </button>
 
             {/* Quick Search */}
             <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
@@ -383,6 +394,11 @@ const Saved = () => {
           onClose={() => setReminderModal({ isOpen: false, service: null })}
           service={reminderModal.service}
           onReminderUpdated={handleReminderUpdated}
+        />
+        <DependencyRoadmapModal
+          isOpen={isRoadmapModalOpen}
+          onClose={() => setIsRoadmapModalOpen(false)}
+          savedServices={savedItems.map((item) => allServices.find((s) => s.id === item.serviceId)).filter(Boolean)}
         />
       </div>
     </div>
