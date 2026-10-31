@@ -954,7 +954,7 @@ const Admin = () => {
                 <RuleConflictInspectorModal
                   isOpen={isRuleConflictModalOpen}
                   onClose={() => setIsRuleConflictModalOpen(false)}
-                  services={services}
+                  services={services.filter((s) => s.archived !== true)}
                 />
               </div>
             )}
