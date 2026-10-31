@@ -59,6 +59,7 @@ import { getDraftForService, listDrafts, saveDraft } from '../services/serviceDr
 import CatalogueMigrationPanel from '../components/admin/CatalogueMigrationPanel';
 import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
 import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchPanel';
+import CatalogueEnrichmentReviewPanel from '../components/admin/CatalogueEnrichmentReviewPanel';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel';
 import AvailabilityNoticePanel from '../components/admin/AvailabilityNoticePanel';
@@ -691,6 +692,11 @@ const Admin = () => {
               {
                 id: 'eligibility-tests',
                 label: 'Eligibility Test Bench',
+                badge: null,
+              },
+              {
+                id: 'enrichment',
+                label: 'Enrichment Queue',
                 badge: null,
               },
               {
@@ -1694,6 +1700,7 @@ const Admin = () => {
 
             {/* Eligibility rule test bench */}
             {activeTab === 'eligibility-tests' && <EligibilityTestBenchPanel />}
+            {activeTab === 'enrichment' && <CatalogueEnrichmentReviewPanel />}
 
             {/* Process Bottleneck Feedback Loop Tab */}
             {activeTab === 'bottlenecks' && (
