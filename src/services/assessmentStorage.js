@@ -1,4 +1,5 @@
 import { logDiagnostic } from '../utils/diagnostics';
+import { filterAssessmentsByProfile, getActiveApplicantProfile } from './applicantProfileService';
 const STORAGE_KEY = 'civicbridge_eligibility_assessments';
 
 export const SCHEME_EVALUATION_RULES = [
@@ -233,20 +234,26 @@ export const getSavedAssessments = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
   } catch (err) {
     logDiagnostic('Failed to parse assessments', err);
     return [];
   }
 };
 
-export const saveAssessment = (profile, evaluations) => {
+export const getAssessmentsForApplicant = (applicantId) =>
+  filterAssessmentsByProfile(getSavedAssessments(), applicantId);
+
+export const saveAssessment = (profile, evaluations, applicant = getActiveApplicantProfile()) => {
   const all = getSavedAssessments();
   const eligibleCount = evaluations.filter((e) => e.status === 'eligible').length;
   const conditionalCount = evaluations.filter((e) => e.status === 'conditional').length;
 
   const newEntry = {
-    id: `eval-${Date.now()}`,
+    id: `eval-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    applicantId: applicant.id,
+    applicantName: applicant.name,
     date: new Date().toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
