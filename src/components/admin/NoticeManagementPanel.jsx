@@ -23,11 +23,14 @@ import {
 } from '../../services/noticeDigestService';
 import { MOCK_SERVICES } from '../../data/services';
 import { safeHttpUrl } from '../../utils/safeContent';
+import CivicNoticeSummarizerModal from '../notices/CivicNoticeSummarizerModal';
 
 const NoticeManagementPanel = () => {
   const [notices, setNotices] = useState([]);
   const [stats, setStats] = useState({ total: 0, approved: 0, pending: 0, drafts: 0, archived: 0 });
   const [showAddForm, setShowAddForm] = useState(false);
+  const [isSummarizerOpen, setIsSummarizerOpen] = useState(false);
+  const [summarizerNotice, setSummarizerNotice] = useState(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [historyModalNotice, setHistoryModalNotice] = useState(null);
@@ -172,6 +175,23 @@ const NoticeManagementPanel = () => {
           >
             <Plus size={16} />
             {showAddForm ? 'Close Notice Form' : 'Register New Notice'}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSummarizerNotice(null);
+              setIsSummarizerOpen(true);
+            }}
+            className="btn btn-secondary"
+            style={{
+              padding: '0.5rem 0.85rem',
+              fontSize: '0.85rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+            }}
+          >
+            <FileText size={15} /> Summarize & Extract Deadlines
           </button>
           <button
             type="button"
@@ -804,6 +824,11 @@ const NoticeManagementPanel = () => {
           </div>
         </div>
       )}
+      <CivicNoticeSummarizerModal
+        isOpen={isSummarizerOpen}
+        onClose={() => setIsSummarizerOpen(false)}
+        initialNotice={summarizerNotice}
+      />
     </div>
   );
 };
