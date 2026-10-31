@@ -12,6 +12,15 @@
  * accessibility tree. Edit and Delete use the same handlers in both layouts.
  */
 import { describeOwner, QUEUE_STATUSES, normalizeOwnership } from '../../services/serviceOwnershipService';
+import { classifyContact } from '../../services/contactDirectoryService';
+
+const needsReviewCount = (svc) =>
+  Array.isArray(svc.contacts) ? svc.contacts.filter((c) => classifyContact(c).needsReview).length : 0;
+
+const ReviewMarker = ({ svc }) => {
+  const n = needsReviewCount(svc);
+  return n ? <span className="ownership-status">{n} contact{n === 1 ? '' : 's'} needs review</span> : null;
+};
 
 const deliveryLabel = (svc) => svc.type || 'Online / Offline';
 
@@ -82,6 +91,7 @@ const ServiceRecordList = ({
               )}
               <td style={{ ...cellPadding, fontWeight: '600', color: 'var(--text-primary)', overflowWrap: 'anywhere' }}>
                 {svc.name}
+                <ReviewMarker svc={svc} />
               </td>
               <td style={{ ...cellPadding, color: 'var(--text-secondary)', overflowWrap: 'anywhere' }}>
                 {svc.category}
@@ -154,6 +164,7 @@ const ServiceRecordList = ({
               </label>
             )}
             <h3 className="admin-record-card__name">{svc.name}</h3>
+            <ReviewMarker svc={svc} />
             <dl className="admin-record-card__meta">
               <div>
                 <dt>Category</dt>

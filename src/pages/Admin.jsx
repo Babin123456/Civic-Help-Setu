@@ -62,6 +62,7 @@ import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchP
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel';
 import AvailabilityNoticePanel from '../components/admin/AvailabilityNoticePanel';
+import { removeNoticesForService } from '../services/serviceAvailabilityNoticeService';
 import { useToast } from '../context/ToastContext';
 import { getAuditReports, resolveAuditReport } from '../services/communityAuditService';
 import { describeAuditReport, countOpenAudits } from '../utils/auditReportView';
@@ -371,6 +372,7 @@ const Admin = () => {
         actor,
         deleteService: deleteAdminService,
         hadLocalChanges: hasLocalServiceCopy(pendingAction.id),
+        cleanup: [removeNoticesForService],
       });
     });
 

@@ -212,7 +212,7 @@ export const addAvailabilityNotice = (input, customStorage, services = getAllSer
 };
 
 /** Edits a notice. Throws if it does not exist or the result is not valid. */
-export const updateAvailabilityNotice = (id, updates, customStorage, services = getAllServices()) => {
+export const updateAvailabilityNotice = (id, updates, customStorage, services = getAllServices({ includeArchived: true })) => {
   requirePermission('availabilityNotices.manage');
   const list = getAvailabilityNotices(customStorage);
   const index = list.findIndex((n) => n.id === id);
@@ -235,6 +235,15 @@ export const withdrawAvailabilityNotice = (id, customStorage, services) =>
 export const deleteAvailabilityNotice = (id, customStorage) => {
   requirePermission('availabilityNotices.manage');
   save(getAvailabilityNotices(customStorage).filter((n) => n.id !== id), customStorage);
+};
+
+/** Removes every notice for a service (used when its guide is deleted). Returns how many went. */
+export const removeNoticesForService = (serviceId, customStorage) => {
+  requirePermission('availabilityNotices.manage');
+  const list = getAvailabilityNotices(customStorage);
+  const kept = list.filter((n) => n.serviceId !== serviceId);
+  if (kept.length !== list.length) save(kept, customStorage);
+  return list.length - kept.length;
 };
 
 /** Notices to show on a service page right now: published, in range, valid. Earliest start first. */

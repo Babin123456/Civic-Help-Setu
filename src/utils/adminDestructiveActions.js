@@ -82,10 +82,16 @@ export const buildReportDismissalDialog = (report) => {
  * @returns {{outcome: 'removed' | 'reverted-to-builtin' | 'nothing-to-clear', services: object[]}}
  * @throws when the service is still listed and it should have been removed
  */
-export const removeServiceGuide = ({ id, name, builtIn, actor, deleteService, hadLocalChanges = true }) => {
+export const removeServiceGuide = ({ id, name, builtIn, actor, deleteService, hadLocalChanges = true, cleanup = [] }) => {
   const services = deleteService(id, actor);
   const stillListed = services.some((s) => s.id === id);
-  if (!stillListed) return { outcome: 'removed', services };
+  if (!stillListed) {
+    // Data tied to the removed guide. One failing cleanup must not undo the delete or skip the rest.
+    cleanup.forEach((fn) => {
+      try { fn(id); } catch { /* leftover records are harmless and can be removed by hand */ }
+    });
+    return { outcome: 'removed', services };
+  }
   if (builtIn) return { outcome: hadLocalChanges ? 'reverted-to-builtin' : 'nothing-to-clear', services };
   throw new Error(`"${name}" is still in the directory, so nothing was removed.`);
 };
