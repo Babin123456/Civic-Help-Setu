@@ -24,6 +24,9 @@ import {
   restoreFromSnapshot,
 } from '../utils/chatSession';
 import { logDiagnostic } from '../utils/diagnostics';
+import { getAllServices } from '../services/serviceCatalog';
+import { queryCivicKnowledge } from '../services/groundedCivicRagService';
+import SourceTraceabilityPanel from '../components/assistant/SourceTraceabilityPanel';
 
 const Assistant = () => {
   const [messages, setMessages] = useState(() => loadChatHistory());
@@ -83,6 +86,13 @@ const Assistant = () => {
   const getAnswer = async (query, history) => {
     // Short follow-ups like "what are the fees?" reuse the service from the last answer
     const resolved = resolveFollowUpQuery(query, history);
+    let ragResult = null;
+    try {
+      const activeServices = getAllServices({ includeArchived: false });
+      ragResult = queryCivicKnowledge(resolved, activeServices);
+    } catch (e) {
+      logDiagnostic('RAG knowledge retrieval error', e);
+    }
     let response;
     try {
       response = await askGroundedCivicAssistant(resolved);
@@ -96,6 +106,7 @@ const Assistant = () => {
       text: '',
       data: response.data,
       serviceId: response.serviceId,
+      ragResult,
       grounded: response.grounded ?? true,
       confidenceScore: response.confidenceScore,
       retrievedChunks: response.retrievedChunks || [],
@@ -324,6 +335,7 @@ const Assistant = () => {
         )}
 
         {/* Sources, review dates and limitations (omitted when the response has no source data) */}
+        {msg.ragResult && <SourceTraceabilityPanel ragResult={msg.ragResult} />}
         <SourcesAndLimitations message={msg} />
 
         {/* Suggested Follow-up Questions */}
