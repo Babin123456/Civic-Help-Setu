@@ -1278,6 +1278,16 @@ html:not([data-theme="light"]) .cmd__result-row--cleared svg { color: #4ade80; }
 :root[data-theme='dark'] .sdp-kind--changed { color: #fbbf24; }
 .sdp-empty { color: var(--text-secondary); font-style: italic; }
 .sdp-preview { border: 2px dashed var(--border-main); border-radius: 0.85rem; padding: 0.5rem; max-height: 70vh; overflow: auto; }
+.sdp-review-box { border: 1px solid var(--border-main); border-radius: 0.6rem; padding: 0.75rem 0.9rem; display: flex; flex-direction: column; gap: 0.5rem; color: var(--text-primary); font-size: 0.9rem; }
+.sdp-status { margin: 0; font-weight: 600; border-left: 4px solid var(--border-main); padding-left: 0.6rem; }
+.sdp-status--none, .sdp-status--returned, .sdp-status--outdated { border-left-color: #f59e0b; }
+.sdp-status--pending { border-left-color: #3b82f6; }
+.sdp-status--approved, .sdp-status--not-needed { border-left-color: #10b981; }
+.sdp-facts { display: grid; grid-template-columns: max-content 1fr; gap: 0.2rem 0.8rem; margin: 0; }
+.sdp-facts dt { font-weight: 700; }
+.sdp-facts dd { margin: 0; overflow-wrap: anywhere; }
+.sdp-form { display: flex; flex-direction: column; gap: 0.4rem; }
+.sdp-form textarea { padding: 0.5rem 0.7rem; border-radius: 0.5rem; border: 1px solid var(--border-main); background: var(--bg-tertiary); color: var(--text-primary); font: inherit; }
 /* Catalogue data migrations (admin) */
 .cmp { display: flex; flex-direction: column; gap: 1rem; }
 .cmp-title { margin: 0; font-size: 1.25rem; color: var(--text-primary); }

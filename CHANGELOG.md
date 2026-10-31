@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Two-person review for high-impact service changes (issue #261): edits to eligibility, required documents, fees and official links need approval from a second admin before they can be published, with the reviewer, time and reason recorded. See `docs/SERVICE_REVIEW.md`.
 - Private draft sandbox for service editors (issue #257): save an edit as a draft, see a field-by-field before/after, preview it with the public service page, and publish it as a separate, confirmed step. See `docs/SERVICE_DRAFTS.md`.
 - Versioned catalogue migration utility (issue #267): dry run with changed / unchanged / invalid counts, an automatic backup before any write, one-click rollback, and explicit confirmation. Never runs on its own. See `docs/CATALOGUE_MIGRATIONS.md`.
 - Admin catalogue coverage and missing-data dashboard: required and optional fields scored separately, filters, links to the affected records and a CSV summary (issue #264). See `docs/CATALOGUE_COVERAGE.md`.

@@ -16,6 +16,7 @@ import {
 import { getAllServices, getServiceById, CUSTOM_SERVICES_KEY } from './serviceCatalog';
 import { getAuditLogs, saveAdminService } from './adminService';
 import { setCurrentActor, PermissionDeniedError } from './accessControl';
+import { approveDraft, submitForReview } from './serviceReview';
 import { MOCK_SERVICES } from '../data/services';
 
 const makeStorage = () => {
@@ -32,7 +33,7 @@ const published = MOCK_SERVICES[0];
 // What the editor produces: a full record
 const editedRecord = (over = {}) => ({
   ...structuredClone(published),
-  fees: 'Rs 250 (revised)',
+  processingTime: '9 - 10 days (revised)',
   ...over,
 });
 
@@ -57,6 +58,16 @@ const newRecord = (over = {}) => ({
   ...over,
 });
 
+// A new guide changes high-impact fields, so it needs a second admin before it can be published.
+const publishApproved = (draftId) => {
+  setCurrentActor({ role: 'admin', username: 'Editor Ann' });
+  submitForReview(draftId, { sourceReference: 'Official notice' });
+  setCurrentActor({ role: 'admin', username: 'Reviewer Raj' });
+  approveDraft(draftId, { reason: 'Checked against the notice' });
+  setCurrentActor({ role: 'admin', username: 'Test Admin' });
+  return publishDraft(draftId);
+};
+
 let storage;
 beforeEach(() => {
   storage = makeStorage();
@@ -69,29 +80,29 @@ describe('creating and editing a draft', () => {
   it('starts a draft of a published guide and remembers what was published', () => {
     const draft = saveDraft(editedRecord(), { serviceId: published.id });
     expect(draft.serviceId).toBe(published.id);
-    expect(draft.base.fees).toBe(published.fees);
-    expect(draft.record.fees).toBe('Rs 250 (revised)');
+    expect(draft.base.processingTime).toBe(published.processingTime);
+    expect(draft.record.processingTime).toBe('9 - 10 days (revised)');
     expect(getDraftForService(published.id).draftId).toBe(draft.draftId);
   });
 
   it('does not change the public catalogue while it is a draft', () => {
     const before = JSON.stringify(getAllServices({ includeArchived: true }));
     const draft = saveDraft(editedRecord(), { serviceId: published.id });
-    saveDraft(editedRecord({ fees: 'Rs 999' }), { draftId: draft.draftId });
+    saveDraft(editedRecord({ processingTime: '99 days' }), { draftId: draft.draftId });
     expect(JSON.stringify(getAllServices({ includeArchived: true }))).toBe(before);
     expect(storage.getItem(CUSTOM_SERVICES_KEY)).toBeNull();
-    expect(getServiceById(published.id).fees).toBe(published.fees);
+    expect(getServiceById(published.id).processingTime).toBe(published.processingTime);
   });
 
   it('updates the same draft on a second save instead of adding another', () => {
     const first = saveDraft(editedRecord(), { serviceId: published.id });
-    const second = saveDraft(editedRecord({ fees: 'Rs 300' }), {
+    const second = saveDraft(editedRecord({ processingTime: '30 days' }), {
       serviceId: published.id,
     });
     expect(second.draftId).toBe(first.draftId);
     expect(listDrafts()).toHaveLength(1);
-    expect(getDraft(first.draftId).record.fees).toBe('Rs 300');
-    expect(second.base.fees).toBe(published.fees);
+    expect(getDraft(first.draftId).record.processingTime).toBe('30 days');
+    expect(second.base.processingTime).toBe(published.processingTime);
   });
 
   it('can draft a new guide that has no published version', () => {
@@ -257,10 +268,10 @@ describe('publishing', () => {
     const draft = saveDraft(editedRecord(), { serviceId: published.id });
     const review = reviewDraft(draft.draftId);
     expect(review.errors).toEqual([]);
-    expect(review.changes.map((c) => c.label)).toEqual(['Fees']);
+    expect(review.changes.map((c) => c.label)).toEqual(['Processing time']);
     expect(review.changes[0]).toMatchObject({
       kind: 'changed',
-      after: ['Rs 250 (revised)'],
+      after: ['9 - 10 days (revised)'],
     });
     expect(review.canPublish).toBe(true);
   });
@@ -269,17 +280,17 @@ describe('publishing', () => {
     const logs = getAuditLogs().length;
     const draft = saveDraft(editedRecord(), { serviceId: published.id });
     const result = publishDraft(draft.draftId, { actor: 'Test Admin' });
-    expect(result.changedFields).toEqual(['Fees']);
-    expect(getServiceById(published.id).fees).toBe('Rs 250 (revised)');
+    expect(result.changedFields).toEqual(['Processing time']);
+    expect(getServiceById(published.id).processingTime).toBe('9 - 10 days (revised)');
     expect(getDraft(draft.draftId)).toBeNull();
     const audit = getAuditLogs();
     expect(audit.length).toBeGreaterThan(logs);
-    expect(audit.some((l) => l.action === 'SERVICE_DRAFT_PUBLISHED' && l.details.includes('Fees'))).toBe(true);
+    expect(audit.some((l) => l.action === 'SERVICE_DRAFT_PUBLISHED' && l.details.includes('Processing time'))).toBe(true);
   });
 
   it('publishes a new guide under a link made from its name', () => {
     const draft = saveDraft(newRecord());
-    const result = publishDraft(draft.draftId);
+    const result = publishApproved(draft.draftId);
     expect(result.serviceId).toBe('sample-ward-certificate');
     expect(getServiceById('sample-ward-certificate').name).toBe('Sample Ward Certificate');
     expect(listDrafts()).toEqual([]);
@@ -287,22 +298,22 @@ describe('publishing', () => {
 
   it('blocks when the published guide changed after the draft began, until confirmed', () => {
     const draft = saveDraft(editedRecord(), { serviceId: published.id });
-    saveAdminService({ ...structuredClone(published), processingTime: '1 - 2 days' }, 'Someone Else');
+    saveAdminService({ ...structuredClone(published), shortDescription: 'Concurrent summary edit' }, 'Someone Else');
 
     const review = reviewDraft(draft.draftId);
     expect(review.stale).toBe(true);
-    expect(review.newerChanges.map((c) => c.label)).toEqual(['Processing time']);
+    expect(review.newerChanges.map((c) => c.label)).toEqual(['Plain language summary']);
     expect(() => publishDraft(draft.draftId)).toThrow(/changed after this draft began/);
-    expect(getServiceById(published.id).fees).toBe(published.fees);
+    expect(getServiceById(published.id).processingTime).toBe(published.processingTime);
 
     publishDraft(draft.draftId, { acknowledgeNewer: true });
-    expect(getServiceById(published.id).fees).toBe('Rs 250 (revised)');
+    expect(getServiceById(published.id).processingTime).toBe('9 - 10 days (revised)');
   });
 
   it('keeps the draft when the guide it edits was removed', () => {
     const draft = saveDraft(newRecord({ name: 'Short lived guide' }));
-    publishDraft(draft.draftId);
-    const edit = saveDraft({ ...getServiceById('short-lived-guide'), fees: 'Rs 1' }, { serviceId: 'short-lived-guide' });
+    publishApproved(draft.draftId);
+    const edit = saveDraft({ ...getServiceById('short-lived-guide'), processingTime: '1 day' }, { serviceId: 'short-lived-guide' });
     localStorage.setItem(CUSTOM_SERVICES_KEY, '[]');
     const review = reviewDraft(edit.draftId);
     expect(review.removedFromCatalogue).toBe(true);

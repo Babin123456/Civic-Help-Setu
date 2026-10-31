@@ -17,6 +17,7 @@ import { sanitizeTextFields, safeHttpUrl } from '../utils/safeContent';
 import { validateJurisdiction, normalizeJurisdiction } from './jurisdictionService';
 import { getAllServices, getServiceById } from './serviceCatalog';
 import { addAuditLog, saveAdminService } from './adminService';
+import { HIGH_IMPACT_KEYS, REVIEW_ALL_CHANGES } from '../data/reviewPolicy';
 
 export const DRAFTS_STORAGE_KEY = 'civicbridge_service_drafts_v1';
 export const MAX_DRAFTS = 50;
@@ -178,10 +179,29 @@ const idFromName = (name) =>
 
 // ---- storage -----------------------------------------------------------------------------------
 
+/**
+ * Where drafts are kept. The default is this browser's localStorage, which is private to one browser. A shared
+ * backend (several admins on several devices) supplies its own `{ read(): draft[], write(drafts): void }` with
+ * `setDraftStore`; nothing else in the draft or review code needs to change. Docs: docs/SERVICE_REVIEW.md
+ */
+export const localDraftStore = {
+  read() {
+    const parsed = JSON.parse(localStorage.getItem(DRAFTS_STORAGE_KEY) ?? '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  },
+  write(drafts) {
+    localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(drafts));
+  },
+};
+
+let draftStore = localDraftStore;
+export const setDraftStore = (store) => {
+  draftStore = store ?? localDraftStore;
+};
+
 const readAll = () => {
   try {
-    const parsed = JSON.parse(localStorage.getItem(DRAFTS_STORAGE_KEY) ?? '[]');
-    return Array.isArray(parsed) ? parsed.filter((d) => isObject(d) && isText(d.draftId) && isObject(d.record)) : [];
+    return draftStore.read().filter((d) => isObject(d) && isText(d.draftId) && isObject(d.record));
   } catch {
     return [];
   }
@@ -189,11 +209,19 @@ const readAll = () => {
 
 const writeAll = (drafts) => {
   try {
-    localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(drafts));
+    draftStore.write(drafts);
   } catch {
     throw new Error('Could not save the draft. Browser storage may be full or blocked.');
   }
   return drafts;
+};
+
+/** A short stable fingerprint of any JSON value (keys sorted), used to tell whether a record changed. */
+export const fingerprint = (value) => {
+  const text = JSON.stringify(value ?? null, (_k, v) => (isObject(v) ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, v[k]])) : v));
+  let h = 5381;
+  for (let i = 0; i < text.length; i += 1) h = ((h << 5) + h + text.charCodeAt(i)) | 0;
+  return `${text.length}:${(h >>> 0).toString(16)}`;
 };
 
 const clean = (record) => {
@@ -232,9 +260,13 @@ export function saveDraft(record, { serviceId = null, draftId = null, author = '
   const existing = drafts.find((d) => d.draftId === draftId) ?? (serviceId ? drafts.find((d) => d.serviceId === serviceId) : null);
 
   if (existing) {
+    const cleaned = clean(record);
+    // An edit after the change was sent for review makes that review (or approval) void: it was about other text.
+    const reviewStillApplies = existing.review && existing.review.fingerprint === fingerprint(cleaned);
     const next = {
       ...existing,
-      record: clean(record),
+      record: cleaned,
+      review: reviewStillApplies ? existing.review : null,
       updatedAt: now(),
       author,
     };
@@ -254,6 +286,7 @@ export function saveDraft(record, { serviceId = null, draftId = null, author = '
     serviceId,
     base: base ? structuredClone(base) : null,
     record: clean(record),
+    review: null,
     createdAt: stamp,
     updatedAt: stamp,
     author,
@@ -268,6 +301,17 @@ export function discardDraft(draftId) {
   const drafts = readAll();
   if (!drafts.some((d) => d.draftId === draftId)) throw new Error('That draft no longer exists.');
   writeAll(drafts.filter((d) => d.draftId !== draftId));
+}
+
+/** Changes fields of a stored draft other than its record (used by the review workflow). */
+export function patchDraft(draftId, patch) {
+  requirePermission('services.write');
+  const drafts = readAll();
+  const existing = drafts.find((d) => d.draftId === draftId);
+  if (!existing) throw new Error('That draft no longer exists.');
+  const next = { ...existing, ...patch, updatedAt: existing.updatedAt };
+  writeAll(drafts.map((d) => (d.draftId === draftId ? next : d)));
+  return next;
 }
 
 // ---- reviewing and publishing -------------------------------------------------------------------
@@ -285,6 +329,12 @@ export function reviewDraft(draftId) {
   const errors = validateDraftRecord(draft.record, { isNew, existingIds });
   const changes = diffRecords(isNew ? {} : (published ?? draft.base), draft.record);
   const newerChanges = !isNew && published && draft.base ? diffRecords(draft.base, published) : [];
+
+  // Second-reviewer rule: edits to high-impact fields (src/data/reviewPolicy.js) need another admin's approval.
+  const highImpact = changes.filter((c) => HIGH_IMPACT_KEYS.includes(c.key));
+  const reviewRequired = REVIEW_ALL_CHANGES ? changes.length > 0 : highImpact.length > 0;
+  const approval = approvalState(draft, { reviewRequired, published });
+  const approvalOk = approval === 'not-needed' || approval === 'approved';
   return {
     draft,
     isNew,
@@ -293,9 +343,35 @@ export function reviewDraft(draftId) {
     changes,
     stale: newerChanges.length > 0,
     newerChanges,
-    canPublish: errors.length === 0 && changes.length > 0 && !(!isNew && !published),
+    highImpact,
+    reviewRequired,
+    approval,
+    canPublish: errors.length === 0 && changes.length > 0 && !(!isNew && !published) && approvalOk,
   };
 }
+
+/**
+ * Where a draft stands with the second-reviewer rule:
+ * 'not-needed' (no high-impact field changed), 'none' (not sent yet), 'pending', 'returned', 'approved',
+ * or 'outdated' (approved, but the draft or the published guide changed since).
+ */
+export function approvalState(draft, { reviewRequired, published }) {
+  if (!reviewRequired) return 'not-needed';
+  const review = draft.review;
+  if (!review) return 'none';
+  if (review.status === 'approved') {
+    const same = review.fingerprint === fingerprint(draft.record) && review.baseFingerprint === fingerprint(published ?? null);
+    return same ? 'approved' : 'outdated';
+  }
+  return review.status === 'pending' || review.status === 'returned' ? review.status : 'none';
+}
+
+const APPROVAL_BLOCKS = {
+  none: 'This change touches high-impact fields and needs a second reviewer. Send it for review first.',
+  pending: 'This change is waiting for a second reviewer. It cannot be published until another admin approves it.',
+  returned: 'A reviewer returned this change. Edit the draft and send it for review again.',
+  outdated: 'The approval no longer applies because the draft or the published guide changed after it was given. Send it for review again.',
+};
 
 const readIds = () => getAllServices({ includeArchived: true }).map((svc) => svc.id);
 
@@ -313,6 +389,7 @@ export function publishDraft(draftId, { actor = 'Admin', acknowledgeNewer = fals
     throw new Error('The published guide was removed after this draft began. Discard the draft or copy it to a new guide.');
   if (review.errors.length) throw new Error(`Fix ${review.errors.length} problem${review.errors.length === 1 ? '' : 's'} before publishing.`);
   if (review.changes.length === 0) throw new Error('This draft does not change anything.');
+  if (!review.canPublish && APPROVAL_BLOCKS[review.approval]) throw new Error(APPROVAL_BLOCKS[review.approval]);
   if (review.stale && !acknowledgeNewer)
     throw new Error('The published guide changed after this draft began. Review those changes and confirm to overwrite them.');
 
@@ -329,7 +406,9 @@ export function publishDraft(draftId, { actor = 'Admin', acknowledgeNewer = fals
     action: 'SERVICE_DRAFT_PUBLISHED',
     actor,
     target: record.name,
-    details: `Published a draft. Changed: ${changedFields.join(', ')}.`,
+    details: `Published a draft. Changed: ${changedFields.join(', ')}.${
+      review.approval === 'approved' ? ` Approved by ${draft.review.reviewer}: ${draft.review.reason}` : ''
+    }`,
   });
   discardDraft(draftId);
   return { changedFields, serviceId: savedId };
