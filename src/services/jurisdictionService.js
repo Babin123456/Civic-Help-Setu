@@ -156,3 +156,16 @@ export const parseJurisdictionFilters = (params, services = []) => {
   const district = options.find((d) => sameText(d, wantedDistrict)) || 'All';
   return { state, district, districtOptions: options };
 };
+
+/**
+ * Builds the jurisdiction object from the admin form fields, reading only the fields the chosen
+ * level shows. A district or local body typed before switching level is ignored, not validated.
+ */
+export const jurisdictionFromFormFields = ({ level, states = [], district = '', localBody = '' }) => ({
+  level,
+  states: level === 'national' ? [] : states,
+  districts: level === 'district' || level === 'local'
+    ? String(district).split(',').map((d) => d.trim()).filter(Boolean)
+    : [],
+  localBody: level === 'local' ? String(localBody).trim() : '',
+});

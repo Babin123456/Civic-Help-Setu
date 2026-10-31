@@ -7,6 +7,9 @@ import {
   normalizeAccessibilityRecord,
   getFacilityAuditSummary,
   filterOfficesByAccessibilityAndLanguage,
+  calculateOfficeAccessibilityScore,
+  recordOfficeAccessibilityAudit,
+  getOfficeAccessibilityAudits,
 } from './accessibilityMapService';
 
 describe('Civic Service Accessibility and Language Coverage Map Service (#146)', () => {
@@ -241,5 +244,48 @@ describe('Civic Service Accessibility and Language Coverage Map Service (#146)',
         expect(typeof FACILITY_LABELS[val]).toBe('string');
       }
     });
+  });
+});
+
+
+describe('Community Accessibility Audits & Score Calculation', () => {
+  const sampleOffice = {
+    id: 'off-test-100',
+    name: 'Tehsil Seva Kendra',
+    accessibility: {
+      wheelchairRamp: true,
+      elevator: true,
+      accessibleRestroom: true,
+      accessibleParking: true,
+      tactilePaving: false,
+    },
+  };
+
+  it('calculates score based on facility weights', () => {
+    const { score, level, color } = calculateOfficeAccessibilityScore(sampleOffice);
+    expect(score).toBeGreaterThanOrEqual(70);
+    expect(level).toBe('HIGH');
+    expect(color).toBe('#10b981');
+  });
+
+  it('records citizen ground-truth audits and updates office score', () => {
+    const saved = recordOfficeAccessibilityAudit('off-test-100', {
+      facilities: {
+        wheelchairRamp: false, // Broken ramp reported by citizen
+      },
+      notes: 'Ramp is under construction and unusable.',
+    });
+
+    expect(saved).not.toBeNull();
+    expect(saved.officeId).toBe('off-test-100');
+
+    const audits = getOfficeAccessibilityAudits('off-test-100');
+    expect(audits).toHaveLength(1);
+    expect(audits[0].notes).toContain('under construction');
+
+    // Re-evaluating score reflects the latest citizen audit override
+    const updatedScore = calculateOfficeAccessibilityScore(sampleOffice);
+    expect(updatedScore.score).toBeLessThan(70);
+    expect(updatedScore.communityAuditsCount).toBe(1);
   });
 });

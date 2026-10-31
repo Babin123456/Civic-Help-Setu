@@ -6,6 +6,8 @@ import {
   checkLinkWithRetry,
   getApplicationLinks,
   getLinkHealthRecords,
+  getLinkRecord,
+  linkRecordKey,
   needsAttention,
   recordManualCheck,
   reviewRedirect,
@@ -29,7 +31,7 @@ export const StatusBadge = ({ status }) => {
 };
 
 const LinkRow = ({ service, link, index, record, onChanged }) => {
-  const key = `${service.id}:${index}`;
+  const key = linkRecordKey(service.id, link);
   const [busy, setBusy] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
   const [outcome, setOutcome] = useState('reachable');
@@ -172,11 +174,14 @@ const LinkHealthPanel = ({ services = MOCK_SERVICES }) => {
   const rows = services
     .map((service) => ({ service, links: getApplicationLinks(service) }))
     .filter((r) => r.links.length > 0)
-    .filter((r) => !onlyAttention || r.links.some((_, i) => needsAttention(records[`${r.service.id}:${i}`])));
+    .filter((r) => !onlyAttention || r.links.some((l) => needsAttention(getLinkRecord(records, r.service.id, l))));
 
   const withLinks = services.filter((s) => getApplicationLinks(s).length > 0);
   const total = withLinks.reduce((n, s) => n + getApplicationLinks(s).length, 0);
-  const attention = Object.values(records).filter(needsAttention).length;
+  const attention = withLinks.reduce(
+    (n, s) => n + getApplicationLinks(s).filter((l) => needsAttention(getLinkRecord(records, s.id, l))).length,
+    0,
+  );
 
   return (
     <section className="lhp" aria-labelledby="lhp-title">
@@ -202,7 +207,7 @@ const LinkHealthPanel = ({ services = MOCK_SERVICES }) => {
               <h3 className="lhp-service__name">{service.name || service.title || service.id}</h3>
               <ul className="lhp-links">
                 {links.map((link, i) => (
-                  <LinkRow key={`${service.id}:${i}`} service={service} link={link} index={i} record={records[`${service.id}:${i}`]} onChanged={refresh} />
+                  <LinkRow key={linkRecordKey(service.id, link)} service={service} link={link} index={i} record={getLinkRecord(records, service.id, link)} onChanged={refresh} />
                 ))}
               </ul>
             </li>

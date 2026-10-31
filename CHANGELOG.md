@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Two-person review for high-impact service changes (issue #261): edits to eligibility, required documents, fees and official links need approval from a second admin before they can be published, with the reviewer, time and reason recorded. See `docs/SERVICE_REVIEW.md`.
+- Private draft sandbox for service editors (issue #257): save an edit as a draft, see a field-by-field before/after, preview it with the public service page, and publish it as a separate, confirmed step. See `docs/SERVICE_DRAFTS.md`.
+- Versioned catalogue migration utility (issue #267): dry run with changed / unchanged / invalid counts, an automatic backup before any write, one-click rollback, and explicit confirmation. Never runs on its own. See `docs/CATALOGUE_MIGRATIONS.md`.
+- Admin catalogue coverage and missing-data dashboard: required and optional fields scored separately, filters, links to the affected records and a CSV summary (issue #264). See `docs/CATALOGUE_COVERAGE.md`.
+- Admin eligibility-rule test bench (issue #259): run fictional applicant cases through the live scheme and service eligibility rules, see which requirement changed a result, and spot rules that have no regression case. See `docs/ELIGIBILITY_TEST_BENCH.md`.
+- Deterministic synthetic service fixtures for tests, demos and development: named scenarios (complete, partial, draft, archived, region-specific, conditional and invalid records) generated from a seed, with no real data and no writes to production storage (issue #273). See `docs/TEST_FIXTURES.md`.
 - Firestore and Cloud Storage security rules, deny by default, with a documented access policy and emulator tests for anonymous, citizen and admin access (issue #220). See `docs/FIREBASE_RULES.md`; run `npm run rules:test`.
 - Security headers and a report-only Content Security Policy (issue #219), generated from `scripts/securityHeaders.js` into `vercel.json`. See `docs/SECURITY_HEADERS.md`.
 - Initial setup of CivicBridge MVP.

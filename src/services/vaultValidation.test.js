@@ -91,6 +91,19 @@ describe('isDuplicateDocument', () => {
   });
 });
 
+describe('isDuplicateDocument with last-4 storage', () => {
+  const stored = [{ id: 'a', type: 'Aadhaar', number: 'XXXX 9012', issuer: 'UIDAI', expiryDate: '' }];
+  it('allows a different number that shares the last 4 when issuer differs', () => {
+    expect(isDuplicateDocument({ type: 'Aadhaar', number: '1111 2222 9012', issuer: 'Other' }, stored)).toBe(false);
+  });
+  it('allows a different number that shares the last 4 when expiry differs', () => {
+    expect(isDuplicateDocument({ type: 'Aadhaar', number: '1111 2222 9012', issuer: 'UIDAI', expiryDate: '2030-01-01' }, stored)).toBe(false);
+  });
+  it('still flags the same document re-added', () => {
+    expect(isDuplicateDocument({ type: 'aadhaar', number: '1234 5678 9012', issuer: ' uidai ' }, stored)).toBe(true);
+  });
+});
+
 describe('isValidVaultRecord', () => {
   it('accepts a record with id, type and number', () => {
     expect(isValidVaultRecord({ id: 'a', type: 'PAN', number: '1' })).toBe(true);

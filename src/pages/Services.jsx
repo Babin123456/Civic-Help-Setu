@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { getAllServices } from '../services/serviceCatalog';
 import ServiceCard from '../components/ServiceCard';
 import FilterToolbar from '../components/services/FilterToolbar';
+import QuickFilterPresets, { QUICK_PRESETS } from '../components/services/QuickFilterPresets';
 import DirectoryEmptyState from '../components/services/DirectoryEmptyState';
 import SearchAnalyticsBar from '../components/services/SearchAnalyticsBar';
 import ServiceComparisonModal from '../components/services/ServiceComparisonModal';
@@ -113,6 +114,26 @@ const Services = () => {
   const handleFeeChange = (fee) => updateParam('fee', fee, 'All');
   const handleSpeedChange = (speed) => updateParam('speed', speed, 'All');
   const handleSortChange = (sort) => updateParam('sort', sort, 'relevance');
+
+  const handleSelectPreset = (preset) => {
+    if (!preset) {
+      handleResetFilters();
+      return;
+    }
+    const nextParams = new URLSearchParams(searchParams);
+    Object.entries(preset.filterParams).forEach(([k, v]) => {
+      nextParams.set(k, v);
+    });
+    setSearchParams(nextParams, { replace: true });
+  };
+
+  const activePresetId = useMemo(() => {
+    for (const preset of QUICK_PRESETS) {
+      const match = Object.entries(preset.filterParams).every(([k, v]) => searchParams.get(k) === v);
+      if (match) return preset.id;
+    }
+    return null;
+  }, [searchParams]);
 
   const handleResetFilters = () => {
     setSearchParams({}, { replace: true });
@@ -261,6 +282,9 @@ const Services = () => {
           onSelectSuggestion={(sugg) => handleSearchChange(sugg)}
           onSelectChip={handleSelectChip}
         />
+
+        {/* Quick Filter Presets Chips */}
+        <QuickFilterPresets activePresetId={activePresetId} onSelectPreset={handleSelectPreset} />
 
         {/* Multi-Faceted Filter & Search Toolbar */}
         <FilterToolbar

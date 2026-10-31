@@ -1,3 +1,5 @@
+import { minimizeDocumentNumber } from './dataMinimization';
+
 export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 export const MAX_FILE_NAME_LENGTH = 120;
 export const MAX_TEXT_LENGTH = 100;
@@ -48,14 +50,23 @@ export const validateFile = (file) => {
 
 const normalise = (v) => String(v || '').trim().toLowerCase().replace(/\s+/g, '');
 
-/** True if another saved document has the same type and number. */
+/**
+ * True if another saved document looks like the same one. Stored numbers keep only their last four
+ * characters (#212), so two different Aadhaar/PAN numbers can share them. When the number was cut
+ * down, issuer and expiry date must match as well, otherwise the user could not save a legitimate
+ * second document. Numbers of four characters or fewer are stored whole and match on their own.
+ */
 export const isDuplicateDocument = (form, existingDocs = []) => {
   const type = normalise(form.type);
-  const number = normalise(form.number);
+  const number = normalise(minimizeDocumentNumber(form.number));
   if (!type || !number) return false;
-  return existingDocs.some(
-    (d) => d.id !== form.id && normalise(d.type) === type && normalise(d.number) === number
-  );
+  const truncated = number.startsWith('xxxx');
+  return existingDocs.some((d) => {
+    if (d.id === form.id || normalise(d.type) !== type) return false;
+    if (normalise(minimizeDocumentNumber(d.number)) !== number) return false;
+    if (!truncated) return true;
+    return normalise(d.issuer) === normalise(form.issuer) && String(d.expiryDate || '') === String(form.expiryDate || '');
+  });
 };
 
 /** Validate the Add Document form. Returns { valid, errors } keyed by field. */

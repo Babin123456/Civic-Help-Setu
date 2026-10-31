@@ -329,7 +329,8 @@ describe('the app does not log raw errors or send diagnostics anywhere', () => {
   const rel = (file) => relative(SRC, file).replace(/\\/g, '/');
 
   // Logging that is fixed text or a plain string (no error object) is allowed in these files.
-  const CONSOLE_ALLOWED = new Set(['utils/diagnostics.js', 'utils/providerError.js', 'utils/a11yLandmarks.js', 'services/voiceCivicAssistantService.js', 'pages/Assistant.jsx']);
+  const CONSOLE_ALLOWED = new Set(['utils/diagnostics.js', 'utils/providerError.js', 'utils/a11yLandmarks.js', 'services/voiceCivicAssistantService.js', 'pages/Assistant.jsx', 'components/common/RouteErrorBoundary.jsx']);
+  // RouteErrorBoundary logs the error to the console in development only and nothing in production (its own tests check both).
 
   it('uses logDiagnostic instead of console.error/console.warn with an error object', () => {
     const offenders = files
