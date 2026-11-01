@@ -14,6 +14,7 @@ import DocumentChecklistCard from '../components/chat/DocumentChecklistCard';
 import ChatEmptyState from '../components/chat/ChatEmptyState';
 import UndoResetNotice from '../components/chat/UndoResetNotice';
 import ConfirmationDialog from '../components/common/ConfirmationDialog';
+import IntentRoutingSuggestions from '../components/assistant/IntentRoutingSuggestions';
 import { STARTER_PROMPTS, resolveFollowUpQuery, getLastUserMessage, hasUserMessages } from '../ai/conversationContext';
 import { loadChatHistory, saveChatHistory, clearChatHistory } from '../services/chatStorage';
 import {
@@ -455,9 +456,13 @@ const Assistant = () => {
                   }}
                 >
                   {isUser ? (
+                    <div>
                     <p style={{ fontSize: '1.05rem', color: 'var(--text-primary)', fontWeight: '500' }}>
-                      {msg.text || msg.content}
-                    </p>
+                      {msg.text || msg.content}</p>
+
+                    <IntentRoutingSuggestions query={msg.text || msg.content} />
+                    </div>
+
                   ) : (
                     renderAssistantContent(msg)
                   )}
