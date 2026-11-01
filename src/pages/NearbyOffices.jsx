@@ -11,8 +11,10 @@ import {
   Building2,
   CalendarCheck,
   Accessibility,
+  CheckSquare,
 } from 'lucide-react';
 import AccessibilityNeedsPlannerModal from '../components/location/AccessibilityNeedsPlannerModal';
+import PhysicalVisitDossierModal from '../components/location/PhysicalVisitDossierModal';
 import {
   filterCivicOffices,
   requestUserCoordinates,
@@ -71,6 +73,7 @@ const NearbyOffices = () => {
   const [transitOffice, setTransitOffice] = useState(null);
   const [footfallOffice, setFootfallOffice] = useState(null);
   const [bookingOffice, setBookingOffice] = useState(null);
+  const [dossierOffice, setDossierOffice] = useState(null);
   const [isAccessibilityModalOpen, setIsAccessibilityModalOpen] = useState(false);
 
   // Initialize service query param if arriving from a specific service details page
@@ -314,6 +317,21 @@ const NearbyOffices = () => {
             >
               <Accessibility size={16} color="var(--success)" />
               <span>Accessibility Needs Planner</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setDossierOffice(selectedOffice || filteredOffices[0] || null)}
+              className="btn btn-secondary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '0.85rem',
+                padding: '0.45rem 0.85rem',
+              }}
+            >
+              <CheckSquare size={16} color="var(--accent-main)" />
+              <span>Visit Dossier Checklist</span>
             </button>
 
             {/* View Mode Buttons */}
@@ -603,6 +621,12 @@ const NearbyOffices = () => {
           isOpen={Boolean(footfallOffice)}
           onClose={() => setFootfallOffice(null)}
           office={footfallOffice}
+        />
+        <PhysicalVisitDossierModal
+          isOpen={Boolean(dossierOffice)}
+          office={dossierOffice}
+          selectedService={activeSelectedService}
+          onClose={() => setDossierOffice(null)}
         />
       </div>
     </div>
