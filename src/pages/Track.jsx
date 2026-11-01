@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 import {
   Search,
   FileText,
+  FileCheck2,
   ArrowRight,
   Copy,
   Plus,
