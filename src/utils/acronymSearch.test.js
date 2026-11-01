@@ -5,10 +5,17 @@ import {
   getAcronymByAcronym,
   resolveRelatedServices,
   validateAcronymData,
+  getAllAcronyms,
+  getAcronymCategory,
+  getAcronymCategoryCounts,
+  filterAcronyms,
+  formatAcronymCitation,
+  ACRONYM_CATEGORIES,
+  ACRONYM_CATEGORY_LABELS,
 } from './acronymSearch.js';
 import { CIVIC_ACRONYMS } from '../data/civicAcronyms.js';
 
-describe('acronymSearch (#263)', () => {
+describe('acronymSearch (#263, #430)', () => {
   describe('searchAcronyms - case-insensitive & whitespace tolerant', () => {
     it('finds an acronym by exact uppercase acronym', () => {
       const results = searchAcronyms('NOC');
@@ -47,9 +54,14 @@ describe('acronymSearch (#263)', () => {
       expect(results.some((r) => r.id === 'ews')).toBe(true);
     });
 
-    it('returns an empty array for an empty query', () => {
+    it('returns an empty array for an empty query by default', () => {
       expect(searchAcronyms('')).toEqual([]);
       expect(searchAcronyms('   ')).toEqual([]);
+    });
+
+    it('returns all entries when includeAllOnEmpty is true', () => {
+      const all = searchAcronyms('', { includeAllOnEmpty: true });
+      expect(all.length).toBe(CIVIC_ACRONYMS.length);
     });
 
     it('returns an empty array for an unmatched query', () => {
@@ -59,6 +71,104 @@ describe('acronymSearch (#263)', () => {
     it('returns an empty array for nullish input', () => {
       expect(searchAcronyms(null)).toEqual([]);
       expect(searchAcronyms(undefined)).toEqual([]);
+    });
+  });
+
+  describe('getAllAcronyms', () => {
+    it('returns all acronyms sorted alphabetically by acronym', () => {
+      const list = getAllAcronyms('acronym-asc');
+      expect(list.length).toBe(CIVIC_ACRONYMS.length);
+      expect(list[0].acronym.localeCompare(list[1].acronym)).toBeLessThanOrEqual(0);
+    });
+
+    it('supports sorting in descending order', () => {
+      const desc = getAllAcronyms('acronym-desc');
+      expect(desc.length).toBe(CIVIC_ACRONYMS.length);
+      expect(desc[0].acronym.localeCompare(desc[1].acronym)).toBeGreaterThanOrEqual(0);
+    });
+
+    it('supports sorting by expanded name', () => {
+      const byName = getAllAcronyms('name-asc');
+      expect(byName.length).toBe(CIVIC_ACRONYMS.length);
+      expect(byName[0].expandedForm.localeCompare(byName[1].expandedForm)).toBeLessThanOrEqual(0);
+    });
+  });
+
+  describe('Categorization and counts', () => {
+    it('classifies known acronyms into their designated category', () => {
+      expect(getAcronymCategory('uidai')).toBe(ACRONYM_CATEGORIES.IDENTITY);
+      expect(getAcronymCategory('bpl')).toBe(ACRONYM_CATEGORIES.WELFARE);
+      expect(getAcronymCategory('epfo')).toBe(ACRONYM_CATEGORIES.FINANCE);
+      expect(getAcronymCategory('rti')).toBe(ACRONYM_CATEGORIES.GOVERNANCE);
+    });
+
+    it('falls back to governance category for unmapped acronyms', () => {
+      expect(getAcronymCategory('unknown-code')).toBe(ACRONYM_CATEGORIES.GOVERNANCE);
+    });
+
+    it('counts categories accurately', () => {
+      const counts = getAcronymCategoryCounts();
+      expect(counts[ACRONYM_CATEGORIES.ALL]).toBe(CIVIC_ACRONYMS.length);
+      expect(counts[ACRONYM_CATEGORIES.IDENTITY]).toBeGreaterThan(0);
+      expect(counts[ACRONYM_CATEGORIES.WELFARE]).toBeGreaterThan(0);
+      expect(counts[ACRONYM_CATEGORIES.FINANCE]).toBeGreaterThan(0);
+      expect(counts[ACRONYM_CATEGORIES.GOVERNANCE]).toBeGreaterThan(0);
+    });
+
+    it('exposes defined human-readable category labels', () => {
+      expect(ACRONYM_CATEGORY_LABELS[ACRONYM_CATEGORIES.IDENTITY]).toBe('Identity & KYC');
+      expect(ACRONYM_CATEGORY_LABELS[ACRONYM_CATEGORIES.WELFARE]).toBe('Social Welfare & Benefits');
+    });
+  });
+
+  describe('filterAcronyms', () => {
+    it('filters by category correctly', () => {
+      const welfareOnly = filterAcronyms({ category: ACRONYM_CATEGORIES.WELFARE });
+      expect(welfareOnly.length).toBeGreaterThan(0);
+      welfareOnly.forEach((entry) => {
+        expect(getAcronymCategory(entry.id)).toBe(ACRONYM_CATEGORIES.WELFARE);
+      });
+    });
+
+    it('filters by first letter correctly', () => {
+      const bLetter = filterAcronyms({ letter: 'B' });
+      expect(bLetter.length).toBeGreaterThan(0);
+      bLetter.forEach((entry) => {
+        expect(entry.acronym.toUpperCase().startsWith('B')).toBe(true);
+      });
+    });
+
+    it('combines query, category, and letter filtering', () => {
+      const results = filterAcronyms({
+        query: 'Poverty',
+        category: ACRONYM_CATEGORIES.WELFARE,
+        letter: 'b',
+      });
+      expect(results.length).toBe(1);
+      expect(results[0].id).toBe('bpl');
+    });
+
+    it('returns empty array when no entries match combined criteria', () => {
+      const results = filterAcronyms({
+        query: 'passport',
+        category: ACRONYM_CATEGORIES.FINANCE,
+      });
+      expect(results).toEqual([]);
+    });
+  });
+
+  describe('formatAcronymCitation', () => {
+    it('formats citation text with acronym, expanded form and plain language definition', () => {
+      const entry = getAcronymById('bpl');
+      const citation = formatAcronymCitation(entry);
+      expect(citation).toContain('BPL — Below Poverty Line');
+      expect(citation).toContain('Definition:');
+      expect(citation).toContain('Source: Civic Help Setu Verified Acronym Directory');
+    });
+
+    it('handles empty or null entry gracefully', () => {
+      expect(formatAcronymCitation(null)).toBe('');
+      expect(formatAcronymCitation({})).toBe('');
     });
   });
 
