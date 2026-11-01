@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
   FileBadge, ShieldCheck, Upload, CreditCard, Car, FileText,
-  Plus, Search, Eye, AlertTriangle, Layers, Download, Tag, Stamp
+  Plus, Search, Eye, AlertTriangle, Layers, Download, Tag, Stamp, Calendar
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../context/ConfirmationDialogContext';
@@ -23,6 +23,7 @@ import ServiceTaggingModal from '../components/vault/ServiceTaggingModal';
 import DocumentPreflightChecker from '../components/vault/DocumentPreflightChecker';
 import InactivityLockModal from '../components/vault/InactivityLockModal';
 import WatermarkAttestationModal from '../components/vault/WatermarkAttestationModal';
+import DocumentRenewalDigestModal from '../components/vault/DocumentRenewalDigestModal';
 import { Lock, Unlock, ShieldAlert } from 'lucide-react';
 import {
   startInactivityTracker,
@@ -64,6 +65,7 @@ const Vault = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+  const [isRenewalDigestOpen, setIsRenewalDigestOpen] = useState(false);
   const [taggingDoc, setTaggingDoc] = useState(null);
   const [watermarkDoc, setWatermarkDoc] = useState(null);
   const [expiringDocs, setExpiringDocs] = useState(() => getExpiringDocuments());
@@ -203,6 +205,15 @@ const Vault = () => {
             >
               <Download size={18} />
               <span>Backup & Restore</span>
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setIsRenewalDigestOpen(true)}
+              style={{ padding: '0.75rem 1.15rem', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <Calendar size={17} />
+              <span>Renewal Digest</span>
             </button>
             <button
               type="button"
@@ -666,6 +677,14 @@ const Vault = () => {
           isOpen={Boolean(taggingDoc)}
           onClose={() => setTaggingDoc(null)}
           document={taggingDoc}
+          onUpdated={refreshVault}
+        />
+
+        {/* Document Renewal Digest & Expiry Alerts Modal */}
+        <DocumentRenewalDigestModal
+          isOpen={isRenewalDigestOpen}
+          onClose={() => setIsRenewalDigestOpen(false)}
+          documents={documents}
           onUpdated={refreshVault}
         />
       </div>
