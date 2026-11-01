@@ -67,6 +67,7 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_readiness_scorecards', category: 'drafts', exportAs: 'readinessScorecards', empty: [] }, // readinessScorecardService.js
   { key: 'civicbridge_office_accessibility_audits', category: 'activity', exportAs: 'officeAccessibilityAudits', empty: [] }, // accessibilityMapService.js
   { key: 'civic_grievance_drafts_v1', category: 'drafts', exportAs: 'grievanceDrafts', empty: [] }, // civicGrievanceDraftingService.js
+  { key: 'civicbridge_preparation_plans_v1', category: 'drafts', exportAs: 'preparationPlans', empty: {} }, // applicationPreparationPlanService.js
 ];
 
 /**
@@ -155,10 +156,13 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_catalogue_snapshots_v1',
   'civicbridge_eligibility_test_cases_v1',
   'civicbridge_service_ownership_v1',
+  'civicbridge_dismissed_recommendations',
+  'civicbridge_catalogue_completeness_dismissals',
   'civicbridge_public_notices_digest_v1',
   'civicbridge_service_availability_notices_v1',
   'civicbridge_source_conflicts',
   'civicbridge_conflict_audit_logs',
+  'civicbridge_duplicate_review_states',
   // Handled by purge itself: consents are reset, the audit log keeps the deletion receipt
   CONSENT_STORAGE_KEY,
   AUDIT_STORAGE_KEY,

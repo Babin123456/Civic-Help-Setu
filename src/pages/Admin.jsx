@@ -58,7 +58,9 @@ import ServiceDraftsPanel from '../components/admin/ServiceDraftsPanel';
 import { getDraftForService, listDrafts, saveDraft } from '../services/serviceDrafts';
 import CatalogueMigrationPanel from '../components/admin/CatalogueMigrationPanel';
 import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
+import CatalogueCompletenessPanel from '../components/admin/CatalogueCompletenessPanel';
 import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchPanel';
+import AiEvaluationSuitePanel from '../components/admin/AiEvaluationSuitePanel';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel';
 import AvailabilityNoticePanel from '../components/admin/AvailabilityNoticePanel';
@@ -79,6 +81,7 @@ import {
 import SourceConflictReviewQueue from '../components/admin/SourceConflictReviewQueue';
 import BarrierInsightsDashboard from '../components/barriers/BarrierInsightsDashboard';
 import RuleConflictInspectorModal from '../components/admin/RuleConflictInspectorModal';
+import DuplicateServiceDetectorPanel from '../components/admin/DuplicateServiceDetectorPanel';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -694,6 +697,11 @@ const Admin = () => {
                 badge: null,
               },
               {
+                id: 'ai-evaluation',
+                label: 'AI Evaluation Suite',
+                badge: null,
+              },
+              {
                 id: 'migrations',
                 label: 'Data Migrations',
                 badge: null,
@@ -718,6 +726,7 @@ const Admin = () => {
                 label: `User Roles (${users.length})`,
                 badge: null,
               },
+              { id: 'duplicates', label: 'Duplicate Detection', badge: null },
               { id: 'audit', label: 'Audit Trail Logs', badge: null },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
@@ -1667,11 +1676,17 @@ const Admin = () => {
 
             {/* Catalogue coverage and missing-data dashboard */}
             {activeTab === 'coverage' && (
-              <CatalogueCoveragePanel services={services} onEditService={handleEditServiceFromReport} />
+              <>
+                <CatalogueCompletenessPanel services={services} onEditService={handleEditServiceFromReport} />
+                <CatalogueCoveragePanel services={services} onEditService={handleEditServiceFromReport} />
+              </>
             )}
 
             {/* Official application-link health check */}
             {activeTab === 'link-health' && <LinkHealthPanel />}
+            {activeTab === 'duplicates' && (
+              <DuplicateServiceDetectorPanel services={services} onRefresh={() => setServices(getAdminServices())} />
+            )}
 
             {/* Private drafts of service guides: review, preview and publish */}
             {activeTab === 'drafts' && (
@@ -1694,6 +1709,7 @@ const Admin = () => {
 
             {/* Eligibility rule test bench */}
             {activeTab === 'eligibility-tests' && <EligibilityTestBenchPanel />}
+            {activeTab === 'ai-evaluation' && <AiEvaluationSuitePanel />}
 
             {/* Process Bottleneck Feedback Loop Tab */}
             {activeTab === 'bottlenecks' && (
