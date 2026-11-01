@@ -31,7 +31,7 @@ describe('ServiceGuide focus mode', () => {
       service.warnings.forEach((w) => expect(html).toContain(w.replace(/'/g, '&#x27;')));
       service.steps.forEach((step) => expect(html).toContain(step.title));
       expect(html).toContain('Proof of birth from hospital');
-      expect(html).toContain('href="https://services.india.gov.in"');
+      expect(html).toContain('href="https://services.india.gov.in/"');
       expect(html).toContain('Before you apply');
     });
   });

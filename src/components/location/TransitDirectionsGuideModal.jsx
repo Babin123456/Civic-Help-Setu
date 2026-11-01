@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { X, Navigation, Train, Bus, Car, MapPin, ExternalLink, HelpCircle } from 'lucide-react';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 export default function TransitDirectionsGuideModal({ isOpen, onClose, office }) {
   useEffect(() => {
@@ -155,7 +156,7 @@ export default function TransitDirectionsGuideModal({ isOpen, onClose, office })
             Close
           </button>
           <a
-            href={mapsUrl}
+            href={safeHttpUrl(mapsUrl) || undefined}
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-primary"

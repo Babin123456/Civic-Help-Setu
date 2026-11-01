@@ -11,6 +11,7 @@ import {
   Layers,
 } from 'lucide-react';
 import { formatDistance } from '../../services/locationService';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 // Geographic bounding box for coordinate to SVG projection (India Region)
 const MAP_BOUNDS = {
@@ -421,7 +422,7 @@ const InteractiveOfficeMap = ({
             {/* Action Buttons */}
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
               <a
-                href={currentActive.directionsUrl}
+                href={safeHttpUrl(currentActive.directionsUrl) || undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-secondary"
