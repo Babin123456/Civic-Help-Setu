@@ -29,6 +29,7 @@ export const ROUTE_PATTERNS = [
   '/assistant',
   '/services',
   '/services/:id',
+  '/acronyms',
   '/eligibility',
   '/nearby',
   '/nearby-offices',
