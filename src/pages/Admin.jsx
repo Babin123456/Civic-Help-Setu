@@ -60,6 +60,7 @@ import CatalogueMigrationPanel from '../components/admin/CatalogueMigrationPanel
 import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
 import CatalogueCompletenessPanel from '../components/admin/CatalogueCompletenessPanel';
 import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchPanel';
+import AiEvaluationSuitePanel from '../components/admin/AiEvaluationSuitePanel';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel';
 import AvailabilityNoticePanel from '../components/admin/AvailabilityNoticePanel';
@@ -693,6 +694,11 @@ const Admin = () => {
               {
                 id: 'eligibility-tests',
                 label: 'Eligibility Test Bench',
+                badge: null,
+              },
+              {
+                id: 'ai-evaluation',
+                label: 'AI Evaluation Suite',
                 badge: null,
               },
               {
@@ -1703,6 +1709,7 @@ const Admin = () => {
 
             {/* Eligibility rule test bench */}
             {activeTab === 'eligibility-tests' && <EligibilityTestBenchPanel />}
+            {activeTab === 'ai-evaluation' && <AiEvaluationSuitePanel />}
 
             {/* Process Bottleneck Feedback Loop Tab */}
             {activeTab === 'bottlenecks' && (
