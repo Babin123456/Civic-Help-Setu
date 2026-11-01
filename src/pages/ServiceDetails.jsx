@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { AlertOctagon, ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, Users, Eye, FileText } from 'lucide-react';
+import { AlertOctagon, ArrowLeft, Bookmark, Calculator, Check, Link2, Printer, Share2, Zap, Users, Eye, CheckSquare, FileText } from 'lucide-react';
 import { getServiceById } from '../services/serviceCatalog';
 import RetiredServiceNotice from '../components/common/RetiredServiceNotice';
 import { useAuth } from '../context/AuthContext';
@@ -26,6 +26,8 @@ import BarrierReportModal from '../components/barriers/BarrierReportModal';
 import AccessibleReaderPreferencesModal from '../components/services/AccessibleReaderPreferencesModal';
 import { getReaderPreferences, computeReaderStyle } from '../services/accessibleReaderService';
 import InteractiveFeeEstimatorModal from '../components/services/InteractiveFeeEstimatorModal';
+import ApplicationPreparationPlanModal from '../components/services/ApplicationPreparationPlanModal';
+import InlineStatusLegend from '../components/common/InlineStatusLegend';
 import DocumentTypeGuidanceModal from '../components/services/DocumentTypeGuidanceModal';
 
 const getSavedServices = () => {
@@ -670,6 +672,17 @@ const ServiceDetails = ({ previewService = null }) => {
               Document-Type Requirements Guidance
             </button>
           </div>
+
+          <InlineStatusLegend
+            categories={[
+              'requirement',
+              'intakeWindow',
+              'fee',
+              'eligibility',
+            ]}
+            title="Status Legend for This Service"
+            fullLegendLabel="View full legend"
+          />
 
           <DocumentPreflightInspectionCard service={service} />
 
