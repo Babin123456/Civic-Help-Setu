@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { AlertOctagon, ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, Users, Eye, HelpCircle } from 'lucide-react';
+import { AlertOctagon, ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, Users, Eye, FileText } from 'lucide-react';
 import { getServiceById } from '../services/serviceCatalog';
 import RetiredServiceNotice from '../components/common/RetiredServiceNotice';
 import { useAuth } from '../context/AuthContext';
@@ -26,7 +26,7 @@ import BarrierReportModal from '../components/barriers/BarrierReportModal';
 import AccessibleReaderPreferencesModal from '../components/services/AccessibleReaderPreferencesModal';
 import { getReaderPreferences, computeReaderStyle } from '../services/accessibleReaderService';
 import InteractiveFeeEstimatorModal from '../components/services/InteractiveFeeEstimatorModal';
-import FormFieldGuidanceModal from '../components/forms/FormFieldGuidanceModal';
+import DocumentTypeGuidanceModal from '../components/services/DocumentTypeGuidanceModal';
 
 const getSavedServices = () => {
   try {
@@ -83,7 +83,7 @@ const ServiceDetails = ({ previewService = null }) => {
   const [showReaderModal, setShowReaderModal] = useState(false);
   const [readerStyle, setReaderStyle] = useState(() => computeReaderStyle(getReaderPreferences()));
   const [showFeeEstimatorModal, setShowFeeEstimatorModal] = useState(false);
-  const [showFormFieldGuidanceModal, setShowFormFieldGuidanceModal] = useState(false);
+  const [showDocGuidanceModal, setShowDocGuidanceModal] = useState(false);
   const [service, setService] = useState(() => previewService ?? getServiceById(id));
 
   const [isSaved, setIsSaved] = useState(() =>
@@ -537,7 +537,7 @@ const ServiceDetails = ({ previewService = null }) => {
 
               <button
                 type="button"
-                onClick={() => setShowFormFieldGuidanceModal(true)}
+                onClick={() => setShowDocGuidanceModal(true)}
                 className="btn btn-secondary"
                 style={{
                   padding: '0.6rem 1rem',
@@ -548,8 +548,8 @@ const ServiceDetails = ({ previewService = null }) => {
                   gap: '0.45rem'
                 }}
               >
-                <HelpCircle size={16} />
-                <span>Form Field Guidance</span>
+                <FileText size={16} />
+                <span>Document Guidance</span>
               </button>
             </div>
           </div>
@@ -657,6 +657,18 @@ const ServiceDetails = ({ previewService = null }) => {
               focusMode={focusMode}
               onToggleFocusMode={toggleFocusMode}
             />
+          </div>
+
+          <div style={{ margin: '1rem 0 0.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setShowDocGuidanceModal(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.85rem' }}
+            >
+              <FileText size={15} color="var(--accent-main)" />
+              Document-Type Requirements Guidance
+            </button>
           </div>
 
           <DocumentPreflightInspectionCard service={service} />
@@ -769,9 +781,9 @@ const ServiceDetails = ({ previewService = null }) => {
         onPreferencesChange={(updated) => setReaderStyle(computeReaderStyle(updated))}
       />
 
-      <FormFieldGuidanceModal
-        isOpen={showFormFieldGuidanceModal}
-        onClose={() => setShowFormFieldGuidanceModal(false)}
+      <DocumentTypeGuidanceModal
+        isOpen={showDocGuidanceModal}
+        onClose={() => setShowDocGuidanceModal(false)}
         service={service}
       />
     </div>
