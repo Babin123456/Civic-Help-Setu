@@ -4,6 +4,7 @@ import { X, Trash2, Printer, Scale } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { comparisonService, NOT_AVAILABLE } from '../../services/comparisonService';
 import { useModalKeyboard } from '../../hooks/useModalKeyboard';
+import EligibilityComparisonExplainerSection from './EligibilityComparisonExplainerSection';
 
 export const ComparisonValue = ({ value }) => {
   if (!value || value.length === 0) {
@@ -102,6 +103,7 @@ const ServiceComparisonModal = ({ isOpen, onClose, comparedServices, onRemove, o
               <p>Tick Compare on up to 3 service cards to see them side by side.</p>
             </div>
           ) : (
+            <>
             <table className="compare-table">
               <caption className="sr-only">Side-by-side comparison of selected services</caption>
               <thead>
@@ -169,6 +171,8 @@ const ServiceComparisonModal = ({ isOpen, onClose, comparedServices, onRemove, o
                 </tr>
               </tbody>
             </table>
+            <EligibilityComparisonExplainerSection comparedServices={comparedServices} />
+            </>
           )}
         </div>
       </div>

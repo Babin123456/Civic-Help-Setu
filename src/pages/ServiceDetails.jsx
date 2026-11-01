@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { AlertOctagon, ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, Users, Eye, HelpCircle } from 'lucide-react';
@@ -39,6 +38,8 @@ const getSavedServices = () => {
 };
 
 import ServicePrintPacketModal from '../components/services/ServicePrintPacketModal';
+import CivicAcronymTooltip from '../components/acronyms/CivicAcronymTooltip.jsx';
+import { CIVIC_ACRONYMS } from '../data/civicAcronyms.js';
 const copyServiceLink = async (url) => {
   try {
     if (navigator?.clipboard?.writeText) {
@@ -531,7 +532,24 @@ const ServiceDetails = ({ previewService = null }) => {
                 }}
               >
                 <Users size={16} />
-                <span>Handoff to Helper</span></button><button type="button" onClick={() => setShowFormFieldGuidanceModal(true)} className="btn btn-secondary" style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem' }}><HelpCircle size={16} /><span>Form Field Guidance</span>
+                <span>Handoff to Helper</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowFormFieldGuidanceModal(true)}
+                className="btn btn-secondary"
+                style={{
+                  padding: '0.6rem 1rem',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem'
+                }}
+              >
+                <HelpCircle size={16} />
+                <span>Form Field Guidance</span>
               </button>
             </div>
           </div>
@@ -564,12 +582,38 @@ const ServiceDetails = ({ previewService = null }) => {
             </p>
           </div>
 
+          {/* Related Acronyms & Terms */}
+          {(() => {
+            const relatedAcronyms = CIVIC_ACRONYMS.filter((a) =>
+              a.relatedServiceIds.includes(service.id)
+            );
+            if (relatedAcronyms.length === 0) return null;
+            return (
+              <div
+                style={{
+                  marginTop: '2rem',
+                  paddingTop: '1.5rem',
+                  borderTop: '1px solid var(--border-light)',
+                }}
+              >
+                <h2 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>
+                  Related Acronyms &amp; Terms
+                </h2>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  {relatedAcronyms.map((entry) => (
+                    <CivicAcronymTooltip key={entry.id} acronym={entry.acronym} />
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Official Source Conflict Caution Banner */}
           <SourceConflictCautionBanner
             serviceId={service.id}
           />
 
-<ApplicabilityPanel service={service} />
+          <ApplicabilityPanel service={service} />
 
           {/* Offline In-Office Visit Staging */}
           <OfflineCacheActionCard service={service} />
@@ -608,11 +652,11 @@ const ServiceDetails = ({ previewService = null }) => {
             </button>
           </div>
           <div style={readerStyle}>
-          <ServiceGuide
-            service={service}
-            focusMode={focusMode}
-            onToggleFocusMode={toggleFocusMode}
-          />
+            <ServiceGuide
+              service={service}
+              focusMode={focusMode}
+              onToggleFocusMode={toggleFocusMode}
+            />
           </div>
 
           <DocumentPreflightInspectionCard service={service} />
@@ -718,11 +762,13 @@ const ServiceDetails = ({ previewService = null }) => {
         onClose={() => setShowBarrierModal(false)}
         service={service}
       />
+
       <AccessibleReaderPreferencesModal
         isOpen={showReaderModal}
         onClose={() => setShowReaderModal(false)}
         onPreferencesChange={(updated) => setReaderStyle(computeReaderStyle(updated))}
       />
+
       <FormFieldGuidanceModal
         isOpen={showFormFieldGuidanceModal}
         onClose={() => setShowFormFieldGuidanceModal(false)}
