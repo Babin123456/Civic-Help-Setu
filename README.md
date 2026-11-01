@@ -3,7 +3,7 @@
 ### Bridging Citizens and Public Services Through Technology
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Nexus%20Spring%20of%20Code-Winter%20Edition-blueviolet?style=for-the-badge" alt="Nexus Spring of Code Winter Edition" />
+  <img src="https://img.shields.io/badge/Nexus%20Spring%20of%20Code-Winter%20Edition-blueviolet?style=for-the-badge" alt="Nexus Winter of Code" />
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" />
   <img src="https://img.shields.io/badge/Vite-Powered-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" />
