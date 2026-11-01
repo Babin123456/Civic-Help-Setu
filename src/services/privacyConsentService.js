@@ -66,6 +66,7 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_journey_handoffs_v1', category: 'drafts', exportAs: 'journeyHandoffs', empty: [] }, // journeyHandoffService.js
   { key: 'civicbridge_readiness_scorecards', category: 'drafts', exportAs: 'readinessScorecards', empty: [] }, // readinessScorecardService.js
   { key: 'civicbridge_office_accessibility_audits', category: 'activity', exportAs: 'officeAccessibilityAudits', empty: [] }, // accessibilityMapService.js
+  { key: 'civic_grievance_drafts_v1', category: 'drafts', exportAs: 'grievanceDrafts', empty: [] }, // civicGrievanceDraftingService.js
   { key: 'civicbridge_preparation_plans_v1', category: 'drafts', exportAs: 'preparationPlans', empty: {} }, // applicationPreparationPlanService.js
 ];
 
