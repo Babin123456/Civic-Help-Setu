@@ -39,6 +39,8 @@ const getSavedServices = () => {
 };
 
 import ServicePrintPacketModal from '../components/services/ServicePrintPacketModal';
+import CivicAcronymTooltip from '../components/acronyms/CivicAcronymTooltip.jsx';
+import { CIVIC_ACRONYMS } from '../data/civicAcronyms.js';
 const copyServiceLink = async (url) => {
   try {
     if (navigator?.clipboard?.writeText) {
@@ -563,6 +565,32 @@ const ServiceDetails = ({ previewService = null }) => {
                 'Details for this service are available in the programme information.'}
             </p>
           </div>
+
+          {/* Related Acronyms & Terms */}
+          {(() => {
+            const relatedAcronyms = CIVIC_ACRONYMS.filter((a) =>
+              a.relatedServiceIds.includes(service.id)
+            );
+            if (relatedAcronyms.length === 0) return null;
+            return (
+              <div
+                style={{
+                  marginTop: '2rem',
+                  paddingTop: '1.5rem',
+                  borderTop: '1px solid var(--border-light)',
+                }}
+              >
+                <h2 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>
+                  Related Acronyms &amp; Terms
+                </h2>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  {relatedAcronyms.map((entry) => (
+                    <CivicAcronymTooltip key={entry.id} acronym={entry.acronym} />
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Official Source Conflict Caution Banner */}
           <SourceConflictCautionBanner
