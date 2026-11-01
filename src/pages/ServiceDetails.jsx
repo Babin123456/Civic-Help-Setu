@@ -1,7 +1,6 @@
-
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { AlertOctagon, ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, Users, Eye, CheckSquare } from 'lucide-react';
+import { AlertOctagon, ArrowLeft, Bookmark, Check, Link2, Printer, Share2, Zap, Users, Eye, HelpCircle } from 'lucide-react';
 import { getServiceById } from '../services/serviceCatalog';
 import RetiredServiceNotice from '../components/common/RetiredServiceNotice';
 import { useAuth } from '../context/AuthContext';
@@ -27,7 +26,7 @@ import BarrierReportModal from '../components/barriers/BarrierReportModal';
 import AccessibleReaderPreferencesModal from '../components/services/AccessibleReaderPreferencesModal';
 import { getReaderPreferences, computeReaderStyle } from '../services/accessibleReaderService';
 import InteractiveFeeEstimatorModal from '../components/services/InteractiveFeeEstimatorModal';
-import ApplicationPreparationPlanModal from '../components/services/ApplicationPreparationPlanModal';
+import FormFieldGuidanceModal from '../components/forms/FormFieldGuidanceModal';
 
 const getSavedServices = () => {
   try {
@@ -84,7 +83,7 @@ const ServiceDetails = ({ previewService = null }) => {
   const [showReaderModal, setShowReaderModal] = useState(false);
   const [readerStyle, setReaderStyle] = useState(() => computeReaderStyle(getReaderPreferences()));
   const [showFeeEstimatorModal, setShowFeeEstimatorModal] = useState(false);
-  const [showPrepPlanModal, setShowPrepPlanModal] = useState(false);
+  const [showFormFieldGuidanceModal, setShowFormFieldGuidanceModal] = useState(false);
   const [service, setService] = useState(() => previewService ?? getServiceById(id));
 
   const [isSaved, setIsSaved] = useState(() =>
@@ -533,7 +532,24 @@ const ServiceDetails = ({ previewService = null }) => {
                 }}
               >
                 <Users size={16} />
-                <span>Handoff to Helper</span></button><button type="button" onClick={() => setShowPrepPlanModal(true)} className="btn btn-secondary" style={{ padding: '0.6rem 1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem' }}><CheckSquare size={16} /><span>Preparation Plan</span>
+                <span>Handoff to Helper</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowFormFieldGuidanceModal(true)}
+                className="btn btn-secondary"
+                style={{
+                  padding: '0.6rem 1rem',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem'
+                }}
+              >
+                <HelpCircle size={16} />
+                <span>Form Field Guidance</span>
               </button>
             </div>
           </div>
@@ -597,7 +613,7 @@ const ServiceDetails = ({ previewService = null }) => {
             serviceId={service.id}
           />
 
-<ApplicabilityPanel service={service} />
+          <ApplicabilityPanel service={service} />
 
           {/* Offline In-Office Visit Staging */}
           <OfflineCacheActionCard service={service} />
@@ -636,11 +652,11 @@ const ServiceDetails = ({ previewService = null }) => {
             </button>
           </div>
           <div style={readerStyle}>
-          <ServiceGuide
-            service={service}
-            focusMode={focusMode}
-            onToggleFocusMode={toggleFocusMode}
-          />
+            <ServiceGuide
+              service={service}
+              focusMode={focusMode}
+              onToggleFocusMode={toggleFocusMode}
+            />
           </div>
 
           <DocumentPreflightInspectionCard service={service} />
@@ -746,15 +762,17 @@ const ServiceDetails = ({ previewService = null }) => {
         onClose={() => setShowBarrierModal(false)}
         service={service}
       />
+
       <AccessibleReaderPreferencesModal
         isOpen={showReaderModal}
         onClose={() => setShowReaderModal(false)}
         onPreferencesChange={(updated) => setReaderStyle(computeReaderStyle(updated))}
       />
-      <ApplicationPreparationPlanModal
+
+      <FormFieldGuidanceModal
+        isOpen={showFormFieldGuidanceModal}
+        onClose={() => setShowFormFieldGuidanceModal(false)}
         service={service}
-        isOpen={showPrepPlanModal}
-        onClose={() => setShowPrepPlanModal(false)}
       />
     </div>
   );
