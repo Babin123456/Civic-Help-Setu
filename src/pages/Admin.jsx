@@ -58,6 +58,7 @@ import ServiceDraftsPanel from '../components/admin/ServiceDraftsPanel';
 import { getDraftForService, listDrafts, saveDraft } from '../services/serviceDrafts';
 import CatalogueMigrationPanel from '../components/admin/CatalogueMigrationPanel';
 import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
+import CatalogueCompletenessPanel from '../components/admin/CatalogueCompletenessPanel';
 import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchPanel';
 import CatalogueEnrichmentReviewPanel from '../components/admin/CatalogueEnrichmentReviewPanel';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
@@ -80,6 +81,7 @@ import {
 import SourceConflictReviewQueue from '../components/admin/SourceConflictReviewQueue';
 import BarrierInsightsDashboard from '../components/barriers/BarrierInsightsDashboard';
 import RuleConflictInspectorModal from '../components/admin/RuleConflictInspectorModal';
+import DuplicateServiceDetectorPanel from '../components/admin/DuplicateServiceDetectorPanel';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -724,6 +726,7 @@ const Admin = () => {
                 label: `User Roles (${users.length})`,
                 badge: null,
               },
+              { id: 'duplicates', label: 'Duplicate Detection', badge: null },
               { id: 'audit', label: 'Audit Trail Logs', badge: null },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
@@ -1673,21 +1676,27 @@ const Admin = () => {
 
             {/* Catalogue coverage and missing-data dashboard */}
             {activeTab === 'coverage' && (
-              <CatalogueCoveragePanel services={services} onEditService={handleEditServiceFromReport} />
+              <>
+                <CatalogueCompletenessPanel services={services} onEditService={handleEditServiceFromReport} />
+                <CatalogueCoveragePanel services={services} onEditService={handleEditServiceFromReport} />
+              </>
             )}
 
             {/* Official application-link health check */}
             {activeTab === 'link-health' && <LinkHealthPanel />}
+            {activeTab === 'duplicates' && (
+              <DuplicateServiceDetectorPanel services={services} onRefresh={() => setServices(getAdminServices())} />
+            )}
 
             {/* Private drafts of service guides: review, preview and publish */}
             {activeTab === 'drafts' && (
-  <ServiceDraftsPanel
-    onEditDraft={handleEditDraft}
-    onChanged={handleDraftsChanged}
-    actor={user?.username || 'SuperAdmin'}
-    refreshKey={draftsVersion}
-  />
-)}
+              <ServiceDraftsPanel
+                onEditDraft={handleEditDraft}
+                onChanged={handleDraftsChanged}
+                actor={user?.username || 'SuperAdmin'}
+                refreshKey={draftsVersion}
+              />
+            )}
             {/* Catalogue data migrations: dry run, backup, apply, rollback */}
             {activeTab === 'migrations' && (
               <CatalogueMigrationPanel

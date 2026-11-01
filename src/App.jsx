@@ -26,6 +26,7 @@ import SSOCallback from './pages/SSOCallback';
 import Assistant from './pages/Assistant';
 import { ServiceCardSkeletonGrid } from './components/ServiceCardSkeleton';
 import ServiceDetails from './pages/ServiceDetails';
+import Acronyms from './pages/Acronyms';
 import Eligibility from './pages/Eligibility';
 import NearbyOffices from './pages/NearbyOffices';
 import Track from './pages/Track';
@@ -75,6 +76,7 @@ function AppRoot() {
                       <Route path="/assistant" element={<Assistant />} />
                       <Route path="/services" element={<Suspense fallback={<ServicesFallback />}><Services /></Suspense>} />
                       <Route path="/services/:id" element={<ServiceDetails />} />
+                      <Route path="/acronyms" element={<Acronyms />} />
                       <Route path="/eligibility" element={<Eligibility />} />
                       <Route path="/nearby" element={<NearbyOffices />} />
                       <Route path="/nearby-offices" element={<NearbyOffices />} />
