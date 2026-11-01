@@ -44,6 +44,8 @@ export const CLOUD_STORES = [
   { key: 'civic_grievance_evidence_drafts', slug: 'evidence-drafts', collection: 'drafts', kind: 'list' },
   { key: 'civic_life_event_journeys', slug: 'life-event-journeys', collection: 'drafts', kind: 'document' },
   { key: 'civicbridge_journey_handoffs_v1', slug: 'journey-handoffs', collection: 'drafts', kind: 'list' },
+  { key: 'civic_grievance_drafts_v1', slug: 'grievance-drafts-v1', collection: 'drafts', kind: 'list' },
+  { key: 'civicbridge_preparation_plans_v1', slug: 'preparation-plans-v1', collection: 'drafts', kind: 'list' },
   { key: 'civicbridge_applicant_profiles_v1', slug: 'applicant-profiles', collection: 'applicantProfiles', kind: 'list' },
   { key: 'civicbridge_readiness_scorecards', slug: 'scorecards', collection: 'scorecards', kind: 'list' },
   { key: 'civicbridge_chat_history', slug: 'chat-history', collection: 'assistantChats', kind: 'document' },
