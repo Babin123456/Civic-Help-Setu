@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircle2, Calendar, MapPin, Clock, ExternalLink } from 'lucide-react';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 const AppointmentConfirmationCard = ({ appointment, onOpenCalendarSync }) => {
   if (!appointment) return null;
@@ -80,7 +81,7 @@ const AppointmentConfirmationCard = ({ appointment, onOpenCalendarSync }) => {
         </button>
         {appointment.directionsUrl && (
           <a
-            href={appointment.directionsUrl}
+            href={safeHttpUrl(appointment.directionsUrl) || undefined}
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-outline"

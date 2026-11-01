@@ -1,6 +1,7 @@
 import React from 'react';
 import { ExternalLink, CheckCircle2, ShieldCheck, Lock } from 'lucide-react';
 import { inspectOfficialSource } from '../services/sourceVerificationService';
+import { safeHttpUrl } from '../utils/safeContent';
 
 const SourceCard = ({ source }) => {
   const inspected = inspectOfficialSource(source);
@@ -27,7 +28,7 @@ const SourceCard = ({ source }) => {
 
   return (
     <a
-      href={inspected.cleanUrl}
+      href={safeHttpUrl(inspected.cleanUrl) || undefined}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`Official resource: ${inspected.name} (opens in new tab)`}

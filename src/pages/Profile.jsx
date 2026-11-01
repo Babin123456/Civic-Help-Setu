@@ -493,7 +493,7 @@ const Profile = () => {
               <a
                 href="https://dashboard.clerk.com"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
                   marginTop: '1rem', fontSize: '0.8rem', color: 'var(--text-tertiary)',
