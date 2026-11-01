@@ -46,6 +46,7 @@ import ApplicationMilestoneTracker from '../components/tracking/ApplicationMiles
 import StatutoryCompensationClaimModal from '../components/tracking/StatutoryCompensationClaimModal';
 import { calculateStatutoryCompensation } from '../services/statutoryCompensationService';
 import DeficiencyCureModal from '../components/tracking/DeficiencyCureModal';
+import InlineStatusLegend from '../components/common/InlineStatusLegend';
 
 const Track = () => {
   const location = useLocation();
@@ -320,6 +321,17 @@ const Track = () => {
                 </div>
 
                 <ApplicationMilestoneTracker application={activeApp} />
+
+                <InlineStatusLegend
+                  categories={[
+                    'application',
+                    'requirement',
+                    'fee',
+                    'eligibility',
+                  ]}
+                  title="Status Legend for Tracking"
+                  fullLegendLabel="View full legend"
+                />
 
                 {requiredDocuments.length > 0 && (
                   <section className="card" style={{ padding: '1.25rem' }} aria-labelledby="track-checklist-title">

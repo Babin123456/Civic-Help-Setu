@@ -28,6 +28,7 @@ import AccessibleReaderPreferencesModal from '../components/services/AccessibleR
 import { getReaderPreferences, computeReaderStyle } from '../services/accessibleReaderService';
 import InteractiveFeeEstimatorModal from '../components/services/InteractiveFeeEstimatorModal';
 import ApplicationPreparationPlanModal from '../components/services/ApplicationPreparationPlanModal';
+import InlineStatusLegend from '../components/common/InlineStatusLegend';
 
 const getSavedServices = () => {
   try {
@@ -614,6 +615,17 @@ const ServiceDetails = ({ previewService = null }) => {
             onToggleFocusMode={toggleFocusMode}
           />
           </div>
+
+          <InlineStatusLegend
+            categories={[
+              'requirement',
+              'intakeWindow',
+              'fee',
+              'eligibility',
+            ]}
+            title="Status Legend for This Service"
+            fullLegendLabel="View full legend"
+          />
 
           <DocumentPreflightInspectionCard service={service} />
 
