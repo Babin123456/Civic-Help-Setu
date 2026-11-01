@@ -43,6 +43,7 @@ const Navbar = () => {
         {/* Desktop Nav */}
         <div style={{ display: 'none', gap: '0.5rem', alignItems: 'center' }} className="md-flex">
           <Link to="/services" className="nav-link">{t('nav.services', 'Services')}</Link>
+          <Link to="/acronyms" className="nav-link">Acronyms</Link>
           <Link to="/eligibility" className="nav-link">Eligibility</Link>
           <Link to="/nearby" className="nav-link">{t('nav.nearby', 'Nearby Centers')}</Link>
           <Link to="/track" className="nav-link">{t('nav.track', 'Track Status')}</Link>
@@ -199,6 +200,7 @@ const Navbar = () => {
             </div>
           )}
           <Link to="/services" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>{t('nav.services', 'Services')}</Link>
+          <Link to="/acronyms" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>Acronyms</Link>
           <Link to="/eligibility" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>Eligibility Checker</Link>
           <Link to="/nearby" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>{t('nav.nearby', 'Nearby Centers')}</Link>
           <Link to="/track" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>{t('nav.track', 'Track Status')}</Link>
