@@ -60,7 +60,7 @@ import CatalogueMigrationPanel from '../components/admin/CatalogueMigrationPanel
 import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
 import CatalogueCompletenessPanel from '../components/admin/CatalogueCompletenessPanel';
 import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchPanel';
-import AiEvaluationSuitePanel from '../components/admin/AiEvaluationSuitePanel';
+import CatalogueEnrichmentReviewPanel from '../components/admin/CatalogueEnrichmentReviewPanel';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel';
 import AvailabilityNoticePanel from '../components/admin/AvailabilityNoticePanel';
@@ -697,8 +697,8 @@ const Admin = () => {
                 badge: null,
               },
               {
-                id: 'ai-evaluation',
-                label: 'AI Evaluation Suite',
+                id: 'enrichment',
+                label: 'Enrichment Queue',
                 badge: null,
               },
               {
@@ -1690,13 +1690,13 @@ const Admin = () => {
 
             {/* Private drafts of service guides: review, preview and publish */}
             {activeTab === 'drafts' && (
-  <ServiceDraftsPanel
-    onEditDraft={handleEditDraft}
-    onChanged={handleDraftsChanged}
-    actor={user?.username || 'SuperAdmin'}
-    refreshKey={draftsVersion}
-  />
-)}
+              <ServiceDraftsPanel
+                onEditDraft={handleEditDraft}
+                onChanged={handleDraftsChanged}
+                actor={user?.username || 'SuperAdmin'}
+                refreshKey={draftsVersion}
+              />
+            )}
             {/* Catalogue data migrations: dry run, backup, apply, rollback */}
             {activeTab === 'migrations' && (
               <CatalogueMigrationPanel
@@ -1709,7 +1709,7 @@ const Admin = () => {
 
             {/* Eligibility rule test bench */}
             {activeTab === 'eligibility-tests' && <EligibilityTestBenchPanel />}
-            {activeTab === 'ai-evaluation' && <AiEvaluationSuitePanel />}
+            {activeTab === 'enrichment' && <CatalogueEnrichmentReviewPanel />}
 
             {/* Process Bottleneck Feedback Loop Tab */}
             {activeTab === 'bottlenecks' && (

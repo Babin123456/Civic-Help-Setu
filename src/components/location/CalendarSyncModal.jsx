@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Calendar, Download, ExternalLink, Clock, MapPin, CheckCircle2 } from 'lucide-react';
 import { calendarExportService } from '../../services/calendarExportService';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 const CalendarSyncModal = ({ isOpen, onClose, appointment }) => {
   if (!isOpen || !appointment) return null;
@@ -135,7 +136,7 @@ const CalendarSyncModal = ({ isOpen, onClose, appointment }) => {
             </button>
 
             <a
-              href={calendarExportService.getGoogleCalendarUrl(appointment)}
+              href={safeHttpUrl(calendarExportService.getGoogleCalendarUrl(appointment)) || undefined}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-outline"
@@ -154,7 +155,7 @@ const CalendarSyncModal = ({ isOpen, onClose, appointment }) => {
             </a>
 
             <a
-              href={calendarExportService.getOutlookCalendarUrl(appointment)}
+              href={safeHttpUrl(calendarExportService.getOutlookCalendarUrl(appointment)) || undefined}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-outline"

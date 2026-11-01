@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Share2, Copy, Check, MessageCircle, Send, Mail, QrCode } from 'lucide-react';
 import QRCodeView from '../common/QRCodeView';
 import { checklistExportService } from '../../services/checklistExportService';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 const ShareServiceModal = ({ isOpen, onClose, service }) => {
   const [copied, setCopied] = useState(false);
@@ -102,7 +103,7 @@ const ShareServiceModal = ({ isOpen, onClose, service }) => {
           {/* Quick Channels */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
             <a
-              href={checklistExportService.getWhatsAppShareUrl(service)}
+              href={safeHttpUrl(checklistExportService.getWhatsAppShareUrl(service)) || undefined}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-outline"
@@ -122,7 +123,7 @@ const ShareServiceModal = ({ isOpen, onClose, service }) => {
             </a>
 
             <a
-              href={checklistExportService.getTelegramShareUrl(service)}
+              href={safeHttpUrl(checklistExportService.getTelegramShareUrl(service)) || undefined}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-outline"
@@ -142,7 +143,7 @@ const ShareServiceModal = ({ isOpen, onClose, service }) => {
             </a>
 
             <a
-              href={checklistExportService.getEmailShareUrl(service)}
+              href={safeHttpUrl(checklistExportService.getEmailShareUrl(service)) || undefined}
               className="btn btn-outline"
               style={{
                 display: 'flex',

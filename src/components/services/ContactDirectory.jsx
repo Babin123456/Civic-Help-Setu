@@ -12,6 +12,7 @@ const ContactItem = ({ item }) => {
   const verifiedOn = formatVerificationDate(contact.lastVerified);
   const isVerified = status === 'verified';
   const isInvalid = status === 'invalid';
+  const safeHref = contact.method === 'web' ? safeHttpUrl(href) : href;
 
   return (
     <li className={`contact-dir__item contact-dir__item--${status}`}>
@@ -37,9 +38,9 @@ const ContactItem = ({ item }) => {
           <p className="contact-dir__value">
             <Icon size={16} aria-hidden="true" />
             <span className="contact-dir__method">{methodLabel}:</span>{' '}
-            {href ? (
+            {safeHref ? (
               <a
-                href={href}
+                href={safeHref}
                 {...(contact.method === 'web' ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                 aria-label={`${ACTION_LABEL[contact.method]} ${typeLabel}: ${contact.value}${contact.method === 'web' ? ' (opens in new tab)' : ''}`}
               >

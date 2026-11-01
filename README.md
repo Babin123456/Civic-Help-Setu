@@ -3,7 +3,7 @@
 ### Bridging Citizens and Public Services Through Technology
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Nexus%20Spring%20of%20Code-Winter%20Edition-blueviolet?style=for-the-badge" alt="Nexus Spring of Code Winter Edition" />
+  <img src="https://img.shields.io/badge/Nexus%20Winter%20of%20Code-blueviolet?style=for-the-badge" alt="Nexus Winter of Code" />
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" />
   <img src="https://img.shields.io/badge/Vite-Powered-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" />
@@ -28,7 +28,7 @@
 
 **Civic Help Setu** is a modern civic-tech platform designed to make public services easier to discover, understand, and access.
 
-Proudly part of **Nexus Spring of Code – Winter Edition (NSOC)**, the project brings together open-source collaboration, practical problem-solving, modern frontend engineering, and technology for public good.
+Proudly part of **Nexus Winter of Code – (NWOC)**, the project brings together open-source collaboration, practical problem-solving, modern frontend engineering, and technology for public good.
 
 Government services are often distributed across multiple websites, departments, and complicated application processes. Citizens may struggle to understand eligibility requirements, identify the correct documents, or determine what to do next.
 
