@@ -21,6 +21,7 @@ import SavedItemCard from '../components/saved/SavedItemCard';
 import ReminderScheduleModal from '../components/saved/ReminderScheduleModal';
 import FavoritesQuickBar from '../components/saved/FavoritesQuickBar';
 import DependencyRoadmapModal from '../components/saved/DependencyRoadmapModal';
+import SavedServiceRecommendationsPanel from '../components/saved/SavedServiceRecommendationsPanel';
 import {
   ALL_COLLECTION,
   buildCollections,
@@ -310,11 +311,18 @@ const Saved = () => {
         )}
 
         {populatedItems.length > 0 && (
-          <p className="collection-help">
+          <p className="collection-help" >
             Each guide is kept in one collection (its folder), so nothing is duplicated and removing a guide
             updates every collection. Collections are saved with your guides; a new empty collection lasts only
             until you reload.
           </p>
+        )}
+
+        {populatedItems.length > 0 && (
+          <SavedServiceRecommendationsPanel
+            savedServices={populatedItems.map((p) => p.service)}
+            catalogueServices={allServices}
+          />
         )}
 
         {/* Main Content Area */}

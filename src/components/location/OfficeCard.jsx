@@ -19,9 +19,11 @@ import { useToast } from '../../context/ToastContext';
 import BestTimeToVisitCard from './BestTimeToVisitCard';
 import { OfficeAccessibilityDetails } from './AccessibilityFacilityPanel';
 import IntakeWindowBadge from './IntakeWindowBadge';
+import ExplainableOfficeMatchCard from './ExplainableOfficeMatchCard';
 
 const OfficeCard = ({
   office,
+  selectedService = null,
   onBookAppointment,
   isSelected = false,
   onSelect = () => {},
@@ -145,6 +147,7 @@ const OfficeCard = ({
           </span>
         </p>
 
+        <ExplainableOfficeMatchCard office={office} service={selectedService} />
         <IntakeWindowBadge office={office} />
 
         {/* Metadata Details Grid */}

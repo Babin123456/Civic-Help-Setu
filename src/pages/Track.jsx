@@ -42,6 +42,7 @@ import SlaBreachAlertWidget from '../components/tracking/SlaBreachAlertWidget';
 import AppellateEscalationLadder from '../components/tracking/AppellateEscalationLadder';
 import GrievanceEscalationAlertBanner from '../components/tracking/GrievanceEscalationAlertBanner';
 import GrievanceEvidenceOrganizerModal from '../components/grievance/GrievanceEvidenceOrganizerModal';
+import CivicGrievanceDraftingAssistantModal from '../components/grievance/CivicGrievanceDraftingAssistantModal';
 import ApplicationMilestoneTracker from '../components/tracking/ApplicationMilestoneTracker';
 import StatutoryCompensationClaimModal from '../components/tracking/StatutoryCompensationClaimModal';
 import { calculateStatutoryCompensation } from '../services/statutoryCompensationService';
@@ -63,6 +64,7 @@ const Track = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isJourneyModalOpen, setIsJourneyModalOpen] = useState(false);
   const [isGrievanceModalOpen, setIsGrievanceModalOpen] = useState(false);
+  const [isGrievanceDraftModalOpen, setIsGrievanceDraftModalOpen] = useState(false);
   const [isCompensationModalOpen, setIsCompensationModalOpen] = useState(false);
   const [isCureModalOpen, setIsCureModalOpen] = useState(false);
 
@@ -178,6 +180,14 @@ const Track = () => {
             </div>
 
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setIsGrievanceDraftModalOpen(true)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <MessageSquare size={16} color="var(--accent-main)" /> Grievance Drafter
+              </button>
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -394,6 +404,12 @@ const Track = () => {
         isOpen={isGrievanceModalOpen}
         onClose={() => setIsGrievanceModalOpen(false)}
         defaultServiceId={activeApp?.serviceId}
+      />
+
+      <CivicGrievanceDraftingAssistantModal
+        isOpen={isGrievanceDraftModalOpen}
+        onClose={() => setIsGrievanceDraftModalOpen(false)}
+        defaultApplication={activeApp}
       />
 
       <StatutoryCompensationClaimModal
