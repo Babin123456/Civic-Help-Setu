@@ -3,16 +3,19 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import Assistant from './Assistant';
 import { ToastProvider } from '../context/ToastContext';
+import { LanguageProvider } from '../context/LanguageContext';
 import { STARTER_PROMPTS } from '../ai/conversationContext';
 
 // No localStorage in node, so the page starts as a fresh chat with only the welcome message
 describe('Assistant page, fresh chat', () => {
   const html = renderToStaticMarkup(
-    <ToastProvider>
-      <MemoryRouter>
-        <Assistant />
-      </MemoryRouter>
-    </ToastProvider>
+    <LanguageProvider>
+      <ToastProvider>
+        <MemoryRouter>
+          <Assistant />
+        </MemoryRouter>
+      </ToastProvider>
+    </LanguageProvider>
   );
 
   it('shows the empty state with the starter questions', () => {
@@ -43,11 +46,13 @@ describe('Assistant page, fresh chat', () => {
 
   it('adapts starter questions when a service context is passed in the URL', () => {
     const serviceHtml = renderToStaticMarkup(
-      <ToastProvider>
-        <MemoryRouter initialEntries={['/assistant?serviceId=birth-certificate']}>
-          <Assistant />
-        </MemoryRouter>
-      </ToastProvider>
+      <LanguageProvider>
+        <ToastProvider>
+          <MemoryRouter initialEntries={['/assistant?serviceId=birth-certificate']}>
+            <Assistant />
+          </MemoryRouter>
+        </ToastProvider>
+      </LanguageProvider>
     );
 
     expect(serviceHtml).toContain('Context tailored to Birth Certificate');
