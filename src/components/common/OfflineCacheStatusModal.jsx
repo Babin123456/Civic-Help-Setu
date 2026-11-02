@@ -42,7 +42,7 @@ const OfflineCacheStatusModal = ({ isOpen, onClose }) => {
   const cachedServiceList = Object.values(cachedData.services || {});
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', display: 'flex',  alignItems: 'flex-start', justifyContent: 'flex-end', paddingTop: '5.5rem', paddingRight: '1rem' }}>
       <div 
         className="card animate-fade-in"
         style={{
