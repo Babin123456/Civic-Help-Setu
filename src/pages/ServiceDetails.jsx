@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { AlertOctagon, ArrowLeft, Bookmark, Calculator, Check, Link2, Printer, Share2, Zap, Users, Eye, CheckSquare, FileText, Sparkles, RotateCcw, Edit2 } from 'lucide-react';
 import { getServiceById } from '../services/serviceCatalog';
 import RetiredServiceNotice from '../components/common/RetiredServiceNotice';
+import ServiceQrHandout from '../components/services/ServiceQrHandout';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import UntranslatedBadge from '../components/common/UntranslatedBadge';
@@ -247,6 +248,7 @@ const ServiceDetails = ({ previewService = null }) => {
         </div>
 
         <RetiredServiceNotice service={service} />
+        <ServiceQrHandout service={service} preview={isPreview} />
 
         <div
           className="glass-panel service-details__panel"
