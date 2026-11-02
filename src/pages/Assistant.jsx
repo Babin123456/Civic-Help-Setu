@@ -15,6 +15,7 @@ import UndoResetNotice from '../components/chat/UndoResetNotice';
 import ConfirmationDialog from '../components/common/ConfirmationDialog';
 import IntentRoutingSuggestions from '../components/assistant/IntentRoutingSuggestions';
 import CivicQuestionSuggestionPanel from '../components/assistant/CivicQuestionSuggestionPanel';
+import TranslatableExplanation from '../components/assistant/TranslatableExplanation';
 import { STARTER_PROMPTS, resolveFollowUpQuery, getLastUserMessage, hasUserMessages, lastAssistantServiceId } from '../ai/conversationContext';
 import { loadChatHistory, saveChatHistory, clearChatHistory } from '../services/chatStorage';
 import {
@@ -252,7 +253,7 @@ const Assistant = () => {
 
   const renderAssistantContent = (msg) => {
     if (msg.text && !msg.data) {
-      return <p style={{ fontSize: '1.05rem', lineHeight: '1.6' }}>{msg.text}</p>;
+      return <TranslatableExplanation text={msg.text} />;
     }
 
     const data = msg.data || {};
@@ -288,9 +289,7 @@ const Assistant = () => {
         )}
 
         {data.summary && (
-          <p style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-            {data.summary}
-          </p>
+          <TranslatableExplanation text={data.summary} />
         )}
 
         {/* Fees and processing pill if present */}
