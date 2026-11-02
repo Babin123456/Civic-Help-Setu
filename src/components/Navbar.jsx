@@ -196,14 +196,19 @@ const Navbar = () => {
             </div>
           )}
 
-        {/* Mobile Nav Toggle */}
-          <button className="hamburger-toggle-btn" style={{ padding: '0.4rem', background: 'var(--glass-bg-hover)', borderRadius: '50%', color: 'var(--text-primary)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}  onClick={() => setIsOpen(!isOpen)} aria-label="Toggle Menu">
+          {/* Hamburger Menu Toggle (Always Visible) */}
+          <button 
+            className="hamburger-toggle-btn" 
+            style={{ padding: '0.4rem', background: 'var(--glass-bg-hover)', borderRadius: '50%', color: 'var(--text-primary)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}  
+            onClick={() => setIsOpen(!isOpen)} 
+            aria-label="Toggle Menu"
+          >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu / Drawer Dropdown */}
       {isOpen && (
         <div className="mobile-drawer-dropdown" style={{ background: 'var(--bg-secondary)', padding: '1.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1rem', borderTop: '1px solid var(--border-main)', maxHeight: 'calc(100vh - 5rem)', overflowY: 'auto', width: '100%', maxWidth: '450px', marginLeft: 'auto' }}>
           {user && (
@@ -222,7 +227,6 @@ const Navbar = () => {
 
           {/* Mobile Utilities Section */}
           <div className="mobile-only-tools" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', width: '100%' }}>
-            {/* Row 1 */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.4rem', alignItems: 'center' }}>
               <button
                 type="button"
@@ -308,12 +312,14 @@ const Navbar = () => {
               </div>
             </div>
           </div>
-        <div className="drawer-accessibility-panel" style={{flexDirection: 'column', gap: '0.5rem', width: '100%', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-main)' }}>
+
+          <div className="drawer-accessibility-panel" style={{flexDirection: 'column', gap: '0.5rem', width: '100%', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-main)' }}>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', width: '100%' }}>
               <PlainLanguageToggle />
               {isServiceDetail && <FocusModeNavToggle />}
             </div>
           </div>
+
           <div className="mobile-only-links" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <Link to="/services" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>{t('nav.services', 'Services')}</Link>
             <Link to="/acronyms" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>Acronyms</Link>
@@ -328,18 +334,20 @@ const Navbar = () => {
           </div>
 
           {!user ? (
-            <Link to="/login" onClick={() => setIsOpen(false)} className="btn btn-primary"  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.65rem 1rem', fontSize: '0.95rem', fontWeight: '600', borderRadius: '0.5rem', textDecoration: 'none', width: '100%' }}>{t('nav.signIn', 'Sign In')}</Link>
+            <Link to="/login" onClick={() => setIsOpen(false)} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.65rem 1rem', fontSize: '0.95rem', fontWeight: '600', borderRadius: '0.5rem', textDecoration: 'none', width: '100%' }}>{t('nav.signIn', 'Sign In')}</Link>
           ) : (
             <button onClick={() => { handleLogout(); setIsOpen(false); }} style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--error)', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '0.5rem', padding: '0.6rem 1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%' }}>{t('nav.signOut', 'Sign Out')}</button>
           )}
         </div>
       )}
+
       <style>{`
         .tablet-tools { display: none !important; }
         .desktop-links { display: none !important; }
         .mobile-only-tools { display: flex !important; }
         .mobile-only-links { display: flex !important; }
         .top-navbar-theme-btn { display: inline-flex !important; }
+        .hamburger-toggle-btn { display: flex !important; }
 
         @media (max-width: 767px) {
           .top-navbar-theme-btn { display: none !important; }
@@ -347,17 +355,13 @@ const Navbar = () => {
         /* Tablet Viewport (768px to 1439px) */
         @media (min-width: 768px) {
           .tablet-tools { display: flex !important; gap: 0.5rem !important; align-items: center; }
-          .hamburger-toggle-btn { display: flex !important; }
           .mobile-only-tools { display: none !important; }
         }
         /* Desktop Viewport (1440px and above) */
         @media (min-width: 1440px) {
           .tablet-tools { display: flex !important; gap: 0.5rem !important; align-items: center; }
           .desktop-links { display: flex !important; gap: 0.5rem !important; align-items: center; }
-          .hamburger-toggle-btn { display: none !important; }
           .mobile-only-tools { display: none !important; }
-          .mobile-only-links { display: none !important; }
-          .mobile-drawer-dropdown { display: none !important; }
         }
       `}</style>
 
