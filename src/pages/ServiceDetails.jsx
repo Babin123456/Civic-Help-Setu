@@ -32,6 +32,7 @@ import InteractiveFeeEstimatorModal from '../components/services/InteractiveFeeE
 import ApplicationPreparationPlanModal from '../components/services/ApplicationPreparationPlanModal';
 import InlineStatusLegend from '../components/common/InlineStatusLegend';
 import DocumentTypeGuidanceModal from '../components/services/DocumentTypeGuidanceModal';
+import ServiceSlaReliabilityCard from '../components/services/ServiceSlaReliabilityCard';
 
 const getSavedServices = () => {
   try {
@@ -675,6 +676,9 @@ const ServiceDetails = ({ previewService = null }) => {
 
           {/* Statutory Welfare & Subsidy Benefit Estimator */}
           <BenefitEntitlementCalculator serviceId={service.id} serviceName={service.name} />
+
+          {/* Service Turnaround (SLA) & Delivery Reliability Forecaster */}
+          <ServiceSlaReliabilityCard service={service} />
 
           {/* Service Guide */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
