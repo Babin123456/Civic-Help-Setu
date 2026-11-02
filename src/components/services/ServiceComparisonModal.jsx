@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Trash2, Printer, Scale } from 'lucide-react';
+import { X, Trash2, Printer, Scale, FileDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { comparisonService, NOT_AVAILABLE } from '../../services/comparisonService';
 import { useModalKeyboard } from '../../hooks/useModalKeyboard';
 import EligibilityComparisonExplainerSection from './EligibilityComparisonExplainerSection';
+import ServiceComparisonExportModal from './ServiceComparisonExportModal';
 
 export const ComparisonValue = ({ value }) => {
   if (!value || value.length === 0) {
@@ -23,6 +24,7 @@ export const ComparisonValue = ({ value }) => {
 const ServiceComparisonModal = ({ isOpen, onClose, comparedServices, onRemove, onClear }) => {
   const [highlightDiffs, setHighlightDiffs] = useState(false);
   const [showOnlyDiffs, setShowOnlyDiffs] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const modalRef = useModalKeyboard(isOpen, onClose);
 
   if (!isOpen) return null;
@@ -55,6 +57,9 @@ const ServiceComparisonModal = ({ isOpen, onClose, comparedServices, onRemove, o
             </p>
           </div>
           <div className="compare-header-actions">
+            <button type="button" className="btn btn-secondary" onClick={() => setShowExportModal(true)}>
+              <FileDown size={16} aria-hidden="true" /> Export Dossier
+            </button>
             <button type="button" className="btn btn-secondary" onClick={() => window.print()}>
               <Printer size={16} aria-hidden="true" /> Print
             </button>
@@ -175,6 +180,11 @@ const ServiceComparisonModal = ({ isOpen, onClose, comparedServices, onRemove, o
             </>
           )}
         </div>
+        <ServiceComparisonExportModal
+          isOpen={showExportModal}
+          onClose={() => setShowExportModal(false)}
+          comparedServices={comparedServices}
+        />
       </div>
     </div>
   );
