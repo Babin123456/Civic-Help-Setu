@@ -82,7 +82,16 @@ export const buildReportDismissalDialog = (report) => {
  * @returns {{outcome: 'removed' | 'reverted-to-builtin' | 'nothing-to-clear', services: object[]}}
  * @throws when the service is still listed and it should have been removed
  */
-export const removeServiceGuide = ({ id, name, builtIn, actor, deleteService, hadLocalChanges = true, clearOwnership }) => {
+export const removeServiceGuide = ({
+  id,
+  name,
+  builtIn,
+  actor,
+  deleteService,
+  hadLocalChanges = true,
+  clearOwnership,
+  cleanup = [],
+}) => {
   const services = deleteService(id, actor);
   const stillListed = services.some((s) => s.id === id);
   if (!stillListed) {
@@ -93,6 +102,16 @@ export const removeServiceGuide = ({ id, name, builtIn, actor, deleteService, ha
         clearOwnership(id);
       } catch {
         /* the guide is already removed; a stale assignment is harmless and invisible */
+      }
+    }
+    const cleanups = Array.isArray(cleanup) ? cleanup : (typeof cleanup === 'function' ? [cleanup] : []);
+    for (const fn of cleanups) {
+      if (typeof fn === 'function') {
+        try {
+          fn(id);
+        } catch {
+          /* a failing cleanup callback must not undo or block the delete */
+        }
       }
     }
     return { outcome: 'removed', services };
