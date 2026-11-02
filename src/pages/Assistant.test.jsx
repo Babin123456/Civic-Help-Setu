@@ -34,4 +34,24 @@ describe('Assistant page, fresh chat', () => {
     expect(html).toContain('aria-busy="false"');
     expect(html).not.toContain('Consulting official civic rules');
   });
+
+  it('renders the civic question suggestion panel with fallback questions', () => {
+    expect(html).toContain('Suggested Questions');
+    expect(html).toContain('Which documents are usually needed for this service?');
+    expect(html).toContain('Where can I find the official application link?');
+  });
+
+  it('adapts starter questions when a service context is passed in the URL', () => {
+    const serviceHtml = renderToStaticMarkup(
+      <ToastProvider>
+        <MemoryRouter initialEntries={['/assistant?serviceId=birth-certificate']}>
+          <Assistant />
+        </MemoryRouter>
+      </ToastProvider>
+    );
+
+    expect(serviceHtml).toContain('Context tailored to Birth Certificate');
+    expect(serviceHtml).toContain('Which documents are usually needed for Birth Certificate?');
+    expect(serviceHtml).toContain('Where can I find the official application link for Birth Certificate?');
+  });
 });

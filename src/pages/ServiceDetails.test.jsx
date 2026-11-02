@@ -26,6 +26,8 @@ describe('ServiceDetails', () => {
     expect(html).toContain(service.name);
     expect(html).toContain('Report Access Barrier');
     expect(html).toContain('Print Visit Dossier');
+    expect(html).toContain('Make checklist');
+    expect(html).toContain('Preparation Plan');
   });
 
   it('says so when the guide does not exist', () => {
