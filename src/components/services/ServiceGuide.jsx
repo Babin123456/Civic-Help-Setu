@@ -4,6 +4,7 @@ import CopyServiceInstructions from './CopyServiceInstructions';
 import OfficialSourcesList from './OfficialSourcesList';
 import ContactDirectory from './ContactDirectory';
 import BottleneckFeedbackPrompt from '../feedback/BottleneckFeedbackPrompt';
+import NextStepGuide from './NextStepGuide';
 import { findJargonTerms } from '../../data/civicGlossary';
 import FormFieldExplainer from '../glossary/FormFieldExplainer';
 import RequirementNote from '../RequirementNote';
@@ -136,6 +137,8 @@ const ServiceGuide = ({ service, focusMode = false, onToggleFocusMode, onMakeChe
       <OfficialSourcesList service={service} />
 
       <ContactDirectory service={service} />
+
+      <NextStepGuide service={service} />
 
       <BottleneckFeedbackPrompt serviceId={service.id} serviceName={service.name} />
     </section>
