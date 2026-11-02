@@ -32,6 +32,7 @@ import InteractiveFeeEstimatorModal from '../components/services/InteractiveFeeE
 import ApplicationPreparationPlanModal from '../components/services/ApplicationPreparationPlanModal';
 import InlineStatusLegend from '../components/common/InlineStatusLegend';
 import DocumentTypeGuidanceModal from '../components/services/DocumentTypeGuidanceModal';
+import FeeWaiverEligibilityCard from '../components/services/FeeWaiverEligibilityCard';
 import ServiceSlaReliabilityCard from '../components/services/ServiceSlaReliabilityCard';
 
 const getSavedServices = () => {
@@ -673,6 +674,9 @@ const ServiceDetails = ({ previewService = null }) => {
             serviceId={service.id}
             serviceName={service.name}
           />
+
+          {/* Statutory Fee Waiver & Concession Eligibility Checker */}
+          <FeeWaiverEligibilityCard service={service} />
 
           {/* Statutory Welfare & Subsidy Benefit Estimator */}
           <BenefitEntitlementCalculator serviceId={service.id} serviceName={service.name} />
