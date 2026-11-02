@@ -143,6 +143,51 @@ Treat this as an incident, not only a bug.
 
 If you report a vulnerability responsibly and want to be named, we will credit you in the advisory. If you prefer not to be named, we will not name you.
 
+## Dependency vulnerability audit
+
+Dependency checks use **npm** (the project's package manager). The command is `npm audit`, which reads `package-lock.json` and reports known advisories from the npm registry.
+
+### What runs
+
+CI runs `npm audit` through `scripts/security/audit-report.mjs` (see `.github/workflows/security.yml`). Locally:
+
+```bash
+# what blocks on PRs: production dependencies only, fails on high or critical
+node scripts/security/audit-report.mjs --omit-dev --level high
+
+# everything including dev tooling, report only (warning, not blocking)
+node scripts/security/audit-report.mjs --level high --warn-only
+
+# plain npm output
+npm audit
+```
+
+`npm audit` needs no `npm install`; it reads `package-lock.json` directly.
+
+### Production vs. development dependencies
+
+Findings are split by scope:
+
+- **Production dependencies** (`dependencies` in `package.json`) ship to users. A high or critical finding here blocks the check and must be fixed before a release.
+- **Development dependencies** (`devDependencies`) only affect tooling (Vite, ESLint, Vitest). They are reported but do not block, because they are not shipped to users. Fix them promptly, but they do not expose runtime users to the vulnerability.
+
+To tell which scope a finding belongs to, check whether the package appears in `dependencies` or `devDependencies` in `package.json`, or follow the `via` chain in the audit output back to a direct dependency.
+
+### Triage path for high / critical findings
+
+1. **Do not run automatic breaking upgrades.** Never blindly run `npm install <pkg>@latest` or accept every `npm audit fix` suggestion. Major version bumps can introduce breaking changes; review them first.
+2. **Review the advisory.** Open the advisory URL listed in the output (or `https://github.com/advisories/<GHSA-id>`) to understand impact, affected versions and the patched version.
+3. **Check the fix path.** Run `npm audit fix` and inspect the `package-lock.json` diff. Accept minor/patch upgrades automatically; review major version bumps in their own PR and run `npm test` and `npm run build` afterwards.
+4. **Apply the smallest safe fix.** Prefer the patched version within the same major line (`^x.y.z`) unless the advisory requires a major jump.
+5. **Verify.** Re-run `npm audit`, `npm run lint`, `npm run build` and `npm test` to confirm nothing broke.
+6. **Document.** Record the decision (upgrade / pin / accepted risk) in the pull request so maintainers can review it. If no fix is published yet, open an issue with the advisory link to track it and mention it in the PR. There is no ignore list on purpose, so an accepted risk stays visible.
+
+If a finding does not apply to how this project uses the package, say why in the PR; maintainers decide whether to proceed.
+
+### Audit output does not reveal credentials
+
+`npm audit` emits only package metadata — names, versions, severity, advisory references and dependency paths. It does **not** emit registry URLs with embedded credentials, auth tokens, `.npmrc` contents, environment variables, or any other secrets. Before sharing audit output in an issue or PR, confirm you did not paste a `.npmrc` token or any auth value alongside it.
+
 ## Questions about this policy
 
 For anything that is not a vulnerability, open a normal issue. If you think this policy is unclear or missing something, a pull request that improves this file is welcome.
