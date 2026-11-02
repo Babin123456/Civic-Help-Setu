@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Shield, Menu, X, LogOut, User, Sun, Moon, WifiOff, Wifi, HardDrive, PhoneCall, Search } from 'lucide-react';
+import { Shield, Menu, X, LogOut, User, Sun, Moon, WifiOff, PhoneCall } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { can } from '../services/accessControl';
 import { useTheme } from '../context/ThemeContext';
@@ -50,25 +50,9 @@ const Navbar = () => {
           <span className="nav-brand__text" style={{ letterSpacing: '-0.02em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('nav.brand', 'CivicBridge')}</span>
         </Link>
 
-        {/* Desktop Nav */}
+        {/* Right side: Online status, SOS, Dark/Light toggle, and Hamburger */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <div className="desktop-links" style={{ display: 'none', alignItems: 'center', gap: '0.5rem'}}>
-          <Link to="/services" className="nav-link">{t('nav.services', 'Services')}</Link>
-          <Link to="/acronyms" className="nav-link">Acronyms</Link>
-          <Link to="/eligibility" className="nav-link">Eligibility</Link>
-          <Link to="/nearby" className="nav-link">{t('nav.nearby', 'Nearby Centers')}</Link>
-          <Link to="/track" className="nav-link">{t('nav.track', 'Track Status')}</Link>
-          <Link to="/assistant" className="nav-link">{t('nav.assistant', 'AI Assistant')}</Link>
-          {user && <Link to="/vault" className="nav-link">{t('nav.vault', 'Doc Vault')}</Link>}
-          <div style={{ width: '1px', height: '20px', background: 'var(--border-main)', margin: '0 0.5rem' }}></div>
-
-          <PlainLanguageToggle />
-          {isServiceDetail && <FocusModeNavToggle />}
-          <LanguageSwitcher />
-          </div>
-
-          {/* Offline Status Badge */}
-          <div className="tablet-tools" style={{ alignItems: 'center' }}>
+          {/* Online Status Badge */}
           <button
             type="button"
             onClick={() => setShowOfflineModal(true)}
@@ -118,27 +102,13 @@ const Navbar = () => {
               alignItems: 'center',
               gap: '0.35rem'
             }}
-            title="Rapid Emergency Helplines (112, 1930, 1091)"
+            title="Rapid Emergency Helplines"
           >
             <PhoneCall size={13} />
             <span>SOS</span>
           </button>
 
-          <VoiceSearchInput
-            onTranscript={(transcript) => {
-              navigate(`/services?q=${encodeURIComponent(transcript)}`);
-            }}
-            onServiceMatched={(match) => {
-              if (match.targetServiceId) {
-                navigate(`/services/${match.targetServiceId}`);
-              }
-            }}
-          />
-          </div>
-          <div className="nav-mobile-actions" style={{ display: 'inline-flex', alignItems: 'center' }}>
-            <LanguageSwitcher variant="mobile" />
-          </div>
-
+          {/* Dark / Light Toggle */}
           <button 
             type="button"
             onClick={toggleTheme} 
@@ -148,53 +118,6 @@ const Navbar = () => {
           >
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-
-          {!user ? (
-            <Link to="/login" className="btn btn-primary desktop-links" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', padding: '0.5rem 1.25rem', fontSize: '0.9rem', marginLeft: '0.5rem', textDecoration: 'none' }}>
-              {t('nav.signIn', 'Sign In')}
-            </Link>
-          ) : (
-            <div className="desktop-links" style={{ display: 'none', alignItems: 'center', gap: '0.75rem', marginLeft: '0.25rem' }}>
-              {can('users.read', user) && (
-                <Link to="/admin" className="nav-link" style={{ color: 'var(--accent-main)', fontWeight: '600' }}>
-                  {t('nav.admin', 'Admin Portal')}
-                </Link>
-              )}
-
-              <Link
-                to="/profile"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.3rem 0.85rem', background: 'var(--glass-bg)', borderRadius: '99px', border: '1px solid var(--border-light)', fontSize: '0.875rem', transition: 'border-color 0.2s', textDecoration: 'none' }}
-                onMouseOver={e => e.currentTarget.style.borderColor = 'var(--accent-main)'}
-                onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border-light)'}
-              >
-                {user.imageUrl ? (
-                  <img
-                    src={user.imageUrl}
-                    alt={user.username}
-                    style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover' }}
-                  />
-                ) : (
-                  <User size={14} color="var(--accent-main)" />
-                )}
-                <span style={{ color: 'var(--text-primary)', fontWeight: '600', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {user.username}
-                </span>
-                <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.45rem', borderRadius: '99px', background: user.role === 'admin' ? 'rgba(56, 189, 248, 0.2)' : 'rgba(52, 211, 153, 0.15)', color: user.role === 'admin' ? 'var(--accent-main)' : 'var(--success)' }}>
-                  {user.role === 'admin' ? t('common.admin', 'Admin') : t('common.citizen', 'Citizen')}
-                </span>
-              </Link>
-
-              <button
-                onClick={handleLogout}
-                style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.5rem', background: 'transparent', border: 'none', transition: 'color 0.2s' }}
-                title={t('nav.signOut', 'Sign Out')}
-                onMouseOver={(e) => e.currentTarget.style.color = 'var(--error)'}
-                onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
-              >
-                <LogOut size={20} />
-              </button>
-            </div>
-          )}
 
           {/* Hamburger Menu Toggle (Always Visible) */}
           <button 
@@ -208,7 +131,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu / Drawer Dropdown */}
+      {/* Menu Drawer Dropdown */}
       {isOpen && (
         <div className="mobile-drawer-dropdown" style={{ background: 'var(--bg-secondary)', padding: '1.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1rem', borderTop: '1px solid var(--border-main)', maxHeight: 'calc(100vh - 5rem)', overflowY: 'auto', width: '100%', maxWidth: '450px', marginLeft: 'auto' }}>
           {user && (
@@ -225,102 +148,34 @@ const Navbar = () => {
             </div>
           )}
 
-          {/* Mobile Utilities Section */}
-          <div className="mobile-only-tools" style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', width: '100%' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.4rem', alignItems: 'center' }}>
-              <button
-                type="button"
-                onClick={() => { setShowSosModal(true); setIsOpen(false); }}
-                style={{
-                  padding: '0.4rem 0.5rem',
-                  borderRadius: '99px',
-                  border: '1px solid #ef4444',
-                  background: 'rgba(239, 68, 68, 0.12)',
-                  color: '#ef4444',
-                  fontSize: '0.75rem',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.3rem',
-                }}
-              >
-                <PhoneCall size={13} />
-                <span>SOS</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => { setShowOfflineModal(true); setIsOpen(false); }}
-                style={{
-                  padding: '0.4rem 0.5rem',
-                  borderRadius: '99px',
-                  border: `1px solid ${isOnline ? 'var(--border-main)' : 'rgba(239, 68, 68, 0.35)'}`,
-                  background: isOnline ? 'var(--glass-bg)' : 'rgba(239, 68, 68, 0.15)',
-                  color: isOnline ? 'var(--text-secondary)' : '#ef4444',
-                  fontSize: '0.8rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.3rem'
-                }}
-              >
-                {isOnline ? (
-                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
-                ) : (
-                  <WifiOff size={13} style={{ color: '#ef4444' }} />
-                )}
-                <span>{isOnline ? 'Online' : 'Offline'}</span>
-              </button>
-              <button 
-                type="button"
-                onClick={toggleTheme} 
-                style={{ 
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  gap: '0.3rem', 
-                  padding: '0.4rem 0.7rem', 
-                  background: 'var(--glass-bg)', 
-                  border: '1px solid var(--border-main)', 
-                  borderRadius: '99px', 
-                  color: 'var(--text-primary)', 
-                  cursor: 'pointer', 
-                  fontSize: '0.75rem', 
-                  fontWeight: '600',
-                  whiteSpace: 'nowrap'
-                }} 
-                title="Toggle Theme">
-                {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
-                <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
-              </button>
-              <div style={{ width: '100%', minWidth: 0 }}>
-                <VoiceSearchInput
-                  onTranscript={(transcript) => {
-                    setIsOpen(false);
-                    navigate(`/services?q=${encodeURIComponent(transcript)}`);
-                  }}
-                  onServiceMatched={(match) => {
-                    if (match.targetServiceId) {
-                      setIsOpen(false);
-                      navigate(`/services/${match.targetServiceId}`);
-                    }
-                  }}
-                />
-              </div>
+          {/* Search & Language Controls Inside Drawer */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%' }}>
+            <VoiceSearchInput
+              onTranscript={(transcript) => {
+                setIsOpen(false);
+                navigate(`/services?q=${encodeURIComponent(transcript)}`);
+              }}
+              onServiceMatched={(match) => {
+                if (match.targetServiceId) {
+                  setIsOpen(false);
+                  navigate(`/services/${match.targetServiceId}`);
+                }
+              }}
+            />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Language</span>
+              <LanguageSwitcher variant="mobile" />
             </div>
           </div>
 
-          <div className="drawer-accessibility-panel" style={{flexDirection: 'column', gap: '0.5rem', width: '100%', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-main)' }}>
+          <div className="drawer-accessibility-panel" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-main)' }}>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', width: '100%' }}>
               <PlainLanguageToggle />
               {isServiceDetail && <FocusModeNavToggle />}
             </div>
           </div>
 
-          <div className="mobile-only-links" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <Link to="/services" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>{t('nav.services', 'Services')}</Link>
             <Link to="/acronyms" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>Acronyms</Link>
             <Link to="/eligibility" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>Eligibility Checker</Link>
@@ -340,30 +195,6 @@ const Navbar = () => {
           )}
         </div>
       )}
-
-      <style>{`
-        .tablet-tools { display: none !important; }
-        .desktop-links { display: none !important; }
-        .mobile-only-tools { display: flex !important; }
-        .mobile-only-links { display: flex !important; }
-        .top-navbar-theme-btn { display: inline-flex !important; }
-        .hamburger-toggle-btn { display: flex !important; }
-
-        @media (max-width: 767px) {
-          .top-navbar-theme-btn { display: none !important; }
-        }
-        /* Tablet Viewport (768px to 1439px) */
-        @media (min-width: 768px) {
-          .tablet-tools { display: flex !important; gap: 0.5rem !important; align-items: center; }
-          .mobile-only-tools { display: none !important; }
-        }
-        /* Desktop Viewport (1440px and above) */
-        @media (min-width: 1440px) {
-          .tablet-tools { display: flex !important; gap: 0.5rem !important; align-items: center; }
-          .desktop-links { display: flex !important; gap: 0.5rem !important; align-items: center; }
-          .mobile-only-tools { display: none !important; }
-        }
-      `}</style>
 
       {/* Offline Cache Status Modal */}
       <OfflineCacheStatusModal
