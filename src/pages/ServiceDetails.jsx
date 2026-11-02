@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { AlertOctagon, ArrowLeft, Bookmark, Calculator, Check, Link2, Printer, Share2, Zap, Users, Eye, CheckSquare, FileText } from 'lucide-react';
+import { AlertOctagon, ArrowLeft, Bookmark, Calculator, Check, Link2, Printer, Share2, Zap, Users, Eye, CheckSquare, FileText, Sparkles, RotateCcw, Edit2 } from 'lucide-react';
 import { getServiceById } from '../services/serviceCatalog';
 import RetiredServiceNotice from '../components/common/RetiredServiceNotice';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +8,9 @@ import { useToast } from '../context/ToastContext';
 import UntranslatedBadge from '../components/common/UntranslatedBadge';
 import { useFocusMode } from '../hooks/useFocusMode';
 import ServiceGuide from '../components/services/ServiceGuide';
+import Checklist from '../components/Checklist';
+import MakeChecklistModal from '../components/services/MakeChecklistModal';
+import { readServiceChecklist, clearServiceChecklist } from '../services/makeChecklistService';
 import DataFreshnessTrustBadge from '../components/services/DataFreshnessTrustBadge';
 import JourneyHandoffModal from '../components/journey/JourneyHandoffModal';
 import NoticeBadge from '../components/notices/NoticeBadge';
@@ -86,21 +89,16 @@ const ServiceDetails = ({ previewService = null }) => {
   const [readerStyle, setReaderStyle] = useState(() => computeReaderStyle(getReaderPreferences()));
   const [showFeeEstimatorModal, setShowFeeEstimatorModal] = useState(false);
   const [showDocGuidanceModal, setShowDocGuidanceModal] = useState(false);
-  const [service, setService] = useState(() => previewService ?? getServiceById(id));
+  const [showPrepPlanModal, setShowPrepPlanModal] = useState(false);
+  const [showMakeChecklistModal, setShowMakeChecklistModal] = useState(false);
+  const service = previewService ?? getServiceById(id);
+  const [, setSavedTick] = useState(0);
+  const [customChecklistState, setCustomChecklistState] = useState(null);
+  const customChecklist = customChecklistState === false
+    ? null
+    : (customChecklistState ?? readServiceChecklist(id));
 
-  const [isSaved, setIsSaved] = useState(() =>
-    getSavedServices().some((savedService) => savedService.id === id)
-  );
-
-  useEffect(() => {
-    setService(previewService ?? getServiceById(id));
-
-    const savedServices = getSavedServices();
-
-    setIsSaved(
-      savedServices.some((savedService) => savedService.id === id)
-    );
-  }, [id, previewService]);
+  const isSaved = Boolean(service && getSavedServices().some((s) => s.id === service.id));
 
   useEffect(() => {
     if (!linkCopied) return undefined;
@@ -153,7 +151,7 @@ const ServiceDetails = ({ previewService = null }) => {
         JSON.stringify(updatedServices)
       );
 
-      setIsSaved(!alreadySaved);
+      setSavedTick((t) => t + 1);
 
       toast.success(
         alreadySaved
@@ -553,6 +551,43 @@ const ServiceDetails = ({ previewService = null }) => {
                 <FileText size={16} />
                 <span>Document Guidance</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => setShowMakeChecklistModal(true)}
+                className="btn btn-secondary"
+                style={{
+                  padding: '0.6rem 1rem',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                  backgroundColor: 'rgba(56, 189, 248, 0.08)',
+                  borderColor: 'rgba(56, 189, 248, 0.3)',
+                  color: 'var(--accent-main)',
+                }}
+              >
+                <Sparkles size={16} />
+                <span>Make checklist</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowPrepPlanModal(true)}
+                className="btn btn-secondary"
+                style={{
+                  padding: '0.6rem 1rem',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                }}
+              >
+                <CheckSquare size={16} />
+                <span>Preparation Plan</span>
+              </button>
             </div>
           </div>
 
@@ -658,8 +693,80 @@ const ServiceDetails = ({ previewService = null }) => {
               service={service}
               focusMode={focusMode}
               onToggleFocusMode={toggleFocusMode}
+              onMakeChecklist={() => setShowMakeChecklistModal(true)}
             />
           </div>
+
+          {/* Structured Application Checklist (#existing Checklist UI) */}
+          {customChecklist && (
+            <section
+              className="card"
+              style={{ padding: '1.25rem', marginTop: '1.5rem' }}
+              aria-labelledby="service-checklist-title"
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '0.75rem',
+                  marginBottom: '1rem',
+                }}
+              >
+                <div>
+                  <h3 id="service-checklist-title" style={{ margin: 0, fontSize: '1.1rem' }}>
+                    Application Document Checklist
+                  </h3>
+                  <small style={{ color: 'var(--text-secondary)' }}>
+                    Structured from service catalogue requirements
+                  </small>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowMakeChecklistModal(true)}
+                    style={{
+                      fontSize: '0.82rem',
+                      padding: '0.35rem 0.75rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                    }}
+                  >
+                    <Edit2 size={14} /> Edit checklist
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      clearServiceChecklist(service.id);
+                      setCustomChecklistState(false);
+                    }}
+                    style={{
+                      fontSize: '0.82rem',
+                      padding: '0.35rem 0.75rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                    }}
+                  >
+                    <RotateCcw size={14} /> Reset
+                  </button>
+                </div>
+              </div>
+
+              <Checklist
+                key={service.id}
+                checklistId={`service_${service.id}`}
+                items={customChecklist.items}
+                requirements={customChecklist.requirements}
+                label={`Application checklist for ${service.name}`}
+              />
+            </section>
+          )}
 
           <div style={{ margin: '1rem 0 0.5rem', display: 'flex', justifyContent: 'flex-end' }}>
             <button
@@ -797,6 +904,19 @@ const ServiceDetails = ({ previewService = null }) => {
       <DocumentTypeGuidanceModal
         isOpen={showDocGuidanceModal}
         onClose={() => setShowDocGuidanceModal(false)}
+        service={service}
+      />
+
+      <MakeChecklistModal
+        isOpen={showMakeChecklistModal}
+        onClose={() => setShowMakeChecklistModal(false)}
+        service={service}
+        onSaveChecklist={(saved) => setCustomChecklistState(saved)}
+      />
+
+      <ApplicationPreparationPlanModal
+        isOpen={showPrepPlanModal}
+        onClose={() => setShowPrepPlanModal(false)}
         service={service}
       />
     </div>
