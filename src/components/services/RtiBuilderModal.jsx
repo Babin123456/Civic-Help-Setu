@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { X, Scale, FileText, Check, Plus, Trash2, HelpCircle } from 'lucide-react';
+import { X, Scale, FileText, Check, Plus, Trash2, HelpCircle, Sparkles } from 'lucide-react';
+import RtiDraftReviewerModal from './RtiDraftReviewerModal';
 import { useModalKeyboard } from '../../hooks/useModalKeyboard';
 import { RTI_DEPARTMENT_DIRECTORY } from '../../data/rtiDepartmentDirectory';
 import { buildRtiApplication } from '../../services/rtiDraftingEngine';
@@ -17,6 +18,7 @@ export default function RtiBuilderModal({ isOpen, onClose }) {
   const [isBpl, setIsBpl] = useState(false);
   const [bplCardNumber, setBplCardNumber] = useState('');
   const [questions, setQuestions] = useState([selectedDept.commonQueries[0] || '']);
+  const [isReviewerOpen, setIsReviewerOpen] = useState(false);
 
   if (!isOpen) return null;
 
@@ -187,14 +189,24 @@ export default function RtiBuilderModal({ isOpen, onClose }) {
             <label style={{ fontSize: '0.82rem', fontWeight: 600 }}>
               Specific Information Required (Point-wise under Section 6(1))
             </label>
-            <button
-              type="button"
-              onClick={handleAddQuestion}
-              style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
-            >
-              <Plus size={12} />
-              <span>Add Query</span>
-            </button>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button
+                type="button"
+                onClick={() => setIsReviewerOpen(true)}
+                style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #3b82f6', background: '#eff6ff', color: '#1d4ed8', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}
+              >
+                <Sparkles size={12} />
+                <span>AI Clarity Review</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleAddQuestion}
+                style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px' }}
+              >
+                <Plus size={12} />
+                <span>Add Query</span>
+              </button>
+            </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -225,6 +237,17 @@ export default function RtiBuilderModal({ isOpen, onClose }) {
         </div>
 
         {/* Generated Preview */}
+        <RtiDraftReviewerModal
+          isOpen={isReviewerOpen}
+          onClose={() => setIsReviewerOpen(false)}
+          initialQuestions={questions}
+          defaultAuthority={selectedDept.nodalAuthority}
+          onAdoptRewording={(suggested) => {
+            setQuestions([suggested]);
+            setIsReviewerOpen(false);
+          }}
+        />
+
         <RtiPreviewLetter rtiResult={rtiResult} />
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
