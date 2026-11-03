@@ -38,6 +38,7 @@ import Privacy from './pages/Privacy';
 import Admin from './pages/Admin';
 import SharedChecklistView from './pages/SharedChecklistView';
 import NotFound from './pages/NotFound';
+import VerifyEmail from './pages/VerifyEmail';
 
 const Services = lazy(() => import('./pages/Services'));
 
@@ -73,6 +74,7 @@ function AppRoot() {
                       <Route path="/signup" element={<SignUpPage />} />
                       <Route path="/sso-callback" element={<SSOCallback />} />
                       <Route path="/signup/sso-callback" element={<SSOCallback />} />
+                      <Route path="/verify-email" element={<VerifyEmail />} />
                       <Route path="/assistant" element={<Assistant />} />
                       <Route path="/services" element={<Suspense fallback={<ServicesFallback />}><Services /></Suspense>} />
                       <Route path="/services/:id" element={<ServiceDetails />} />
