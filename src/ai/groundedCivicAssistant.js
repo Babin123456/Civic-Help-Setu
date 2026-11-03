@@ -73,7 +73,6 @@ export async function askGroundedCivicAssistant(query, options = {}) {
   const service = getActiveBuiltInServices().find((s) => s.id === topChunk.serviceId) || null;
 
   // Synthesize answer text grounded exclusively in retrieved chunks
-  const chunkContents = retrieval.retrievedChunks.map((c) => c.content);
   const primarySummary = retrieval.retrievedChunks
     .map((c) => `[${c.sectionTitle}]: ${c.content}`)
     .join('\n\n');
