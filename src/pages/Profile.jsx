@@ -3,7 +3,7 @@ import {
   User, Mail, Phone, MapPin, Briefcase, Edit3, Check, X,
   Camera, ShieldCheck, LogOut, Star, FileText, BookMarked,
   ChevronRight, Loader2, AlertCircle, ExternalLink, Download,
-  Bell, Shield, CheckCircle, RotateCcw, Send, Lock,
+  Bell, Shield, CheckCircle, RotateCcw, Send, Lock, Share2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
@@ -13,6 +13,7 @@ import DataPortabilityModal from '../components/profile/DataPortabilityModal';
 import CivicEntitlementReadinessCard from '../components/profile/CivicEntitlementReadinessCard';
 import VoluntaryProfileRecommendationPanel from '../components/profile/VoluntaryProfileRecommendationPanel';
 import NotificationPreferenceCenter from '../components/profile/NotificationPreferenceCenter';
+import ShareableProfileModal from '../components/profile/ShareableProfileModal';
 import { isEmailVerified } from '../services/emailVerificationService';
 
 /* ─────────────────────────── helpers ─────────────────────────── */
@@ -93,6 +94,7 @@ const Profile = () => {
   // Bumped after "Clear my data" so counts read from localStorage (Saved Guides) refresh
   const [, setDataVersion] = useState(0);
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const [form, setForm] = useState({
     firstName: clerkUser?.firstName || '',
@@ -323,13 +325,23 @@ const Profile = () => {
               </span>
             )}
             {!editing ? (
-              <button
-                onClick={() => setEditing(true)}
-                className="btn btn-secondary"
-                style={{ padding: '0.6rem 1.25rem', fontSize: '0.9rem' }}
-              >
-                <Edit3 size={16} /> Edit Profile
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setShareModalOpen(true)}
+                  className="btn btn-secondary"
+                  style={{ padding: '0.6rem 1.1rem', fontSize: '0.9rem' }}
+                >
+                  <Share2 size={16} /> Share Profile
+                </button>
+                <button
+                  onClick={() => setEditing(true)}
+                  className="btn btn-secondary"
+                  style={{ padding: '0.6rem 1.25rem', fontSize: '0.9rem' }}
+                >
+                  <Edit3 size={16} /> Edit Profile
+                </button>
+              </div>
             ) : (
               <>
                 <button
@@ -721,6 +733,20 @@ const Profile = () => {
               isOpen={exportModalOpen}
               onClose={() => setExportModalOpen(false)}
               currentUser={user}
+            />
+
+            <ShareableProfileModal
+              isOpen={shareModalOpen}
+              onClose={() => setShareModalOpen(false)}
+              currentUser={user}
+              profileData={{
+                fullName: `${form.firstName} ${form.lastName}`.trim() || user?.username,
+                state: form.state,
+                district: form.city,
+                occupation: form.occupation,
+                savedServices: [],
+                applications: [],
+              }}
             />
 
             <NotificationPreferenceCenter
