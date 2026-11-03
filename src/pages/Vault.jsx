@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
   FileBadge, ShieldCheck, Upload, CreditCard, Car, FileText,
-  Plus, Search, Eye, AlertTriangle, Layers, Download, Tag, Stamp, Calendar
+  Plus, Search, Eye, AlertTriangle, Layers, Download, Tag, Stamp, Calendar, Camera
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../context/ConfirmationDialogContext';
@@ -24,6 +24,7 @@ import DocumentPreflightChecker from '../components/vault/DocumentPreflightCheck
 import InactivityLockModal from '../components/vault/InactivityLockModal';
 import WatermarkAttestationModal from '../components/vault/WatermarkAttestationModal';
 import DocumentRenewalDigestModal from '../components/vault/DocumentRenewalDigestModal';
+import DocumentQualityOcrInspectorModal from '../components/vault/DocumentQualityOcrInspectorModal';
 import { Lock, Unlock, ShieldAlert } from 'lucide-react';
 import {
   startInactivityTracker,
@@ -66,6 +67,7 @@ const Vault = () => {
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isRenewalDigestOpen, setIsRenewalDigestOpen] = useState(false);
+  const [isOcrInspectorOpen, setIsOcrInspectorOpen] = useState(false);
   const [taggingDoc, setTaggingDoc] = useState(null);
   const [watermarkDoc, setWatermarkDoc] = useState(null);
   const [expiringDocs, setExpiringDocs] = useState(() => getExpiringDocuments());
@@ -214,6 +216,16 @@ const Vault = () => {
             >
               <Calendar size={17} />
               <span>Renewal Digest</span>
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setIsOcrInspectorOpen(true)}
+              aria-label="Consent-Based Document Quality & OCR Check"
+              style={{ padding: '0.75rem 1.15rem', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <Camera size={17} />
+              <span>OCR Quality Check</span>
             </button>
             <button
               type="button"
@@ -678,6 +690,13 @@ const Vault = () => {
           onClose={() => setTaggingDoc(null)}
           document={taggingDoc}
           onUpdated={refreshVault}
+        />
+
+        {/* Consent-Based Document Quality & OCR Inspector Modal */}
+        <DocumentQualityOcrInspectorModal
+          isOpen={isOcrInspectorOpen}
+          onClose={() => setIsOcrInspectorOpen(false)}
+          documents={documents}
         />
 
         {/* Document Renewal Digest & Expiry Alerts Modal */}
