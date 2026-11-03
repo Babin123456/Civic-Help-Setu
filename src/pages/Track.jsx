@@ -48,6 +48,7 @@ import ApplicationMilestoneTracker from '../components/tracking/ApplicationMiles
 import StatutoryCompensationClaimModal from '../components/tracking/StatutoryCompensationClaimModal';
 import { calculateStatutoryCompensation } from '../services/statutoryCompensationService';
 import DeficiencyCureModal from '../components/tracking/DeficiencyCureModal';
+import RejectionNoticeExplainerModal from '../components/tracking/RejectionNoticeExplainerModal';
 import InlineStatusLegend from '../components/common/InlineStatusLegend';
 
 const Track = () => {
@@ -69,6 +70,7 @@ const Track = () => {
   const [isGrievanceDraftModalOpen, setIsGrievanceDraftModalOpen] = useState(false);
   const [isCompensationModalOpen, setIsCompensationModalOpen] = useState(false);
   const [isCureModalOpen, setIsCureModalOpen] = useState(false);
+  const [isExplainerModalOpen, setIsExplainerModalOpen] = useState(false);
 
   useEffect(() => {
     const freshApps = getApplications();
@@ -272,6 +274,21 @@ const Track = () => {
                           <Scale size={16} /> Claim Delay Compensation
                         </button>
                       )}
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => setIsExplainerModalOpen(true)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                          color: '#b45309',
+                          borderColor: '#fcd34d',
+                          backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                        }}
+                      >
+                        <FileText size={16} /> Explain Rejection / Notice
+                      </button>
                       <button type="button" className="btn btn-secondary" onClick={handleCopyId}>
                         <Copy size={16} /> Copy ID
                       </button>
@@ -435,6 +452,13 @@ const Track = () => {
         isOpen={isCureModalOpen}
         onClose={() => setIsCureModalOpen(false)}
         citizenName={activeApp?.applicantName || 'Citizen Applicant'}
+      />
+
+      <RejectionNoticeExplainerModal
+        isOpen={isExplainerModalOpen}
+        onClose={() => setIsExplainerModalOpen(false)}
+        application={activeApp}
+        initialNotice={activeApp?.rejectionReason || activeApp?.pendingAction?.description || ''}
       />
     </section>
   );
