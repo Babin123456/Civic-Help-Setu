@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { AlertOctagon, ArrowLeft, Bookmark, Calculator, Check, Link2, Printer, Share2, Zap, Users, Eye, CheckSquare, FileText, Sparkles, RotateCcw, Edit2 } from 'lucide-react';
+import { AlertOctagon, ArrowLeft, Bookmark, Calculator, Check, Link2, Printer, Share2, Zap, Users, Eye, CheckSquare, FileText, Sparkles, RotateCcw, Edit2, ShieldCheck } from 'lucide-react';
 import { getServiceById } from '../services/serviceCatalog';
 import RetiredServiceNotice from '../components/common/RetiredServiceNotice';
 import ServiceQrHandout from '../components/services/ServiceQrHandout';
@@ -33,6 +33,7 @@ import InteractiveFeeEstimatorModal from '../components/services/InteractiveFeeE
 import ApplicationPreparationPlanModal from '../components/services/ApplicationPreparationPlanModal';
 import InlineStatusLegend from '../components/common/InlineStatusLegend';
 import DocumentTypeGuidanceModal from '../components/services/DocumentTypeGuidanceModal';
+import ApplicationReadinessCheckerModal from '../components/services/ApplicationReadinessCheckerModal';
 import FeeWaiverEligibilityCard from '../components/services/FeeWaiverEligibilityCard';
 import ServiceSlaReliabilityCard from '../components/services/ServiceSlaReliabilityCard';
 
@@ -94,6 +95,7 @@ const ServiceDetails = ({ previewService = null }) => {
   const [showDocGuidanceModal, setShowDocGuidanceModal] = useState(false);
   const [showPrepPlanModal, setShowPrepPlanModal] = useState(false);
   const [showMakeChecklistModal, setShowMakeChecklistModal] = useState(false);
+  const [showReadinessCheckerModal, setShowReadinessCheckerModal] = useState(false);
   const service = previewService ?? getServiceById(id);
   const [, setSavedTick] = useState(0);
   const [customChecklistState, setCustomChecklistState] = useState(null);
@@ -592,6 +594,26 @@ const ServiceDetails = ({ previewService = null }) => {
                 <CheckSquare size={16} />
                 <span>Preparation Plan</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => setShowReadinessCheckerModal(true)}
+                className="btn btn-secondary"
+                style={{
+                  padding: '0.6rem 1rem',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                  backgroundColor: 'rgba(14, 165, 233, 0.08)',
+                  borderColor: 'rgba(14, 165, 233, 0.3)',
+                  color: '#0284c7',
+                }}
+              >
+                <ShieldCheck size={16} />
+                <span>AI Readiness Checker</span>
+              </button>
             </div>
           </div>
 
@@ -927,6 +949,12 @@ const ServiceDetails = ({ previewService = null }) => {
       <ApplicationPreparationPlanModal
         isOpen={showPrepPlanModal}
         onClose={() => setShowPrepPlanModal(false)}
+        service={service}
+      />
+
+      <ApplicationReadinessCheckerModal
+        isOpen={showReadinessCheckerModal}
+        onClose={() => setShowReadinessCheckerModal(false)}
         service={service}
       />
     </div>
