@@ -63,6 +63,10 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civic_grievance_tickets` | `grievanceService.js` | Grievance tickets raised from the app | Tracking records |
 | `civicbridge_reminders` | `reminderNotificationService.js` | Renewal, submission and document expiry reminders | Tracking records |
 | `civicbridge_notification_settings` | `reminderNotificationService.js` | Reminder lead time settings | Tracking records |
+| `civicbridge_email_verification_pending` | `emailVerificationService.js` | Pending email verification tokens (single-use, 24h expiry) | Account security |
+| `civicbridge_verified_emails` | `emailVerificationService.js` | List of verified email addresses | Account security |
+| `civicbridge_email_resend_attempts` | `emailVerificationService.js` | Rate limiting state for resend attempts | Account security |
+| `civicbridge_notification_preferences` | `notificationPreferenceService.js` | User email notification preferences (optional categories) | Account security |
 | `civicbridge_saved_rich` | `savedStorage.js` | Saved guides with folder and note | Saved items |
 | `civicbridge_saved` | `savedStorage.js`, `ServiceDetails.jsx` | Older list of saved guide ids, kept in step with the one above | Saved items |
 | `civic_compared_services` | `comparisonService.js` | Services picked for comparison | Saved items |

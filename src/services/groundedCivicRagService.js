@@ -266,8 +266,8 @@ export const queryCivicKnowledge = (query, services = []) => {
   }));
 
   // Determine confidence & support status
-  let status = 'SUPPORTED';
-  let confidenceLevel = RAG_CONFIDENCE_LEVELS.HIGH;
+  let status;
+  let confidenceLevel;
 
   if (topScore >= 0.55) {
     status = 'SUPPORTED';
@@ -278,7 +278,7 @@ export const queryCivicKnowledge = (query, services = []) => {
   }
 
   // Synthesize grounded answer
-  let answerText = '';
+  let answerText;
 
   if (status === 'SUPPORTED') {
     answerText = `Based on verified records for "${primaryChunk.serviceTitle}" (${primaryChunk.fieldLabel}):\n\n${primaryChunk.text}`;
