@@ -1,30 +1,6 @@
-/* global process */
-import { bearerToken } from '../_lib/firebaseToken.js';
 import { createRateLimiter } from '../_lib/abuseGuard.js';
-import { verifyToken as verifyClerkToken, createClerkClient } from '@clerk/backend';
 
 const emailSendRateLimiter = createRateLimiter({ limit: 20, windowMs: 60 * 1000 });
-
-let clerkClient;
-
-async function getClerkClient() {
-  if (!clerkClient && process.env.CLERK_SECRET_KEY) {
-    clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
-  }
-  return clerkClient;
-}
-
-async function getUserIdFromSession(sessionToken) {
-  if (!sessionToken) return null;
-  try {
-    const clerk = await getClerkClient();
-    if (!clerk) return null;
-    const claims = await verifyClerkToken(sessionToken, { secretKey: process.env.CLERK_SECRET_KEY });
-    return claims.sub;
-  } catch {
-    return null;
-  }
-}
 
 const json = (status, body, extra = {}) => ({
   status,
