@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Shield, Menu, X, LogOut, User, Sun, Moon, WifiOff, PhoneCall } from 'lucide-react';
+import { Shield, Menu, X, LogOut, User, Sun, Moon, WifiOff, PhoneCall, Mic } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { can } from '../services/accessControl';
 import { useTheme } from '../context/ThemeContext';
@@ -12,11 +12,13 @@ import FocusModeNavToggle from './common/FocusModeNavToggle';
 import OfflineCacheStatusModal from './common/OfflineCacheStatusModal';
 import EmergencyHelplineModal from './emergency/EmergencyHelplineModal';
 import VoiceSearchInput from './common/VoiceSearchInput';
+import MultilingualVoiceNavigationModal from './navigation/MultilingualVoiceNavigationModal';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showOfflineModal, setShowOfflineModal] = useState(false);
   const [showSosModal, setShowSosModal] = useState(false);
+  const [showVoiceNavModal, setShowVoiceNavModal] = useState(false);
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { t } = useLanguage();
@@ -106,6 +108,28 @@ const Navbar = () => {
           >
             <PhoneCall size={13} />
             <span>SOS</span>
+          </button>
+
+          {/* Multilingual Voice Navigation Button */}
+          <button
+            type="button"
+            onClick={() => setShowVoiceNavModal(true)}
+            className="top-navbar-theme-btn"
+            style={{
+              padding: '0.4rem',
+              background: 'rgba(14, 165, 233, 0.1)',
+              borderRadius: '50%',
+              color: '#0284c7',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            title="Multilingual Voice Navigation"
+            aria-label="Multilingual Voice Navigation"
+          >
+            <Mic size={18} />
           </button>
 
           {/* Dark / Light Toggle */}
@@ -200,6 +224,12 @@ const Navbar = () => {
       <OfflineCacheStatusModal
         isOpen={showOfflineModal}
         onClose={() => setShowOfflineModal(false)}
+      />
+
+      {/* Multilingual Voice Navigation Modal */}
+      <MultilingualVoiceNavigationModal
+        isOpen={showVoiceNavModal}
+        onClose={() => setShowVoiceNavModal(false)}
       />
 
       {/* 24x7 Emergency SOS Modal */}
