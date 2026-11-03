@@ -122,7 +122,7 @@ export function retrieveGroundedChunks(query, options = {}) {
 
   // Sort candidate chunks by descending score
   const rankedChunkEntries = Array.from(scores.entries())
-    .filter(([_, score]) => score > 0)
+    .filter(([, score]) => score > 0)
     .sort((a, b) => b[1] - a[1]);
 
   if (rankedChunkEntries.length === 0) {

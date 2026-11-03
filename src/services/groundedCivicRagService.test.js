@@ -1,9 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
-  tokenize,
   isApprovedService,
   createServiceChunks,
-  retrieveKnowledge,
   queryCivicKnowledge,
   RAG_CONFIDENCE_LEVELS,
 } from './groundedCivicRagService';
@@ -115,6 +113,32 @@ describe('groundedCivicRagService (#400)', () => {
 
       // Draft service was excluded from index, so result must be unsupported or not cite the draft
       expect(result.citations.some((c) => c.serviceId === 'draft-pension-yojana')).toBe(false);
+    });
+
+    it('handles an approved service with no official URL without crashing', () => {
+      const serviceWithoutUrl = {
+        id: 'local-veterinary-camp',
+        title: 'Local Veterinary Camp',
+        department: 'Animal Husbandry',
+        description: 'Free vaccination and health check camp for livestock.',
+        eligibility: ['Livestock owners in the district'],
+        documents: ['Aadhaar card', 'Land holding proof'],
+        process: ['Visit the nearest veterinary hospital'],
+        fees: 'Free of Cost',
+        archived: false,
+        status: 'approved',
+      };
+
+      const result = queryCivicKnowledge(
+        'veterinary camp livestock vaccination',
+        [serviceWithoutUrl],
+      );
+
+      expect(result.status).toBe('SUPPORTED');
+      expect(result.citations.length).toBeGreaterThan(0);
+      expect(result.citations[0].serviceId).toBe('local-veterinary-camp');
+      expect(result.citations[0].officialUrl).toBeNull();
+      expect(result.answer).toContain('Local Veterinary Camp');
     });
   });
 });
