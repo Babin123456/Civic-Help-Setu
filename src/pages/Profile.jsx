@@ -10,6 +10,7 @@ import { describeProviderError, logProviderError } from '../utils/providerError'
 import ClearMyDataPanel from '../components/privacy/ClearMyDataPanel';
 import DataPortabilityModal from '../components/profile/DataPortabilityModal';
 import CivicEntitlementReadinessCard from '../components/profile/CivicEntitlementReadinessCard';
+import VoluntaryProfileRecommendationPanel from '../components/profile/VoluntaryProfileRecommendationPanel';
 
 /* ─────────────────────────── helpers ─────────────────────────── */
 const Field = ({ icon: Icon, label, value, placeholder, editing, name, onChange, type = 'text' }) => (
@@ -533,6 +534,8 @@ const Profile = () => {
                 </button>
               </div>
             </div>
+
+            <VoluntaryProfileRecommendationPanel onUpdate={() => setDataVersion((v) => v + 1)} />
 
             <ClearMyDataPanel onCleared={() => setDataVersion((v) => v + 1)} />
 
