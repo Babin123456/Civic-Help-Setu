@@ -26,6 +26,7 @@ export const ROUTE_PATTERNS = [
   '/signup',
   '/signup/sso-callback',
   '/sso-callback',
+  '/verify-email',
   '/assistant',
   '/services',
   '/services/:id',
