@@ -38,6 +38,7 @@ import Privacy from './pages/Privacy';
 import Admin from './pages/Admin';
 import SharedChecklistView from './pages/SharedChecklistView';
 import PublicApplicationStatusView from './pages/PublicApplicationStatusView';
+import SharedProfileView from './pages/SharedProfileView';
 import NotFound from './pages/NotFound';
 import VerifyEmail from './pages/VerifyEmail';
 
@@ -86,6 +87,7 @@ function AppRoot() {
                       <Route path="/track" element={<Track />} />
                       <Route path="/shared-checklist/:token" element={<SharedChecklistView />} />
                       <Route path="/app-status/:token" element={<PublicApplicationStatusView />} />
+                      <Route path="/shared-profile/:token" element={<SharedProfileView />} />
 
                       <Route path="/saved" element={
                         <ProtectedRoute>
