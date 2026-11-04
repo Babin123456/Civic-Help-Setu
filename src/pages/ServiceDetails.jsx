@@ -31,6 +31,8 @@ import AccessibleReaderPreferencesModal from '../components/services/AccessibleR
 import { getReaderPreferences, computeReaderStyle } from '../services/accessibleReaderService';
 import InteractiveFeeEstimatorModal from '../components/services/InteractiveFeeEstimatorModal';
 import ApplicationPreparationPlanModal from '../components/services/ApplicationPreparationPlanModal';
+import { findJargonTerms } from '../data/civicGlossary';
+import TermExplainer from '../components/TermExplainer';
 import InlineStatusLegend from '../components/common/InlineStatusLegend';
 import DocumentTypeGuidanceModal from '../components/services/DocumentTypeGuidanceModal';
 import ApplicationReadinessCheckerModal from '../components/services/ApplicationReadinessCheckerModal';
@@ -643,6 +645,48 @@ const ServiceDetails = ({ previewService = null }) => {
                 service.shortDescription ||
                 'Details for this service are available in the programme information.'}
             </p>
+
+            {/* Explainable terms used in the service description */}
+            {(() => {
+              const desc = service.description || service.shortDescription || '';
+              const terms = findJargonTerms(desc);
+              if (terms.length === 0) return null;
+              return (
+                <div
+                  style={{
+                    marginTop: '1rem',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '0.5rem',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: '700',
+                      color: 'var(--text-tertiary)',
+                      textTransform: 'uppercase',
+                      marginRight: '0.5rem',
+                    }}
+                  >
+                    Explain terms:
+                  </span>
+                  {terms.slice(0, 4).map((t) => (
+                    <TermExplainer
+                      key={t.id}
+                      term={t.term}
+                      label="Explain this term"
+                      variant="inline"
+                      serviceContext={{
+                        serviceName: service.name,
+                        serviceDescription: desc,
+                        section: 'Overview',
+                      }}
+                    />
+                  ))}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Related Acronyms & Terms */}

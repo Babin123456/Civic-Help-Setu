@@ -7,6 +7,7 @@ import BottleneckFeedbackPrompt from '../feedback/BottleneckFeedbackPrompt';
 import NextStepGuide from './NextStepGuide';
 import { findJargonTerms } from '../../data/civicGlossary';
 import FormFieldExplainer from '../glossary/FormFieldExplainer';
+import TermExplainer from '../TermExplainer';
 import RequirementNote from '../RequirementNote';
 import { getDocumentRequirements } from '../../services/requirementTypes';
 
@@ -87,11 +88,23 @@ const ServiceGuide = ({ service, focusMode = false, onToggleFocusMode, onMakeChe
                   <span>{item}</span>
                   <RequirementNote requirement={requirements[i]} />
                   {topTerm && (
-                    <FormFieldExplainer
-                      term={topTerm.term}
-                      label="What is this?"
-                      variant="inline"
-                    />
+                    <>
+                      <FormFieldExplainer
+                        term={topTerm.term}
+                        label="What is this?"
+                        variant="inline"
+                      />
+                      <TermExplainer
+                        term={topTerm.term}
+                        label="Explain this term"
+                        variant="inline"
+                        serviceContext={{
+                          serviceName: service.name,
+                          serviceDescription: service.description || service.shortDescription || '',
+                          section: 'Documents you need',
+                        }}
+                      />
+                    </>
                   )}
                 </li>
               );
