@@ -245,11 +245,12 @@ describe('notificationPreferenceService', () => {
   describe('getAllCategories', () => {
     it('returns all categories with metadata', () => {
       const categories = getAllCategories();
-      expect(categories).toHaveLength(5);
+      expect(categories).toHaveLength(6);
       expect(categories.map(c => c.id)).toEqual([
         'service_updates',
         'deadline_reminders',
         'product_announcements',
+        'newsletter_digest',
         'account_security',
         'verification_emails',
       ]);
@@ -259,7 +260,7 @@ describe('notificationPreferenceService', () => {
   describe('getCategoryChoices', () => {
     it('returns formatted choices for UI', () => {
       const choices = getCategoryChoices();
-      expect(choices).toHaveLength(5);
+      expect(choices).toHaveLength(6);
       expect(choices[0]).toHaveProperty('id');
       expect(choices[0]).toHaveProperty('label');
       expect(choices[0]).toHaveProperty('description');
@@ -269,7 +270,7 @@ describe('notificationPreferenceService', () => {
 
   describe('constants', () => {
     it('CATEGORY_IDS includes all categories', () => {
-      expect(CATEGORY_IDS).toHaveLength(5);
+      expect(CATEGORY_IDS).toHaveLength(6);
     });
 
     it('OPTIONAL_CATEGORY_IDS includes only non-essential', () => {
@@ -277,6 +278,7 @@ describe('notificationPreferenceService', () => {
         'service_updates',
         'deadline_reminders',
         'product_announcements',
+        'newsletter_digest',
       ]);
     });
 
