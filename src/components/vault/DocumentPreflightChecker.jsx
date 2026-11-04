@@ -8,7 +8,9 @@ import {
   validateVoterId,
   validateDrivingLicense,
   inspectDocumentFile,
-  generatePreflightAudit
+  generatePreflightAudit,
+  validatePreflightFile,
+  STANDARD_PORTAL_LIMITS
 } from '../../services/documentValidatorService';
 import PreflightAuditModal from './PreflightAuditModal';
 
@@ -16,6 +18,7 @@ export default function DocumentPreflightChecker({ onAuditComplete }) {
   const [docType, setDocType] = useState(DOCUMENT_TYPES.AADHAAR);
   const [identifier, setIdentifier] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
+  const [fileError, setFileError] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [activeAudit, setActiveAudit] = useState(null);
   const [validationResult, setValidationResult] = useState(null);
@@ -45,13 +48,24 @@ export default function DocumentPreflightChecker({ onAuditComplete }) {
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const validation = validatePreflightFile(file);
+    if (!validation.valid) {
+      setFileError(validation.error);
+      setSelectedFile(null);
+      e.target.value = '';
+      return;
     }
+
+    setFileError('');
+    setSelectedFile(file);
   };
 
   const handleRunFullAudit = (e) => {
     e.preventDefault();
+    if (fileError) return;
     const docData = {
       title: `${docType.replace('_', ' ')} Pre-flight`,
       type: docType,
@@ -189,46 +203,67 @@ export default function DocumentPreflightChecker({ onAuditComplete }) {
         </div>
 
         {/* File upload inspection dropzone */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-          <label
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 14px',
-              background: '#f1f5f9',
-              borderRadius: '8px',
-              border: '1px dashed #94a3b8',
-              cursor: 'pointer',
-              fontSize: '0.84rem',
-              color: '#334155',
-              fontWeight: 500
-            }}
-          >
-            <Upload size={16} />
-            <span>{selectedFile ? selectedFile.name : 'Inspect File (Size <= 2MB, PDF/JPG)'}</span>
-            <input type="file" onChange={handleFileChange} style={{ display: 'none' }} accept=".pdf,.jpg,.jpeg,.png" />
-          </label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+            <label
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 14px',
+                background: '#f1f5f9',
+                borderRadius: '8px',
+                border: fileError ? '1px dashed #dc2626' : '1px dashed #94a3b8',
+                cursor: 'pointer',
+                fontSize: '0.84rem',
+                color: '#334155',
+                fontWeight: 500
+              }}
+            >
+              <Upload size={16} />
+              <span>{selectedFile ? selectedFile.name : 'Attach Document File'}</span>
+              <input
+                type="file"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+                accept=".pdf,.jpg,.jpeg,.png"
+                aria-invalid={fileError ? 'true' : undefined}
+                aria-describedby={fileError ? 'preflight-file-hint preflight-file-error' : 'preflight-file-hint'}
+              />
+            </label>
 
-          <button
-            type="submit"
-            style={{
-              padding: '9px 18px',
-              background: '#2563eb',
-              color: '#ffffff',
-              borderRadius: '8px',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <FileCheck size={16} />
-            Run Pre-flight Audit
-          </button>
+            <button
+              type="submit"
+              disabled={Boolean(fileError)}
+              style={{
+                padding: '9px 18px',
+                background: '#2563eb',
+                color: '#ffffff',
+                borderRadius: '8px',
+                border: 'none',
+                cursor: fileError ? 'not-allowed' : 'pointer',
+                fontWeight: 600,
+                fontSize: '0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                opacity: fileError ? 0.6 : 1
+              }}
+            >
+              <FileCheck size={16} />
+              Run Pre-flight Audit
+            </button>
+          </div>
+
+          <p id="preflight-file-hint" style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
+            Allowed formats: {STANDARD_PORTAL_LIMITS.ALLOWED_TYPES_HINT}.
+          </p>
+
+          {fileError && (
+            <p id="preflight-file-error" role="alert" style={{ margin: 0, color: '#dc2626', fontSize: '0.8rem', fontWeight: 500 }}>
+              {fileError}
+            </p>
+          )}
         </div>
       </form>
 
