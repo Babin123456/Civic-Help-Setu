@@ -159,7 +159,7 @@ describe('emailVerificationService', () => {
 
   describe('checkResendRateLimit', () => {
     beforeEach(() => {
-      console.log('beforeEach: resetting test limiter, size =', testRateLimiter.size());
+      // Debug logging removed — rate limiter size is verified via assertions
     });
     it('allows first resend attempt', () => {
       const result = testCheckResendRateLimit(TEST_EMAIL);
@@ -168,13 +168,9 @@ describe('emailVerificationService', () => {
     });
 
     it('allows up to 3 attempts within window', () => {
-      console.log('Test start, size:', testRateLimiter.size());
       let result = testCheckResendRateLimit(TEST_EMAIL);
-      console.log('After 1st call:', result, 'size:', testRateLimiter.size());
       result = testCheckResendRateLimit(TEST_EMAIL);
-      console.log('After 2nd call:', result, 'size:', testRateLimiter.size());
       result = testCheckResendRateLimit(TEST_EMAIL);
-      console.log('After 3rd call:', result, 'size:', testRateLimiter.size());
 
       expect(result.allowed).toBe(true);
       expect(result.remaining).toBe(0);
