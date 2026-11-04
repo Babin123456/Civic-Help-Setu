@@ -37,6 +37,7 @@ import OpenSource from './pages/OpenSource';
 import Privacy from './pages/Privacy';
 import Admin from './pages/Admin';
 import SharedChecklistView from './pages/SharedChecklistView';
+import SharedDirectoryView from './pages/SharedDirectoryView';
 import PublicApplicationStatusView from './pages/PublicApplicationStatusView';
 import SharedProfileView from './pages/SharedProfileView';
 import NotFound from './pages/NotFound';
@@ -86,6 +87,7 @@ function AppRoot() {
                       <Route path="/nearby-offices" element={<NearbyOffices />} />
                       <Route path="/track" element={<Track />} />
                       <Route path="/shared-checklist/:token" element={<SharedChecklistView />} />
+                      <Route path="/shared-directory/:token" element={<SharedDirectoryView />} />
                       <Route path="/app-status/:token" element={<PublicApplicationStatusView />} />
                       <Route path="/shared-profile/:token" element={<SharedProfileView />} />
 
