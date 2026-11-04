@@ -4,6 +4,7 @@ import { searchGlossary } from '../../data/civicGlossary.js';
 import { submitGlossarySuggestion } from '../../services/civicGlossaryService.js';
 import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../context/ToastContext';
+import { useTheme } from '../../context/ThemeContext';
 import { safeHttpUrl } from '../../utils/safeContent';
 
 const CivicGlossaryModal = ({
@@ -12,6 +13,7 @@ const CivicGlossaryModal = ({
 }) => {
   const { language } = useLanguage();
   const { toast } = useToast();
+  const { theme } = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [showSuggestModal, setShowSuggestModal] = useState(false);
   const [suggestTerm, setSuggestTerm] = useState('');
@@ -68,10 +70,11 @@ const CivicGlossaryModal = ({
         backgroundColor: 'rgba(0,0,0,0.75)',
         backdropFilter: 'blur(8px)',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-end',
         zIndex: 1100,
-        padding: '1rem',
+        paddingTop: '5.5rem',       
+        paddingRight: '1rem',
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -87,7 +90,7 @@ const CivicGlossaryModal = ({
           flexDirection: 'column',
           padding: '1.75rem',
           borderRadius: '1.25rem',
-          background: 'var(--bg-card, #131b2e)',
+          background: theme === 'dark' ? 'var(--bg-card, #131b2e)' : 'var(--bg-card, #ffffff)',
           border: '1px solid var(--border-main)',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
         }}

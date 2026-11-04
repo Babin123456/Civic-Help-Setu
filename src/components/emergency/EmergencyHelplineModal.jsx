@@ -53,10 +53,12 @@ export default function EmergencyHelplineModal({ isOpen, onClose }) {
         background: 'rgba(15, 23, 42, 0.8)',
         backdropFilter: 'blur(4px)',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-end',
         zIndex: 2500,
         padding: '1rem',
+        paddingTop: '5.5rem',      
+        paddingRight: '1rem',
       }}
       role="presentation"
     >
@@ -71,7 +73,7 @@ export default function EmergencyHelplineModal({ isOpen, onClose }) {
           display: 'flex',
           flexDirection: 'column',
           borderRadius: '1.25rem',
-          background: 'var(--bg-card, #1e293b)',
+          background: 'var(--bg-main)',
           border: '1px solid rgba(239, 68, 68, 0.4)',
           boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)',
           overflow: 'hidden',

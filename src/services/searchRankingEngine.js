@@ -1,4 +1,9 @@
 import { matchesJurisdiction } from './jurisdictionService';
+import {
+  resolveIndicCivicQuery,
+  calculatePhoneticMatchScore,
+  explainPhoneticMatch,
+} from './phoneticTransliterationSearchService';
 
 export const CIVIC_SYNONYMS = {
   dl: ['driving license', 'license', 'rto', 'vehicle', 'driving'],
@@ -172,6 +177,21 @@ export const calculateServiceRelevance = (service, query) => {
   if (catLower.includes(q)) score += 8;
   if (deptLower.includes(q)) score += 8;
 
+  // 1b. Indic colloquial lexicon & dynamic phonetic scoring (#435)
+  const indicResolution = resolveIndicCivicQuery(q);
+  if (indicResolution.hasIndicMatch) {
+    for (const keyword of indicResolution.expandedKeywords) {
+      if (nameLower.includes(keyword)) score += 24;
+      if (descLower.includes(keyword)) score += 10;
+      if (catLower.includes(keyword)) score += 8;
+    }
+  }
+
+  const phoneticScore = calculatePhoneticMatchScore(q, nameLower);
+  if (phoneticScore >= 70) {
+    score += Math.round(phoneticScore * 0.25);
+  }
+
   // 2. Synonym expansion bonus
   for (const [key, synonyms] of Object.entries(CIVIC_SYNONYMS)) {
     if (q.includes(key)) {
@@ -338,6 +358,17 @@ export const rankAndFilterServices = (
 export const getFuzzyMatchSummary = (query = '') => {
   const clean = query.toLowerCase().trim();
   if (!clean || clean.length < 3) return null;
+
+  const indicResolution = resolveIndicCivicQuery(clean);
+  if (indicResolution.hasIndicMatch && indicResolution.matchedEntries.length > 0) {
+    const entry = indicResolution.matchedEntries[0];
+    return {
+      isTransliterated: true,
+      matchedPhrase: entry.colloquial,
+      suggestedTerm: entry.canonical,
+      explanation: entry.explanation,
+    };
+  }
 
   for (const [transKey, canonicals] of Object.entries(CIVIC_PHONETIC_TRANSLITERATIONS)) {
     if (clean.includes(transKey)) {

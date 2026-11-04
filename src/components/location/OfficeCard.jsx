@@ -18,6 +18,7 @@ import { formatDistance } from '../../services/locationService';
 import { useToast } from '../../context/ToastContext';
 import BestTimeToVisitCard from './BestTimeToVisitCard';
 import { OfficeAccessibilityDetails } from './AccessibilityFacilityPanel';
+import { safeHttpUrl } from '../../utils/safeContent';
 import IntakeWindowBadge from './IntakeWindowBadge';
 import ExplainableOfficeMatchCard from './ExplainableOfficeMatchCard';
 
@@ -282,7 +283,7 @@ const OfficeCard = ({
         }}
       >
         <a
-          href={office.directionsUrl}
+          href={safeHttpUrl(office.directionsUrl) || undefined}
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}

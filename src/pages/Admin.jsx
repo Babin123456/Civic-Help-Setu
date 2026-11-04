@@ -60,7 +60,7 @@ import CatalogueMigrationPanel from '../components/admin/CatalogueMigrationPanel
 import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
 import CatalogueCompletenessPanel from '../components/admin/CatalogueCompletenessPanel';
 import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchPanel';
-import AiEvaluationSuitePanel from '../components/admin/AiEvaluationSuitePanel';
+import CatalogueEnrichmentReviewPanel from '../components/admin/CatalogueEnrichmentReviewPanel';
 import BottleneckFeedbackDashboard from '../components/admin/BottleneckFeedbackDashboard';
 import NoticeManagementPanel from '../components/admin/NoticeManagementPanel';
 import AvailabilityNoticePanel from '../components/admin/AvailabilityNoticePanel';
@@ -82,6 +82,7 @@ import SourceConflictReviewQueue from '../components/admin/SourceConflictReviewQ
 import BarrierInsightsDashboard from '../components/barriers/BarrierInsightsDashboard';
 import RuleConflictInspectorModal from '../components/admin/RuleConflictInspectorModal';
 import DuplicateServiceDetectorPanel from '../components/admin/DuplicateServiceDetectorPanel';
+import CatalogueConflictDetectorPanel from '../components/admin/CatalogueConflictDetectorPanel';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -697,8 +698,8 @@ const Admin = () => {
                 badge: null,
               },
               {
-                id: 'ai-evaluation',
-                label: 'AI Evaluation Suite',
+                id: 'enrichment',
+                label: 'Enrichment Queue',
                 badge: null,
               },
               {
@@ -727,6 +728,7 @@ const Admin = () => {
                 badge: null,
               },
               { id: 'duplicates', label: 'Duplicate Detection', badge: null },
+              { id: 'conflicts', label: 'Requirement Conflicts', badge: null },
               { id: 'audit', label: 'Audit Trail Logs', badge: null },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
@@ -1687,16 +1689,23 @@ const Admin = () => {
             {activeTab === 'duplicates' && (
               <DuplicateServiceDetectorPanel services={services} onRefresh={() => setServices(getAdminServices())} />
             )}
+            {activeTab === 'conflicts' && (
+              <CatalogueConflictDetectorPanel
+                services={services}
+                onRefresh={() => setServices(getAdminServices())}
+                onEditService={handleEditServiceFromReport}
+              />
+            )}
 
             {/* Private drafts of service guides: review, preview and publish */}
             {activeTab === 'drafts' && (
-  <ServiceDraftsPanel
-    onEditDraft={handleEditDraft}
-    onChanged={handleDraftsChanged}
-    actor={user?.username || 'SuperAdmin'}
-    refreshKey={draftsVersion}
-  />
-)}
+              <ServiceDraftsPanel
+                onEditDraft={handleEditDraft}
+                onChanged={handleDraftsChanged}
+                actor={user?.username || 'SuperAdmin'}
+                refreshKey={draftsVersion}
+              />
+            )}
             {/* Catalogue data migrations: dry run, backup, apply, rollback */}
             {activeTab === 'migrations' && (
               <CatalogueMigrationPanel
@@ -1709,7 +1718,7 @@ const Admin = () => {
 
             {/* Eligibility rule test bench */}
             {activeTab === 'eligibility-tests' && <EligibilityTestBenchPanel />}
-            {activeTab === 'ai-evaluation' && <AiEvaluationSuitePanel />}
+            {activeTab === 'enrichment' && <CatalogueEnrichmentReviewPanel />}
 
             {/* Process Bottleneck Feedback Loop Tab */}
             {activeTab === 'bottlenecks' && (

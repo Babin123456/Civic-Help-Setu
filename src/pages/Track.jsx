@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 import {
   Search,
   FileText,
+  FileCheck2,
   ArrowRight,
   Copy,
   Plus,
@@ -42,10 +43,13 @@ import SlaBreachAlertWidget from '../components/tracking/SlaBreachAlertWidget';
 import AppellateEscalationLadder from '../components/tracking/AppellateEscalationLadder';
 import GrievanceEscalationAlertBanner from '../components/tracking/GrievanceEscalationAlertBanner';
 import GrievanceEvidenceOrganizerModal from '../components/grievance/GrievanceEvidenceOrganizerModal';
+import CivicGrievanceDraftingAssistantModal from '../components/grievance/CivicGrievanceDraftingAssistantModal';
 import ApplicationMilestoneTracker from '../components/tracking/ApplicationMilestoneTracker';
 import StatutoryCompensationClaimModal from '../components/tracking/StatutoryCompensationClaimModal';
 import { calculateStatutoryCompensation } from '../services/statutoryCompensationService';
 import DeficiencyCureModal from '../components/tracking/DeficiencyCureModal';
+import RejectionNoticeExplainerModal from '../components/tracking/RejectionNoticeExplainerModal';
+import InlineStatusLegend from '../components/common/InlineStatusLegend';
 
 const Track = () => {
   const location = useLocation();
@@ -63,8 +67,10 @@ const Track = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isJourneyModalOpen, setIsJourneyModalOpen] = useState(false);
   const [isGrievanceModalOpen, setIsGrievanceModalOpen] = useState(false);
+  const [isGrievanceDraftModalOpen, setIsGrievanceDraftModalOpen] = useState(false);
   const [isCompensationModalOpen, setIsCompensationModalOpen] = useState(false);
   const [isCureModalOpen, setIsCureModalOpen] = useState(false);
+  const [isExplainerModalOpen, setIsExplainerModalOpen] = useState(false);
 
   useEffect(() => {
     const freshApps = getApplications();
@@ -181,6 +187,14 @@ const Track = () => {
               <button
                 type="button"
                 className="btn btn-secondary"
+                onClick={() => setIsGrievanceDraftModalOpen(true)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <MessageSquare size={16} color="var(--accent-main)" /> Grievance Drafter
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
                 onClick={() => setIsGrievanceModalOpen(true)}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
               >
@@ -260,6 +274,21 @@ const Track = () => {
                           <Scale size={16} /> Claim Delay Compensation
                         </button>
                       )}
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => setIsExplainerModalOpen(true)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                          color: '#b45309',
+                          borderColor: '#fcd34d',
+                          backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                        }}
+                      >
+                        <FileText size={16} /> Explain Rejection / Notice
+                      </button>
                       <button type="button" className="btn btn-secondary" onClick={handleCopyId}>
                         <Copy size={16} /> Copy ID
                       </button>
@@ -320,6 +349,17 @@ const Track = () => {
                 </div>
 
                 <ApplicationMilestoneTracker application={activeApp} />
+
+                <InlineStatusLegend
+                  categories={[
+                    'application',
+                    'requirement',
+                    'fee',
+                    'eligibility',
+                  ]}
+                  title="Status Legend for Tracking"
+                  fullLegendLabel="View full legend"
+                />
 
                 {requiredDocuments.length > 0 && (
                   <section className="card" style={{ padding: '1.25rem' }} aria-labelledby="track-checklist-title">
@@ -396,6 +436,12 @@ const Track = () => {
         defaultServiceId={activeApp?.serviceId}
       />
 
+      <CivicGrievanceDraftingAssistantModal
+        isOpen={isGrievanceDraftModalOpen}
+        onClose={() => setIsGrievanceDraftModalOpen(false)}
+        defaultApplication={activeApp}
+      />
+
       <StatutoryCompensationClaimModal
         isOpen={isCompensationModalOpen}
         onClose={() => setIsCompensationModalOpen(false)}
@@ -406,6 +452,13 @@ const Track = () => {
         isOpen={isCureModalOpen}
         onClose={() => setIsCureModalOpen(false)}
         citizenName={activeApp?.applicantName || 'Citizen Applicant'}
+      />
+
+      <RejectionNoticeExplainerModal
+        isOpen={isExplainerModalOpen}
+        onClose={() => setIsExplainerModalOpen(false)}
+        application={activeApp}
+        initialNotice={activeApp?.rejectionReason || activeApp?.pendingAction?.description || ''}
       />
     </section>
   );

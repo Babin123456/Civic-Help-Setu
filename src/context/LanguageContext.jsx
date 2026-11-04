@@ -5,7 +5,7 @@ import { SUPPORTED_LANGUAGES, loadLanguage, saveLanguage } from '../utils/langua
 import { logDiagnostic } from '../utils/diagnostics';
 
 const en = DICTIONARIES.en;
-const LanguageContext = createContext(null);
+export const LanguageContext = createContext(null);
 const PLAIN_LANG_KEY = 'civicbridge_plain_lang';
 
 export { SUPPORTED_LANGUAGES };

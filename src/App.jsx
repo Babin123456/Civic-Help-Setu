@@ -26,6 +26,7 @@ import SSOCallback from './pages/SSOCallback';
 import Assistant from './pages/Assistant';
 import { ServiceCardSkeletonGrid } from './components/ServiceCardSkeleton';
 import ServiceDetails from './pages/ServiceDetails';
+import Acronyms from './pages/Acronyms';
 import Eligibility from './pages/Eligibility';
 import NearbyOffices from './pages/NearbyOffices';
 import Track from './pages/Track';
@@ -36,7 +37,11 @@ import OpenSource from './pages/OpenSource';
 import Privacy from './pages/Privacy';
 import Admin from './pages/Admin';
 import SharedChecklistView from './pages/SharedChecklistView';
+import SharedDirectoryView from './pages/SharedDirectoryView';
+import PublicApplicationStatusView from './pages/PublicApplicationStatusView';
+import SharedProfileView from './pages/SharedProfileView';
 import NotFound from './pages/NotFound';
+import VerifyEmail from './pages/VerifyEmail';
 
 const Services = lazy(() => import('./pages/Services'));
 
@@ -72,14 +77,19 @@ function AppRoot() {
                       <Route path="/signup" element={<SignUpPage />} />
                       <Route path="/sso-callback" element={<SSOCallback />} />
                       <Route path="/signup/sso-callback" element={<SSOCallback />} />
+                      <Route path="/verify-email" element={<VerifyEmail />} />
                       <Route path="/assistant" element={<Assistant />} />
                       <Route path="/services" element={<Suspense fallback={<ServicesFallback />}><Services /></Suspense>} />
                       <Route path="/services/:id" element={<ServiceDetails />} />
+                      <Route path="/acronyms" element={<Acronyms />} />
                       <Route path="/eligibility" element={<Eligibility />} />
                       <Route path="/nearby" element={<NearbyOffices />} />
                       <Route path="/nearby-offices" element={<NearbyOffices />} />
                       <Route path="/track" element={<Track />} />
                       <Route path="/shared-checklist/:token" element={<SharedChecklistView />} />
+                      <Route path="/shared-directory/:token" element={<SharedDirectoryView />} />
+                      <Route path="/app-status/:token" element={<PublicApplicationStatusView />} />
+                      <Route path="/shared-profile/:token" element={<SharedProfileView />} />
 
                       <Route path="/saved" element={
                         <ProtectedRoute>

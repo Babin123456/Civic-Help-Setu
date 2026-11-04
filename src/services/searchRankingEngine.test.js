@@ -79,4 +79,15 @@ describe('searchRankingEngine - Phonetic Transliterations & Fuzzy Matching', () 
     expect(typoSummary).not.toBeNull();
     expect(typoSummary.suggestedTerm).toBe('passport');
   });
+
+  it('resolves complex Indic compound phrases like "aay praman patra" (#435)', () => {
+    const results = rankAndFilterServices(mockServices, { searchQuery: 'aay praman patra' });
+    expect(results.length).toBeGreaterThan(0);
+    expect(results[0].id).toBe('income-certificate');
+
+    const summary = getFuzzyMatchSummary('aay praman patra');
+    expect(summary.isTransliterated).toBe(true);
+    expect(summary.suggestedTerm).toBe('income certificate');
+    expect(summary.explanation).toBeDefined();
+  });
 });

@@ -268,6 +268,22 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   top: 0;
   z-index: 50;
   height: 5rem;
+  width: 100%;
+}
+.nav-container {
+  max-width: 1440px; 
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+.nav-brand {
+  flex-shrink: 0; 
 }
 .nav-link {
   font-family: var(--font-heading);
@@ -283,11 +299,10 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .nav-mobile-actions { flex-shrink: 0; }
 @media (max-width: 480px) {
   .nav-container { padding-left: 1rem; padding-right: 1rem; }
-  .nav-brand { min-width: 0; }
-  .nav-brand { gap: 0.5rem !important; font-size: 1.25rem !important; }
+  .nav-brand { min-width: 0; gap: 0.5rem !important; font-size: 1.25rem !important; }
   .nav-brand__logo { width: 2.25rem !important; height: 2.25rem !important; }
   /* the globe and the EN badge stay, the button keeps its aria-label */
-  .nav-mobile-actions .lang-switcher__label { display: none; }
+  .lang-switcher__label { display: none !important; }
   /* the button no longer sits at the right edge, so pin the list to the screen instead */
   .nav-mobile-actions .lang-switcher__menu {
     position: fixed !important;

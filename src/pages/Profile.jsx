@@ -3,6 +3,7 @@ import {
   User, Mail, Phone, MapPin, Briefcase, Edit3, Check, X,
   Camera, ShieldCheck, LogOut, Star, FileText, BookMarked,
   ChevronRight, Loader2, AlertCircle, ExternalLink, Download,
+  Bell, Shield, CheckCircle, RotateCcw, Send, Lock, Share2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
@@ -10,6 +11,10 @@ import { describeProviderError, logProviderError } from '../utils/providerError'
 import ClearMyDataPanel from '../components/privacy/ClearMyDataPanel';
 import DataPortabilityModal from '../components/profile/DataPortabilityModal';
 import CivicEntitlementReadinessCard from '../components/profile/CivicEntitlementReadinessCard';
+import VoluntaryProfileRecommendationPanel from '../components/profile/VoluntaryProfileRecommendationPanel';
+import NotificationPreferenceCenter from '../components/profile/NotificationPreferenceCenter';
+import ShareableProfileModal from '../components/profile/ShareableProfileModal';
+import { isEmailVerified } from '../services/emailVerificationService';
 
 /* ─────────────────────────── helpers ─────────────────────────── */
 const Field = ({ icon: Icon, label, value, placeholder, editing, name, onChange, type = 'text' }) => (
@@ -89,6 +94,7 @@ const Profile = () => {
   // Bumped after "Clear my data" so counts read from localStorage (Saved Guides) refresh
   const [, setDataVersion] = useState(0);
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const [form, setForm] = useState({
     firstName: clerkUser?.firstName || '',
@@ -100,21 +106,23 @@ const Profile = () => {
     bio: meta.bio || '',
   });
 
-  // Re-seed if clerkUser loads after mount
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [prefModalOpen, setPrefModalOpen] = useState(false);
+  const [emailChangeModalOpen, setEmailChangeModalOpen] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [emailChangeStep, setEmailChangeStep] = useState('input'); // 'input', 'verify', 'complete'
+  const [emailChangeLoading, setEmailChangeLoading] = useState(false);
+  const [emailChangeError, setEmailChangeError] = useState('');
+  const [emailChangeMessage, setEmailChangeMessage] = useState('');
+  const [pendingEmailChange, setPendingEmailChange] = useState(null);
+
+  const handleOpenPreferences = () => setPrefModalOpen(true);
+
   useEffect(() => {
-    if (clerkUser) {
-      const m = clerkUser.unsafeMetadata || {};
-      setForm({
-        firstName: clerkUser.firstName || '',
-        lastName: clerkUser.lastName || '',
-        phone: m.phone || '',
-        city: m.city || '',
-        state: m.state || '',
-        occupation: m.occupation || '',
-        bio: m.bio || '',
-      });
+    if (user?.email) {
+      setEmailVerified(isEmailVerified(user.email));
     }
-  }, [clerkUser?.id]);
+  }, [user?.email]);
 
   if (!user) {
     navigate('/login');
@@ -177,6 +185,113 @@ const Profile = () => {
     navigate('/');
   };
 
+  const handleEmailChangeRequest = async () => {
+    if (!newEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail.trim())) {
+      setEmailChangeError('Please enter a valid email address');
+      return;
+    }
+    if (newEmail.trim().toLowerCase() === user.email.toLowerCase()) {
+      setEmailChangeError('This is already your current email address');
+      return;
+    }
+    setEmailChangeLoading(true);
+    setEmailChangeError('');
+    setEmailChangeMessage('');
+    try {
+      const response = await fetch('/api/email/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'send', email: newEmail.trim() }),
+      });
+      const data = await response.json();
+      if (response.ok && data.sent) {
+        setPendingEmailChange(newEmail.trim());
+        setEmailChangeStep('verify');
+        setEmailChangeMessage(data.message);
+      } else {
+        setEmailChangeError(data.message || data.error || 'Failed to send verification email');
+      }
+    } catch (err) {
+      logProviderError('Email change request failed', err);
+      setEmailChangeError('Network error. Please try again.');
+    } finally {
+      setEmailChangeLoading(false);
+    }
+  };
+
+  const handleEmailChangeVerify = async (token) => {
+    if (!token.trim()) {
+      setEmailChangeError('Please enter the verification code');
+      return;
+    }
+    setEmailChangeLoading(true);
+    setEmailChangeError('');
+    try {
+      const response = await fetch('/api/email/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verify', token: token.trim() }),
+      });
+      const data = await response.json();
+      if (response.ok && data.verified) {
+        if (clerkUser) {
+          await clerkUser.update({ emailAddress: pendingEmailChange });
+        }
+        setEmailChangeStep('complete');
+        setEmailChangeMessage('Email address updated successfully!');
+        setEmailVerified(true);
+        setTimeout(() => {
+          setEmailChangeModalOpen(false);
+          setEmailChangeStep('input');
+          setNewEmail('');
+          setPendingEmailChange(null);
+          setEmailChangeMessage('');
+        }, 2000);
+      } else {
+        setEmailChangeError(data.message || data.error || 'Invalid or expired verification code');
+      }
+    } catch (err) {
+      logProviderError('Email change verification failed', err);
+      setEmailChangeError('Network error. Please try again.');
+    } finally {
+      setEmailChangeLoading(false);
+    }
+  };
+
+  const handleResendEmailChange = async () => {
+    if (!pendingEmailChange) return;
+    setEmailChangeLoading(true);
+    setEmailChangeError('');
+    setEmailChangeMessage('');
+    try {
+      const response = await fetch('/api/email/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'resend', email: pendingEmailChange }),
+      });
+      const data = await response.json();
+      if (response.ok && data.sent) {
+        setEmailChangeMessage(data.message);
+      } else {
+        setEmailChangeError(data.message || data.error || 'Failed to resend verification email');
+      }
+    } catch (err) {
+      logProviderError('Resend email change failed', err);
+      setEmailChangeError('Network error. Please try again.');
+    } finally {
+      setEmailChangeLoading(false);
+    }
+  };
+
+  const openEmailChangeModal = () => {
+    setNewEmail('');
+    setEmailChangeStep('input');
+    setEmailChangeError('');
+    setEmailChangeMessage('');
+    setPendingEmailChange(null);
+    setEmailChangeModalOpen(true);
+  };
+
   const savedCount = JSON.parse(localStorage.getItem('civicbridge_saved') || '[]').length;
   const displayName = `${form.firstName} ${form.lastName}`.trim() || user.username;
   const joinDate = clerkUser?.createdAt
@@ -210,13 +325,23 @@ const Profile = () => {
               </span>
             )}
             {!editing ? (
-              <button
-                onClick={() => setEditing(true)}
-                className="btn btn-secondary"
-                style={{ padding: '0.6rem 1.25rem', fontSize: '0.9rem' }}
-              >
-                <Edit3 size={16} /> Edit Profile
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setShareModalOpen(true)}
+                  className="btn btn-secondary"
+                  style={{ padding: '0.6rem 1.1rem', fontSize: '0.9rem' }}
+                >
+                  <Share2 size={16} /> Share Profile
+                </button>
+                <button
+                  onClick={() => setEditing(true)}
+                  className="btn btn-secondary"
+                  style={{ padding: '0.6rem 1.25rem', fontSize: '0.9rem' }}
+                >
+                  <Edit3 size={16} /> Edit Profile
+                </button>
+              </div>
             ) : (
               <>
                 <button
@@ -398,11 +523,23 @@ const Profile = () => {
                 />
               </div>
               <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <Field
-                  icon={Mail} label="Email Address" name="email"
-                  value={user.email} placeholder="—"
-                  editing={false} onChange={() => {}}
-                />
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
+                  <Field
+                    icon={Mail} label="Email Address" name="email"
+                    value={user.email} placeholder="—"
+                    editing={false} onChange={() => {}}
+                  />
+                  {user.isClerk && !editing && (
+                    <button
+                      type="button"
+                      onClick={openEmailChangeModal}
+                      className="btn btn-secondary"
+                      style={{ marginTop: 'auto', padding: '0.5rem 1rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', height: 'fit-content' }}
+                    >
+                      <Send size={14} /> Change Email
+                    </button>
+                  )}
+                </div>
                 <Field
                   icon={Phone} label="Phone Number" name="phone" type="tel"
                   value={form.phone} placeholder="e.g. +91 98765 43210"
@@ -493,7 +630,7 @@ const Profile = () => {
               <a
                 href="https://dashboard.clerk.com"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
                   marginTop: '1rem', fontSize: '0.8rem', color: 'var(--text-tertiary)',
@@ -504,6 +641,60 @@ const Profile = () => {
               >
                 <ExternalLink size={13} /> Manage account on Clerk Dashboard
               </a>
+            </div>
+
+            {/* Email Verification Status */}
+            <div className="glass-panel" style={{ padding: '1.5rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
+                <Mail size={18} color="var(--accent-main)" /> Email Verification
+              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '99px', fontSize: '0.8rem', fontWeight: '600', background: emailVerified ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.12)', color: emailVerified ? '#10b981' : '#f59e0b', border: '1px solid', borderColor: emailVerified ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)' }}>
+                  {emailVerified ? (
+                    <>
+                      <CheckCircle size={14} /> Verified
+                    </>
+                  ) : (
+                    <>
+                      <Shield size={14} /> Unverified
+                    </>
+                  )}
+                </div>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', flex: 1, minWidth: '200px' }}>
+                  {emailVerified ? 'Your email is verified. You will receive all notifications.' : 'Your email is not verified. Some notifications may not be delivered.'}
+                </span>
+                {!emailVerified && user.isClerk && (
+                  <Link to="/verify-email" className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Mail size={14} /> Verify Email
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            {/* Notification Preferences */}
+            <div className="glass-panel" style={{ padding: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: '700', margin: 0, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Bell size={18} color="#f59e0b" /> Notification Preferences
+                </h3>
+                <button
+                  type="button"
+                  onClick={handleOpenPreferences}
+                  className="btn btn-secondary"
+                  style={{
+                    padding: '0.5rem 1rem',
+                    fontSize: '0.85rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                  }}
+                >
+                  <Shield size={15} /> Manage Preferences
+                </button>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                Choose which optional emails you receive. Essential security alerts are always sent.
+              </p>
             </div>
 
             {/* Citizen Data Portability Export */}
@@ -534,6 +725,8 @@ const Profile = () => {
               </div>
             </div>
 
+            <VoluntaryProfileRecommendationPanel onUpdate={() => setDataVersion((v) => v + 1)} />
+
             <ClearMyDataPanel onCleared={() => setDataVersion((v) => v + 1)} />
 
             <DataPortabilityModal
@@ -541,6 +734,139 @@ const Profile = () => {
               onClose={() => setExportModalOpen(false)}
               currentUser={user}
             />
+
+            <ShareableProfileModal
+              isOpen={shareModalOpen}
+              onClose={() => setShareModalOpen(false)}
+              currentUser={user}
+              profileData={{
+                fullName: `${form.firstName} ${form.lastName}`.trim() || user?.username,
+                state: form.state,
+                district: form.city,
+                occupation: form.occupation,
+                savedServices: [],
+                applications: [],
+              }}
+            />
+
+            <NotificationPreferenceCenter
+              isOpen={prefModalOpen}
+              onClose={() => setPrefModalOpen(false)}
+              userId={user.id}
+            />
+
+            {emailChangeModalOpen && (
+              <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+                <div className="glass-panel animate-fade-in" style={{ width: '100%', maxWidth: '480px', maxHeight: '90vh', overflow: 'auto', padding: '1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Mail size={20} color="var(--accent-main)" /> {emailChangeStep === 'input' ? 'Change Email Address' : emailChangeStep === 'verify' ? 'Verify New Email' : 'Email Updated'}
+                    </h3>
+                    <button onClick={() => { setEmailChangeModalOpen(false); setEmailChangeStep('input'); setEmailChangeError(''); setEmailChangeMessage(''); }} style={{ padding: '0.5rem', borderRadius: '0.5rem', background: 'transparent', border: '1px solid var(--border-light)', color: 'var(--text-secondary)', cursor: 'pointer' }} aria-label="Close">
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  {emailChangeMessage && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', borderRadius: '0.75rem', background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', color: '#10b981', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                      <CheckCircle size={16} /> {emailChangeMessage}
+                    </div>
+                  )}
+
+                  {emailChangeError && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', borderRadius: '0.75rem', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                      <AlertCircle size={16} /> {emailChangeError}
+                    </div>
+                  )}
+
+                  {emailChangeStep === 'input' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        Enter your new email address. We'll send a verification link to that address.
+                      </p>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>
+                        Current email: <span style={{ fontFamily: 'monospace', color: 'var(--text-primary)' }}>{user.email}</span>
+                      </p>
+                      <input
+                        type="email"
+                        value={newEmail}
+                        onChange={e => { setNewEmail(e.target.value); setEmailChangeError(''); }}
+                        placeholder="new.email@example.com"
+                        style={{
+                          width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem',
+                          background: 'var(--glass-bg)', border: '1px solid var(--border-main)',
+                          color: 'var(--text-primary)', fontSize: '0.95rem', fontFamily: 'inherit',
+                          outline: 'none',
+                        }}
+                        onFocus={e => { e.target.style.borderColor = 'var(--accent-main)'; e.target.style.boxShadow = '0 0 0 3px rgba(56,189,248,0.15)'; }}
+                        onBlur={e => { e.target.style.borderColor = 'var(--border-main)'; e.target.style.boxShadow = 'none'; }}
+                        autoFocus
+                      />
+                      <button
+                        onClick={handleEmailChangeRequest}
+                        disabled={emailChangeLoading || !newEmail.trim()}
+                        className="btn btn-primary"
+                        style={{ width: '100%', padding: '0.75rem', fontSize: '0.95rem' }}
+                      >
+                        {emailChangeLoading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={16} />}
+                        {emailChangeLoading ? 'Sending...' : 'Send Verification Email'}
+                      </button>
+                    </div>
+                  )}
+
+                  {emailChangeStep === 'verify' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        We've sent a verification code to <strong>{pendingEmailChange}</strong>.
+                        Enter the code below to confirm the change.
+                      </p>
+                      <input
+                        type="text"
+                        placeholder="Enter verification code"
+                        style={{
+                          width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem',
+                          background: 'var(--glass-bg)', border: '1px solid var(--border-main)',
+                          color: 'var(--text-primary)', fontSize: '0.95rem', fontFamily: 'inherit',
+                          outline: 'none', textAlign: 'center', letterSpacing: '0.2em',
+                        }}
+                        onFocus={e => { e.target.style.borderColor = 'var(--accent-main)'; e.target.style.boxShadow = '0 0 0 3px rgba(56,189,248,0.15)'; }}
+                        onBlur={e => { e.target.style.borderColor = 'var(--border-main)'; e.target.style.boxShadow = 'none'; }}
+                        onKeyDown={e => e.key === 'Enter' && handleEmailChangeVerify(e.target.value)}
+                        autoFocus
+                      />
+                      <button
+                        onClick={() => handleEmailChangeVerify(document.querySelector('input[type="text"]')?.value || '')}
+                        disabled={emailChangeLoading}
+                        className="btn btn-primary"
+                        style={{ width: '100%', padding: '0.75rem', fontSize: '0.95rem' }}
+                      >
+                        {emailChangeLoading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={16} />}
+                        {emailChangeLoading ? 'Verifying...' : 'Verify & Update Email'}
+                      </button>
+                      <button
+                        onClick={handleResendEmailChange}
+                        disabled={emailChangeLoading}
+                        className="btn btn-secondary"
+                        style={{ width: '100%', padding: '0.6rem', fontSize: '0.85rem' }}
+                      >
+                        <RotateCcw size={14} /> Resend Code
+                      </button>
+                    </div>
+                  )}
+
+                  {emailChangeStep === 'complete' && (
+                    <div style={{ textAlign: 'center', padding: '1rem' }}>
+                      <div style={{ width: '4rem', height: '4rem', borderRadius: '50%', background: 'rgba(16,185,129,0.12)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', margin: '0 auto 1rem' }}>
+                        <CheckCircle size={28} color="#10b981" />
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        Your email has been updated to <strong>{pendingEmailChange}</strong>.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
           </div>
         </div>

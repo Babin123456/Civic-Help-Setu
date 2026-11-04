@@ -54,6 +54,7 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civic_journey_progress_<journeyId>` (one per journey) | `journeyDependencyEngine.js` | Completed tasks of a journey plan | Drafts and in-progress work |
 | `civic_accessibility_visit_plans` | `accessibilityPlannerService.js` | Saved citizen accessibility needs, accommodations, and office pre-visit confirmation checklists | Drafts and in-progress work |
 | `civic_grievance_evidence_drafts` | `grievanceEvidenceService.js` | Private user-controlled grievance preparation drafts and timelines | Drafts and in-progress work |
+| `civic_grievance_drafts_v1` | `civicGrievanceDraftingService.js` | User-controlled formal civic grievance drafts and facts | Drafts and in-progress work |
 | `civic_life_event_journeys` | `lifeEventNavigatorService.js` | Saved life-event roadmap progress, hidden tasks and regional selections | Drafts and in-progress work |
 | `civicbridge_eligibility_assessments` | `assessmentStorage.js` | Answers and results of eligibility checks | Drafts and in-progress work |
 | `civicbridge_applicant_profiles_v1` | `applicantProfileService.js` | Household and family member applicant profiles for scoped assessments | Drafts and in-progress work |
@@ -62,6 +63,10 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civic_grievance_tickets` | `grievanceService.js` | Grievance tickets raised from the app | Tracking records |
 | `civicbridge_reminders` | `reminderNotificationService.js` | Renewal, submission and document expiry reminders | Tracking records |
 | `civicbridge_notification_settings` | `reminderNotificationService.js` | Reminder lead time settings | Tracking records |
+| `civicbridge_email_verification_pending` | `emailVerificationService.js` | Pending email verification tokens (single-use, 24h expiry) | Account security |
+| `civicbridge_verified_emails` | `emailVerificationService.js` | List of verified email addresses | Account security |
+| `civicbridge_email_resend_attempts` | `emailVerificationService.js` | Rate limiting state for resend attempts | Account security |
+| `civicbridge_notification_preferences` | `notificationPreferenceService.js` | User email notification preferences (optional categories) | Account security |
 | `civicbridge_saved_rich` | `savedStorage.js` | Saved guides with folder and note | Saved items |
 | `civicbridge_saved` | `savedStorage.js`, `ServiceDetails.jsx` | Older list of saved guide ids, kept in step with the one above | Saved items |
 | `civic_compared_services` | `comparisonService.js` | Services picked for comparison | Saved items |
@@ -103,6 +108,9 @@ After clearing, the sample reviews, sample audit reports and the sample vault do
 | `civicbridge_eligibility_test_cases_v1` | Fictional test cases a maintainer saved in the admin eligibility test bench. Holds made-up answers only, never a citizen's | Admin portal data |
 | `civicbridge_service_drafts_v1` | Unpublished drafts of service guide edits, private to the admin's browser. Hold guide content only, never a citizen's data | Admin portal data |
 | `civicbridge_catalogue_snapshots_v1` | The last 5 backups of the saved service catalogue, taken before a data migration or rollback. Guide content only, never a citizen's data | Admin portal data |
+| `civicbridge_reader_preferences` | User reading mode preferences (font size, contrast, spacing) | Display preference |
+| `civicbridge_catalogue_enrichment_queue_v1` | Proposed AI service enrichments pending admin review | Admin review queue |
+| `civicbridge_dismissed_recommendations`, `civicbridge_catalogue_completeness_dismissals` | Dismissed recommendation IDs and admin catalogue completeness quality check dismissals | UI dismissals and admin review state |
 | `civicbridge_custom_services`, `civicbridge_audit_logs`, `civicbridge_rbac_users`, `civicbridge_service_submissions` | Admin portal data | Not citizen data |
 | `civicbridge_barrier_audit_logs`, `civicbridge_freshness_trust_reviews_v1`, `civicbridge_link_health_v1`, `civicbridge_public_notices_digest_v1`, `civicbridge_source_conflicts`, `civicbridge_conflict_audit_logs`, `civicbridge_duplicate_review_states` | Admin barrier moderation, freshness reviews, official link check results, public gazette digest cache, and source conflict audit queues | Admin portal moderation and public digest cache |
 | `civicbridge_barrier_audit_logs`, `civicbridge_freshness_trust_reviews_v1`, `civicbridge_public_notices_digest_v1`, `civicbridge_service_availability_notices_v1`, `civicbridge_source_conflicts`, `civicbridge_conflict_audit_logs` | Admin barrier moderation, freshness reviews, public gazette digest cache, and source conflict audit queues | Admin portal moderation and public digest cache |

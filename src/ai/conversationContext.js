@@ -32,7 +32,8 @@ const mentionsAnyService = (query) => {
 };
 
 // Service id of the latest assistant answer, only if no user message follows it
-const lastAssistantServiceId = (messages) => {
+export const lastAssistantServiceId = (messages = []) => {
+  if (!Array.isArray(messages)) return null;
   for (let i = messages.length - 1; i >= 0; i -= 1) {
     if (messages[i].role === 'assistant') return messages[i].serviceId || null;
   }

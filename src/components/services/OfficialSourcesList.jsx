@@ -1,6 +1,7 @@
 import React from 'react';
 import { ExternalLink, ShieldCheck, CheckCircle2, AlertCircle, Building2, Calendar, Lock } from 'lucide-react';
 import { getServiceSourceMetadata } from '../../services/sourceVerificationService';
+import { safeHttpUrl } from '../../utils/safeContent';
 
 const OfficialSourcesList = ({ service, onReportMissingSource }) => {
   const { sources, formattedLastVerified, freshness, hasSources } = getServiceSourceMetadata(service);
@@ -93,7 +94,7 @@ const OfficialSourcesList = ({ service, onReportMissingSource }) => {
           {sources.map((src, idx) => (
             <a
               key={idx}
-              href={src.cleanUrl}
+              href={safeHttpUrl(src.cleanUrl) || undefined}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Visit official source: ${src.name} on ${src.domain} (opens in new tab)`}

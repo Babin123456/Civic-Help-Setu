@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { parseAssistantQuery } from '../utils/searchParams';
+import { parseAssistantQuery, parseSlugParam } from '../utils/searchParams';
 import { useLocation, Link } from 'react-router-dom';
 import { Send, AlertCircle, Loader2, Sparkles, Mic, MicOff, BookOpen, RefreshCw, Pencil } from 'lucide-react';
-import ChatMessage from '../components/ChatMessage';
 import { askCivicAssistant } from '../ai/civicAssistant';
 import { askGroundedCivicAssistant } from '../ai/groundedCivicAssistant';
 import SourceGroundedBadge from '../components/assistant/SourceGroundedBadge';
@@ -15,7 +14,9 @@ import ChatEmptyState from '../components/chat/ChatEmptyState';
 import UndoResetNotice from '../components/chat/UndoResetNotice';
 import ConfirmationDialog from '../components/common/ConfirmationDialog';
 import IntentRoutingSuggestions from '../components/assistant/IntentRoutingSuggestions';
-import { STARTER_PROMPTS, resolveFollowUpQuery, getLastUserMessage, hasUserMessages } from '../ai/conversationContext';
+import CivicQuestionSuggestionPanel from '../components/assistant/CivicQuestionSuggestionPanel';
+import TranslatableExplanation from '../components/assistant/TranslatableExplanation';
+import { STARTER_PROMPTS, resolveFollowUpQuery, getLastUserMessage, hasUserMessages, lastAssistantServiceId } from '../ai/conversationContext';
 import { loadChatHistory, saveChatHistory, clearChatHistory } from '../services/chatStorage';
 import {
   UNDO_WINDOW_MS,
@@ -48,41 +49,13 @@ const Assistant = () => {
   const requestInFlightRef = useRef(false);
 
   const location = useLocation();
+  const urlServiceId = parseSlugParam(new URLSearchParams(location.search).get('service') || new URLSearchParams(location.search).get('serviceId'));
+  const [overrideServiceId, setOverrideServiceId] = useState(null);
 
   // Save messages to persistent storage whenever they update
   useEffect(() => {
     saveChatHistory(messages);
   }, [messages]);
-
-  // Handle URL query parameter ?q=
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const query = parseAssistantQuery(searchParams.get('q'));
-
-    if (query) {
-      handleSendMessage(query);
-      window.history.replaceState({}, document.title, location.pathname);
-    }
-  }, [location]);
-
-  // If the notice had keyboard focus when it goes away, hand focus back to the input
-  const closeUndo = () => {
-    if (undoNoticeRef.current?.contains(document.activeElement)) inputRef.current?.focus();
-    setUndoSnapshot(null);
-  };
-
-  // Drop the undo option when the window closes
-  useEffect(() => {
-    if (!undoSnapshot) return undefined;
-    const timer = setTimeout(() => closeUndo(), getUndoRemainingMs(undoSnapshot));
-    return () => clearTimeout(timer);
-  }, [undoSnapshot]);
-
-  useEffect(() => {
-    // Nothing to scroll to in the empty state, and after a reset the starters should stay in view
-    if (!hasUserMessages(messages) && !isLoading) return;
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [messages, isLoading]);
 
   const getAnswer = async (query, history) => {
     // Short follow-ups like "what are the fees?" reuse the service from the last answer
@@ -150,6 +123,42 @@ const Assistant = () => {
       setIsLoading(false);
     }
   };
+
+  // Handle URL query parameter ?q=
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const query = parseAssistantQuery(searchParams.get('q'));
+
+    if (query) {
+      window.history.replaceState({}, document.title, location.pathname);
+      const timer = setTimeout(() => {
+        handleSendMessage(query);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only when URL search location changes
+  }, [location.search]);
+
+  // If the notice had keyboard focus when it goes away, hand focus back to the input
+  const closeUndo = () => {
+    if (undoNoticeRef.current?.contains(document.activeElement)) inputRef.current?.focus();
+    setUndoSnapshot(null);
+  };
+
+  // Drop the undo option when the window closes
+  useEffect(() => {
+    if (!undoSnapshot) return undefined;
+    const timer = setTimeout(() => closeUndo(), getUndoRemainingMs(undoSnapshot));
+    return () => clearTimeout(timer);
+  }, [undoSnapshot]);
+
+  useEffect(() => {
+    // Nothing to scroll to in the empty state, and after a reset the starters should stay in view
+    if (!hasUserMessages(messages) && !isLoading) return;
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages, isLoading]);
+
+
 
   // Put the last question back in the input so it can be reworded
   const handleRefineLast = () => {
@@ -225,6 +234,7 @@ const Assistant = () => {
     if (isLoading || !needsResetConfirmation(messages)) return;
     setUndoSnapshot(createResetSnapshot(messages));
     setMessages(clearChatHistory());
+    setOverrideServiceId('');
     window.scrollTo({ top: 0 });
     setError(null);
     setFailedQuery(null);
@@ -237,10 +247,13 @@ const Assistant = () => {
   };
 
   const questionCount = messages.filter((m) => m.role === 'user').length;
+  const currentServiceContextId = overrideServiceId !== null
+    ? (overrideServiceId || null)
+    : (urlServiceId || location.state?.serviceId || (!hasUserMessages(messages) ? null : lastAssistantServiceId(messages)));
 
   const renderAssistantContent = (msg) => {
     if (msg.text && !msg.data) {
-      return <p style={{ fontSize: '1.05rem', lineHeight: '1.6' }}>{msg.text}</p>;
+      return <TranslatableExplanation text={msg.text} />;
     }
 
     const data = msg.data || {};
@@ -276,9 +289,7 @@ const Assistant = () => {
         )}
 
         {data.summary && (
-          <p style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-            {data.summary}
-          </p>
+          <TranslatableExplanation text={data.summary} />
         )}
 
         {/* Fees and processing pill if present */}
@@ -426,6 +437,18 @@ const Assistant = () => {
 
         {/* Personalized Civic Recommendations based on User Profile Context */}
         <PersonalizedRecommendationsPanel onSelectPrompt={(prompt) => handleSendMessage(prompt)} />
+
+        {/* Contextual Civic-Service Question Suggestion Panel (#385) */}
+        <CivicQuestionSuggestionPanel
+          serviceId={currentServiceContextId}
+          onSelectSuggestion={(prompt) => handleSendMessage(prompt)}
+          onFillSuggestion={(prompt) => {
+            setInput(prompt);
+            inputRef.current?.focus();
+          }}
+          onClearService={() => setOverrideServiceId('')}
+          disabled={isLoading}
+        />
 
         {/* Empty state with starter prompts for a fresh session */}
         {!hasUserMessages(messages) && (
