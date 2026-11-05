@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { AlertOctagon, ArrowLeft, Bookmark, Calculator, Check, Link2, Printer, Share2, Zap, Users, Eye, CheckSquare, FileText, Sparkles, RotateCcw, Edit2, ShieldCheck } from 'lucide-react';
+import { AlertOctagon, ArrowLeft, Bookmark, Calculator, Check, Link2, Printer, Share2, Zap, Users, Eye, CheckSquare, FileText, Sparkles, RotateCcw, Edit2, ShieldCheck, Mail } from 'lucide-react';
 import { getServiceById } from '../services/serviceCatalog';
 import RetiredServiceNotice from '../components/common/RetiredServiceNotice';
 import ServiceQrHandout from '../components/services/ServiceQrHandout';
@@ -49,6 +49,7 @@ const getSavedServices = () => {
 };
 
 import ServicePrintPacketModal from '../components/services/ServicePrintPacketModal';
+import ShareByEmailModal from '../components/services/ShareByEmailModal';
 import CivicAcronymTooltip from '../components/acronyms/CivicAcronymTooltip.jsx';
 import { CIVIC_ACRONYMS } from '../data/civicAcronyms.js';
 const copyServiceLink = async (url) => {
@@ -98,6 +99,7 @@ const ServiceDetails = ({ previewService = null }) => {
   const [showPrepPlanModal, setShowPrepPlanModal] = useState(false);
   const [showMakeChecklistModal, setShowMakeChecklistModal] = useState(false);
   const [showReadinessCheckerModal, setShowReadinessCheckerModal] = useState(false);
+  const [showShareByEmailModal, setShowShareByEmailModal] = useState(false);
   const service = previewService ?? getServiceById(id);
   const [, setSavedTick] = useState(0);
   const [customChecklistState, setCustomChecklistState] = useState(null);
@@ -489,6 +491,30 @@ const ServiceDetails = ({ previewService = null }) => {
                     color="var(--accent-main)"
                   />
                   Low-Bandwidth & SMS Copy
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowShareByEmailModal(true)}
+                  className="btn btn-secondary"
+                  aria-label="Share this service by email"
+                  style={{
+                    gridColumn: '1 / -1',
+                    padding: '0.65rem',
+                    fontSize: '0.875rem',
+                    background: 'var(--glass-bg)',
+                    color: 'var(--text-primary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.35rem',
+                  }}
+                >
+                  <Mail
+                    size={16}
+                    color="var(--accent-main)"
+                  />
+                  Share by email
                 </button>
               </div>
 
@@ -1000,6 +1026,14 @@ const ServiceDetails = ({ previewService = null }) => {
         isOpen={showReadinessCheckerModal}
         onClose={() => setShowReadinessCheckerModal(false)}
         service={service}
+      />
+
+      <ShareByEmailModal
+        isOpen={showShareByEmailModal}
+        services={[service]}
+        preSelectedIds={[service.id]}
+        onClose={() => setShowShareByEmailModal(false)}
+        onSent={() => setShowShareByEmailModal(false)}
       />
     </div>
   );
