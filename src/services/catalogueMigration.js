@@ -155,7 +155,7 @@ export const CURRENT_VERSION = MIGRATIONS[MIGRATIONS.length - 1].version;
 export const KNOWN_FIELDS = Object.freeze([
   'id', 'name', 'shortDescription', 'category', 'department', 'type', 'difficulty', 'feeType', 'speedDays', 'eligibility', 'documents',
   'fees', 'processingTime', 'lastVerified', 'steps', 'officialSources', 'warnings', 'popularityScore', 'eligibilityRuleKey', 'jurisdiction',
-  'publicationState', 'contacts', 'intakeWindows', 'archived', 'archivedAt', 'archivedBy', 'archiveReason', 'rating', 'tags',
+  'publicationState', 'contacts', 'dateGuidance', 'validityNote', 'intakeWindows', 'archived', 'archivedAt', 'archivedBy', 'archiveReason', 'rating', 'tags',
 ]);
 
 // ---- one record -----------------------------------------------------------------------------------

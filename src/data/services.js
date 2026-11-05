@@ -1,38 +1,135 @@
 export const MOCK_SERVICES = [
   {
-    id: 'birth-certificate',
-    name: 'Birth Certificate',
-    shortDescription: 'Official record of a person\'s birth, required for various legal and identity purposes.',
-    category: 'Certificates',
-    department: 'Municipal Administration',
-    type: 'Online / Offline',
-    difficulty: 'Medium',
-    feeType: 'paid',
-    speedDays: 14,
-    popularityScore: 92,
-    eligibilityRuleKey: 'birth-certificate',
-    eligibility: ['Parents of the newborn', 'Individuals without a birth certificate'],
-    documents: [
-      'Proof of birth from hospital (if born in hospital)',
-      'Parents\' identity proof (Aadhaar/Voter ID)',
-      'Marriage certificate of parents (in some regions)'
-    ],
-    documentRequirements: {
-      'Proof of birth from hospital (if born in hospital)': { type: 'conditional', condition: 'The child was born in a hospital.' },
-      'Marriage certificate of parents (in some regions)': { type: 'conditional', condition: 'Your region asks for it. The service record says only some regions do.' }
+    "id": "birth-certificate",
+    "jurisdiction": {
+      "level": "state",
+      "states": [
+        "Tamil Nadu"
+      ],
+      "districts": [],
+      "localBody": ""
     },
-    steps: [
-      { title: 'Register the birth', description: 'Ensure the hospital has registered the birth, or register it locally within 21 days.' },
-      { title: 'Gather documents', description: 'Collect hospital discharge summary and parents\' ID proofs.' },
-      { title: 'Apply online/offline', description: 'Submit the application via the local municipal portal or visit the registrar office.' }
+    "name": "Birth Certificate",
+    "shortDescription": "Register a birth in Tamil Nadu with the Registrar for the place where it occurred, then search or download the official certificate through the Tamil Nadu Civil Registration System.",
+    "category": "Certificates",
+    "department": "Chief Registrar of Births and Deaths, Tamil Nadu / jurisdictional Registrar",
+    "type": "Online / Offline",
+    "difficulty": "Medium",
+    "feeType": "paid",
+    "speedDays": 30,
+    "popularityScore": 92,
+    "eligibility": [
+      "This guide applies when the birth occurred in Tamil Nadu. Registration is handled by the Registrar for the place of occurrence, not simply the family's current residential address.",
+      "For a birth in a hospital or other institution, the institution is responsible for informing the Registrar under the civil-registration process.",
+      "For a home birth, the informant should report the event to the Registrar for the local area within 21 days."
     ],
-    fees: 'Typically ₹20 - ₹100 (varies by state and time elapsed since birth)',
-    processingTime: '7 - 30 days',
-    officialSources: [
-      { name: 'National Government Services Portal', url: 'https://services.india.gov.in', verified: true }
+    "documents": [
+      "Hospital or health-centre birth record / institutional acknowledgement (keep available if requested; confirm the current checklist with the Registrar)",
+      "Evidence of the date and place of birth requested by the jurisdictional Registrar (requirements depend on the circumstances and are not established as one universal checklist by the linked public sources)",
+      "Self-attested supporting document in Form 14 (for delayed reporting after 30 days and within one year, as prescribed by Tamil Nadu Rule 9(2))"
     ],
-    warnings: ['Late registration (after 21 days) may require an affidavit and additional fees.', 'Information may vary by state.'],
-    lastVerified: '2023-10-01'
+    "documentRequirements": {
+      "Hospital or health-centre birth record / institutional acknowledgement (keep available if requested; confirm the current checklist with the Registrar)": {
+        "type": "unverified"
+      },
+      "Evidence of the date and place of birth requested by the jurisdictional Registrar (requirements depend on the circumstances and are not established as one universal checklist by the linked public sources)": {
+        "type": "unverified"
+      },
+      "Self-attested supporting document in Form 14 (for delayed reporting after 30 days and within one year, as prescribed by Tamil Nadu Rule 9(2))": {
+        "type": "conditional",
+        "condition": "The birth is reported after 30 days but within one year of its occurrence."
+      }
+    },
+    "steps": [
+      {
+        "title": "Identify the correct Registrar",
+        "description": "Use the place where the birth occurred to identify the local registration unit and Registrar. A birth occurring outside Tamil Nadu must be registered with the authority for that place."
+      },
+      {
+        "title": "Check who reports the birth",
+        "description": "For a hospital, health centre, maternity home, nursing home or similar institution, the institution is responsible for informing the Registrar. For a home birth, the citizen/informant should report it to the Registrar for the local area."
+      },
+      {
+        "title": "Report within 21 days",
+        "description": "Tamil Nadu Rule 5(3) requires the information to be given within 21 days from the date of birth. Normal registration within this period is free."
+      },
+      {
+        "title": "Use the correct delayed-registration route",
+        "description": "After 21 days but within 30 days: Rule 9(1) sets a ₹100 late fee. After 30 days but within one year: Rule 9(2) requires written permission from the officer for the registration-unit type, a ₹200 late fee and a self-attested supporting document in Form 14. After one year, Rule 9(3) prescribes a ₹500 late fee; the competent authority must be read with amended Section 13 of the central Act effective 1 October 2026: for more than one year but within two years, an order from the District Magistrate, Sub-Divisional Magistrate or an Executive Magistrate authorised by the District Magistrate; after two years, an order from a Judicial Magistrate of the First Class. The authority verifies the event."
+      },
+      {
+        "title": "Search or download the certificate",
+        "description": "The CRSTN public portal provides search and certificate download for births registered from 1 January 2018. The search page asks for RCH ID or details such as gender, district, place of birth and date of birth, with mobile verification."
+      },
+      {
+        "title": "For older or missing records",
+        "description": "For a birth registered before 1 January 2018, contact the relevant local body. If no entry appears, ask the jurisdictional Registrar about a record search or non-availability certificate; do not submit a duplicate registration without checking."
+      },
+      {
+        "title": "Add the child's name or correct an entry",
+        "description": "Under Tamil Nadu Rule 10, the parent or guardian can provide the child's name within 12 months from registration without a late fee; after 12 months but within 15 years, the rule prescribes ₹200. For an error in an existing entry, contact the Registrar and follow the Rule 11 / Section 15 correction process."
+      }
+    ],
+    "dateGuidance": [
+      {
+        "label": "Date of birth",
+        "description": "The event date. It starts the normal 21-day reporting period and determines which delayed-registration period applies."
+      },
+      {
+        "label": "Reporting date",
+        "description": "The date the birth information is given to the Registrar. Keep any acknowledgement or reference number supplied by the institution or Registrar."
+      },
+      {
+        "label": "Registration date",
+        "description": "The date entered in the register. The child's name-addition period under Rule 10 is calculated from this date, not the date of birth."
+      },
+      {
+        "label": "Certificate issue / download date",
+        "description": "Keep the downloaded or issued certificate and note when it was obtained. It is distinct from the date of birth and registration date."
+      }
+    ],
+    "validityNote": "The linked official sources do not specify a general expiry date for a birth certificate. A separate authority may ask for a recently issued copy for a particular application; confirm that requirement with the receiving authority.",
+    "fees": "Normal registration within 21 days: free. After 21 days but within 30 days: ₹100. After 30 days but within one year: ₹200, with written permission and Form 14. After one year: Tamil Nadu Rule 9(3) prescribes ₹500; the competent authority is split by amended Section 13 (1–2 years: District Magistrate / Sub-Divisional Magistrate / authorised Executive Magistrate; over 2 years: Judicial Magistrate First Class). CRSTN online downloads for births registered from 1 January 2018 are free. Separate searches or certified extracts may have Rule 13 fees; confirm the exact service and amount before paying.",
+    "processingTime": "Tamil Nadu Rule 8 describes a 30-day certificate collection/transmission window in specified reporting cases. The reviewed official sources do not state one universal processing guarantee for every route; confirm the current timeline with the jurisdictional Registrar.",
+    "officialSources": [
+      {
+        "name": "Tamil Nadu Directorate of Town Panchayats — Birth and Death Registration",
+        "url": "https://townpanchayat.in/birth_death.php",
+        "verified": true,
+        "lastVerified": "2026-11-05"
+      },
+      {
+        "name": "Tamil Nadu Civil Registration System (CRSTN)",
+        "url": "https://www.crstn.org/birth_death_tn/crs",
+        "verified": true,
+        "lastVerified": "2026-11-05"
+      },
+      {
+        "name": "CRSTN — Birth Certificate Search",
+        "url": "https://www.crstn.org/birth_death_tn/BCert",
+        "verified": true,
+        "lastVerified": "2026-11-05"
+      },
+      {
+        "name": "Tamil Nadu Government Gazette archive — Rules, 2025 (G.O. Ms. No. 351 / SRO A-20(a)/2025)",
+        "url": "https://www.stationeryprinting.tn.gov.in/extra_ordinary_lists.php?id=MjAyNQ%3D%3D",
+        "verified": true,
+        "lastVerified": "2026-11-05"
+      },
+      {
+        "name": "Office of the Registrar General & Census Commissioner — Registration of Births and Deaths (Amendment) Act, 2026",
+        "url": "https://censusindia.mha.gov.in/nada/index.php/catalog/47182",
+        "verified": true,
+        "lastVerified": "2026-11-05"
+      }
+    ],
+    "warnings": [
+      "This guide is specific to births that occurred in Tamil Nadu. Use the Registrar for the place of occurrence if the birth happened in another state or Union Territory.",
+      "The Tamil Nadu Rules, 2025 supersede the 2000 state rules. For delayed reports after one year, also apply the central Registration of Births and Deaths (Amendment) Act, 2026, in force from 1 October 2026: more than two years now requires a Judicial Magistrate of the First Class order.",
+      "Do not assume a universal identity-document checklist. Confirm the current evidence required for the particular birth circumstances with the jurisdictional Registrar.",
+      "CRSTN online download is free for births registered from 1 January 2018; separate record searches, certified extracts and non-availability certificates are different services and may carry separate fees."
+    ],
+    "lastVerified": "2026-11-05"
   },
   {
     id: 'aadhaar-card',
