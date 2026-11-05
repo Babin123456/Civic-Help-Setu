@@ -1,9 +1,9 @@
 # Birth Certificate — Tamil Nadu Research Notes
 
-**Prepared:** 4 November 2026  
+**Prepared:** 5 November 2026  
 **Related issue:** [#501 — Add a Birth Certificate issuance guide](https://github.com/GoldRay19/Civic-Help-Setu/issues/501)  
 **Scope:** Tamil Nadu-specific research and citizen-facing content.  
-**Status:** Research draft for maintainer review; not legal advice and not yet approved for publication.
+**Status:** Research notes supporting the service-page implementation in PR #535; maintainer review is required before publication.
 
 ## 1. Citizen-facing summary
 
