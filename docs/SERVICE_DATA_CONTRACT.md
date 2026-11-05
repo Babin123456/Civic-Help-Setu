@@ -36,8 +36,6 @@ Required unless marked optional.
 | `warnings` | string[] | optional, fallback `[]` |
 | `dateGuidance` | `{label, description}[]` | optional; displays dated-process notes in the service guide |
 | `validityNote` | string | optional; displays a service-specific validity/use note |
-| `dateGuidance` | `{label, description}[]` | optional; displays dated-process notes in the service guide |
-| `validityNote` | string | optional; displays a service-specific validity/use note |
 | `popularityScore` | number | optional, 0 to 100 |
 | `eligibilityRuleKey` | string | optional, key into `eligibilityRules.js` |
 | `jurisdiction` | `{level, states, districts, localBody}` | optional, no fallback: a record without it is "unknown", never nationwide. Checked with the app's own `validateJurisdiction` (a `state` level needs a state, a `national` one lists none, and so on). A legacy plain string such as `India` is rejected |
