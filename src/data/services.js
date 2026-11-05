@@ -117,8 +117,8 @@ export const MOCK_SERVICES = [
         "lastVerified": "2026-11-05"
       },
       {
-        "name": "Akashvani — 2026 Amendment Act commencement and delayed-registration authorities",
-        "url": "https://newsonair.gov.in/registration-of-births-and-deaths-amendment-act-comes-into-force-today/",
+        "name": "Office of the Registrar General & Census Commissioner — Registration of Births and Deaths (Amendment) Act, 2026",
+        "url": "https://censusindia.mha.gov.in/nada/index.php/catalog/47182",
         "verified": true,
         "lastVerified": "2026-11-05"
       }
