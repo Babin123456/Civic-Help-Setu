@@ -26,6 +26,8 @@ describe('validateServiceRecord', () => {
     const r = {
       ...valid(), jurisdiction: { level: 'state', states: ['Delhi'], districts: [], localBody: '' }, publicationState: 'draft', warnings: ['Carry originals'],
       contacts: [{ label: 'Helpline', phone: '1950' }, { label: 'Web', url: 'https://eci.gov.in' }],
+      dateGuidance: [{ label: 'Date of birth', description: 'The event date.' }],
+      validityNote: 'No general expiry date is stated.',
     };
     expect(validateServiceRecord(r)).toEqual([]);
   });
@@ -48,6 +50,8 @@ describe('validateServiceRecord', () => {
     ['officialSources[0].url', { officialSources: [{ name: 'A', url: 'http://insecure.example' }] }],
     ['publicationState', { publicationState: 'live' }],
     ['contacts[0]', { contacts: [{ label: 'Empty' }] }],
+    ['validityNote', { validityNote: '' }],
+    ['dateGuidance', { dateGuidance: [{ label: 'Date of birth' }] }],
     ['contacts[0].email', { contacts: [{ label: 'Mail', email: 'nope' }] }],
   ])('rejects invalid %s', (field, patch) => {
     expect(fields({ ...valid(), ...patch })).toContain(field);
