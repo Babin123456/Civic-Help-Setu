@@ -1,6 +1,6 @@
 {
   "nav": {
-    "brand": "CivicBridge",
+    "brand": "Civic Help Setu",
     "services": "Services",
     "nearby": "Nearby Centers",
     "track": "Track Status",
@@ -36,7 +36,7 @@
   "hero": {
     "tagline": "The New Standard for Civic Assistance",
     "title": "Simplify Complex Public Systems",
-    "subtitle": "CivicBridge translates bureaucratic procedures into clear, actionable steps using verified official sources. No jargon, just direct answers.",
+    "subtitle": "Civic Help Setu translates bureaucratic procedures into clear, actionable steps using verified official sources. No jargon, just direct answers.",
     "exploreBtn": "Explore All Guides",
     "tryAiBtn": "Try AI Assistant"
   },
@@ -63,7 +63,7 @@
     "community": "Community & Legal",
     "privacy": "Privacy Policy",
     "openSource": "Open Source",
-    "disclaimer": "CivicBridge is an independent, non-governmental civic tech platform. We provide guidance and direct citizens to official government portals."
+    "disclaimer": "Civic Help Setu is an independent, non-governmental civic tech platform. We provide guidance and direct citizens to official government portals."
   },
   "rejection_guide": {
     "title": "Rejection Prevention Guide",

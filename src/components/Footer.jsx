@@ -16,7 +16,7 @@ const Footer = () => {
             <Shield size={20} fill="var(--bg-main)" color="var(--bg-main)" />
           </div>
           <span style={{ fontWeight: '800', fontSize: '1.25rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
-            {t('nav.brand', 'CivicBridge')}
+            {t('nav.brand', 'Civic Help Setu')}
           </span>
           <span style={{ fontSize: '0.9rem', marginLeft: '0.5rem', color: 'var(--text-muted)' }}>
             &copy; {new Date().getFullYear()} {t('footer.openSource', 'Open Source Project')}.
@@ -24,7 +24,7 @@ const Footer = () => {
         </div>
 
         <p style={{ maxWidth: '640px', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.6', margin: 0 }}>
-          {t('footer.disclaimer', 'CivicBridge is an independent, non-governmental civic tech platform.')}
+          {t('footer.disclaimer', 'Civic Help Setu is an independent, non-governmental civic tech platform.')}
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.75rem', fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-secondary)' }}>

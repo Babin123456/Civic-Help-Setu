@@ -5,7 +5,7 @@ const OpenSource = () => {
   return (
     <div className="container max-w-4xl pt-20 pb-24">
       <div className="text-center mb-16">
-        <h1 className="text-4xl font-bold mb-4">Why CivicBridge is Open Source</h1>
+        <h1 className="text-4xl font-bold mb-4">Why Civic Help Setu is Open Source</h1>
         <p className="text-xl text-muted">
           Public-service information should be accessible, understandable, and community maintained.
         </p>
