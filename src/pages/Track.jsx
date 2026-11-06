@@ -50,6 +50,7 @@ import { calculateStatutoryCompensation } from '../services/statutoryCompensatio
 import DeficiencyCureModal from '../components/tracking/DeficiencyCureModal';
 import RejectionNoticeExplainerModal from '../components/tracking/RejectionNoticeExplainerModal';
 import InlineStatusLegend from '../components/common/InlineStatusLegend';
+import './TrackSearch.css';
 
 const Track = () => {
   const location = useLocation();
@@ -61,6 +62,7 @@ const Track = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [activeApp, setActiveApp] = useState(null);
   const [notFound, setNotFound] = useState(false);
+  const [searchError, setSearchError] = useState('');
   const [showReceipt, setShowReceipt] = useState(false);
 
   const [newNoteText, setNewNoteText] = useState('');
@@ -97,11 +99,14 @@ const Track = () => {
     e?.preventDefault();
     const query = appIdInput.trim();
     if (!query) {
+      setSearchError('Enter the reference ID from your application receipt.');
+      setNotFound(false);
       toast?.warning?.('Please enter an application reference ID to track status.');
       return;
     }
 
     setIsSearching(true);
+    setSearchError('');
     setNotFound(false);
 
     setTimeout(() => {
@@ -112,7 +117,11 @@ const Track = () => {
         toast?.success?.(`Application record ${match.id} loaded successfully.`);
       } else {
         setActiveApp(null);
-        setNotFound(true);
+        if (!parseReferenceParam(query)) {
+          setSearchError('This reference has no readable characters. Check the ID on your receipt.');
+        } else {
+          setNotFound(true);
+        }
         toast?.error?.(`No record found matching "${query}".`);
       }
       setIsSearching(false);
@@ -129,6 +138,7 @@ const Track = () => {
     setActiveApp(app);
     setAppIdInput(app.id);
     setNotFound(false);
+    setSearchError('');
   };
 
   const handleAddNote = (e) => {
@@ -149,6 +159,7 @@ const Track = () => {
     setActiveApp(newApp);
     setAppIdInput(newApp.id);
     setNotFound(false);
+    setSearchError('');
     setIsAddModalOpen(false);
   };
 
@@ -207,26 +218,34 @@ const Track = () => {
           </div>
         </header>
 
-        <div style={{ display: 'grid', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '1.5rem', minWidth: 0 }}>
           <ActiveApplicationsSummaryGrid metrics={metrics} applications={applications} />
 
-          <div className="card" style={{ padding: '1.25rem' }}>
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
-              <form onSubmit={handleSearch} style={{ display: 'flex', flex: 1, minWidth: '260px', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <div style={{ position: 'relative', flex: 1 }}>
-                  <Search size={18} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
+          <div className="card track-search-card">
+            <div className="track-search-layout">
+              <form onSubmit={handleSearch} className="track-search-form" noValidate>
+                <label htmlFor="track-reference" className="track-search-label">Application reference ID</label>
+                <p id="track-reference-help" className="track-search-help">Use the ID on your receipt, for example SRV-98234710. Formats vary by service. Search checks applications saved on this device.</p>
+                <div className="track-search-controls" aria-busy={isSearching}>
+                  <div className="track-search-input-wrap">
+                  <Search size={18} aria-hidden="true" className="track-search-icon" />
                   <input
+                    id="track-reference"
                     type="text"
                     value={appIdInput}
-                    onChange={(e) => setAppIdInput(e.target.value)}
-                    placeholder="Enter application reference ID"
-                    style={{ width: '100%', padding: '0.9rem 1rem 0.9rem 2.6rem', borderRadius: '0.75rem', border: '1px solid var(--border-main)' }}
+                    onChange={(e) => { setAppIdInput(e.target.value); setSearchError(''); setNotFound(false); }}
+                    placeholder="e.g. SRV-98234710"
+                    disabled={isSearching}
+                    aria-invalid={searchError ? 'true' : undefined}
+                    aria-describedby={searchError ? 'track-reference-help track-reference-error' : 'track-reference-help'}
                   />
+                  </div>
+                  <button type="submit" className="btn btn-primary" disabled={isSearching}>
+                    {isSearching ? 'Searching…' : 'Track application'}
+                  </button>
                 </div>
-
-                <button type="submit" className="btn btn-primary" disabled={isSearching}>
-                  {isSearching ? 'Searching...' : 'Track'}
-                </button>
+                {searchError && <p id="track-reference-error" className="track-search-error" role="alert">{searchError}</p>}
+                <p className="track-search-loading" role="status" aria-live="polite">{isSearching ? 'Searching saved applications…' : ''}</p>
               </form>
 
               <button type="button" className="btn btn-secondary" onClick={() => setIsJourneyModalOpen(true)}>
@@ -235,8 +254,9 @@ const Track = () => {
             </div>
 
             {notFound && (
-              <div style={{ marginTop: '1rem', color: '#ef4444', fontWeight: 600 }}>
-                No application found matching that reference.
+              <div className="track-search-not-found">
+                <p role="status"><strong>No saved application found.</strong> Check the reference on your receipt and try again, or add it to this device.</p>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsAddModalOpen(true)}><Plus size={16} aria-hidden="true" /> Add application</button>
               </div>
             )}
           </div>
@@ -425,7 +445,7 @@ const Track = () => {
       <ManualAddApplicationModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onSave={handleManualAdd}
+        onApplicationAdded={handleManualAdd}
       />
 
       <TrackingReceiptModal app={activeApp} isOpen={showReceipt} onClose={() => setShowReceipt(false)} />
