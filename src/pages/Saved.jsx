@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getAllServices } from '../services/serviceCatalog';
-import { BookmarkMinus, Bookmark, Search, Layers, Sparkles, Folder, GitMerge } from 'lucide-react';
+import { BookmarkMinus, Bookmark, Search, Layers, Sparkles, Folder, GitMerge, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   getSavedItems,
@@ -9,6 +9,7 @@ import {
   clearAllSaved,
   toggleFavoriteItem,
 } from '../services/savedStorage';
+import ShareByEmailModal from '../components/services/ShareByEmailModal';
 import {
   getAllReminders,
   calculateDaysRemaining,
@@ -50,6 +51,8 @@ const Saved = () => {
   const [editingModal, setEditingModal] = useState({ isOpen: false, item: null, service: null });
   const [reminderModal, setReminderModal] = useState({ isOpen: false, service: null });
   const [isRoadmapModalOpen, setIsRoadmapModalOpen] = useState(false);
+  const [shareByEmailModalOpen, setShareByEmailModalOpen] = useState(false);
+  const [shareSelectedIds, setShareSelectedIds] = useState(new Set());
 
   useEffect(() => {
     setSavedItems(getSavedItems());
@@ -235,6 +238,20 @@ const Saved = () => {
               >
                 <BookmarkMinus size={15} /> Clear All
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShareSelectedIds(new Set(populatedItems.map((p) => p.service.id)));
+                  setShareByEmailModalOpen(true);
+                }}
+                className="btn btn-secondary"
+                style={{
+                  padding: '0.5rem 1rem',
+                  fontSize: '0.85rem',
+                }}
+              >
+                <Mail size={15} /> Share by email
+              </button>
             </div>
           )}
         </div>
@@ -407,6 +424,20 @@ const Saved = () => {
           isOpen={isRoadmapModalOpen}
           onClose={() => setIsRoadmapModalOpen(false)}
           savedServices={savedItems.map((item) => allServices.find((s) => s.id === item.serviceId)).filter(Boolean)}
+        />
+
+        <ShareByEmailModal
+          isOpen={shareByEmailModalOpen}
+          services={populatedItems.map((p) => p.service)}
+          preSelectedIds={Array.from(shareSelectedIds)}
+          onClose={() => {
+            setShareByEmailModalOpen(false);
+            setShareSelectedIds(new Set());
+          }}
+          onSent={() => {
+            setShareByEmailModalOpen(false);
+            setShareSelectedIds(new Set());
+          }}
         />
       </div>
     </div>

@@ -18,6 +18,7 @@ export const EMAIL_TEMPLATES = {
   PASSWORD_CHANGED: 'password_changed',
   EMAIL_CHANGED: 'email_changed',
   LOGIN_ALERT: 'login_alert',
+  SERVICE_SHARE: 'service_share',
   NEWSLETTER_DIGEST: 'newsletter_digest',
 };
 
@@ -31,6 +32,7 @@ const TEMPLATE_CATEGORY_MAP = {
   [EMAIL_TEMPLATES.PASSWORD_CHANGED]: 'account_security',
   [EMAIL_TEMPLATES.EMAIL_CHANGED]: 'account_security',
   [EMAIL_TEMPLATES.LOGIN_ALERT]: 'account_security',
+  [EMAIL_TEMPLATES.SERVICE_SHARE]: 'service_shares',
   [EMAIL_TEMPLATES.NEWSLETTER_DIGEST]: 'newsletter_digest',
 };
 
@@ -181,6 +183,15 @@ export async function sendLoginAlertEmail(email, loginData, userId) {
     data: loginData,
     userId,
     forceEssential: true,
+  });
+}
+
+export async function sendServiceShareEmail(email, shareData, userId) {
+  return sendEmail({
+    to: email,
+    template: EMAIL_TEMPLATES.SERVICE_SHARE,
+    data: shareData,
+    userId,
   });
 }
 
