@@ -129,6 +129,12 @@ export function validateServiceRecord(record) {
 
   // Optional fields: absent is fine, present must be valid.
   if (record.warnings !== undefined && !isTextList(record.warnings)) fail('warnings', 'must be an array of non-empty strings when present');
+  if (record.validityNote !== undefined && !isText(record.validityNote)) fail('validityNote', 'must be a non-empty string when present');
+  if (record.dateGuidance !== undefined) {
+    if (!Array.isArray(record.dateGuidance) || record.dateGuidance.some((item) => !isObject(item) || !isText(item.label) || !isText(item.description))) {
+      fail('dateGuidance', 'must be an array of { label, description } with non-empty strings when present');
+    }
+  }
   if (record.popularityScore !== undefined && !(Number.isFinite(record.popularityScore) && record.popularityScore >= 0 && record.popularityScore <= 100)) {
     fail('popularityScore', 'must be a number from 0 to 100 when present');
   }

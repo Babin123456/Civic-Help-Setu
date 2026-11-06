@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Download, Upload, ShieldCheck, Check, AlertCircle } from 'lucide-react';
+import { validateBackupFile } from '../../services/vaultValidation';
 import { exportVaultData, importVaultData } from '../../services/vaultStorage';
 import { useToast } from '../../context/ToastContext';
 import { logDiagnostic } from '../../utils/diagnostics';
@@ -12,6 +13,7 @@ const VaultBackupRestoreModal = ({
   const { toast } = useToast();
   const [importText, setImportText] = useState('');
   const [importStatus, setImportStatus] = useState(null);
+  const [fileError, setFileError] = useState('');
 
   if (!isOpen) return null;
 
@@ -38,6 +40,15 @@ const VaultBackupRestoreModal = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const validation = validateBackupFile(file);
+    if (!validation.valid) {
+      setFileError(validation.error);
+      setImportText('');
+      e.target.value = '';
+      return;
+    }
+
+    setFileError('');
     const reader = new FileReader();
     reader.onload = (event) => {
       setImportText(event.target?.result || '');
@@ -158,12 +169,24 @@ const VaultBackupRestoreModal = ({
             Upload a previously exported CivicBridge vault backup file to restore records.
           </p>
 
+          <p id="backup-file-hint" style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)', margin: '0 0 0.5rem' }}>
+            Allowed format: JSON (.json), up to 2 MB.
+          </p>
+
           <input
             type="file"
             accept=".json"
             onChange={handleFileUpload}
-            style={{ marginBottom: '0.75rem', fontSize: '0.85rem' }}
+            aria-invalid={fileError ? 'true' : undefined}
+            aria-describedby={fileError ? 'backup-file-hint backup-file-error' : 'backup-file-hint'}
+            style={{ marginBottom: fileError ? '0.25rem' : '0.75rem', fontSize: '0.85rem' }}
           />
+
+          {fileError && (
+            <p id="backup-file-error" role="alert" style={{ fontSize: '0.8rem', color: '#ef4444', margin: '0 0 0.75rem' }}>
+              {fileError}
+            </p>
+          )}
 
           {importStatus && (
             <div

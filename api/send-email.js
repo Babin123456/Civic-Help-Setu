@@ -50,7 +50,6 @@ export default async function route(req, res) {
   MOCK_EMAIL_LOG.push(logEntry);
   if (MOCK_EMAIL_LOG.length > 500) MOCK_EMAIL_LOG.shift();
 
-  console.log(`[MOCK EMAIL] To: ${to}, Template: ${template}`, data);
-
+  console.log(`[MOCK EMAIL] id=${logEntry.id}, template=${template}, status=sent`);
   return json(200, { messageId: logEntry.id, message: 'Email queued for delivery (mock)' });
 }

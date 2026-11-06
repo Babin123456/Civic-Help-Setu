@@ -68,6 +68,9 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_office_accessibility_audits', category: 'activity', exportAs: 'officeAccessibilityAudits', empty: [] }, // accessibilityMapService.js
   { key: 'civic_grievance_drafts_v1', category: 'drafts', exportAs: 'grievanceDrafts', empty: [] }, // civicGrievanceDraftingService.js
   { key: 'civicbridge_preparation_plans_v1', category: 'drafts', exportAs: 'preparationPlans', empty: {} }, // applicationPreparationPlanService.js
+  { key: 'civicbridge_newsletter_subscriptions', category: 'tracking', exportAs: 'newsletterSubscriptions', empty: [] }, // newsletterSubscriptionService.js
+  { key: 'civicbridge_sent_digests', category: 'tracking', exportAs: 'sentNewsletterDigests', empty: [] }, // newsletterSubscriptionService.js
+  { key: 'civicbridge_newsletter_delivery_failures', category: 'tracking', exportAs: 'newsletterDeliveryFailures', empty: [] }, // newsletterSubscriptionService.js
 ];
 
 /**

@@ -26,9 +26,32 @@ const ServiceImportPanel = ({ existingServices, actorName, onImported, onClose }
     if (!file) return;
     reset();
     setFileName(file.name);
+    if (!file.size) {
+      setReadError(`"${file.name}" is empty. Choose a file with content.`);
+      return;
+    }
     if (file.size > MAX_IMPORT_BYTES) {
       setReadError(`"${file.name}" is larger than ${MAX_IMPORT_BYTES / 1024} KB. Split it into smaller files.`);
       return;
+    }
+    const idx = file.name.lastIndexOf('.');
+    const ext = idx === -1 ? '' : file.name.slice(idx + 1).toLowerCase();
+    if (!['csv', 'json'].includes(ext)) {
+      setReadError(`Unsupported file format (.${ext || 'unknown'}). Only CSV and JSON files are allowed.`);
+      return;
+    }
+    const mime = (file.type || '').split(';')[0].trim().toLowerCase();
+    if (mime) {
+      const csvMimes = ['text/csv', 'application/csv', 'text/plain'];
+      const jsonMimes = ['application/json', 'text/plain'];
+      if (ext === 'csv' && !csvMimes.includes(mime)) {
+        setReadError(`The file extension (.csv) does not match its content type (${file.type}).`);
+        return;
+      }
+      if (ext === 'json' && !jsonMimes.includes(mime)) {
+        setReadError(`The file extension (.json) does not match its content type (${file.type}).`);
+        return;
+      }
     }
     try {
       const text = await file.text();
@@ -81,13 +104,16 @@ const ServiceImportPanel = ({ existingServices, actorName, onImported, onClose }
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '1rem', alignItems: 'center' }}>
         <label className="btn btn-primary" style={{ fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
           <Upload size={16} /> Choose file
-          <input type="file" accept=".csv,.json,text/csv,application/json" onChange={handleFile} style={{ display: 'none' }} />
+          <input type="file" accept=".csv,.json,text/csv,application/json" onChange={handleFile} aria-describedby="import-file-hint" style={{ display: 'none' }} />
         </label>
         <button type="button" className="btn btn-secondary" onClick={handleDownloadTemplate} style={{ fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
           <Download size={16} /> Download CSV template
         </button>
         {fileName && <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{fileName}</span>}
       </div>
+      <p id="import-file-hint" style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '0.5rem 0 0' }}>
+        Allowed formats: CSV or JSON, up to {MAX_IMPORT_BYTES / 1024} KB.
+      </p>
 
       <div aria-live="polite">
         {readError && <p role="alert" style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '1rem' }}>{readError}</p>}

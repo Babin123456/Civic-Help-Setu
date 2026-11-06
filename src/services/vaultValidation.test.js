@@ -7,6 +7,8 @@ import {
   formatFileSize,
   getVerificationLabel,
   MAX_FILE_SIZE_BYTES,
+  MAX_BACKUP_SIZE_BYTES,
+  validateBackupFile,
 } from './vaultValidation';
 
 const file = (name, type, size = 1000) => ({ name, type, size });
@@ -127,5 +129,37 @@ describe('formatFileSize and labels', () => {
   it('labels verification as self-declared', () => {
     expect(getVerificationLabel({ verified: true })).toBe('Self-declared verified');
     expect(getVerificationLabel({})).toBe('Not verified');
+  });
+});
+
+describe('validateBackupFile', () => {
+  const jsonFile = (name, type, size = 1000) => ({ name, type, size });
+
+  it('accepts valid JSON backup files', () => {
+    expect(validateBackupFile(jsonFile('backup.json', 'application/json')).valid).toBe(true);
+    expect(validateBackupFile(jsonFile('vault_export.json', 'text/plain')).valid).toBe(true);
+    expect(validateBackupFile(jsonFile('data.JSON', '')).valid).toBe(true);
+  });
+
+  it('rejects missing or empty backup files', () => {
+    expect(validateBackupFile(null).valid).toBe(false);
+    expect(validateBackupFile(jsonFile('backup.json', 'application/json', 0)).valid).toBe(false);
+  });
+
+  it('rejects oversized backup files', () => {
+    expect(validateBackupFile(jsonFile('backup.json', 'application/json', MAX_BACKUP_SIZE_BYTES)).valid).toBe(true);
+    expect(validateBackupFile(jsonFile('backup.json', 'application/json', MAX_BACKUP_SIZE_BYTES + 1)).valid).toBe(false);
+  });
+
+  it('rejects unsupported file formats', () => {
+    expect(validateBackupFile(jsonFile('backup.pdf', 'application/pdf')).valid).toBe(false);
+    expect(validateBackupFile(jsonFile('backup.exe', 'application/x-msdownload')).valid).toBe(false);
+    expect(validateBackupFile(jsonFile('backup.csv', 'text/csv')).valid).toBe(false);
+  });
+
+  it('rejects mismatched extension and MIME types', () => {
+    const res = validateBackupFile(jsonFile('backup.json', 'image/png'));
+    expect(res.valid).toBe(false);
+    expect(res.error).toMatch(/extension does not match/i);
   });
 });

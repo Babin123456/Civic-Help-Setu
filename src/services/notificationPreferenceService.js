@@ -27,6 +27,12 @@ export const NOTIFICATION_CATEGORIES = {
     description: 'Updates about new features, platform improvements, and Civic Help Setu product news.',
     essential: false,
   },
+  NEWSLETTER_DIGEST: {
+    id: 'newsletter_digest',
+    label: 'Monthly Civic Digest',
+    description: 'Personalised monthly email with new services, updates, deadlines, and official announcements based on your interests and location.',
+    essential: false,
+  },
   ACCOUNT_SECURITY: {
     id: 'account_security',
     label: 'Account Security',
@@ -53,6 +59,7 @@ const DEFAULT_PREFERENCES = {
   service_updates: true,
   deadline_reminders: true,
   product_announcements: false,
+  newsletter_digest: false,
   account_security: true,
   verification_emails: true,
 };

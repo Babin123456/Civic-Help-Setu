@@ -52,7 +52,7 @@ export const CSV_COLUMNS = [
   'lastVerified',
 ];
 const PIPE_COLUMNS = new Set(['eligibility', 'documents', 'warnings']);
-const JSON_ONLY_FIELDS = new Set(['steps', 'officialSources', 'popularityScore', 'eligibilityRuleKey']);
+const JSON_ONLY_FIELDS = new Set(['steps', 'officialSources', 'popularityScore', 'eligibilityRuleKey', 'dateGuidance', 'validityNote']);
 const KNOWN_FIELDS = new Set([...CSV_COLUMNS, ...JSON_ONLY_FIELDS]);
 
 // "Short Description", "short_description" and "shortDescription" all map to the same column.

@@ -19,6 +19,7 @@ export const EMAIL_TEMPLATES = {
   EMAIL_CHANGED: 'email_changed',
   LOGIN_ALERT: 'login_alert',
   SERVICE_SHARE: 'service_share',
+  NEWSLETTER_DIGEST: 'newsletter_digest',
 };
 
 const TEMPLATE_CATEGORY_MAP = {
@@ -32,6 +33,7 @@ const TEMPLATE_CATEGORY_MAP = {
   [EMAIL_TEMPLATES.EMAIL_CHANGED]: 'account_security',
   [EMAIL_TEMPLATES.LOGIN_ALERT]: 'account_security',
   [EMAIL_TEMPLATES.SERVICE_SHARE]: 'service_shares',
+  [EMAIL_TEMPLATES.NEWSLETTER_DIGEST]: 'newsletter_digest',
 };
 
 export function getCategoryForTemplate(template) {
@@ -189,6 +191,15 @@ export async function sendServiceShareEmail(email, shareData, userId) {
     to: email,
     template: EMAIL_TEMPLATES.SERVICE_SHARE,
     data: shareData,
+    userId,
+  });
+}
+
+export async function sendNewsletterDigestEmail(email, digestData, userId) {
+  return sendEmail({
+    to: email,
+    template: EMAIL_TEMPLATES.NEWSLETTER_DIGEST,
+    data: digestData,
     userId,
   });
 }

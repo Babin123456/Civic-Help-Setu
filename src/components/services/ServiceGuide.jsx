@@ -16,7 +16,7 @@ const hasItems = (list) => Array.isArray(list) && list.length > 0;
 // Full application guide for a service. The same content renders in both
 // layouts; focus mode only swaps the presentation class.
 const ServiceGuide = ({ service, focusMode = false, onToggleFocusMode, onMakeChecklist }) => {
-  const { eligibility, documents, steps, fees, processingTime, warnings } = service;
+  const { eligibility, documents, steps, fees, processingTime, warnings, dateGuidance, validityNote } = service;
   const requirements = getDocumentRequirements(service);
 
   return (
@@ -144,6 +144,27 @@ const ServiceGuide = ({ service, focusMode = false, onToggleFocusMode, onMakeChe
               </div>
             )}
           </dl>
+        </div>
+      )}
+
+      {hasItems(dateGuidance) && (
+        <div className="service-guide__block">
+          <h3>Important dates to keep track of</h3>
+          <dl className="service-guide__facts">
+            {dateGuidance.map((item, i) => (
+              <div key={item.label || i}>
+                <dt>{item.label}</dt>
+                <dd>{item.description}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
+
+      {validityNote && (
+        <div className="service-guide__block" role="note" aria-label="Certificate validity">
+          <h3>Validity and use</h3>
+          <p>{validityNote}</p>
         </div>
       )}
 

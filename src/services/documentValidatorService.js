@@ -41,8 +41,43 @@ export const DOCUMENT_TYPES = {
 export const STANDARD_PORTAL_LIMITS = {
   MAX_FILE_SIZE_BYTES: 2 * 1024 * 1024, // 2MB
   RECOMMENDED_MIN_BYTES: 50 * 1024,     // 50KB
-  ALLOWED_EXTENSIONS: ['pdf', 'jpg', 'jpeg', 'png']
+  ALLOWED_EXTENSIONS: ['pdf', 'jpg', 'jpeg', 'png'],
+  ALLOWED_MIME_TYPES: {
+    'application/pdf': ['pdf'],
+    'image/jpeg': ['jpg', 'jpeg'],
+    'image/png': ['png']
+  },
+  ALLOWED_TYPES_HINT: 'PDF, JPG, or PNG, up to 2 MB'
 };
+
+/**
+ * Pre-validation for document files before pre-flight audit or upload.
+ * Returns { valid: boolean, error: string }
+ */
+export function validatePreflightFile(file) {
+  if (!file) return { valid: false, error: 'Please choose a file.' };
+  if (!file.size) return { valid: false, error: 'This file is empty. Choose a file with content.' };
+  if (file.size > STANDARD_PORTAL_LIMITS.MAX_FILE_SIZE_BYTES) {
+    return { valid: false, error: 'File is too large. Maximum limit is 2 MB.' };
+  }
+  const fileName = file.name || '';
+  const idx = fileName.lastIndexOf('.');
+  const ext = idx === -1 ? '' : fileName.slice(idx + 1).toLowerCase();
+  if (!ext || !STANDARD_PORTAL_LIMITS.ALLOWED_EXTENSIONS.includes(ext)) {
+    return { valid: false, error: 'Unsupported file format. Only PDF, JPG, and PNG files are allowed.' };
+  }
+  const mime = (file.type || '').split(';')[0].trim().toLowerCase();
+  if (mime) {
+    const allowedExts = STANDARD_PORTAL_LIMITS.ALLOWED_MIME_TYPES[mime];
+    if (!allowedExts) {
+      return { valid: false, error: 'Unsupported file type. Only PDF, JPG, and PNG files are allowed.' };
+    }
+    if (!allowedExts.includes(ext)) {
+      return { valid: false, error: 'The file extension does not match its content type.' };
+    }
+  }
+  return { valid: true, error: '' };
+}
 
 /**
  * Validate number using Verhoeff algorithm
@@ -226,19 +261,33 @@ export function inspectDocumentFile(file) {
   const warnings = [];
   const fileName = file.name || 'document';
   const fileSize = file.size || 0;
-  const ext = fileName.split('.').pop().toLowerCase();
+  const idx = fileName.lastIndexOf('.');
+  const ext = idx === -1 ? '' : fileName.slice(idx + 1).toLowerCase();
 
-  // Extension Check
-  if (!STANDARD_PORTAL_LIMITS.ALLOWED_EXTENSIONS.includes(ext)) {
-    issues.push(`Format .${ext} is not supported by civic portals. Use PDF, JPG, or PNG.`);
-  }
-
-  // Size Checks
-  if (fileSize > STANDARD_PORTAL_LIMITS.MAX_FILE_SIZE_BYTES) {
+  // Size & empty file Checks
+  if (!fileSize) {
+    issues.push('This file is empty. Choose a file with content.');
+  } else if (fileSize > STANDARD_PORTAL_LIMITS.MAX_FILE_SIZE_BYTES) {
     const sizeMb = (fileSize / (1024 * 1024)).toFixed(2);
     issues.push(`File size (${sizeMb} MB) exceeds government portal maximum limit of 2 MB.`);
   } else if (fileSize < STANDARD_PORTAL_LIMITS.RECOMMENDED_MIN_BYTES) {
     warnings.push('File is smaller than 50 KB. Verify text is sharp and legible to prevent rejection for blurriness.');
+  }
+
+  // Extension Check
+  if (!ext || !STANDARD_PORTAL_LIMITS.ALLOWED_EXTENSIONS.includes(ext)) {
+    issues.push(`Format .${ext || 'unknown'} is not supported by civic portals. Use PDF, JPG, or PNG.`);
+  }
+
+  // MIME type and mismatch check
+  if (file.type) {
+    const mime = file.type.split(';')[0].trim().toLowerCase();
+    const allowedExts = STANDARD_PORTAL_LIMITS.ALLOWED_MIME_TYPES?.[mime];
+    if (!allowedExts) {
+      issues.push(`Unsupported file type (${file.type}). Only PDF, JPG, and PNG files are allowed.`);
+    } else if (!allowedExts.includes(ext)) {
+      issues.push(`The file extension (.${ext}) does not match its content type (${file.type}).`);
+    }
   }
 
   // File naming security check

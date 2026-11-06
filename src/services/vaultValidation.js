@@ -1,6 +1,7 @@
 import { minimizeDocumentNumber } from './dataMinimization';
 
 export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+export const MAX_BACKUP_SIZE_BYTES = 2 * 1024 * 1024;
 export const MAX_FILE_NAME_LENGTH = 120;
 export const MAX_TEXT_LENGTH = 100;
 export const MAX_NOTES_LENGTH = 300;
@@ -29,6 +30,27 @@ export const formatFileSize = (bytes) => {
  * The picker's accept attribute is only a hint, so type, size and
  * extension are checked here.
  */
+/**
+ * Validate vault backup JSON file before processing.
+ * Returns { valid, error }.
+ */
+export const validateBackupFile = (file) => {
+  if (!file) return { valid: false, error: 'Please choose a backup file.' };
+  if (!file.size) return { valid: false, error: 'This file is empty. Choose a file with content.' };
+  if (file.size > MAX_BACKUP_SIZE_BYTES) {
+    return { valid: false, error: 'Backup file is too large. Maximum allowed size is 2 MB.' };
+  }
+  const ext = getExtension(file.name);
+  if (ext !== 'json') {
+    return { valid: false, error: 'Unsupported file format. Only JSON (.json) backup files are allowed.' };
+  }
+  const mime = (file.type || '').split(';')[0].trim().toLowerCase();
+  if (mime && mime !== 'application/json' && mime !== 'text/plain') {
+    return { valid: false, error: 'The file extension does not match its content type.' };
+  }
+  return { valid: true, error: '' };
+};
+
 export const validateFile = (file) => {
   if (!file) return { valid: false, error: 'Please choose a file.' };
   if (!file.size) return { valid: false, error: 'This file is empty. Choose a file with content.' };
@@ -38,7 +60,8 @@ export const validateFile = (file) => {
   if ((file.name || '').length > MAX_FILE_NAME_LENGTH) {
     return { valid: false, error: `File name is too long. Keep it under ${MAX_FILE_NAME_LENGTH} characters.` };
   }
-  const extensions = ALLOWED_FILE_TYPES[file.type];
+  const mime = (file.type || '').split(';')[0].trim().toLowerCase();
+  const extensions = ALLOWED_FILE_TYPES[mime];
   if (!extensions) {
     return { valid: false, error: 'Unsupported file type. Only PDF, JPG and PNG files are allowed.' };
   }

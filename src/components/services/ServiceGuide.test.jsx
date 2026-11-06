@@ -30,10 +30,20 @@ describe('ServiceGuide focus mode', () => {
       const html = render(mode);
       service.warnings.forEach((w) => expect(html).toContain(w.replace(/'/g, '&#x27;')));
       service.steps.forEach((step) => expect(html).toContain(step.title));
-      expect(html).toContain('Proof of birth from hospital');
-      expect(html).toContain('href="https://services.india.gov.in/"');
+      expect(html).toContain('Hospital or health-centre birth record');
+      expect(html).toContain('href="https://townpanchayat.in/birth_death.php"');
       expect(html).toContain('Before you apply');
     });
+  });
+
+  it('renders the Tamil Nadu date checkpoints and validity guidance', () => {
+    const html = render(false);
+    expect(html).toContain('Important dates to keep track of');
+    expect(html).toContain('Date of birth');
+    expect(html).toContain('Reporting date');
+    expect(html).toContain('Validity and use');
+    expect(html).toContain('The linked official sources do not specify a general expiry date');
+    expect(html).toContain('CRSTN — Birth Certificate Search');
   });
 
   it('does not change the text content, only the presentation', () => {
