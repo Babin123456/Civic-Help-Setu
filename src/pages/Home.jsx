@@ -1,43 +1,41 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import SearchBox from '../components/SearchBox';
-import { BookOpen, Shield, HelpCircle, Users, CheckCircle2, Code, ArrowRight, Sparkles, ShieldAlert, Compass } from 'lucide-react';
+import { 
+  BookOpen, 
+  Shield, 
+  HelpCircle, 
+  Users, 
+  CheckCircle2, 
+  ArrowRight, 
+  Sparkles, 
+  ShieldAlert, 
+  Compass, 
+  Pause, 
+  Play 
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import QuickActionPanel from '../components/QuickActionPanel';
 import DisasterReliefHubModal from '../components/emergency/DisasterReliefHubModal';
 import LifeEventNavigatorModal from '../components/journey/LifeEventNavigatorModal';
-
-const useTypewriter = (words, typingSpeed = 80, deletingSpeed = 40, pauseDuration = 2500) => {
-  const [text, setText] = useState('');
-  const [wordIndex, setWordIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    let timer;
-    const currentWord = words[wordIndex];
-    if (isDeleting) {
-      if (text === '') {
-        setIsDeleting(false);
-        setWordIndex((prev) => (prev + 1) % words.length);
-        timer = setTimeout(() => {}, 500); 
-      } else {
-        timer = setTimeout(() => setText(currentWord.substring(0, text.length - 1)), deletingSpeed);
-      }
-    } else {
-      if (text === currentWord) {
-        timer = setTimeout(() => setIsDeleting(true), pauseDuration);
-      } else {
-        timer = setTimeout(() => setText(currentWord.substring(0, text.length + 1)), typingSpeed);
-      }
-    }
-    return () => clearTimeout(timer);
-  }, [text, isDeleting, wordIndex, words, typingSpeed, deletingSpeed, pauseDuration]);
-
-  return text;
-};
+import { useAccessibleTypewriter } from '../hooks/useAccessibleTypewriter';
 
 const Home = () => {
-  const typingWords = ["Government Services.", "Passport Applications.", "Birth Certificates.", "Public Systems."];
-  const typedText = useTypewriter(typingWords);
+  const typingWords = [
+    'Government Services.',
+    'Passport Applications.',
+    'Birth Certificates.',
+    'Public Systems.'
+  ];
+
+  const {
+    text: typedText,
+    isPaused,
+    prefersReduced,
+    togglePause
+  } = useAccessibleTypewriter(typingWords, {
+    staticFallback: 'Public Systems.'
+  });
+
   const [isReliefModalOpen, setIsReliefModalOpen] = useState(false);
   const [isLifeEventModalOpen, setIsLifeEventModalOpen] = useState(false);
 
@@ -48,31 +46,128 @@ const Home = () => {
       <div className="glow-blob" style={{ width: '600px', height: '600px', bottom: '10%', left: '-10%', background: 'var(--grad-end)' }}></div>
 
       {/* Hero Section */}
-      <section className="section" style={{ paddingTop: '8rem', paddingBottom: '6rem' }}>
-        <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', maxWidth: '900px' }}>
-          <div className="animate-fade-in" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1.5rem', background: 'var(--glass-bg)', borderRadius: '99px', border: '1px solid var(--border-main)', marginBottom: '2rem', fontSize: '0.9rem', fontWeight: '500' }}>
+      <section className="section" style={{ paddingTop: 'clamp(5rem, 8vw, 8rem)', paddingBottom: 'clamp(4rem, 6vw, 6rem)' }}>
+        <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', maxWidth: '900px', padding: '0 1rem' }}>
+          
+          {/* Badge */}
+          <div 
+            className="animate-fade-in" 
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '0.5rem', 
+              padding: '0.4rem 1.25rem', 
+              background: 'var(--glass-bg)', 
+              borderRadius: '99px', 
+              border: '1px solid var(--border-main)', 
+              marginBottom: '1.5rem', 
+              fontSize: 'clamp(0.8rem, 2vw, 0.9rem)', 
+              fontWeight: '500' 
+            }}
+          >
             <Sparkles size={16} color="var(--accent-main)" />
             <span>The New Standard for Civic Assistance</span>
           </div>
           
-          <h1 className="animate-fade-in delay-100" style={{ fontSize: 'clamp(3rem, 6vw, 4.5rem)', lineHeight: '1.1', fontWeight: '800', marginBottom: '1.5rem' }}>
+          {/* Main Accessible Hero Heading */}
+          <h1 
+            className="animate-fade-in delay-100" 
+            style={{ 
+              fontSize: 'clamp(2.25rem, 5.5vw, 4.25rem)', 
+              lineHeight: '1.15', 
+              fontWeight: '800', 
+              marginBottom: '1.25rem',
+              letterSpacing: '-0.02em',
+              maxWidth: '850px'
+            }}
+          >
             Simplify Complex <br/>
-            <span className="text-gradient" style={{ minHeight: '1.2em', display: 'inline-block' }}>
+            <span 
+              className="text-gradient" 
+              style={{ 
+                minHeight: '1.2em', 
+                display: 'inline-block',
+                position: 'relative'
+              }}
+              aria-live="polite"
+              aria-atomic="true"
+            >
               {typedText}
-              <span className="typing-cursor"></span>
+              {!prefersReduced && (
+                <span className="typing-cursor" aria-hidden="true"></span>
+              )}
             </span>
           </h1>
+
+          {/* Pause / Resume control for animation (shown when animation is supported) */}
+          {!prefersReduced && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <button
+                type="button"
+                onClick={togglePause}
+                className="btn-pause-animation"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  fontSize: '0.75rem',
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: '99px',
+                  background: 'var(--glass-bg)',
+                  border: '1px solid var(--border-light)',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer'
+                }}
+                aria-label={isPaused ? 'Resume hero text animation' : 'Pause hero text animation'}
+                title={isPaused ? 'Resume animation' : 'Pause animation'}
+              >
+                {isPaused ? <Play size={12} /> : <Pause size={12} />}
+                <span>{isPaused ? 'Resume Animation' : 'Pause Animation'}</span>
+              </button>
+            </div>
+          )}
           
-          <p className="animate-fade-in delay-200" style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '3rem', maxWidth: '700px', lineHeight: '1.6' }}>
-            CivicBridge translates bureaucratic processes into clear, actionable steps using verified official sources. No jargon, just answers.
+          {/* Hero Subtitle */}
+          <p 
+            className="animate-fade-in delay-200" 
+            style={{ 
+              fontSize: 'clamp(1rem, 2.5vw, 1.25rem)', 
+              color: 'var(--text-secondary)', 
+              marginBottom: '2.5rem', 
+              maxWidth: '680px', 
+              lineHeight: '1.6' 
+            }}
+          >
+            Civic Help Setu translates bureaucratic processes into clear, actionable steps using verified official sources. No jargon, just answers.
           </p>
           
-          <div className="animate-fade-in delay-300" style={{ width: '100%', maxWidth: '700px', marginBottom: '3rem' }}>
+          {/* Primary Search Interaction */}
+          <div 
+            className="animate-fade-in delay-300" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '680px', 
+              marginBottom: '2.5rem' 
+            }}
+          >
             <SearchBox size="large" placeholder="What do you need help with? (e.g. Lost Aadhaar card)" />
           </div>
 
-          <div className="animate-fade-in delay-300" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <Link to="/services" className="btn btn-primary">Explore All Guides</Link>
+          {/* Action CTAs */}
+          <div 
+            className="animate-fade-in delay-300" 
+            style={{ 
+              display: 'flex', 
+              gap: '0.75rem', 
+              flexWrap: 'wrap', 
+              justifyContent: 'center',
+              width: '100%',
+              maxWidth: '750px'
+            }}
+          >
+            <Link to="/services" className="btn btn-primary" style={{ padding: '0.75rem 1.5rem', fontSize: '0.95rem' }}>
+              Explore All Guides
+            </Link>
             <button
               type="button"
               onClick={() => setIsLifeEventModalOpen(true)}
@@ -83,12 +178,16 @@ const Home = () => {
                 gap: '6px',
                 borderColor: 'var(--accent-main)',
                 color: 'var(--accent-main)',
+                padding: '0.75rem 1.25rem',
+                fontSize: '0.95rem'
               }}
             >
               <Compass size={16} color="var(--accent-main)" />
               <span>Life-Event Navigator</span>
             </button>
-            <Link to="/assistant" className="btn btn-secondary">Try AI Assistant</Link>
+            <Link to="/assistant" className="btn btn-secondary" style={{ padding: '0.75rem 1.25rem', fontSize: '0.95rem' }}>
+              Try AI Assistant
+            </Link>
             <button
               type="button"
               onClick={() => setIsReliefModalOpen(true)}
@@ -98,11 +197,13 @@ const Home = () => {
                 alignItems: 'center',
                 gap: '6px',
                 borderColor: '#dc2626',
-                color: '#dc2626'
+                color: '#dc2626',
+                padding: '0.75rem 1.25rem',
+                fontSize: '0.95rem'
               }}
             >
               <ShieldAlert size={16} color="#dc2626" />
-              <span>Offline Relief Camps & SOS</span>
+              <span>Offline Relief Camps &amp; SOS</span>
             </button>
           </div>
         </div>
@@ -149,7 +250,7 @@ const Home = () => {
       <section className="section">
         <div className="container">
           <div className="animate-fade-in" style={{ textAlign: 'center', marginBottom: '4rem', maxWidth: '800px', margin: '0 auto 4rem' }}>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '1rem' }}>How CivicBridge Works</h2>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '1rem' }}>How Civic Help Setu Works</h2>
             <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)' }}>We break down complex bureaucratic processes into clear, actionable steps.</p>
           </div>
           <div className="grid-3">
@@ -190,57 +291,36 @@ const Home = () => {
           </div>
           <div className="grid-4">
             <Link to="/services?cat=Identity" className="card animate-fade-in delay-100" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>Identity & Docs</h3>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Aadhaar, Passports, Voter ID, Birth & Death Certificates.</p>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>Identity &amp; Docs</h3>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Aadhaar, Passports, Voter ID, Birth &amp; Death Certificates.</p>
               <div style={{ marginTop: 'auto', width: '2.5rem', height: '2.5rem', borderRadius: '50%', background: 'var(--glass-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowRight size={18} /></div>
             </Link>
             <Link to="/services?cat=Finance" className="card animate-fade-in delay-200" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>Finance & Taxes</h3>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>Finance &amp; Taxes</h3>
               <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '2rem' }}>PAN Cards, Income Tax Returns, Provident Fund (EPF).</p>
               <div style={{ marginTop: 'auto', width: '2.5rem', height: '2.5rem', borderRadius: '50%', background: 'var(--glass-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowRight size={18} /></div>
             </Link>
             <Link to="/services?cat=Transport" className="card animate-fade-in delay-300" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>Transport</h3>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Driving Licenses, Vehicle Registration, Challan Payments.</p>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>Transport &amp; Vehicles</h3>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Driving Licences, Vehicle Registration (RC), Pollution Certificates.</p>
               <div style={{ marginTop: 'auto', width: '2.5rem', height: '2.5rem', borderRadius: '50%', background: 'var(--glass-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowRight size={18} /></div>
             </Link>
-            <Link to="/services?cat=Health" className="card animate-fade-in delay-300" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>Health & Welfare</h3>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Ayushman Bharat, Ration Cards, Pension Schemes.</p>
+            <Link to="/services?cat=Land" className="card animate-fade-in delay-300" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>Land &amp; Revenue</h3>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Land Records (RoR), Mutation, Encumbrance, Property Tax.</p>
               <div style={{ marginTop: 'auto', width: '2.5rem', height: '2.5rem', borderRadius: '50%', background: 'var(--glass-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowRight size={18} /></div>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="section">
-        <div className="container animate-fade-in" style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
-          <div style={{ display: 'inline-flex', padding: '1.25rem', background: 'var(--glass-bg)', borderRadius: '1.25rem', border: '1px solid var(--border-main)', marginBottom: '2rem' }}>
-            <Code size={40} color="var(--text-primary)" />
-          </div>
-          <h2 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '1.5rem' }}>100% Open Source</h2>
-          <p style={{ fontSize: '1.25rem', color: 'var(--text-tertiary)', marginBottom: '2.5rem', lineHeight: '1.6' }}>
-            Public-service information should belong to the public. Our entire platform is community-maintained on GitHub.
-          </p>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/open-source" className="btn btn-primary">Learn More</Link>
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="btn btn-secondary">View on GitHub</a>
-          </div>
-        </div>
-      </section>
-
-      {/* Offline Disaster Relief & Emergency Hub Modal */}
-      <DisasterReliefHubModal
-        isOpen={isReliefModalOpen}
-        onClose={() => setIsReliefModalOpen(false)}
-      />
-
-      {/* Civic Life-Event Navigator Modal */}
-      <LifeEventNavigatorModal
-        isOpen={isLifeEventModalOpen}
-        onClose={() => setIsLifeEventModalOpen(false)}
-      />
+      {/* Emergency & Life Navigator Modals */}
+      {isReliefModalOpen && (
+        <DisasterReliefHubModal isOpen={isReliefModalOpen} onClose={() => setIsReliefModalOpen(false)} />
+      )}
+      {isLifeEventModalOpen && (
+        <LifeEventNavigatorModal isOpen={isLifeEventModalOpen} onClose={() => setIsLifeEventModalOpen(false)} />
+      )}
     </div>
   );
 };
