@@ -28,8 +28,8 @@ export const VOICE_SEARCH_ALIASES = [
     spokenPhrases: ['pm kisan', 'kisan samman nidhi', 'kheti kisan', '6000 kisan installment', 'pm kisan ekyc']
   },
   {
-    targetServiceId: 'ayushman-bharat',
-    canonicalName: 'Ayushman Bharat Card',
-    spokenPhrases: ['ayushman card', 'pm jay health card', 'golden card', '5 lakh free treatment', 'ayushman bharat hospital']
+    targetServiceId: 'ayushman-bharat-card',
+    canonicalName: 'Ayushman Bharat PM-JAY Beneficiary Card',
+    spokenPhrases: ['ayushman card', 'pm jay health card', 'golden card', '5 lakh free treatment', 'ayushman bharat hospital', 'ayushman bharat card download', 'ayushman card correction', 'pmjay beneficiary card']
   }
 ];

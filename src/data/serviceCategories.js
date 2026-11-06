@@ -9,4 +9,5 @@ export const SERVICE_CATEGORIES = [
   'Complaints',
   'Business',
   'Agriculture',
+  'Health',
 ];

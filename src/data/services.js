@@ -478,6 +478,141 @@ export const MOCK_SERVICES = [
     ],
     warnings: ['Mandatory e-KYC is required to receive installments. Land holding must be registered in the farmer\'s name.'],
     lastVerified: '2024-01-20'
+  },
+  {
+    id: 'ayushman-bharat-card',
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
+    name: 'Ayushman Bharat PM-JAY Beneficiary Card',
+    shortDescription: 'Download, verify, or correct the Ayushman Bharat PM-JAY beneficiary card (Ayushman Card) for cashless hospitalization up to ₹5 lakh per family per year at empanelled hospitals. Eligibility is based on SECC 2011 deprivation criteria and state-specific categories; not all residents qualify.',
+    category: 'Health',
+    department: 'National Health Authority (NHA) / State Health Agencies (SHAs)',
+    type: 'Online / Offline (CSC / Empanelled Hospital)',
+    difficulty: 'Medium',
+    feeType: 'free',
+    speedDays: 7,
+    popularityScore: 93,
+    eligibility: [
+      'Households identified as eligible under the Socio-Economic Caste Census (SECC) 2011 deprivation criteria (D1–D5, D7) for rural areas, and occupational categories for urban areas.',
+      'Additional state-specific eligibility categories may apply (e.g., Antyodaya Anna Yojana families, construction workers, street vendors, ASHA/anganwadi workers, etc.). Eligibility varies by state/UT; check the state health agency portal.',
+      'The beneficiary must be a member of an eligible household. Individual enrollment is not open to the general public; the scheme uses pre-identified beneficiary lists.',
+      'Aadhaar-linked mobile number is required for OTP-based e-KYC verification at the time of card generation or download.'
+    ],
+    documents: [
+      'Aadhaar card (or Aadhaar number) of the beneficiary for e-KYC verification',
+      'Ration card or family ID (state-specific) to establish household membership',
+      'Mobile number linked to Aadhaar for OTP verification',
+      'Optional: Any government-issued photo ID (Voter ID, PAN, Driving License) for assisted verification at CSC or empanelled hospital if Aadhaar OTP fails'
+    ],
+    documentRequirements: {
+      'Aadhaar card (or Aadhaar number) of the beneficiary for e-KYC verification': { type: 'required' },
+      'Ration card or family ID (state-specific) to establish household membership': { type: 'required', condition: 'Required to locate the beneficiary in the SECC/state database; exact document name varies by state' },
+      'Mobile number linked to Aadhaar for OTP verification': { type: 'required' },
+      'Optional: Any government-issued photo ID (Voter ID, PAN, Driving License) for assisted verification at CSC or empanelled hospital if Aadhaar OTP fails': { type: 'optional' }
+    },
+    steps: [
+      {
+        title: 'Check eligibility and locate beneficiary record',
+        description: 'Visit the NHA beneficiary portal (https://beneficiary.nha.gov.in) or the state health agency portal. Enter Aadhaar number, ration card number, or mobile number to search the beneficiary database. If the record exists, the system will display the household details and eligible members.'
+      },
+      {
+        title: 'Complete e-KYC verification',
+        description: 'For the selected beneficiary, initiate Aadhaar OTP-based e-KYC. An OTP is sent to the Aadhaar-linked mobile number. Enter the OTP to verify identity. If OTP fails, visit a Common Service Centre (CSC) or empanelled hospital for biometric/assisted verification.'
+      },
+      {
+        title: 'Generate or download the Ayushman Card',
+        description: 'After successful e-KYC, the Ayushman Card (PDF) is generated. Download it from the SETU portal (https://setu.pmjay.gov.in) or the beneficiary portal. The card displays the beneficiary name, PM-JAY ID, family members, and QR code for hospital verification.'
+      },
+      {
+        title: 'Verify card details and family members',
+        description: 'Check that all eligible family members are listed on the card. If a member is missing, they may need separate e-KYC or the household record may need updating at the state level. Do not assume all household members are automatically included.'
+      },
+      {
+        title: 'Use the card at empanelled hospitals',
+        description: 'Present the Ayushman Card (printed or digital) and a valid photo ID at any empanelled public or private hospital. The hospital verifies the card via the PM-JAY Transaction Management System (TMS). Search empanelled hospitals at https://hospitals.pmjay.gov.in.'
+      },
+      {
+        title: 'Request correction if details are wrong',
+        description: 'For errors in name, gender, date of birth, or family member details, raise a grievance through the PM-JAY grievance portal (https://grievance.pmjay.gov.in) or contact the State Health Agency helpline. Corrections require supporting documents (e.g., Aadhaar for DOB/name, birth certificate for new members). The card is re-issued after approval.'
+      }
+    ],
+    dateGuidance: [
+      {
+        label: 'Eligibility verification date',
+        description: 'The date the beneficiary record was confirmed in the SECC/state database. This is not the same as the card download date. Check the beneficiary portal for the verification status and date.'
+      },
+      {
+        label: 'e-KYC completion date',
+        description: 'The date Aadhaar OTP or biometric verification was successfully completed. The card cannot be generated before this step. Keep the e-KYC acknowledgement/reference number.'
+      },
+      {
+        label: 'Card generation date',
+        description: 'The date the Ayushman Card PDF was generated and made available for download. This is the effective date for the current card version.'
+      },
+      {
+        label: 'Card download date',
+        description: 'The date you downloaded or printed the card. Keep a record; some hospitals may ask when the card was last downloaded.'
+      },
+      {
+        label: 'Correction request date',
+        description: 'The date a correction grievance was submitted. Track status via the grievance portal. The revised card will have a new generation date.'
+      },
+      {
+        label: 'Scheme year / validity window',
+        description: 'PM-JAY benefits reset annually (typically April–March). The card remains valid for the scheme year, but hospitals verify eligibility in real-time via TMS. The linked official sources do not specify a fixed card expiry date; confirm with the State Health Agency.'
+      }
+    ],
+    validityNote: 'The Ayushman Card does not have a fixed expiry date printed on it. Eligibility is verified in real-time at the hospital via the PM-JAY TMS. Benefits are available for the ongoing scheme year (typically April–March). If household eligibility changes (e.g., member added/removed), a new card must be generated. The linked official sources do not specify a general card expiry; confirm current validity rules with the State Health Agency.',
+    fees: 'Free on all official portals (beneficiary.nha.gov.in, setu.pmjay.gov.in). Common Service Centres (CSCs) may charge a nominal facilitation fee (typically ₹10–₹30) for assisted download/print; this is not a government fee. Do not pay agents for card generation.',
+    processingTime: 'e-KYC and card generation are near-instant (minutes) if Aadhaar OTP works. Assisted verification at CSC/hospital may take 15–30 minutes. Correction requests via grievance portal: the linked official sources do not specify a statutory timeline; typical resolution is 7–30 days depending on the State Health Agency.',
+    officialSources: [
+      {
+        name: 'National Health Authority — PM-JAY Official Website',
+        url: 'https://pmjay.gov.in',
+        verified: true,
+        lastVerified: '2026-11-05'
+      },
+      {
+        name: 'NHA Beneficiary Identification & Verification Portal',
+        url: 'https://beneficiary.nha.gov.in',
+        verified: true,
+        lastVerified: '2026-11-05'
+      },
+      {
+        name: 'SETU Portal — Ayushman Card Download',
+        url: 'https://setu.pmjay.gov.in',
+        verified: true,
+        lastVerified: '2026-11-05'
+      },
+      {
+        name: 'Empanelled Hospital Search',
+        url: 'https://hospitals.pmjay.gov.in',
+        verified: true,
+        lastVerified: '2026-11-05'
+      },
+      {
+        name: 'PM-JAY Grievance Redressal Portal',
+        url: 'https://grievance.pmjay.gov.in',
+        verified: true,
+        lastVerified: '2026-11-05'
+      }
+    ],
+    warnings: [
+      'Eligibility is NOT universal. Only pre-identified SECC 2011 households and state-specific categories qualify. You cannot "apply" as an individual; you can only verify if your household is already in the database.',
+      'State implementation varies. Some states/UTs (e.g., West Bengal, Odisha, Delhi, Telangana) have separate or merged health schemes with different eligibility and portals. Always check the State Health Agency portal for your state.',
+      'The Ayushman Card (PM-JAY card) is different from state-specific health cards (e.g., Tamil Nadu CMCHIS, Karnataka Ayushman Arogya Karnataka, Maharashtra MJPJAY). They are not interchangeable.',
+      'e-KYC requires an Aadhaar-linked mobile number. If the mobile number is not linked or has changed, visit a CSC or empanelled hospital for biometric verification.',
+      'Card download is free on official portals. Do not pay third-party agents or unofficial websites.',
+      'The card alone does not guarantee treatment; the hospital must verify eligibility in the TMS at the time of admission. Pre-authorization may be required for certain packages.',
+      'Family members not listed on the card must complete their own e-KYC. Adding members after initial card generation requires a correction request.',
+      'Correction of name, DOB, or gender requires supporting documents (Aadhaar, birth certificate). The linked official sources do not specify a standard correction timeline; escalate to the State Health Agency helpline if delayed.',
+      'Keep identifiers (PM-JAY ID, Aadhaar, ration card) private. Do not share them on public links, social media, or analytics.'
+    ],
+    contacts: [
+      { label: 'NHA Helpline (National)', phone: '14555', url: 'https://pmjay.gov.in' },
+      { label: 'PM-JAY Grievance Portal', url: 'https://grievance.pmjay.gov.in' },
+      { label: 'State Health Agency Contacts', url: 'https://pmjay.gov.in/state-health-agencies' }
+    ],
+    lastVerified: '2026-11-05'
   }
 ];
 
