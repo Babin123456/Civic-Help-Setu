@@ -313,6 +313,50 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   }
 }
 
+/* Navigation Drawer Links (#575) */
+.nav-drawer-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-sm, 0.5rem);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.nav-drawer-link:hover {
+  color: var(--accent-main);
+  background: var(--glass-bg-hover);
+}
+
+.nav-drawer-link.is-active,
+.nav-drawer-link[aria-current="page"] {
+  color: var(--accent-main);
+  background: var(--accent-light);
+  border-left-color: var(--accent-main);
+  font-weight: 700;
+}
+
+.nav-drawer-link.is-active:hover {
+  background: var(--accent-light);
+}
+
+.nav-drawer-link--admin {
+  color: var(--accent-main);
+}
+
+.nav-drawer-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--accent-main);
+  flex-shrink: 0;
+}
+
 /* Backgrounds & Animations */
 .bg-grid-dark {
   position: absolute;
@@ -409,6 +453,17 @@ html[data-high-contrast="true"] .card,
 html[data-high-contrast="true"] .glass-panel {
   border: 2px solid #ffffff !important;
   background: #0a0a0a !important;
+}
+
+html[data-high-contrast="true"] .nav-drawer-link.is-active,
+html[data-high-contrast="true"] .nav-drawer-link[aria-current="page"] {
+  color: #facc15 !important;
+  background: #1a1a1a !important;
+  border-left-color: #facc15 !important;
+}
+
+html[data-high-contrast="true"] .nav-drawer-indicator {
+  background-color: #facc15 !important;
 }
 
 /* Visible Keyboard Focus Ring */

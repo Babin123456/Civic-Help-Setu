@@ -14,8 +14,8 @@ import EmergencyHelplineModal from './emergency/EmergencyHelplineModal';
 import VoiceSearchInput from './common/VoiceSearchInput';
 import MultilingualVoiceNavigationModal from './navigation/MultilingualVoiceNavigationModal';
 
-const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen !== undefined ? defaultOpen : initialOpen);
   const [showOfflineModal, setShowOfflineModal] = useState(false);
   const [showSosModal, setShowSosModal] = useState(false);
   const [showVoiceNavModal, setShowVoiceNavModal] = useState(false);
@@ -26,6 +26,31 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const isServiceDetail = /^\/services\/[^/]+/.test(pathname);
+
+  const isNavActive = (target) => {
+    const normalizedPath =
+      pathname.endsWith('/') && pathname.length > 1
+        ? pathname.slice(0, -1)
+        : pathname;
+
+    if (target === '/services') {
+      return normalizedPath === '/services' || isServiceDetail;
+    }
+
+    if (target === '/nearby') {
+      return normalizedPath === '/nearby' || normalizedPath === '/nearby-offices';
+    }
+
+    if (target === '/admin') {
+      return normalizedPath === '/admin' || normalizedPath.startsWith('/admin/');
+    }
+
+    if (target === '/login') {
+      return normalizedPath === '/login' || normalizedPath.startsWith('/login/');
+    }
+
+    return normalizedPath === target;
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -200,20 +225,136 @@ const Navbar = () => {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <Link to="/services" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>{t('nav.services', 'Services')}</Link>
-            <Link to="/acronyms" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>Acronyms</Link>
-            <Link to="/eligibility" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>Eligibility Checker</Link>
-            <Link to="/nearby" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>{t('nav.nearby', 'Nearby Centers')}</Link>
-            <Link to="/track" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>{t('nav.track', 'Track Status')}</Link>
-            <Link to="/assistant" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>{t('nav.assistant', 'AI Assistant')}</Link>
-            {user && <Link to="/vault" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>{t('nav.vault', 'Document Vault')}</Link>}
-            {user && <Link to="/saved" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>{t('nav.saved', 'Saved Guides')}</Link>}
-            {user && <Link to="/profile" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>{t('nav.profile', 'My Profile')}</Link>}
-            {user && can('users.read', user) && <Link to="/admin" onClick={() => setIsOpen(false)} style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--accent-main)' }}>{t('nav.admin', 'Admin Portal')}</Link>}
+            <Link
+              to="/services"
+              onClick={() => setIsOpen(false)}
+              className={`nav-drawer-link ${isNavActive('/services') ? 'is-active' : ''}`}
+              aria-current={isNavActive('/services') ? 'page' : undefined}
+              style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}
+            >
+              {t('nav.services', 'Services')}
+              {isNavActive('/services') && <span className="nav-drawer-indicator" aria-hidden="true" />}
+            </Link>
+
+            <Link
+              to="/acronyms"
+              onClick={() => setIsOpen(false)}
+              className={`nav-drawer-link ${isNavActive('/acronyms') ? 'is-active' : ''}`}
+              aria-current={isNavActive('/acronyms') ? 'page' : undefined}
+              style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}
+            >
+              Acronyms
+              {isNavActive('/acronyms') && <span className="nav-drawer-indicator" aria-hidden="true" />}
+            </Link>
+
+            <Link
+              to="/eligibility"
+              onClick={() => setIsOpen(false)}
+              className={`nav-drawer-link ${isNavActive('/eligibility') ? 'is-active' : ''}`}
+              aria-current={isNavActive('/eligibility') ? 'page' : undefined}
+              style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}
+            >
+              Eligibility Checker
+              {isNavActive('/eligibility') && <span className="nav-drawer-indicator" aria-hidden="true" />}
+            </Link>
+
+            <Link
+              to="/nearby"
+              onClick={() => setIsOpen(false)}
+              className={`nav-drawer-link ${isNavActive('/nearby') ? 'is-active' : ''}`}
+              aria-current={isNavActive('/nearby') ? 'page' : undefined}
+              style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}
+            >
+              {t('nav.nearby', 'Nearby Centers')}
+              {isNavActive('/nearby') && <span className="nav-drawer-indicator" aria-hidden="true" />}
+            </Link>
+
+            <Link
+              to="/track"
+              onClick={() => setIsOpen(false)}
+              className={`nav-drawer-link ${isNavActive('/track') ? 'is-active' : ''}`}
+              aria-current={isNavActive('/track') ? 'page' : undefined}
+              style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}
+            >
+              {t('nav.track', 'Track Status')}
+              {isNavActive('/track') && <span className="nav-drawer-indicator" aria-hidden="true" />}
+            </Link>
+
+            <Link
+              to="/assistant"
+              onClick={() => setIsOpen(false)}
+              className={`nav-drawer-link ${isNavActive('/assistant') ? 'is-active' : ''}`}
+              aria-current={isNavActive('/assistant') ? 'page' : undefined}
+              style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}
+            >
+              {t('nav.assistant', 'AI Assistant')}
+              {isNavActive('/assistant') && <span className="nav-drawer-indicator" aria-hidden="true" />}
+            </Link>
+
+            {user && (
+              <Link
+                to="/vault"
+                onClick={() => setIsOpen(false)}
+                className={`nav-drawer-link ${isNavActive('/vault') ? 'is-active' : ''}`}
+                aria-current={isNavActive('/vault') ? 'page' : undefined}
+                style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}
+              >
+                {t('nav.vault', 'Document Vault')}
+                {isNavActive('/vault') && <span className="nav-drawer-indicator" aria-hidden="true" />}
+              </Link>
+            )}
+
+            {user && (
+              <Link
+                to="/saved"
+                onClick={() => setIsOpen(false)}
+                className={`nav-drawer-link ${isNavActive('/saved') ? 'is-active' : ''}`}
+                aria-current={isNavActive('/saved') ? 'page' : undefined}
+                style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}
+              >
+                {t('nav.saved', 'Saved Guides')}
+                {isNavActive('/saved') && <span className="nav-drawer-indicator" aria-hidden="true" />}
+              </Link>
+            )}
+
+            {user && (
+              <Link
+                to="/profile"
+                onClick={() => setIsOpen(false)}
+                className={`nav-drawer-link ${isNavActive('/profile') ? 'is-active' : ''}`}
+                aria-current={isNavActive('/profile') ? 'page' : undefined}
+                style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}
+              >
+                {t('nav.profile', 'My Profile')}
+                {isNavActive('/profile') && <span className="nav-drawer-indicator" aria-hidden="true" />}
+              </Link>
+            )}
+
+            {user && can('users.read', user) && (
+              <Link
+                to="/admin"
+                onClick={() => setIsOpen(false)}
+                className={`nav-drawer-link nav-drawer-link--admin ${isNavActive('/admin') ? 'is-active' : ''}`}
+                aria-current={isNavActive('/admin') ? 'page' : undefined}
+                style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--accent-main)' }}
+              >
+                {t('nav.admin', 'Admin Portal')}
+                {isNavActive('/admin') && <span className="nav-drawer-indicator" aria-hidden="true" />}
+              </Link>
+            )}
           </div>
 
           {!user ? (
-            <Link to="/login" onClick={() => setIsOpen(false)} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.65rem 1rem', fontSize: '0.95rem', fontWeight: '600', borderRadius: '0.5rem', textDecoration: 'none', width: '100%' }}>{t('nav.signIn', 'Sign In')}</Link>
+            <Link
+              to="/login"
+              onClick={() => setIsOpen(false)}
+              className={`btn btn-primary nav-drawer-link ${isNavActive('/login') ? 'is-active' : ''}`}
+              aria-current={isNavActive('/login') ? 'page' : undefined}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.65rem 1rem', fontSize: '0.95rem', fontWeight: '600', borderRadius: '0.5rem', textDecoration: 'none', width: '100%' }}
+            >
+              {t('nav.signIn', 'Sign In')}
+              {isNavActive('/login') && <span className="nav-drawer-indicator" aria-hidden="true" />}
+            </Link>
           ) : (
             <button onClick={() => { handleLogout(); setIsOpen(false); }} style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--error)', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '0.5rem', padding: '0.6rem 1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%' }}>{t('nav.signOut', 'Sign Out')}</button>
           )}
