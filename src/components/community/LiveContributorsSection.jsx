@@ -7,7 +7,7 @@ import {
   ExternalLink,
   GitCommit,
   ShieldAlert,
-  Github,
+  Code2,
   ArrowUpRight,
 } from 'lucide-react';
 
