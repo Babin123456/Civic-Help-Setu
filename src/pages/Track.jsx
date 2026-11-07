@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import SharedDeviceNotice from '../components/privacy/SharedDeviceNotice';
+import StandardPageHeader from '../components/common/StandardPageHeader';
 import { parseReferenceParam } from '../utils/searchParams';
 import { useLocation } from 'react-router-dom';
 import {
@@ -184,39 +185,40 @@ const Track = () => {
   return (
     <section className="section" style={{ paddingTop: '2rem' }}>
       <div className="container">
-        <header style={{ marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-            <div>
-              <p style={{ textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-tertiary)' }}>
-                Application Tracking
-              </p>
-              <h1 style={{ margin: 0, fontSize: 'clamp(2rem, 4vw, 3rem)' }}>Track your civic service status</h1>
-              <SharedDeviceNotice what="tracked applications" />
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setIsGrievanceDraftModalOpen(true)}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-              >
-                <MessageSquare size={16} color="var(--accent-main)" /> Grievance Drafter
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setIsGrievanceModalOpen(true)}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-              >
-                <FileText size={16} color="var(--accent-main)" /> Grievance Organizer
-              </button>
-              <button type="button" className="btn btn-primary" onClick={() => setIsAddModalOpen(true)}>
-                <Plus size={16} /> Add Application
-              </button>
-            </div>
+        {/* Standard Page Header */}
+        <StandardPageHeader
+          eyebrow="Application Tracking"
+          badgeText="Local Browser Storage"
+          badgeType="accent"
+          title="Track your civic service status"
+          subtitle="Monitor submission milestones, action requirements, delay alerts, and grievance escalation paths."
+          align="left"
+        >
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setIsGrievanceDraftModalOpen(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <MessageSquare size={16} color="var(--accent-main)" /> Grievance Drafter
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setIsGrievanceModalOpen(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <FileText size={16} color="var(--accent-main)" /> Grievance Organizer
+            </button>
+            <button type="button" className="btn btn-primary" onClick={() => setIsAddModalOpen(true)}>
+              <Plus size={16} /> Add Application
+            </button>
           </div>
-        </header>
+        </StandardPageHeader>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <SharedDeviceNotice what="tracked applications" />
+        </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '1.5rem', minWidth: 0 }}>
           <ActiveApplicationsSummaryGrid metrics={metrics} applications={applications} />

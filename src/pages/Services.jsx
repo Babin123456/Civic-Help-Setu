@@ -10,6 +10,7 @@ import ServiceComparisonModal from '../components/services/ServiceComparisonModa
 import ComparisonFloatingTray from '../components/services/ComparisonFloatingTray';
 import { comparisonService, MAX_COMPARE_LIMIT } from '../services/comparisonService';
 import { getSearchSuggestions, rankAndFilterServices } from '../services/searchRankingEngine';
+import StandardPageHeader from '../components/common/StandardPageHeader';
 import { Layers, Scale, Building2, HelpCircle } from 'lucide-react';
 import { parseServiceFilters, normalizeSearchQuery } from '../utils/searchParams';
 import { parseJurisdictionFilters } from '../services/jurisdictionService';
@@ -199,57 +200,16 @@ const Services = () => {
     >
       <div className="container">
         {/* Polished Header Section */}
-        <header
-          className="services-header"
-          style={{
-            textAlign: 'center',
-            marginBottom: '2.5rem',
-            position: 'relative',
-          }}
+        {/* Standard Page Header */}
+        <StandardPageHeader
+          eyebrow="Verified Citizen Portals & Guides"
+          eyebrowIcon={<Layers size={16} />}
+          badgeText="Central & State"
+          badgeType="accent"
+          title="Public Services Directory"
+          subtitle="Find step-by-step procedures, required documents, authority contacts, and fee breakdowns for central and state public services."
+          maxWidth="700px"
         >
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              color: 'var(--accent-main)',
-              fontSize: '0.85rem',
-              fontWeight: '700',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              marginBottom: '0.75rem',
-              padding: '0.35rem 0.95rem',
-              background: 'rgba(56, 189, 248, 0.08)',
-              borderRadius: '99px',
-              border: '1px solid rgba(56, 189, 248, 0.2)',
-            }}
-          >
-            <Layers size={16} /> Verified Citizen Portals & Guides
-          </div>
-
-          <h1
-            style={{
-              fontSize: 'clamp(2.25rem, 5vw, 3.25rem)',
-              fontWeight: '800',
-              marginBottom: '0.85rem',
-              lineHeight: 1.15,
-            }}
-          >
-            Public Services Directory
-          </h1>
-
-          <p
-            style={{
-              fontSize: '1.15rem',
-              color: 'var(--text-secondary)',
-              maxWidth: '680px',
-              margin: '0 auto 1.5rem',
-              lineHeight: 1.6,
-            }}
-          >
-            Find step-by-step procedures, required documents, authority contacts, and fee breakdowns for central and state public services.
-          </p>
-
           {/* Quick Utility Action Buttons */}
           <div
             className="services-utility-actions"
@@ -306,7 +266,7 @@ const Services = () => {
               <span>Civic Grievance & Department Router</span>
             </button>
           </div>
-        </header>
+        </StandardPageHeader>
 
         {/* Category Pills Navigation with accessible label */}
         <nav
