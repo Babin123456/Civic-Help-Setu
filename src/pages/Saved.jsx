@@ -271,58 +271,108 @@ const Saved = () => {
         {/* Folder Tabs & Search Toolbar */}
         {populatedItems.length > 0 && (
           <div
+            className="saved-toolbar-container glass-panel"
             style={{
               display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              flexDirection: 'column',
               gap: '1rem',
-              marginBottom: '1rem',
+              marginBottom: '1.5rem',
+              padding: '1.25rem',
+              borderRadius: '0.875rem',
+              border: '1px solid var(--border-light)',
+              background: 'var(--card-bg, rgba(255, 255, 255, 0.03))',
             }}
           >
-            <CollectionSwitcher
-              collections={collections}
-              activeCollection={activeCollection}
-              onSelect={setActiveFolder}
-              onCreate={handleCreateCollection}
-            />
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => setIsRoadmapModalOpen(true)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem' }}
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '0.75rem',
+              }}
             >
-              <GitMerge size={15} color="#a855f7" />
-              Prerequisite Roadmap Planner
-            </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Folder size={18} color="var(--accent-main)" aria-hidden="true" />
+                <span style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-primary)' }}>
+                  Manage Collections
+                </span>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    padding: '0.15rem 0.5rem',
+                    borderRadius: '99px',
+                    background: 'var(--bg-main)',
+                    color: 'var(--text-secondary)',
+                    border: '1px solid var(--border-light)',
+                  }}
+                >
+                  {collections.length} {collections.length === 1 ? 'folder' : 'folders'}
+                </span>
+              </div>
 
-            {/* Quick Search */}
-            <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
-              <Search
-                size={16}
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setIsRoadmapModalOpen(true)}
                 style={{
-                  position: 'absolute',
-                  left: '0.85rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'var(--text-tertiary)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  fontSize: '0.82rem',
+                  padding: '0.4rem 0.85rem',
+                  borderRadius: '99px',
                 }}
+              >
+                <GitMerge size={15} color="#a855f7" aria-hidden="true" />
+                <span>Prerequisite Roadmap Planner</span>
+              </button>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '1rem',
+              }}
+            >
+              <CollectionSwitcher
+                collections={collections}
+                activeCollection={activeCollection}
+                onSelect={setActiveFolder}
+                onCreate={handleCreateCollection}
               />
-              <input
-                type="text"
-                placeholder="Search notes or guides..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-field"
-                style={{
-                  paddingLeft: '2.4rem',
-                  paddingRight: '0.85rem',
-                  paddingTop: '0.45rem',
-                  paddingBottom: '0.45rem',
-                  fontSize: '0.85rem',
-                  width: '100%',
-                }}
-              />
+
+              {/* Quick Search */}
+              <div style={{ position: 'relative', width: '100%', maxWidth: '320px' }}>
+                <Search
+                  size={16}
+                  style={{
+                    position: 'absolute',
+                    left: '0.85rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'var(--text-tertiary)',
+                  }}
+                />
+                <input
+                  type="text"
+                  placeholder="Search notes or guides..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="input-field"
+                  style={{
+                    paddingLeft: '2.4rem',
+                    paddingRight: '0.85rem',
+                    paddingTop: '0.45rem',
+                    paddingBottom: '0.45rem',
+                    fontSize: '0.85rem',
+                    width: '100%',
+                  }}
+                />
+              </div>
             </div>
           </div>
         )}
