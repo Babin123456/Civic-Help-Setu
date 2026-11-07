@@ -308,7 +308,74 @@ const Vault = () => {
         ) : (
           <>
             {/* Vault Stats Cards */}
-        <VaultStats documents={documents} />
+            <VaultStats documents={documents} />
+
+            {/* Document Constraints & Privacy Guide Banner */}
+            <section
+              className="vault-privacy-constraints-banner glass-panel"
+              aria-label="Document storage constraints and privacy notice"
+              style={{
+                marginBottom: '1.75rem',
+                padding: '1.25rem 1.5rem',
+                borderRadius: '1rem',
+                border: '1px solid var(--border-light)',
+                background: 'var(--card-bg, rgba(255, 255, 255, 0.03))',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <ShieldCheck size={20} color="var(--accent-main)" aria-hidden="true" />
+                  <h2 style={{ fontSize: '1rem', fontWeight: '700', margin: 0, color: 'var(--text-primary)' }}>
+                    Local Privacy Architecture &amp; File Constraints
+                  </h2>
+                </div>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: '700',
+                    padding: '0.2rem 0.6rem',
+                    borderRadius: '99px',
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    color: 'var(--success, #10b981)',
+                  }}
+                >
+                  Zero Server Upload
+                </span>
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                  gap: '1rem',
+                  fontSize: '0.84rem',
+                  color: 'var(--text-secondary)',
+                  lineHeight: '1.5',
+                }}
+              >
+                <div>
+                  <strong style={{ color: 'var(--text-primary)', display: 'block', marginBottom: '0.2rem' }}>
+                    📁 Supported Formats:
+                  </strong>
+                  <span>PDF documents, JPG images, and PNG scans. Maximum file size: 5 MB per item.</span>
+                </div>
+                <div>
+                  <strong style={{ color: 'var(--text-primary)', display: 'block', marginBottom: '0.2rem' }}>
+                    🛡️ Data Minimization:
+                  </strong>
+                  <span>Only metadata and masked numbers (last 4 characters) are stored on this device.</span>
+                </div>
+                <div>
+                  <strong style={{ color: 'var(--text-primary)', display: 'block', marginBottom: '0.2rem' }}>
+                    ⏱️ Session Auto-Lock:
+                  </strong>
+                  <span>Vault automatically engages inactivity protection after 5 minutes of idle time.</span>
+                </div>
+              </div>
+            </section>
 
         {/* Toolbar: Search and Filter Tabs */}
         <div
@@ -611,29 +678,115 @@ const Vault = () => {
 
         {/* Empty State */}
         {filteredDocuments.length === 0 && (
-          <div
-            className="glass-panel"
+          <section
+            className="vault-empty-state card glass-panel animate-fade-in"
+            aria-labelledby="vault-empty-title"
             style={{
               textAlign: 'center',
-              padding: '3rem 2rem',
+              padding: 'clamp(2.5rem, 6vw, 4rem) clamp(1.25rem, 4vw, 2.5rem)',
               marginTop: '1.5rem',
+              borderRadius: '1.25rem',
+              border: '1px dashed var(--border-light)',
+              maxWidth: '750px',
+              marginLeft: 'auto',
+              marginRight: 'auto',
             }}
           >
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', fontWeight: '600' }}>
-              No documents found matching "{searchQuery}" in {activeCategory}.
-            </p>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => {
-                setSearchQuery('');
-                setActiveCategory('All');
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'rgba(56, 189, 248, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.25rem',
+                color: 'var(--accent-main)',
               }}
-              style={{ marginTop: '1rem', padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}
             >
-              Clear Filters
-            </button>
-          </div>
+              <FileBadge size={32} aria-hidden="true" />
+            </div>
+
+            <h3
+              id="vault-empty-title"
+              style={{
+                color: 'var(--text-primary)',
+                fontSize: '1.4rem',
+                fontWeight: '700',
+                marginBottom: '0.5rem',
+              }}
+            >
+              {documents.length === 0
+                ? 'Your Digital Civic Vault is Empty'
+                : `No documents found in ${activeCategory}`}
+            </h3>
+
+            <p
+              style={{
+                color: 'var(--text-secondary)',
+                fontSize: '0.95rem',
+                maxWidth: '520px',
+                margin: '0 auto 1.5rem',
+                lineHeight: '1.6',
+              }}
+            >
+              {documents.length === 0 ? (
+                <>
+                  Store masked credential references, track certificate expiration deadlines, and prepare
+                  tamper-evident watermarked photocopies. <strong>No sensitive file data leaves your device.</strong>
+                </>
+              ) : searchQuery ? (
+                <>
+                  No stored records matched query <em>&ldquo;{searchQuery}&rdquo;</em> in category{' '}
+                  <strong>{activeCategory}</strong>. Try relaxing your search terms or view all documents.
+                </>
+              ) : (
+                <>
+                  You haven&apos;t added any documents under <strong>{activeCategory}</strong> yet. You can catalog identity
+                  cards, vehicle registrations, tax profiles, or welfare entitlements.
+                </>
+              )}
+            </p>
+
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => setIsModalOpen(true)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  borderRadius: '99px',
+                  padding: '0.65rem 1.5rem',
+                }}
+              >
+                <Plus size={16} aria-hidden="true" />
+                <span>Add First Document</span>
+              </button>
+
+              {(searchQuery || activeCategory !== 'All') && (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setActiveCategory('All');
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    borderRadius: '99px',
+                    padding: '0.65rem 1.5rem',
+                  }}
+                >
+                  Clear Filters
+                </button>
+              )}
+            </div>
+          </section>
         )}
 
           </>
