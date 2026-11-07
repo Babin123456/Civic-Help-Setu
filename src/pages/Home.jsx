@@ -64,7 +64,7 @@ const Home = () => {
           </h1>
           
           <p className="animate-fade-in delay-200" style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '3rem', maxWidth: '700px', lineHeight: '1.6' }}>
-            CivicBridge translates bureaucratic processes into clear, actionable steps using verified official sources. No jargon, just answers.
+            Civic Help Setu translates bureaucratic processes into clear, actionable steps using verified official sources. No jargon, just answers.
           </p>
           
           <div className="animate-fade-in delay-300" style={{ width: '100%', maxWidth: '700px', marginBottom: '3rem' }}>
@@ -149,7 +149,7 @@ const Home = () => {
       <section className="section">
         <div className="container">
           <div className="animate-fade-in" style={{ textAlign: 'center', marginBottom: '4rem', maxWidth: '800px', margin: '0 auto 4rem' }}>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '1rem' }}>How CivicBridge Works</h2>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '1rem' }}>How Civic Help Setu Works</h2>
             <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)' }}>We break down complex bureaucratic processes into clear, actionable steps.</p>
           </div>
           <div className="grid-3">

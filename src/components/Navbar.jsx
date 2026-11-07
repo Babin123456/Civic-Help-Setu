@@ -49,7 +49,7 @@ const Navbar = () => {
           <div className="nav-brand__logo" style={{ width: '2.5rem', height: '2.5rem', borderRadius: '0.75rem', background: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Shield size={20} color="var(--bg-main)" fill="currentColor" />
           </div>
-          <span className="nav-brand__text" style={{ letterSpacing: '-0.02em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('nav.brand', 'CivicBridge')}</span>
+          <span className="nav-brand__text" style={{ letterSpacing: '-0.02em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('nav.brand', 'Civic Help Setu')}</span>
         </Link>
 
         {/* Right side: Online status, SOS, Dark/Light toggle, and Hamburger */}
