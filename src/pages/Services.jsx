@@ -10,7 +10,7 @@ import ServiceComparisonModal from '../components/services/ServiceComparisonModa
 import ComparisonFloatingTray from '../components/services/ComparisonFloatingTray';
 import { comparisonService, MAX_COMPARE_LIMIT } from '../services/comparisonService';
 import { getSearchSuggestions, rankAndFilterServices } from '../services/searchRankingEngine';
-import { Layers, Scale, Building2 } from 'lucide-react';
+import { Layers, Scale, Building2, HelpCircle } from 'lucide-react';
 import { parseServiceFilters, normalizeSearchQuery } from '../utils/searchParams';
 import { parseJurisdictionFilters } from '../services/jurisdictionService';
 import RtiBuilderModal from '../components/services/RtiBuilderModal';
@@ -158,6 +158,7 @@ const Services = () => {
     selectedFee !== 'All' ||
     selectedSpeed !== 'All' ||
     selectedState !== 'All' ||
+    selectedDistrict !== 'All' ||
     sortBy !== 'relevance'
   );
 
@@ -189,52 +190,96 @@ const Services = () => {
   ]);
 
   return (
-    <div className="section animate-fade-in" style={{ paddingBottom: comparedServices.length > 0 ? '12rem' : '6rem' }}>
+    <div
+      className="section services-page-container animate-fade-in"
+      style={{
+        paddingTop: '2rem',
+        paddingBottom: comparedServices.length > 0 ? '12rem' : '6rem',
+      }}
+    >
       <div className="container">
-        {/* Header Section */}
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+        {/* Polished Header Section */}
+        <header
+          className="services-header"
+          style={{
+            textAlign: 'center',
+            marginBottom: '2.5rem',
+            position: 'relative',
+          }}
+        >
           <div
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.5rem',
               color: 'var(--accent-main)',
-              fontSize: '0.875rem',
+              fontSize: '0.85rem',
               fontWeight: '700',
               textTransform: 'uppercase',
               letterSpacing: '1px',
-              marginBottom: '0.5rem',
+              marginBottom: '0.75rem',
+              padding: '0.35rem 0.95rem',
+              background: 'rgba(56, 189, 248, 0.08)',
+              borderRadius: '99px',
+              border: '1px solid rgba(56, 189, 248, 0.2)',
             }}
           >
-            <Layers size={18} /> Verified Government Roadmaps
+            <Layers size={16} /> Verified Citizen Portals & Guides
           </div>
-          <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: '800', marginBottom: '1rem' }}>
-            Public Service Directory
+
+          <h1
+            style={{
+              fontSize: 'clamp(2.25rem, 5vw, 3.25rem)',
+              fontWeight: '800',
+              marginBottom: '0.85rem',
+              lineHeight: 1.15,
+            }}
+          >
+            Public Services Directory
           </h1>
-          <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '650px', margin: '0 auto 1.25rem' }}>
-            Official requirements, eligibility criteria, and step-by-step procedures to obtain essential Indian civic services.
+
+          <p
+            style={{
+              fontSize: '1.15rem',
+              color: 'var(--text-secondary)',
+              maxWidth: '680px',
+              margin: '0 auto 1.5rem',
+              lineHeight: 1.6,
+            }}
+          >
+            Find step-by-step procedures, required documents, authority contacts, and fee breakdowns for central and state public services.
           </p>
 
-          <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          {/* Quick Utility Action Buttons */}
+          <div
+            className="services-utility-actions"
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              gap: '0.85rem',
+              flexWrap: 'wrap',
+            }}
+          >
             <button
               type="button"
               onClick={() => setIsRtiModalOpen(true)}
               style={{
-                padding: '0.6rem 1.4rem',
+                padding: '0.55rem 1.25rem',
                 borderRadius: '99px',
-                border: '1px solid #2563eb',
-                background: '#eff6ff',
-                color: '#1d4ed8',
+                border: '1px solid rgba(37, 99, 235, 0.4)',
+                background: 'rgba(37, 99, 235, 0.08)',
+                color: '#2563eb',
                 fontWeight: 700,
-                fontSize: '0.88rem',
+                fontSize: '0.85rem',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: '0 2px 4px rgba(37,99,235,0.08)'
+                boxShadow: '0 2px 4px rgba(37, 99, 235, 0.08)',
+                transition: 'all 0.2s ease',
               }}
             >
-              <Scale size={16} />
+              <Scale size={15} />
               <span>Citizen RTI Request Builder (Section 6(1))</span>
             </button>
 
@@ -242,63 +287,72 @@ const Services = () => {
               type="button"
               onClick={() => setIsGrievanceRouterOpen(true)}
               style={{
-                padding: '0.6rem 1.4rem',
+                padding: '0.55rem 1.25rem',
                 borderRadius: '99px',
-                border: '1px solid #ea580c',
-                background: '#fff7ed',
-                color: '#c2410c',
+                border: '1px solid rgba(234, 88, 12, 0.4)',
+                background: 'rgba(234, 88, 12, 0.08)',
+                color: '#ea580c',
                 fontWeight: 700,
-                fontSize: '0.88rem',
+                fontSize: '0.85rem',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: '0 2px 4px rgba(234,88,12,0.08)'
+                boxShadow: '0 2px 4px rgba(234, 88, 12, 0.08)',
+                transition: 'all 0.2s ease',
               }}
             >
-              <Building2 size={16} />
+              <Building2 size={15} />
               <span>Civic Grievance & Department Router</span>
             </button>
           </div>
-        </div>
+        </header>
 
-        {/* Category Pills Navigation */}
-        <div
+        {/* Category Pills Navigation with accessible label */}
+        <nav
+          aria-label="Filter services by category"
           style={{
-            display: 'flex',
-            gap: '0.5rem',
-            overflowX: 'auto',
-            paddingBottom: '1rem',
             marginBottom: '1rem',
-            scrollbarWidth: 'none',
           }}
         >
-          {categories.map((cat) => {
-            const isActive = activeCategory.toLowerCase() === cat.toLowerCase();
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => handleCategoryChange(cat)}
-                style={{
-                  padding: '0.5rem 1.25rem',
-                  borderRadius: '99px',
-                  fontWeight: '600',
-                  fontSize: '0.9rem',
-                  whiteSpace: 'nowrap',
-                  cursor: 'pointer',
-                  border: isActive ? '1px solid var(--accent-main)' : '1px solid var(--border-light)',
-                  background: isActive ? 'var(--accent-main)' : 'var(--glass-bg)',
-                  color: isActive ? 'var(--bg-main)' : 'var(--text-secondary)',
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: isActive ? '0 4px 12px rgba(56, 189, 248, 0.25)' : 'none',
-                }}
-              >
-                {cat}
-              </button>
-            );
-          })}
-        </div>
+          <div
+            style={{
+              display: 'flex',
+              gap: '0.5rem',
+              overflowX: 'auto',
+              paddingBottom: '0.5rem',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+            }}
+          >
+            {categories.map((cat) => {
+              const isActive = activeCategory.toLowerCase() === cat.toLowerCase();
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => handleCategoryChange(cat)}
+                  aria-pressed={isActive}
+                  style={{
+                    padding: '0.5rem 1.15rem',
+                    borderRadius: '99px',
+                    fontWeight: '600',
+                    fontSize: '0.88rem',
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer',
+                    border: isActive ? '1px solid var(--accent-main)' : '1px solid var(--border-light)',
+                    background: isActive ? 'var(--accent-main)' : 'var(--glass-bg)',
+                    color: isActive ? 'var(--bg-main)' : 'var(--text-secondary)',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    boxShadow: isActive ? '0 4px 12px rgba(56, 189, 248, 0.25)' : 'none',
+                  }}
+                >
+                  {cat}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
 
         {/* Search Analytics Bar (Did you mean & Trending chips) */}
         <SearchAnalyticsBar
