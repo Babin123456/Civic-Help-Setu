@@ -760,6 +760,7 @@ html[data-high-contrast="true"] .glass-panel {
 .service-card-wrap { display: flex; flex-direction: column; gap: 0.5rem; height: 100%; }
 .service-card-wrap > .card { flex: 1; }
 .compare-toggle { display: inline-flex; align-items: center; gap: 0.5rem; align-self: flex-start; padding: 0.35rem 0.75rem; border: 1px solid var(--border-main); border-radius: var(--radius-full); background: var(--glass-bg); color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+.compare-toggle:focus-within { outline: 2px solid var(--accent-main); outline-offset: 2px; }
 .compare-toggle.is-disabled { opacity: 0.55; cursor: not-allowed; }
 .compare-toggle { scroll-margin-bottom: 10rem; }
 .compare-toggle input { accent-color: var(--accent-main); width: 1rem; height: 1rem; }
