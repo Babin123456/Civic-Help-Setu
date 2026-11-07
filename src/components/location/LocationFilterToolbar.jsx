@@ -246,6 +246,8 @@ const LocationFilterToolbar = ({
               State / Region
             </label>
             <select
+              id="office-state-select"
+              aria-label="Filter offices by State or Region"
               value={selectedState}
               onChange={(e) => onStateChange(e.target.value)}
               className="input-field"
