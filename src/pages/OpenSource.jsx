@@ -1,402 +1,793 @@
+
 import React, { useState } from 'react';
-import { 
-  Code, 
-  GitPullRequest, 
-  AlertCircle, 
-  BookOpen, 
-  Heart, 
-  Shield, 
-  Accessibility, 
-  FileCheck2, 
-  Palette, 
-  CheckCircle2, 
-  ExternalLink, 
-  Terminal, 
-  Users 
+import {
+  Code2,
+  GitPullRequest,
+  AlertCircle,
+  BookOpen,
+  Heart,
+  ShieldCheck,
+  Accessibility,
+  FileCheck2,
+  Palette,
+  CheckCircle2,
+  ExternalLink,
+  Terminal,
+  Users,
+  ArrowUpRight,
+  Sparkles,
+  Github,
+  Globe2,
+  Copy,
+  Layers3,
+  ChevronRight,
+  Rocket,
+  Lightbulb,
+  Star,
+  GitBranch,
+  Monitor,
+  HandHeart,
+  ClipboardCheck,
 } from 'lucide-react';
+
 import LiveContributorsSection from '../components/community/LiveContributorsSection';
 
-/**
- * OpenSource Component - Civic Help Setu Contributors Hub
- * Provides a dedicated community center outlining contribution pathways,
- * verified repository links, governance values, and step-by-step local setup.
- */
 const OpenSource = () => {
   const [activePathway, setActivePathway] = useState('code');
+  const [copiedCommand, setCopiedCommand] = useState('');
 
   const repoBaseUrl = 'https://github.com/GoldRay19/Civic-Help-Setu';
 
   const pathways = [
     {
       id: 'code',
-      title: 'Code & Core Engineering',
-      icon: Code,
-      badge: 'React 18 / Vite / Vitest',
-      description: 'Build robust client-side civic tools, offline caching, and responsive UI components with clean architecture.',
-      skills: ['React', 'JavaScript (ES6+)', 'Tailwind / CSS Variables', 'Vitest'],
+      title: 'Code & Engineering',
+      subtitle: 'Build the foundation',
+      icon: Code2,
+      badge: 'Development',
+      description:
+        'Engineer reliable civic technology through thoughtful architecture, intelligent automation, and scalable applications that make public services easier to access.',
+      skills: ['React', 'JavaScript', 'Vite', 'Tailwind CSS', 'Vitest'],
       tasks: [
-        'Implement offline-first PWA caching and service workers',
-        'Enhance AI retrieval-augmented civic assistance modules',
-        'Improve local data minimization and document vault utilities'
+        'Develop offline-first PWA experiences and service workers',
+        'Improve AI-powered civic assistance and retrieval systems',
+        'Build secure document vaults and privacy-first utilities',
       ],
-      linkText: 'Browse Code Issues',
-      linkUrl: `${repoBaseUrl}/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement`
+      linkText: 'Explore code issues',
+      linkUrl: `${repoBaseUrl}/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement`,
+      color: 'blue',
     },
     {
       id: 'ui',
       title: 'UI & UX Design',
+      subtitle: 'Design for everyone',
       icon: Palette,
-      badge: 'User-Centric Design',
-      description: 'Craft intuitive, clutter-free layouts that help citizens navigate complex bureaucratic workflows calmly.',
-      skills: ['Figma', 'Responsive Layouts', 'Information Architecture', 'Plain UI'],
+      badge: 'Design',
+      description:
+        'Create intuitive, welcoming interfaces that transform complex government procedures into simple, understandable experiences for every citizen.',
+      skills: ['Figma', 'Responsive Design', 'UX Research', 'CSS', 'Accessibility'],
       tasks: [
-        'Refine mobile viewport spacing and touch targets',
-        'Design visual progress roadmaps and milestone trackers',
-        'Simplify application checklists and service comparison trays'
+        'Improve mobile layouts, spacing, and interactive elements',
+        'Design visual application progress and milestone trackers',
+        'Simplify document checklists and service comparison experiences',
       ],
-      linkText: 'View UI/UX Tasks',
-      linkUrl: `${repoBaseUrl}/issues?q=is%3Aissue+is%3Aopen+label%3Aui`
+      linkText: 'Explore design issues',
+      linkUrl: `${repoBaseUrl}/issues?q=is%3Aissue+is%3Aopen+label%3Aui`,
+      color: 'purple',
     },
     {
       id: 'a11y',
-      title: 'Accessibility (a11y)',
+      title: 'Accessibility',
+      subtitle: 'Technology without barriers',
       icon: Accessibility,
-      badge: 'WCAG 2.1 AA Standard',
-      description: 'Ensure every citizen, regardless of ability or assistive technology, can access public guidance seamlessly.',
-      skills: ['ARIA landmark roles', 'Screen Reader Auditing', 'Keyboard Navigation', 'High Contrast'],
+      badge: 'Inclusive Technology',
+      description:
+        'Make civic information accessible to people with different abilities, devices, languages, and assistive technologies.',
+      skills: ['WCAG', 'ARIA', 'Keyboard Navigation', 'NVDA', 'Screen Readers'],
       tasks: [
-        'Audit keyboard focus rings and skip-to-content links',
-        'Verify NVDA/VoiceOver announcement readability',
-        'Support prefers-reduced-motion across interactive banners'
+        'Audit keyboard navigation and visible focus indicators',
+        'Improve screen-reader announcements and semantic HTML',
+        'Implement reduced-motion and high-contrast support',
       ],
-      linkText: 'Explore a11y Issues',
-      linkUrl: `${repoBaseUrl}/issues?q=is%3Aissue+is%3Aopen+label%3Aaccessibility`
+      linkText: 'Explore accessibility issues',
+      linkUrl: `${repoBaseUrl}/issues?q=is%3Aissue+is%3Aopen+label%3Aaccessibility`,
+      color: 'emerald',
     },
     {
       id: 'civic-data',
-      title: 'Civic Data & Scheme Guides',
+      title: 'Civic Research & Data',
+      subtitle: 'Make information trustworthy',
       icon: FileCheck2,
-      badge: 'Verified Portals Only',
-      description: 'Research statutory government portals, fee schedules, and required document checklists for state and central services.',
-      skills: ['Legal/Govt Research', 'Plain-Language Writing', 'Markdown', 'Regulatory Auditing'],
+      badge: 'Civic Research',
+      description:
+        'Research government services, eligibility conditions, official portals, documentation requirements, and application procedures across India.',
+      skills: ['Government Research', 'Legal Awareness', 'Markdown', 'Data Verification'],
       tasks: [
-        'Add card-based guides for State/UT certificates and documents',
-        'Audit official fee rules and turnaround timelines',
-        'Draft rejection prevention checklists for common applications'
+        'Create structured guides for state and central government services',
+        'Verify official fees, eligibility rules, and application timelines',
+        'Prepare document checklists that prevent application rejection',
       ],
-      linkText: 'Help with Civic Guides',
-      linkUrl: `${repoBaseUrl}/issues?q=is%3Aissue+is%3Aopen+label%3Adocumentation`
+      linkText: 'Explore documentation issues',
+      linkUrl: `${repoBaseUrl}/issues?q=is%3Aissue+is%3Aopen+label%3Adocumentation`,
+      color: 'amber',
     },
     {
       id: 'testing',
-      title: 'Testing & Quality Assurance',
-      icon: Shield,
-      badge: 'Zero Regressions',
-      description: 'Strengthen automated test suites and security guardrails to maintain software reliability.',
-      skills: ['Unit Testing', 'ESLint Security', 'Edge-Case Auditing', 'Regression Tests'],
+      title: 'Testing & Security',
+      subtitle: 'Build with confidence',
+      icon: ShieldCheck,
+      badge: 'Quality Assurance',
+      description:
+        'Protect the reliability of civic services through automated testing, security reviews, and continuous quality improvements.',
+      skills: ['Vitest', 'Unit Testing', 'Security', 'Regression Testing', 'ESLint'],
       tasks: [
-        'Write Vitest suites for newly introduced service cards',
-        'Run security linting to catch vulnerable patterns early',
-        'Validate offline caching fallbacks under simulated disconnects'
+        'Create automated tests for service and eligibility components',
+        'Identify security weaknesses and vulnerable code patterns',
+        'Test offline functionality and network failure scenarios',
       ],
-      linkText: 'Check Testing Tasks',
-      linkUrl: `${repoBaseUrl}/issues?q=is%3Aissue+is%3Aopen+label%3Atesting`
+      linkText: 'Explore testing issues',
+      linkUrl: `${repoBaseUrl}/issues?q=is%3Aissue+is%3Aopen+label%3Atesting`,
+      color: 'rose',
     },
     {
       id: 'docs',
-      title: 'Docs & Translation',
+      title: 'Documentation & Languages',
+      subtitle: 'Knowledge belongs to everyone',
       icon: BookOpen,
-      badge: 'Multilingual India',
-      description: 'Help translate bureaucratic terminology into plain Indian languages and maintain comprehensive developer guides.',
-      skills: ['Multilingual Translation', 'Technical Documentation', 'Glossary Curation'],
+      badge: 'Community Knowledge',
+      description:
+        'Make technical documentation and government terminology easier to understand through clear writing, translations, and practical guides.',
+      skills: ['Technical Writing', 'Translation', 'Markdown', 'Indian Languages'],
       tasks: [
-        'Translate civic acronyms and statutory legal terms',
-        'Keep README and CONTRIBUTING guidelines crystal clear',
-        'Document environment setup and offline troubleshooting tips'
+        'Translate important civic terminology into Indian languages',
+        'Improve README and contributor documentation',
+        'Document environment setup and troubleshooting procedures',
       ],
-      linkText: 'Contribute to Docs',
-      linkUrl: `${repoBaseUrl}/blob/main/CONTRIBUTING.md`
-    }
+      linkText: 'Explore documentation',
+      linkUrl: `${repoBaseUrl}/blob/main/CONTRIBUTING.md`,
+      color: 'cyan',
+    },
   ];
 
+  const principles = [
+    {
+      icon: Heart,
+      title: 'Public Good First',
+      description:
+        'Civic information should remain accessible. We believe in building useful public-interest technology without paywalls or unnecessary barriers.',
+      color: 'rose',
+    },
+    {
+      icon: ShieldCheck,
+      title: 'Privacy by Design',
+      description:
+        'Respect citizen data. Minimize unnecessary collection, protect personal documents, and make privacy an essential part of every feature.',
+      color: 'emerald',
+    },
+    {
+      icon: CheckCircle2,
+      title: 'Trust & Transparency',
+      description:
+        'Government procedures, fees, and requirements should be backed by official sources and presented with clear verification context.',
+      color: 'blue',
+    },
+  ];
+
+  const setupSteps = [
+    {
+      title: 'Clone the repository',
+      description: 'Get the project onto your local machine.',
+      command: `git clone https://github.com/<your-username>/Civic-Help-Setu.git
+cd Civic-Help-Setu`,
+    },
+    {
+      title: 'Install dependencies',
+      description: 'Install the packages required by the project.',
+      command: `npm install
+npm run dev`,
+    },
+    {
+      title: 'Run quality checks',
+      description: 'Check your changes before submitting a pull request.',
+      command: `npm test
+npm run lint:security`,
+    },
+  ];
+
+  const activeItem = pathways.find(
+    (item) => item.id === activePathway
+  );
+
+  const ActiveIcon = activeItem.icon;
+
+  const copyCommand = async (command, index) => {
+    try {
+      await navigator.clipboard.writeText(command);
+      setCopiedCommand(String(index));
+      window.setTimeout(() => setCopiedCommand(''), 2000);
+    } catch {
+      setCopiedCommand('');
+    }
+  };
+
+  const colorStyles = {
+    blue: {
+      icon: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+      badge: 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
+      selected: 'border-blue-500 bg-blue-500/[0.06]',
+      dot: 'bg-blue-500',
+    },
+    purple: {
+      icon: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+      badge: 'bg-purple-500/10 text-purple-700 dark:text-purple-300',
+      selected: 'border-purple-500 bg-purple-500/[0.06]',
+      dot: 'bg-purple-500',
+    },
+    emerald: {
+      icon: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+      badge: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+      selected: 'border-emerald-500 bg-emerald-500/[0.06]',
+      dot: 'bg-emerald-500',
+    },
+    amber: {
+      icon: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+      badge: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
+      selected: 'border-amber-500 bg-amber-500/[0.06]',
+      dot: 'bg-amber-500',
+    },
+    rose: {
+      icon: 'bg-rose-500/10 text-rose-600 dark:text-rose-400',
+      badge: 'bg-rose-500/10 text-rose-700 dark:text-rose-300',
+      selected: 'border-rose-500 bg-rose-500/[0.06]',
+      dot: 'bg-rose-500',
+    },
+    cyan: {
+      icon: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
+      badge: 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300',
+      selected: 'border-cyan-500 bg-cyan-500/[0.06]',
+      dot: 'bg-cyan-500',
+    },
+  };
+
   return (
-    <div className="container max-w-5xl pt-16 pb-24 text-gray-900 dark:text-gray-100">
-      {/* Hero Header */}
-      <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 mb-4">
-          <Users size={14} />
-          <span>Civic Help Setu Community Hub</span>
-        </div>
-        <h1 className="text-4xl sm:text-5xl font-extrabold mb-4 tracking-tight">
-          Building India&apos;s Public Tech Infrastructure, Together
-        </h1>
-        <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
-          Civic Help Setu is a 100% open-source, non-governmental civic assistance platform.
-          We transform fragmented bureaucratic rules into clear, actionable, verified steps for every Indian citizen.
-        </p>
+    <main className="relative min-h-screen overflow-hidden bg-white text-gray-900 dark:bg-[#080d18] dark:text-gray-100">
 
-        {/* Quick Hub Links */}
-        <div className="flex flex-wrap justify-center gap-3 mt-6">
-          <a
-            href={repoBaseUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-primary inline-flex items-center gap-2 text-sm font-semibold"
-            aria-label="Visit Civic Help Setu GitHub repository (opens in new tab)"
-          >
-            <Code size={16} />
-            <span>GitHub Repository</span>
-            <ExternalLink size={14} className="opacity-70" />
-          </a>
-          <a
-            href={`${repoBaseUrl}/blob/main/CONTRIBUTING.md`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-secondary inline-flex items-center gap-2 text-sm font-semibold"
-            aria-label="Read Civic Help Setu contribution guidelines (opens in new tab)"
-          >
-            <BookOpen size={16} />
-            <span>Contribution Guidelines</span>
-            <ExternalLink size={14} className="opacity-70" />
-          </a>
-          <a
-            href={`${repoBaseUrl}/issues`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-secondary inline-flex items-center gap-2 text-sm font-semibold"
-            aria-label="Browse open issues on GitHub (opens in new tab)"
-          >
-            <AlertCircle size={16} />
-            <span>Open Issues</span>
-            <ExternalLink size={14} className="opacity-70" />
-          </a>
-          <a
-            href={`${repoBaseUrl}/pulls`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-secondary inline-flex items-center gap-2 text-sm font-semibold"
-            aria-label="Review active Pull Requests on GitHub (opens in new tab)"
-          >
-            <GitPullRequest size={16} />
-            <span>Pull Requests</span>
-            <ExternalLink size={14} className="opacity-70" />
-          </a>
-        </div>
+      {/* Background decoration */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-48 left-1/2 h-[480px] w-[700px] -translate-x-1/2 rounded-full bg-blue-500/[0.08] blur-[120px]" />
+        <div className="absolute right-0 top-[600px] h-80 w-80 rounded-full bg-purple-500/[0.05] blur-[100px]" />
+        <div className="absolute left-0 top-[1200px] h-80 w-80 rounded-full bg-cyan-500/[0.05] blur-[100px]" />
       </div>
 
-      {/* Guiding Principles */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-        <div className="p-6 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
-          <div className="w-12 h-12 rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 flex items-center justify-center mb-4">
-            <Heart size={24} />
-          </div>
-          <h2 className="text-lg font-bold mb-2">Public Good First</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-300 leading-normal">
-            No paywalls, ads, or monetization. Public-service procedures and legal awareness belong freely to every citizen.
-          </p>
-        </div>
+      <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-12 sm:px-6 lg:px-8 lg:pt-20">
 
-        <div className="p-6 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
-          <div className="w-12 h-12 rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center mb-4">
-            <Shield size={24} />
-          </div>
-          <h2 className="text-lg font-bold mb-2">Privacy &amp; Data Dignity</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-300 leading-normal">
-            No tracking of citizen inquiries, zero data brokering, and local-first browser storage for all personal documents.
-          </p>
-        </div>
+        {/* HERO */}
+        <section className="relative mb-20 overflow-hidden rounded-[32px] border border-gray-200 bg-gradient-to-br from-gray-50 via-white to-blue-50/70 px-6 py-14 dark:border-white/10 dark:from-[#111827] dark:via-[#0d1422] dark:to-[#101e36] sm:px-12 sm:py-20 lg:px-16">
 
-        <div className="p-6 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
-          <div className="w-12 h-12 rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 flex items-center justify-center mb-4">
-            <CheckCircle2 size={24} />
-          </div>
-          <h2 className="text-lg font-bold mb-2">Government Verified Only</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-300 leading-normal">
-            Every timeline, fee, and requirement links directly to verified government gazettes and official department portals.
-          </p>
-        </div>
-      </div>
+          <div className="absolute -right-20 -top-28 h-80 w-80 rounded-full border border-blue-500/10" />
+          <div className="absolute -right-8 -top-16 h-56 w-56 rounded-full border border-blue-500/10" />
 
-      {/* Contribution Pathways Section */}
-      <section className="mb-16">
-        <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-8">
-          <h2 className="text-2xl font-bold tracking-tight">Choose Your Contribution Pathway</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Whether you write code, design accessible experiences, test features, or research civic policies, there is a place for you.
-          </p>
-        </div>
+          <div className="relative z-10 max-w-4xl">
 
-        {/* Pathway Pills */}
-        <div className="flex flex-wrap gap-2 mb-6" role="tablist" aria-label="Contribution Pathways">
-          {pathways.map((item) => {
-            const IconComponent = item.icon;
-            const isSelected = activePathway === item.id;
-            return (
-              <button
-                key={item.id}
-                role="tab"
-                aria-selected={isSelected}
-                aria-controls={`panel-${item.id}`}
-                id={`tab-${item.id}`}
-                onClick={() => setActivePathway(item.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                  isSelected
-                    ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-500/50'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300'
-                }`}
+            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/80 px-4 py-2 text-xs font-bold tracking-wide text-blue-700 shadow-sm dark:border-blue-400/20 dark:bg-blue-500/10 dark:text-blue-300">
+              <Sparkles size={15} />
+              THE CIVIC HELP SETU COMMUNITY
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              OPEN SOURCE
+            </div>
+
+            <h1 className="max-w-4xl text-4xl font-black leading-[1.12] tracking-tight sm:text-5xl lg:text-7xl">
+              Build technology
+              <br />
+              that makes a
+              <span className="bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 bg-clip-text text-transparent">
+                {' '}difference.
+              </span>
+            </h1>
+
+            <p className="mt-7 max-w-2xl text-base leading-8 text-gray-600 dark:text-gray-400 sm:text-lg">
+              Join a community building more accessible, transparent,
+              and understandable civic services for India. Every line
+              of code, verified guide, and thoughtful contribution
+              moves us forward.
+            </p>
+
+            <div className="mt-9 flex flex-wrap gap-3">
+              <a
+                href={`${repoBaseUrl}/issues`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5 hover:bg-blue-700"
               >
-                <IconComponent size={16} />
-                <span>{item.title}</span>
-              </button>
-            );
-          })}
-        </div>
+                <Rocket size={17} />
+                Start Contributing
+                <ArrowUpRight size={16} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </a>
 
-        {/* Selected Pathway Details Card */}
-        {pathways
-          .filter((p) => p.id === activePathway)
-          .map((item) => {
-            const IconComponent = item.icon;
-            return (
-              <div
-                key={item.id}
-                role="tabpanel"
-                id={`panel-${item.id}`}
-                aria-labelledby={`tab-${item.id}`}
-                className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm"
+              <a
+                href={repoBaseUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-3.5 text-sm font-bold text-gray-800 transition-all hover:border-gray-400 hover:bg-gray-50 dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
               >
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                      <IconComponent size={24} />
+                <Github size={17} />
+                Explore Repository
+                <ExternalLink size={14} />
+              </a>
+            </div>
+
+            <div className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-4 border-t border-gray-200 pt-7 dark:border-white/10">
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <Globe2 size={17} className="text-blue-500" />
+                Built for India
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <HandHeart size={17} className="text-rose-500" />
+                Public-interest technology
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <Users size={17} className="text-emerald-500" />
+                Community-driven
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* QUICK LINKS */}
+        <section className="mb-20">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">
+                Get involved
+              </p>
+              <h2 className="mt-2 text-2xl font-extrabold tracking-tight">
+                Your contribution starts here.
+              </h2>
+            </div>
+            <ArrowUpRight className="hidden text-gray-400 sm:block" size={24} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+
+            {[
+              {
+                title: 'Repository',
+                subtitle: 'Explore the code',
+                icon: Github,
+                href: repoBaseUrl,
+              },
+              {
+                title: 'Issues',
+                subtitle: 'Find something to solve',
+                icon: AlertCircle,
+                href: `${repoBaseUrl}/issues`,
+              },
+              {
+                title: 'Pull Requests',
+                subtitle: 'Review contributions',
+                icon: GitPullRequest,
+                href: `${repoBaseUrl}/pulls`,
+              },
+              {
+                title: 'Guidelines',
+                subtitle: 'Learn how to contribute',
+                icon: BookOpen,
+                href: `${repoBaseUrl}/blob/main/CONTRIBUTING.md`,
+              },
+            ].map((link) => {
+              const Icon = link.icon;
+
+              return (
+                <a
+                  key={link.title}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group rounded-2xl border border-gray-200 bg-white p-4 transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/5 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-blue-400/40 sm:p-5"
+                >
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                    <Icon size={20} />
+                  </div>
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-sm font-bold">{link.title}</span>
+                    <ArrowUpRight size={15} className="text-gray-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-blue-500" />
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    {link.subtitle}
+                  </p>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* PRINCIPLES */}
+        <section className="mb-24">
+          <div className="mb-9 max-w-2xl">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">
+              What drives us
+            </p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Technology with a purpose.
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-gray-600 dark:text-gray-400">
+              We believe meaningful technology begins with people,
+              transparency, and a commitment to the public good.
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-3">
+            {principles.map((item) => {
+              const Icon = item.icon;
+              const styles = colorStyles[item.color];
+
+              return (
+                <article
+                  key={item.title}
+                  className="group rounded-2xl border border-gray-200 bg-white p-7 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-gray-900/5 dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.05]"
+                >
+                  <div className={`mb-6 flex h-12 w-12 items-center justify-center rounded-2xl ${styles.icon}`}>
+                    <Icon size={24} />
+                  </div>
+                  <h3 className="text-lg font-extrabold">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-gray-600 dark:text-gray-400">
+                    {item.description}
+                  </p>
+                  <div className="mt-6 h-1 w-10 rounded-full bg-gray-200 transition-all group-hover:w-20 group-hover:bg-blue-500 dark:bg-white/10" />
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* CONTRIBUTION PATHWAYS */}
+        <section className="mb-24">
+
+          <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div className="max-w-2xl">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">
+                Find your place
+              </p>
+              <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+                Choose your pathway.
+              </h2>
+              <p className="mt-3 text-sm leading-7 text-gray-600 dark:text-gray-400">
+                You don't need to do everything. Pick the area where
+                your skills can create the greatest impact.
+              </p>
+            </div>
+
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
+              <Layers3 size={15} className="text-blue-500" />
+              6 contribution pathways
+            </div>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[320px_1fr] lg:items-start">
+
+            {/* Pathway selector */}
+            <div
+              className="flex gap-2 overflow-x-auto pb-3 lg:flex-col lg:overflow-visible lg:pb-0"
+              role="tablist"
+              aria-label="Contribution pathways"
+              aria-orientation="vertical"
+            >
+              {pathways.map((item) => {
+                const Icon = item.icon;
+                const selected = activePathway === item.id;
+                const styles = colorStyles[item.color];
+
+                return (
+                  <button
+                    key={item.id}
+                    id={`tab-${item.id}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={selected}
+                    aria-controls={`panel-${item.id}`}
+                    onClick={() => setActivePathway(item.id)}
+                    className={`flex min-w-[230px] items-center gap-3 rounded-2xl border p-4 text-left transition-all lg:min-w-0 ${
+                      selected
+                        ? `${styles.selected} shadow-sm`
+                        : 'border-gray-200 bg-white hover:border-gray-300 dark:border-white/10 dark:bg-white/[0.02] dark:hover:bg-white/[0.05]'
+                    }`}
+                  >
+                    <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${styles.icon}`}>
+                      <Icon size={21} />
                     </div>
-                    <div>
-                      <h3 className="text-xl font-bold">{item.title}</h3>
-                      <span className="text-xs font-medium px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
-                        {item.badge}
+
+                    <div className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-bold">
+                        {item.title}
+                      </span>
+                      <span className="mt-1 block text-xs text-gray-500 dark:text-gray-400">
+                        {item.subtitle}
                       </span>
                     </div>
+
+                    <ChevronRight
+                      size={17}
+                      className={`shrink-0 transition-transform ${
+                        selected
+                          ? 'translate-x-0.5 text-blue-500'
+                          : 'text-gray-400'
+                      }`}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Active pathway details */}
+            <article
+              key={activeItem.id}
+              id={`panel-${activeItem.id}`}
+              role="tabpanel"
+              aria-labelledby={`tab-${activeItem.id}`}
+              tabIndex={0}
+              className="min-w-0 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#101827] sm:p-9"
+            >
+
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${colorStyles[activeItem.color].icon}`}>
+                    <ActiveIcon size={27} />
                   </div>
-                  <a
-                    href={item.linkUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    <span>{item.linkText}</span>
-                    <ExternalLink size={14} />
-                  </a>
-                </div>
-
-                <p className="text-gray-700 dark:text-gray-300 text-sm mb-6 leading-relaxed">
-                  {item.description}
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-100 dark:border-gray-800 text-sm">
                   <div>
-                    <h4 className="font-semibold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
-                      Key Skills &amp; Focus Areas
-                    </h4>
-                    <div className="flex flex-wrap gap-1.5">
-                      {item.skills.map((skill, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2.5 py-1 text-xs rounded-md bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-medium"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
-                      Typical High-Impact Contributions
-                    </h4>
-                    <ul className="space-y-1.5 text-xs text-gray-600 dark:text-gray-300">
-                      {item.tasks.map((task, idx) => (
-                        <li key={idx} className="flex items-start gap-2">
-                          <span className="text-emerald-500 font-bold">•</span>
-                          <span>{task}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <span className={`inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${colorStyles[activeItem.color].badge}`}>
+                      {activeItem.badge}
+                    </span>
+                    <h3 className="mt-2 text-xl font-extrabold sm:text-2xl">
+                      {activeItem.title}
+                    </h3>
                   </div>
                 </div>
               </div>
-            );
-          })}
-      </section>
 
-      {/* Live GitHub Contributors Section */}
-      <LiveContributorsSection />
+              <p className="mt-7 max-w-2xl text-sm leading-8 text-gray-600 dark:text-gray-400">
+                {activeItem.description}
+              </p>
 
-      {/* Quick Local Setup Guide */}
-      <section className="mb-16 p-6 sm:p-8 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-2 mb-3">
-          <Terminal size={20} className="text-blue-600 dark:text-blue-400" />
-          <h2 className="text-xl font-bold">Fast-Track Local Development Setup</h2>
-        </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Get Civic Help Setu running on your local machine in under 2 minutes:
-        </p>
+              <div className="my-8 h-px bg-gray-100 dark:bg-white/10" />
 
-        <div className="space-y-3 font-mono text-xs">
-          <div className="p-3 rounded-lg bg-gray-900 text-gray-100 overflow-x-auto">
-            <span className="text-gray-500"># 1. Clone your fork of the repository</span>
-            <br />
-            git clone https://github.com/&lt;your-username&gt;/Civic-Help-Setu.git
-            <br />
-            cd Civic-Help-Setu
+              <div className="grid gap-9 sm:grid-cols-2">
+
+                <div>
+                  <div className="mb-4 flex items-center gap-2">
+                    <Star size={16} className="text-amber-500" />
+                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                      Skills & technologies
+                    </h4>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {activeItem.skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-gray-300"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-4 flex items-center gap-2">
+                    <ClipboardCheck size={16} className="text-emerald-500" />
+                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                      Potential contributions
+                    </h4>
+                  </div>
+
+                  <ul className="space-y-4">
+                    {activeItem.tasks.map((task) => (
+                      <li
+                        key={task}
+                        className="flex items-start gap-3 text-sm leading-6 text-gray-600 dark:text-gray-300"
+                      >
+                        <CheckCircle2
+                          size={17}
+                          className="mt-0.5 shrink-0 text-emerald-500"
+                        />
+                        {task}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+              </div>
+
+              <div className="mt-9 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-gray-50 p-4 dark:bg-white/[0.04]">
+                <div>
+                  <p className="text-sm font-bold">
+                    Ready to make an impact?
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Find an opportunity in this contribution area.
+                  </p>
+                </div>
+
+                <a
+                  href={activeItem.linkUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-xs font-bold text-white transition-all hover:bg-blue-700"
+                >
+                  {activeItem.linkText}
+                  <ArrowUpRight size={15} />
+                </a>
+              </div>
+            </article>
+
+          </div>
+        </section>
+
+        {/* LIVE CONTRIBUTORS */}
+        <section className="mb-24">
+          <div className="mb-8">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">
+              The people behind the project
+            </p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Meet the contributors.
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-600 dark:text-gray-400">
+              Open source grows through people who share their time,
+              ideas, and skills. Discover the community contributing
+              to Civic Help Setu.
+            </p>
           </div>
 
-          <div className="p-3 rounded-lg bg-gray-900 text-gray-100 overflow-x-auto">
-            <span className="text-gray-500"># 2. Install dependencies &amp; start dev server</span>
-            <br />
-            npm install
-            <br />
-            npm run dev
+          <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white p-5 dark:border-white/10 dark:bg-white/[0.03] sm:p-8">
+            <LiveContributorsSection />
           </div>
+        </section>
 
-          <div className="p-3 rounded-lg bg-gray-900 text-gray-100 overflow-x-auto">
-            <span className="text-gray-500"># 3. Verify tests and security lint before opening PR</span>
-            <br />
-            npm test
-            <br />
-            npm run lint:security
+        {/* DEVELOPER SETUP */}
+        <section className="mb-24 overflow-hidden rounded-3xl border border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-[#101827]">
+
+          <div className="grid lg:grid-cols-[0.85fr_1.15fr]">
+
+            <div className="p-7 sm:p-10 lg:p-12">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                <Terminal size={24} />
+              </div>
+
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">
+                Developer quickstart
+              </p>
+
+              <h2 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight">
+                From zero to your first contribution.
+              </h2>
+
+              <p className="mt-4 text-sm leading-8 text-gray-600 dark:text-gray-400">
+                Set up your local environment, explore the codebase,
+                and prepare your first contribution to the project.
+              </p>
+
+              <a
+                href={`${repoBaseUrl}/blob/main/CONTRIBUTING.md`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400"
+              >
+                Read contribution guidelines
+                <ArrowUpRight size={16} />
+              </a>
+            </div>
+
+            <div className="space-y-4 bg-white p-5 dark:bg-[#0b1220] sm:p-8">
+
+              {setupSteps.map((step, index) => (
+                <div
+                  key={step.title}
+                  className="overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10"
+                >
+                  <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-3 dark:border-white/10">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10 text-xs font-extrabold text-blue-600 dark:text-blue-400">
+                        0{index + 1}
+                      </span>
+                      <div>
+                        <h3 className="text-xs font-bold">
+                          {step.title}
+                        </h3>
+                        <p className="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                          {step.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => copyCommand(step.command, index)}
+                      aria-label={`Copy commands for ${step.title}`}
+                      className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-2 text-[10px] font-bold text-gray-600 transition-colors hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/10"
+                    >
+                      {copiedCommand === String(index) ? (
+                        <>
+                          <CheckCircle2 size={13} />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={13} />
+                          Copy
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <pre className="overflow-x-auto bg-[#0b1220] p-5 text-xs leading-7 text-emerald-300">
+                    <code>{step.command}</code>
+                  </pre>
+                </div>
+              ))}
+
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Community Callout & Code of Conduct */}
-      <div className="text-center p-8 rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900">
-        <h2 className="text-2xl font-bold mb-2">Have an Idea or Found a Gap?</h2>
-        <p className="text-sm text-gray-600 dark:text-gray-300 max-w-xl mx-auto mb-6">
-          If an official civic procedure has changed in your state or you noticed an error in guidance,
-          open an issue directly or submit a pull request. Every contribution helps fellow citizens save hours of confusion.
-        </p>
-        <div className="flex flex-wrap justify-center gap-3">
-          <a
-            href={`${repoBaseUrl}/issues/new`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-primary inline-flex items-center gap-2 text-sm font-semibold"
-          >
-            <span>Open a New Issue</span>
-            <ExternalLink size={14} />
-          </a>
-          <a
-            href={`${repoBaseUrl}/blob/main/CODE_OF_CONDUCT.md`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-secondary inline-flex items-center gap-2 text-sm font-semibold"
-          >
-            <span>Code of Conduct</span>
-            <ExternalLink size={14} />
-          </a>
-        </div>
+        {/* FINAL CTA */}
+        <section className="relative overflow-hidden rounded-[30px] bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 px-6 py-14 text-center text-white shadow-xl shadow-blue-600/10 sm:px-12 sm:py-16">
+
+          <div className="pointer-events-none absolute -left-20 -top-28 h-72 w-72 rounded-full border border-white/10" />
+          <div className="pointer-events-none absolute -right-16 -bottom-32 h-96 w-96 rounded-full border border-white/10" />
+
+          <div className="relative z-10 mx-auto max-w-2xl">
+            <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10">
+              <Lightbulb size={27} />
+            </div>
+
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-100">
+              Every contribution counts
+            </p>
+
+            <h2 className="mt-4 text-3xl font-black tracking-tight sm:text-5xl">
+              Have an idea? Let's build it together.
+            </h2>
+
+            <p className="mt-5 text-sm leading-8 text-blue-100 sm:text-base">
+              Found outdated civic information, identified an
+              improvement, or want to introduce a new feature?
+              Share your idea with the community.
+            </p>
+
+            <div className="mt-9 flex flex-wrap justify-center gap-3">
+              <a
+                href={`${repoBaseUrl}/issues/new`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-extrabold text-blue-700 transition-all hover:-translate-y-0.5 hover:bg-blue-50"
+              >
+                Open an issue
+                <ArrowUpRight size={17} />
+              </a>
+
+              <a
+                href={`${repoBaseUrl}/blob/main/CODE_OF_CONDUCT.md`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/10 px-6 py-3.5 text-sm font-bold text-white transition-all hover:bg-white/20"
+              >
+                <Heart size={16} />
+                Code of Conduct
+              </a>
+            </div>
+
+            <p className="mt-8 text-xs text-blue-100/80">
+              Civic Help Setu · Open source · Built for the public good
+            </p>
+          </div>
+        </section>
+
       </div>
-    </div>
+    </main>
   );
 };
 
