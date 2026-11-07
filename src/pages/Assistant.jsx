@@ -475,6 +475,8 @@ const Assistant = () => {
             return (
               <div
                 key={msg.id || index}
+                role="article"
+                aria-label={isUser ? 'Citizen question' : 'Civic Assistant consultation response'}
                 style={{
                   display: 'flex',
                   justifyContent: isUser ? 'flex-end' : 'flex-start',
@@ -483,13 +485,32 @@ const Assistant = () => {
                 <div
                   className="card animate-fade-in"
                   style={{
-                    maxWidth: '85%',
+                    maxWidth: isUser ? 'min(85%, 600px)' : '100%',
+                    width: isUser ? 'auto' : '100%',
                     padding: '1.5rem',
-                    background: isUser ? 'rgba(56, 189, 248, 0.1)' : 'var(--glass-bg)',
+                    background: isUser ? 'rgba(56, 189, 248, 0.08)' : 'var(--glass-bg)',
                     borderColor: isUser ? 'rgba(56, 189, 248, 0.3)' : 'var(--border-main)',
                     borderRadius: '1.25rem',
+                    lineHeight: '1.6',
+                    overflowWrap: 'break-word',
+                    wordBreak: 'break-word',
                   }}
                 >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                      marginBottom: '0.65rem',
+                      fontSize: '0.75rem',
+                      fontWeight: '800',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      color: isUser ? 'var(--accent-main)' : 'var(--text-tertiary)',
+                    }}
+                  >
+                    <span>{isUser ? 'You (Citizen)' : 'Civic Help Setu Assistant'}</span>
+                  </div>
                   {isUser ? (
                     <div>
                     <p style={{ fontSize: '1.05rem', color: 'var(--text-primary)', fontWeight: '500' }}>
