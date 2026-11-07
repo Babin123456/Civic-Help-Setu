@@ -114,7 +114,7 @@ export default function LiveContributorsSection({ customFetcher = null }) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Github size={17} />
+            <Code2 size={17} />
             View on GitHub
             <ArrowUpRight size={15} />
           </a>
