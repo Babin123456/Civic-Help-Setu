@@ -1,199 +1,244 @@
-import React, { useState, useEffect } from 'react';
-import { Users, Loader2, AlertCircle, RefreshCw, ExternalLink, GitCommit, ShieldAlert } from 'lucide-react';
-import { fetchLiveContributors, REPO_OWNER, REPO_NAME } from '../../services/githubContributorsService';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  Users,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+  ExternalLink,
+  GitCommit,
+  ShieldAlert,
+  Github,
+  ArrowUpRight,
+} from 'lucide-react';
 
-/**
- * LiveContributorsSection Component
- * Renders real GitHub repository contributors in a responsive grid
- * with loading, empty, API-failure, and rate-limited states.
- */
+import {
+  fetchLiveContributors,
+  REPO_OWNER,
+  REPO_NAME,
+} from '../../services/githubContributorsService';
+
+import './LiveContributorsSection.css';
+
 export default function LiveContributorsSection({ customFetcher = null }) {
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState({
     status: 'idle',
-    contributors: []
+    contributors: [],
   });
 
-  const loadData = async (forceRefresh = false) => {
-    setLoading(true);
+  const loadData = useCallback(async (forceRefresh = false, isActive = () => true) => {
+    if (isActive()) setLoading(true);
+
     try {
-      const res = customFetcher
+      const response = customFetcher
         ? await customFetcher({ forceRefresh })
         : await fetchLiveContributors({ forceRefresh });
-      setResult(res);
-    } catch (err) {
+
+      if (!isActive()) return;
+
+      setResult({
+        ...response,
+        contributors: Array.isArray(response?.contributors)
+          ? response.contributors
+          : [],
+      });
+    } catch (error) {
+      if (!isActive()) return;
+
       setResult({
         status: 'error',
         contributors: [],
-        errorMessage: err?.message || 'Failed to fetch contributors'
+        errorMessage: error?.message || 'Failed to fetch contributors.',
       });
     } finally {
-      setLoading(false);
+      if (isActive()) setLoading(false);
     }
-  };
+  }, [customFetcher]);
 
   useEffect(() => {
-    let mounted = true;
-    loadData().then(() => {
-      if (!mounted) return;
-    });
-    return () => {
-      mounted = false;
-    };
-  }, []);
+    let active = true;
 
-  const repoContributorsUrl = `https://github.com/${REPO_OWNER}/${REPO_NAME}/graphs/contributors`;
+    loadData(false, () => active);
+
+    return () => {
+      active = false;
+    };
+  }, [loadData]);
+
+  const contributors = result.contributors || [];
+  const repoUrl = `https://github.com/${REPO_OWNER}/${REPO_NAME}`;
+  const contributorsUrl = `${repoUrl}/graphs/contributors`;
+
+  const isRateLimited = result.status === 'rate_limited';
+  const isError = result.status === 'error';
+  const isEmpty =
+    result.status === 'empty' ||
+    (result.status === 'success' && contributors.length === 0);
 
   return (
-    <section
-      className="live-contributors-section mb-16 p-6 sm:p-8 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm"
-      aria-label="GitHub Repository Contributors"
-    >
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-gray-100 dark:border-gray-800">
-        <div>
-          <div className="inline-flex items-center gap-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 mb-1">
-            <Users size={13} />
-            <span>Real GitHub Contributors</span>
+    <section className="lcs-section" aria-label="GitHub repository contributors">
+      {/* Header */}
+      <div className="lcs-header">
+        <div className="lcs-heading">
+          <div className="lcs-eyebrow">
+            <Users size={15} />
+            <span>REAL GITHUB CONTRIBUTORS</span>
+            <span className="lcs-live-dot" />
           </div>
-          <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Repository Contributors
-          </h2>
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-            Verified public contributors from <code>{REPO_OWNER}/{REPO_NAME}</code>.
+
+          <h2>Meet Our Contributors</h2>
+
+          <p>
+            Real people building <strong>{REPO_OWNER}/{REPO_NAME}</strong>.
+            Every contribution makes a difference.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="lcs-actions">
           <button
             type="button"
+            className="lcs-button lcs-button-secondary"
             onClick={() => loadData(true)}
             disabled={loading}
-            className="btn btn-secondary inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5"
-            aria-label="Refresh contributors list from GitHub"
           >
-            <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-            <span>Refresh</span>
+            <RefreshCw
+              size={16}
+              className={loading ? 'lcs-spin' : ''}
+            />
+            {loading ? 'Refreshing' : 'Refresh'}
           </button>
+
           <a
-            href={repoContributorsUrl}
+            className="lcs-button lcs-button-primary"
+            href={contributorsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn btn-primary inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5"
-            aria-label="View all contributors graph on GitHub (opens in new tab)"
           >
-            <span>View All on GitHub</span>
-            <ExternalLink size={13} />
+            <Github size={17} />
+            View on GitHub
+            <ArrowUpRight size={15} />
           </a>
         </div>
       </div>
 
-      {/* Loading State */}
+      {/* Loading */}
       {loading && (
-        <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400" role="status">
-          <Loader2 size={32} className="animate-spin mb-3 text-blue-600 dark:text-blue-400" />
-          <p className="text-sm font-medium">Fetching real contributor data from GitHub...</p>
-        </div>
-      )}
-
-      {/* Rate Limited State */}
-      {!loading && result.status === 'rate_limited' && (
-        <div className="p-6 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-amber-900 dark:text-amber-200" role="alert">
-          <div className="flex items-start gap-3">
-            <ShieldAlert size={20} className="shrink-0 text-amber-600 mt-0.5" />
-            <div>
-              <h3 className="text-sm font-bold">GitHub Rate Limit Reached</h3>
-              <p className="text-xs text-amber-800 dark:text-amber-300 mt-1">
-                GitHub limits unauthenticated API requests to 60 per hour. Contributor avatars cannot be loaded right now,
-                but you can view the complete contributor graph directly on GitHub.
-              </p>
-              <div className="mt-3">
-                <a
-                  href={repoContributorsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-900 dark:text-amber-100 underline hover:no-underline"
-                >
-                  <span>Open Contributors Graph on GitHub</span>
-                  <ExternalLink size={12} />
-                </a>
-              </div>
-            </div>
+        <div className="lcs-state" role="status">
+          <div className="lcs-loader">
+            <Loader2 size={27} className="lcs-spin" />
           </div>
+          <h3>Finding our contributors</h3>
+          <p>Loading live contribution data from GitHub...</p>
         </div>
       )}
 
-      {/* API Error State */}
-      {!loading && result.status === 'error' && (
-        <div className="p-6 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-900 dark:text-rose-200" role="alert">
-          <div className="flex items-start gap-3">
-            <AlertCircle size={20} className="shrink-0 text-rose-600 mt-0.5" />
-            <div>
-              <h3 className="text-sm font-bold">Unable to Load Live Contributors</h3>
-              <p className="text-xs text-rose-800 dark:text-rose-300 mt-1">
-                {result.errorMessage || 'GitHub API is temporarily unreachable.'} The rest of this community hub remains fully functional.
-              </p>
-              <div className="mt-3">
-                <button
-                  type="button"
-                  onClick={() => loadData(true)}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-900 dark:text-rose-100 underline hover:no-underline"
-                >
-                  <span>Try Again</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Empty State */}
-      {!loading && result.status === 'empty' && (
-        <div className="text-center py-10 px-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700">
-          <Users size={32} className="mx-auto text-gray-400 mb-2" />
-          <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200">No Contributors Reported</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">
-            The GitHub API returned zero contributors for this repository endpoint.
-          </p>
-        </div>
-      )}
-
-      {/* Successful Contributors Grid */}
-      {!loading && result.status === 'success' && result.contributors.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {result.contributors.map((c) => (
-            <a
-              key={c.id || c.login}
-              href={c.html_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-800/40 hover:bg-white dark:hover:bg-gray-800 transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label={`${c.login} - ${c.contributions} contributions on GitHub`}
-            >
-              <div className="flex items-center gap-3">
-                <img
-                  src={c.avatar_url}
-                  alt=""
-                  width="44"
-                  height="44"
-                  loading="lazy"
-                  className="rounded-full bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600"
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                      {c.login}
-                    </span>
-                    <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-500" />
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    <GitCommit size={12} />
-                    <span>{c.contributions} {c.contributions === 1 ? 'commit' : 'commits'}</span>
-                  </div>
-                </div>
-              </div>
+      {/* Rate limit */}
+      {!loading && isRateLimited && (
+        <div className="lcs-message lcs-warning" role="alert">
+          <ShieldAlert size={23} />
+          <div>
+            <h3>GitHub rate limit reached</h3>
+            <p>
+              GitHub has temporarily limited API requests. Please try again
+              later or view the contributor graph directly.
+            </p>
+            <a href={contributorsUrl} target="_blank" rel="noopener noreferrer">
+              View GitHub contributor graph <ExternalLink size={14} />
             </a>
-          ))}
+          </div>
         </div>
+      )}
+
+      {/* Error */}
+      {!loading && isError && (
+        <div className="lcs-message lcs-error" role="alert">
+          <AlertCircle size={23} />
+          <div>
+            <h3>Couldn't load contributors</h3>
+            <p>
+              {result.errorMessage || 'GitHub API is temporarily unavailable.'}
+            </p>
+            <button type="button" onClick={() => loadData(true)}>
+              Try again <RefreshCw size={13} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Empty */}
+      {!loading && isEmpty && (
+        <div className="lcs-state">
+          <div className="lcs-empty-icon">
+            <Users size={28} />
+          </div>
+          <h3>No contributors found yet</h3>
+          <p>Be the first to contribute to this repository!</p>
+          <a href={`${repoUrl}/contribute`} target="_blank" rel="noopener noreferrer">
+            Start contributing <ArrowUpRight size={15} />
+          </a>
+        </div>
+      )}
+
+      {/* Contributors */}
+      {!loading && result.status === 'success' && contributors.length > 0 && (
+        <>
+          <div className="lcs-grid">
+            {contributors.map((contributor, index) => (
+              <a
+                key={contributor.id || contributor.login}
+                href={contributor.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="lcs-card"
+                aria-label={`${contributor.login}, ${contributor.contributions} contributions`}
+              >
+                <div className="lcs-card-top">
+                  <span className="lcs-rank">
+                    #{index + 1}
+                  </span>
+                  <ExternalLink size={15} className="lcs-card-link" />
+                </div>
+
+                <img
+                  className="lcs-avatar"
+                  src={contributor.avatar_url}
+                  alt={`${contributor.login}'s GitHub avatar`}
+                  loading="lazy"
+                  width="76"
+                  height="76"
+                />
+
+                <h3 className="lcs-username">{contributor.login}</h3>
+
+                <span className="lcs-contributions">
+                  <GitCommit size={15} />
+                  <strong>
+                    {Number(contributor.contributions || 0).toLocaleString()}
+                  </strong>
+                  {Number(contributor.contributions) === 1
+                    ? 'contribution'
+                    : 'contributions'}
+                </span>
+
+                <span className="lcs-profile-label">
+                  GitHub profile <ArrowUpRight size={13} />
+                </span>
+              </a>
+            ))}
+          </div>
+
+          <div className="lcs-footer">
+            <span>
+              <span className="lcs-footer-dot" />
+              Showing {contributors.length} public contributor
+              {contributors.length === 1 ? '' : 's'}
+            </span>
+
+            <a href={contributorsUrl} target="_blank" rel="noopener noreferrer">
+              Explore all contributions <ArrowUpRight size={15} />
+            </a>
+          </div>
+        </>
       )}
     </section>
   );
