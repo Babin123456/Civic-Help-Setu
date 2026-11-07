@@ -14,6 +14,7 @@ import {
   Terminal, 
   Users 
 } from 'lucide-react';
+import LiveContributorsSection from '../components/community/LiveContributorsSection';
 
 /**
  * OpenSource Component - Civic Help Setu Contributors Hub
@@ -326,6 +327,9 @@ const OpenSource = () => {
             );
           })}
       </section>
+
+      {/* Live GitHub Contributors Section */}
+      <LiveContributorsSection />
 
       {/* Quick Local Setup Guide */}
       <section className="mb-16 p-6 sm:p-8 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700">
