@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Clock, Gauge, Sparkles } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
+import { ArrowRight, BookOpen, Building2, Clock, Gauge } from 'lucide-react';
 import UntranslatedBadge from './common/UntranslatedBadge';
 import ApplicabilityBadge from './services/ApplicabilityBadge';
 
@@ -16,36 +15,36 @@ const getDifficultyBadge = (diff = '') => {
 };
 
 const ServiceCard = ({ service, isCompared = false, compareDisabled = false, onToggleCompare }) => {
-  const { isPlainLanguage } = useLanguage();
+  if (!service) return null;
+
   const diffStyle = getDifficultyBadge(service.difficulty);
 
   const card = (
     <Link
       to={`/services/${service.id}`}
-      className="card"
+      className="card service-card"
       style={{
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
         height: '100%',
         textDecoration: 'none',
         position: 'relative',
         transition: 'all 0.3s ease',
       }}
     >
-      <div>
+      <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
         {/* Badges Header */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: '1.25rem',
+            marginBottom: '0.85rem',
             gap: '0.5rem',
             flexWrap: 'wrap',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
             <span
               style={{
                 padding: '0.2rem 0.65rem',
@@ -74,73 +73,129 @@ const ServiceCard = ({ service, isCompared = false, compareDisabled = false, onT
                   gap: '0.25rem',
                 }}
               >
-                <Gauge size={12} /> {service.difficulty}
+                <Gauge size={12} aria-hidden="true" /> {service.difficulty}
               </span>
             )}
           </div>
 
-          <span
-            style={{
-              fontSize: '0.75rem',
-              fontWeight: '600',
-              color: 'var(--text-tertiary)',
-              background: 'var(--glass-bg)',
-              padding: '0.2rem 0.6rem',
-              borderRadius: '99px',
-              border: '1px solid var(--border-light)',
-            }}
-          >
-            {service.type}
-          </span>
+          {service.type && (
+            <span
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: '600',
+                color: 'var(--text-tertiary)',
+                background: 'var(--glass-bg)',
+                padding: '0.2rem 0.6rem',
+                borderRadius: '99px',
+                border: '1px solid var(--border-light)',
+              }}
+            >
+              {service.type}
+            </span>
+          )}
         </div>
 
+        {/* Department Metadata */}
+        {service.department && (
+          <div
+            className="service-card-dept"
+            title={service.department}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              fontSize: '0.8rem',
+              color: 'var(--text-secondary)',
+              marginBottom: '0.75rem',
+              maxWidth: '100%',
+            }}
+          >
+            <Building2 size={13} style={{ flexShrink: 0, color: 'var(--text-tertiary)' }} aria-hidden="true" />
+            <span
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {service.department}
+            </span>
+          </div>
+        )}
+
+        {/* Title */}
         <h3
           style={{
-            fontSize: '1.4rem',
+            fontSize: '1.35rem',
             fontWeight: '800',
-            marginBottom: '0.75rem',
+            marginBottom: '0.65rem',
             color: 'var(--text-primary)',
             transition: 'color 0.2s',
+            lineHeight: 1.3,
           }}
         >
           {service.name}
         </h3>
 
+        {/* Description with multi-line clamp to prevent uneven card height */}
         <p
+          className="service-card-desc"
           style={{
             color: 'var(--text-secondary)',
-            fontSize: '0.95rem',
-            marginBottom: '1.5rem',
-            lineHeight: '1.6',
+            fontSize: '0.925rem',
+            marginBottom: '1rem',
+            lineHeight: '1.55',
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
           }}
         >
           {service.shortDescription}
         </p>
-        <div style={{ marginBottom: '0.75rem' }}>
-          <ApplicabilityBadge service={service} />
+
+        {/* Badges container */}
+        <div style={{ marginTop: 'auto', marginBottom: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+          <div>
+            <ApplicabilityBadge service={service} />
+          </div>
+          <div>
+            <UntranslatedBadge />
+          </div>
         </div>
-        <UntranslatedBadge />
       </div>
 
+      {/* Card Action Footer */}
       <div
         style={{
           marginTop: 'auto',
-          paddingTop: '1.25rem',
+          paddingTop: '1rem',
           borderTop: '1px dashed var(--border-main)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          gap: '0.75rem',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-tertiary)', fontSize: '0.8rem' }}>
-          <Clock size={14} />
+          <Clock size={14} aria-hidden="true" />
           <span>{service.processingTime || 'Standard Processing'}</span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600', color: 'var(--accent-main)', fontSize: '0.875rem' }}>
-          <BookOpen size={16} />
+        <div
+          className="service-card-action"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.45rem',
+            fontWeight: '600',
+            color: 'var(--accent-main)',
+            fontSize: '0.875rem',
+          }}
+        >
+          <BookOpen size={16} aria-hidden="true" />
           <span>View Guide</span>
-          <ArrowRight size={14} />
+          <ArrowRight size={14} aria-hidden="true" />
         </div>
       </div>
     </Link>
@@ -156,6 +211,7 @@ const ServiceCard = ({ service, isCompared = false, compareDisabled = false, onT
           type="checkbox"
           checked={isCompared}
           disabled={compareDisabled}
+          aria-label={`Compare ${service.name}`}
           onChange={() => onToggleCompare(service.id)}
         />
         <span>
