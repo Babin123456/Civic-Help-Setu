@@ -126,6 +126,25 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   max-width: var(--max-w-content);
   margin: 0 auto;
   padding: 0 2rem;
+  box-sizing: border-box;
+}
+
+/* Fluid responsive typography utilities (#590) */
+.page-header-title {
+  letter-spacing: -0.025em;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.page-header-subtitle {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.page-header-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-sans);
 }
 
 .section {

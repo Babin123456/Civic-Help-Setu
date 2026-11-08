@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { parseSlugParam } from '../utils/searchParams';
 import { useLocation } from 'react-router-dom';
+import StandardPageHeader from '../components/common/StandardPageHeader';
 import {
   MapPin,
   Compass,
@@ -226,46 +227,16 @@ const NearbyOffices = () => {
     <div className="section animate-fade-in" style={{ paddingBottom: '5rem' }}>
       <div className="container" style={{ maxWidth: '1280px' }}>
         {/* Page Header */}
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              color: 'var(--accent-main)',
-              fontSize: '0.875rem',
-              fontWeight: '700',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              marginBottom: '0.5rem',
-            }}
-          >
-            <Compass size={18} /> Location-Aware Civic Discovery
-          </div>
-
-          <h1
-            style={{
-              fontSize: 'clamp(2.25rem, 5vw, 3.25rem)',
-              fontWeight: '900',
-              lineHeight: '1.2',
-              marginBottom: '0.75rem',
-            }}
-          >
-            Find Nearby Public Offices & Seva Kendras
-          </h1>
-
-          <p
-            style={{
-              fontSize: '1.15rem',
-              color: 'var(--text-secondary)',
-              maxWidth: '750px',
-              margin: '0 auto',
-            }}
-          >
-            Locate official government facilitation centers, RTOs, Passport Seva Kendras, and Aadhaar centers.
-            Check live operating hours, directions, and book electronic visit tokens.
-          </p>
-        </div>
+        {/* Standard Page Header */}
+        <StandardPageHeader
+          eyebrow="Location-Aware Civic Discovery"
+          eyebrowIcon={<Compass size={18} />}
+          badgeText="Live Directory"
+          badgeType="accent"
+          title="Find Nearby Public Offices & Seva Kendras"
+          subtitle="Locate official government facilitation centers, RTOs, Passport Seva Kendras, and Aadhaar centers. Check live operating hours, directions, and book electronic visit tokens."
+          maxWidth="750px"
+        />
 
         {/* View Mode Switcher & Counter Strip */}
         <div
