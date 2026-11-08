@@ -32,6 +32,7 @@ import { AccessibilityFilterBar } from '../components/location/AccessibilityFaci
 import { filterOfficesByAccessibilityAndLanguage } from '../services/accessibilityMapService';
 import { getServiceById } from '../services/serviceCatalog';
 import LocationPermissionPanel, { LOCATION_REQUEST_BUTTON_ID } from '../components/location/LocationPermissionPanel';
+import NearbyOfficesEmptyState from '../components/location/NearbyOfficesEmptyState';
 import {
   LOCATION_STATUS,
   canRequestLocation,
@@ -47,6 +48,7 @@ const NearbyOffices = () => {
   const { toast } = useToast();
 
   // Search & Filter State
+  const initialParams = useMemo(() => new URLSearchParams(routerLocation.search), [routerLocation.search]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedState, setSelectedState] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
@@ -54,7 +56,7 @@ const NearbyOffices = () => {
   const [maxRadiusKm, setMaxRadiusKm] = useState(50);
   const [onlyOpenNow, setOnlyOpenNow] = useState(false);
   const [onlyWheelchair, setOnlyWheelchair] = useState(false);
-  const [serviceFilter, setServiceFilter] = useState('');
+  const [serviceFilter, setServiceFilter] = useState(() => parseSlugParam(initialParams.get('service')) || '');
   const activeSelectedService = useMemo(() => (serviceFilter ? getServiceById(serviceFilter) : null), [serviceFilter]);
   const [selectedFacilities, setSelectedFacilities] = useState([]);
   const [selectedLanguages, setSelectedLanguages] = useState([]);
@@ -472,31 +474,23 @@ const NearbyOffices = () => {
         {viewMode === 'list' && (
           <div>
             {filteredOffices.length === 0 ? (
-              <div
-                className="glass-panel"
-                style={{
-                  padding: '3rem 1.5rem',
-                  textAlign: 'center',
-                  borderRadius: '1rem',
-                  border: '1px dashed var(--border-light)',
-                }}
-              >
-                <Building2 size={36} color="var(--text-tertiary)" style={{ margin: '0 auto 1rem' }} />
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>
-                  No Civic Centers Found
-                </h3>
-                <p style={{ color: 'var(--text-secondary)', maxWidth: '450px', margin: '0 auto 1.5rem', fontSize: '0.9rem' }}>
-                  {emptyHint}
-                </p>
-                <button
-                  type="button"
-                  onClick={handleResetFilters}
-                  className="btn btn-secondary"
-                  style={{ borderRadius: '0.5rem' }}
-                >
-                  Reset Discovery Filters
-                </button>
-              </div>
+              <NearbyOfficesEmptyState
+                searchQuery={searchQuery}
+                selectedState={selectedState}
+                selectedDistrict={selectedDistrict}
+                selectedChannel={selectedChannel}
+                maxRadiusKm={maxRadiusKm}
+                onlyOpenNow={onlyOpenNow}
+                onlyWheelchair={onlyWheelchair}
+                selectedFacilities={selectedFacilities}
+                selectedLanguages={selectedLanguages}
+                serviceFilter={serviceFilter}
+                userCoords={userCoords}
+                onResetFilters={handleResetFilters}
+                onExpandRadius={() => setMaxRadiusKm((prev) => Math.min(prev + 50, 200))}
+                onClearSearch={() => setSearchQuery('')}
+                onClearAccessibility={handleClearAccessibilityFilters}
+              />
             ) : (
               <div
                 style={{
@@ -546,30 +540,23 @@ const NearbyOffices = () => {
             {/* Right: Scrollable Office Directory Cards */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {filteredOffices.length === 0 ? (
-                <div
-                  className="glass-panel"
-                  style={{
-                    padding: '3rem 1.5rem',
-                    textAlign: 'center',
-                    borderRadius: '1rem',
-                    border: '1px dashed var(--border-light)',
-                  }}
-                >
-                  <Building2 size={36} color="var(--text-tertiary)" style={{ margin: '0 auto 1rem' }} />
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem' }}>
-                    No Civic Centers Found
-                  </h3>
-                  <p style={{ color: 'var(--text-secondary)', maxWidth: '400px', margin: '0 auto 1.5rem', fontSize: '0.9rem' }}>
-                    {emptyHint}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleResetFilters}
-                    className="btn btn-secondary"
-                  >
-                    Reset Discovery Filters
-                  </button>
-                </div>
+                <NearbyOfficesEmptyState
+                  searchQuery={searchQuery}
+                  selectedState={selectedState}
+                  selectedDistrict={selectedDistrict}
+                  selectedChannel={selectedChannel}
+                  maxRadiusKm={maxRadiusKm}
+                  onlyOpenNow={onlyOpenNow}
+                  onlyWheelchair={onlyWheelchair}
+                  selectedFacilities={selectedFacilities}
+                  selectedLanguages={selectedLanguages}
+                  serviceFilter={serviceFilter}
+                  userCoords={userCoords}
+                  onResetFilters={handleResetFilters}
+                  onExpandRadius={() => setMaxRadiusKm((prev) => Math.min(prev + 50, 200))}
+                  onClearSearch={() => setSearchQuery('')}
+                  onClearAccessibility={handleClearAccessibilityFilters}
+                />
               ) : (
                 filteredOffices.map((office) => (
                   <OfficeCard
