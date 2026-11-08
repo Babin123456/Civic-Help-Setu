@@ -10,7 +10,7 @@ import ServiceComparisonModal from '../components/services/ServiceComparisonModa
 import ComparisonFloatingTray from '../components/services/ComparisonFloatingTray';
 import { comparisonService, MAX_COMPARE_LIMIT } from '../services/comparisonService';
 import { getSearchSuggestions, rankAndFilterServices } from '../services/searchRankingEngine';
-import { Layers, Scale, Building2, HelpCircle } from 'lucide-react';
+import { Layers, Scale, Building2 } from 'lucide-react';
 import { parseServiceFilters, normalizeSearchQuery } from '../utils/searchParams';
 import { parseJurisdictionFilters } from '../services/jurisdictionService';
 import RtiBuilderModal from '../components/services/RtiBuilderModal';
@@ -149,16 +149,20 @@ const Services = () => {
     setSearchParams(nextParams, { replace: true });
   };
 
-  const hasActiveFilters = Boolean(
+  const hasFilterFacets = Boolean(
     activeCategory !== 'All' ||
-    searchQuery ||
     selectedMode !== 'All' ||
     selectedDifficulty !== 'All' ||
     selectedDepartment !== 'All' ||
     selectedFee !== 'All' ||
     selectedSpeed !== 'All' ||
     selectedState !== 'All' ||
-    selectedDistrict !== 'All' ||
+    selectedDistrict !== 'All'
+  );
+
+  const hasActiveFilters = Boolean(
+    hasFilterFacets ||
+    searchQuery ||
     sortBy !== 'relevance'
   );
 
@@ -415,7 +419,10 @@ const Services = () => {
           <DirectoryEmptyState
             searchQuery={searchQuery}
             activeCategory={activeCategory}
+            hasActiveFilters={hasFilterFacets}
+            totalServices={allServices.length}
             onReset={handleResetFilters}
+            onClearSearch={() => handleSearchChange('')}
           />
         )}
 
