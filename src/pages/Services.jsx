@@ -150,16 +150,20 @@ const Services = () => {
     setSearchParams(nextParams, { replace: true });
   };
 
-  const hasActiveFilters = Boolean(
+  const hasFilterFacets = Boolean(
     activeCategory !== 'All' ||
-    searchQuery ||
     selectedMode !== 'All' ||
     selectedDifficulty !== 'All' ||
     selectedDepartment !== 'All' ||
     selectedFee !== 'All' ||
     selectedSpeed !== 'All' ||
     selectedState !== 'All' ||
-    selectedDistrict !== 'All' ||
+    selectedDistrict !== 'All'
+  );
+
+  const hasActiveFilters = Boolean(
+    hasFilterFacets ||
+    searchQuery ||
     sortBy !== 'relevance'
   );
 
@@ -375,7 +379,10 @@ const Services = () => {
           <DirectoryEmptyState
             searchQuery={searchQuery}
             activeCategory={activeCategory}
+            hasActiveFilters={hasFilterFacets}
+            totalServices={allServices.length}
             onReset={handleResetFilters}
+            onClearSearch={() => handleSearchChange('')}
           />
         )}
 
