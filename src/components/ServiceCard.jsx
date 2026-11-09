@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, Building2, Clock, Gauge } from 'lucide-react';
 import UntranslatedBadge from './common/UntranslatedBadge';
 import ApplicabilityBadge from './services/ApplicabilityBadge';
+import ServiceOverview from './services/ServiceOverview';
 
 const getDifficultyBadge = (diff = '') => {
   const d = diff.toLowerCase();
@@ -14,7 +15,7 @@ const getDifficultyBadge = (diff = '') => {
   return { bg: 'rgba(245, 158, 11, 0.15)', text: '#f59e0b', border: 'rgba(245, 158, 11, 0.3)' };
 };
 
-const ServiceCard = ({ service, isCompared = false, compareDisabled = false, onToggleCompare }) => {
+const ServiceCard = ({ service, isCompared = false, compareDisabled = false, onToggleCompare, showOverview = false }) => {
   if (!service) return null;
 
   const diffStyle = getDifficultyBadge(service.difficulty);
@@ -201,23 +202,26 @@ const ServiceCard = ({ service, isCompared = false, compareDisabled = false, onT
     </Link>
   );
 
-  if (!onToggleCompare) return card;
+  if (!onToggleCompare && !showOverview) return card;
 
   return (
     <div className="service-card-wrap">
       {card}
-      <label className={`compare-toggle${compareDisabled ? ' is-disabled' : ''}`}>
-        <input
-          type="checkbox"
-          checked={isCompared}
-          disabled={compareDisabled}
-          aria-label={`Compare ${service.name}`}
-          onChange={() => onToggleCompare(service.id)}
-        />
-        <span>
-          Compare<span className="sr-only"> {service.name}</span>
-        </span>
-      </label>
+      {onToggleCompare && (
+        <label className={`compare-toggle${compareDisabled ? ' is-disabled' : ''}`}>
+          <input
+            type="checkbox"
+            checked={isCompared}
+            disabled={compareDisabled}
+            aria-label={`Compare ${service.name}`}
+            onChange={() => onToggleCompare(service.id)}
+          />
+          <span>
+            Compare<span className="sr-only"> {service.name}</span>
+          </span>
+        </label>
+      )}
+      {showOverview && <ServiceOverview service={service} />}
     </div>
   );
 };

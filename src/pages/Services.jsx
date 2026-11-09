@@ -372,6 +372,7 @@ const Services = () => {
                 isCompared={comparedIds.includes(service.id)}
                 compareDisabled={compareFull && !comparedIds.includes(service.id)}
                 onToggleCompare={handleToggleCompare}
+                showOverview
               />
             ))}
           </div>

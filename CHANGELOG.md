@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- An optional one-sentence "AI overview" under each service in the search results (issue #384): made only from the guide's name, description and department, labelled as AI-generated, kept for the next time it is opened, and with a plain message instead of a guess when the guide has no description. It does not change the order of the results or any eligibility status. See `src/ai/serviceOverview.js`.
 - Two-person review for high-impact service changes (issue #261): edits to eligibility, required documents, fees and official links need approval from a second admin before they can be published, with the reviewer, time and reason recorded. See `docs/SERVICE_REVIEW.md`.
 - Private draft sandbox for service editors (issue #257): save an edit as a draft, see a field-by-field before/after, preview it with the public service page, and publish it as a separate, confirmed step. See `docs/SERVICE_DRAFTS.md`.
 - Versioned catalogue migration utility (issue #267): dry run with changed / unchanged / invalid counts, an automatic backup before any write, one-click rollback, and explicit confirmation. Never runs on its own. See `docs/CATALOGUE_MIGRATIONS.md`.
