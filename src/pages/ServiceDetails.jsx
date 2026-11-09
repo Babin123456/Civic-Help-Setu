@@ -33,6 +33,7 @@ import InteractiveFeeEstimatorModal from '../components/services/InteractiveFeeE
 import ApplicationPreparationPlanModal from '../components/services/ApplicationPreparationPlanModal';
 import { findJargonTerms } from '../data/civicGlossary';
 import TermExplainer from '../components/TermExplainer';
+import ServiceSimplifier from '../components/services/ServiceSimplifier';
 import InlineStatusLegend from '../components/common/InlineStatusLegend';
 import DocumentTypeGuidanceModal from '../components/services/DocumentTypeGuidanceModal';
 import ApplicationReadinessCheckerModal from '../components/services/ApplicationReadinessCheckerModal';
@@ -324,6 +325,7 @@ const ServiceDetails = ({ previewService = null }) => {
               >
                 {service.shortDescription}
               </p>
+              <ServiceSimplifier key={service.id} service={service} />
               <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <UntranslatedBadge />
                 <DataFreshnessTrustBadge service={service} />
