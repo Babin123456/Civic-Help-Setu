@@ -28,6 +28,7 @@ describe('ServiceDetails', () => {
     expect(html).toContain('Print Visit Dossier');
     expect(html).toContain('Make checklist');
     expect(html).toContain('Preparation Plan');
+    expect(html).toContain('Simplify this service');
   });
 
   it('says so when the guide does not exist', () => {
