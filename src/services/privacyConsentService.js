@@ -10,8 +10,16 @@ const CONSENT_STORAGE_KEY = 'civicbridge_consent_preferences';
 const AUDIT_STORAGE_KEY = 'civicbridge_privacy_audit_log';
 
 // Vault export keeps the document metadata but never the document number.
-const redactVaultDocuments = (docs) =>
-  docs.map((doc) => ({
+const redactVaultDocuments = (docs) => {
+  if (docs && !Array.isArray(docs) && docs.format === 'civicbridge-vault-encrypted') {
+    return {
+      encrypted: true,
+      format: docs.format,
+      version: docs.version,
+    };
+  }
+  if (!Array.isArray(docs)) return [];
+  return docs.map((doc) => ({
     id: doc.id,
     name: doc.type ?? doc.name ?? null,
     category: doc.category ?? null,
@@ -22,6 +30,7 @@ const redactVaultDocuments = (docs) =>
     verified: Boolean(doc.verified),
     lastModified: doc.lastModified ?? doc.createdAt ?? null,
   }));
+};
 
 /**
  * Every localStorage key where the app keeps the user's own data, with the file that writes it.

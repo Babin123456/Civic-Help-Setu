@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Tag, Check, ShieldCheck } from 'lucide-react';
 import { MOCK_SERVICES } from '../../data/services';
-import { tagDocumentToService, untagDocumentFromService } from '../../services/vaultStorage';
+import { tagDocumentToServiceEncrypted, untagDocumentFromServiceEncrypted } from '../../services/vaultStorage';
 import { useToast } from '../../context/ToastContext';
 
 const ServiceTaggingModal = ({
@@ -15,19 +15,23 @@ const ServiceTaggingModal = ({
 
   if (!isOpen || !doc) return null;
 
-  const handleToggleTag = (serviceId) => {
+  const handleToggleTag = async (serviceId) => {
     const isTagged = tagged.includes(serviceId);
-    let updated;
-    if (isTagged) {
-      updated = untagDocumentFromService(doc.id, serviceId);
-      setTagged(tagged.filter((s) => s !== serviceId));
-      toast.info(`Unlinked from service.`);
-    } else {
-      updated = tagDocumentToService(doc.id, serviceId);
-      setTagged([...tagged, serviceId]);
-      toast.success(`Tagged to service for fast auto-attachment!`);
+    try {
+      let updated;
+      if (isTagged) {
+        updated = await untagDocumentFromServiceEncrypted(doc.id, serviceId);
+        setTagged(tagged.filter((s) => s !== serviceId));
+        toast.info('Unlinked from service.');
+      } else {
+        updated = await tagDocumentToServiceEncrypted(doc.id, serviceId);
+        setTagged([...tagged, serviceId]);
+        toast.success('Tagged to service for fast auto-attachment!');
+      }
+      onUpdated(updated);
+    } catch (err) {
+      toast.error(err?.message || 'Could not update document service tags.');
     }
-    onUpdated(updated);
   };
 
   return (

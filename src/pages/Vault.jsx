@@ -1,23 +1,35 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useId, useCallback } from 'react';
 import {
   FileBadge, ShieldCheck, Upload, CreditCard, Car, FileText,
-  Plus, Search, Eye, AlertTriangle, Layers, Download, Tag, Stamp, Calendar, Camera
+  Plus, Search, Eye, AlertTriangle, Layers, Download, Tag, Stamp, Calendar, Camera, KeyRound
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../context/ConfirmationDialogContext';
+import { useToast } from '../context/ToastContext';
 import {
   getDocuments,
-  saveDocument,
-  deleteDocument,
+  saveDocumentEncrypted,
+  deleteDocumentEncrypted,
   getExpiryStatus,
   getExpiringDocuments,
+  isVaultAtRestEncrypted,
+  isEncryptedVaultLocked,
+  unlockAtRestVault,
+  lockAtRestVault,
 } from '../services/vaultStorage';
+import {
+  VAULT_HIGH_RISK_ACTION,
+  vaultSecurityStore,
+  evaluateVaultAccessRisk,
+  verifyAndConsumeStepUpToken,
+} from '../services/vaultRiskBasedAccessService';
 import VaultStats from '../components/vault/VaultStats';
 import DocumentModal from '../components/vault/DocumentModal';
 import DocumentPreviewModal from '../components/vault/DocumentPreviewModal';
 import ExpiringDocumentsAlert from '../components/vault/ExpiringDocumentsAlert';
 import VaultRenewalReminderBanner from '../components/vault/VaultRenewalReminderBanner';
 import VaultBackupRestoreModal from '../components/vault/VaultBackupRestoreModal';
+import VaultSecurityControlsModal from '../components/vault/VaultSecurityControlsModal';
 import SharedDeviceNotice from '../components/privacy/SharedDeviceNotice';
 import ServiceTaggingModal from '../components/vault/ServiceTaggingModal';
 import DocumentPreflightChecker from '../components/vault/DocumentPreflightChecker';
@@ -60,30 +72,60 @@ const formatAddedDate = (iso) => {
 const Vault = () => {
   const { user } = useAuth();
   const confirm = useConfirm();
+  const { toast } = useToast();
+  const sessionIdSuffix = useId();
+  const vaultSessionId = `vault_sess_${sessionIdSuffix}`;
+  const lastVerifiedAtRef = useRef(0);
+
   const [documents, setDocuments] = useState([]);
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+  const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
   const [isRenewalDigestOpen, setIsRenewalDigestOpen] = useState(false);
   const [isOcrInspectorOpen, setIsOcrInspectorOpen] = useState(false);
   const [taggingDoc, setTaggingDoc] = useState(null);
   const [watermarkDoc, setWatermarkDoc] = useState(null);
   const [expiringDocs, setExpiringDocs] = useState(() => getExpiringDocuments());
-  const [isVaultLocked, setIsVaultLocked] = useState(false);
+  const [isVaultLocked, setIsVaultLocked] = useState(() => isEncryptedVaultLocked());
   const [showInactivityWarning, setShowInactivityWarning] = useState(false);
   const [warningSeconds, setWarningSeconds] = useState(30);
+  const [unlockPassphrase, setUnlockPassphrase] = useState('');
+  const [unlockError, setUnlockError] = useState('');
+  const [isUnlocking, setIsUnlocking] = useState(false);
+  const [stepUpVerified, setStepUpVerified] = useState(false);
 
-  const refreshVault = () => {
+  const refreshVault = useCallback(() => {
     const docs = getDocuments();
     setDocuments(docs);
     setExpiringDocs(getExpiringDocuments());
-  };
+  }, []);
 
   useEffect(() => {
     refreshVault();
-  }, []);
+  }, [refreshVault]);
+
+  useEffect(() => {
+    lastVerifiedAtRef.current = Date.now();
+    vaultSecurityStore.registerSession({
+      id: vaultSessionId,
+      userId: user?.id || 'local-citizen',
+      deviceLabel: 'Current Browser Vault Session',
+      isCurrent: true,
+    });
+  }, [vaultSessionId, user?.id]);
+
+  const engagePrivacyLock = useCallback(() => {
+    lockAtRestVault();
+    setStepUpVerified(false);
+    setUnlockPassphrase('');
+    setUnlockError('');
+    setSelectedDoc(null);
+    setIsVaultLocked(true);
+    refreshVault();
+  }, [refreshVault]);
 
   useEffect(() => {
     if (isVaultLocked) {
@@ -99,19 +141,62 @@ const Vault = () => {
       },
       onTimeout: () => {
         setShowInactivityWarning(false);
-        setIsVaultLocked(true);
-        setSelectedDoc(null);
+        engagePrivacyLock();
       },
       onActivity: () => {
         setShowInactivityWarning(false);
       },
     });
     return () => stopInactivityTracker();
-  }, [isVaultLocked]);
+  }, [isVaultLocked, engagePrivacyLock]);
 
-  const handleSaveDocument = (docData) => {
-    // saveDocument throws if browser storage is full; the modal shows the message
-    const updated = saveDocument(docData);
+  const completeStepUpChallenge = () => {
+    const token = `stepup_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const ok = verifyAndConsumeStepUpToken(vaultSessionId, token);
+    if (ok) {
+      lastVerifiedAtRef.current = Date.now();
+      setStepUpVerified(true);
+      toast.success('Step-up verification completed for this vault session.');
+    }
+    return ok;
+  };
+
+  const authorizeSensitiveAction = async (action) => {
+    const authAgeSeconds = lastVerifiedAtRef.current
+      ? Math.max(0, Math.round((Date.now() - lastVerifiedAtRef.current) / 1000))
+      : 0;
+    const assessment = evaluateVaultAccessRisk({
+      sessionId: vaultSessionId,
+      action,
+      authAgeSeconds,
+      mfaVerified: stepUpVerified,
+    });
+
+    if (assessment.allowed) {
+      return true;
+    }
+
+    if (!assessment.requiresStepUp) {
+      toast.error(assessment.reason);
+      return false;
+    }
+
+    const approved = await confirm({
+      title: 'Step-Up Verification Required',
+      message: `${assessment.reason} Confirm step-up verification to continue with ${action.replaceAll('_', ' ').toLowerCase()}.`,
+      confirmLabel: 'Verify & Continue',
+      cancelLabel: 'Cancel',
+    });
+
+    if (!approved) {
+      return false;
+    }
+
+    return completeStepUpChallenge();
+  };
+
+  const handleSaveDocument = async (docData) => {
+    const updated = await saveDocumentEncrypted(docData);
     setDocuments(updated);
     setExpiringDocs(getExpiringDocuments());
   };
@@ -131,10 +216,42 @@ const Vault = () => {
 
     if (!shouldDelete) return;
 
-    const updated = deleteDocument(id);
+    const authorized = await authorizeSensitiveAction(VAULT_HIGH_RISK_ACTION.PERMANENT_DELETE);
+    if (!authorized) return;
+
+    const updated = await deleteDocumentEncrypted(id);
     setDocuments(updated);
     setExpiringDocs(getExpiringDocuments());
     setSelectedDoc(null);
+  };
+
+  const handleUnlockVault = async (e) => {
+    if (e) e.preventDefault();
+    setUnlockError('');
+
+    if (isVaultAtRestEncrypted()) {
+      if (!unlockPassphrase) {
+        setUnlockError('Enter your vault encryption passphrase to unlock.');
+        return;
+      }
+      setIsUnlocking(true);
+      try {
+        const docs = await unlockAtRestVault(unlockPassphrase);
+        setDocuments(docs);
+        setExpiringDocs(getExpiringDocuments());
+        setUnlockPassphrase('');
+        setIsVaultLocked(false);
+        resetInactivityTracker();
+      } catch (err) {
+        setUnlockError(err?.message || 'Incorrect passphrase or tampered vault storage.');
+      } finally {
+        setIsUnlocking(false);
+      }
+      return;
+    }
+
+    setIsVaultLocked(false);
+    resetInactivityTracker();
   };
 
   const filteredDocuments = useMemo(() => {
@@ -211,6 +328,16 @@ const Vault = () => {
             <button
               type="button"
               className="btn btn-secondary"
+              onClick={() => setIsSecurityModalOpen(true)}
+              aria-label="Encryption and Session Security"
+              style={{ padding: '0.75rem 1.15rem', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <KeyRound size={17} />
+              <span>{isVaultAtRestEncrypted() ? 'Encryption On' : 'Encryption'}</span>
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
               onClick={() => setIsRenewalDigestOpen(true)}
               style={{ padding: '0.75rem 1.15rem', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
             >
@@ -230,7 +357,7 @@ const Vault = () => {
             <button
               type="button"
               className="btn btn-secondary"
-              onClick={() => setIsVaultLocked(true)}
+              onClick={engagePrivacyLock}
               aria-label="Lock Vault for Privacy"
               style={{ padding: '0.75rem 1.1rem', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
             >
@@ -290,20 +417,58 @@ const Vault = () => {
               Vault Locked for Privacy
             </h2>
             <p style={{ color: 'var(--text-secondary)', maxWidth: '480px', margin: '0 auto 1.5rem', lineHeight: '1.6' }}>
-              Your credentials and document numbers were obscured to protect your identity privacy at public kiosks and shared terminals.
+              {isVaultAtRestEncrypted()
+                ? 'Your encrypted vault key was cleared from memory. Enter your passphrase to decrypt your document metadata locally.'
+                : 'Your credentials and document numbers were obscured to protect your identity privacy at public kiosks and shared terminals.'}
             </p>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => {
-                setIsVaultLocked(false);
-                resetInactivityTracker();
-              }}
-              style={{ padding: '0.75rem 1.75rem', fontSize: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-            >
-              <Unlock size={18} />
-              <span>Unlock Vault</span>
-            </button>
+            {isVaultAtRestEncrypted() ? (
+              <form
+                onSubmit={handleUnlockVault}
+                style={{ maxWidth: '360px', margin: '0 auto', display: 'grid', gap: '0.75rem', textAlign: 'left' }}
+              >
+                <div>
+                  <label htmlFor="vault-unlock-passphrase" style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.3rem' }}>
+                    Vault Passphrase
+                  </label>
+                  <input
+                    id="vault-unlock-passphrase"
+                    type="password"
+                    value={unlockPassphrase}
+                    onChange={(e) => {
+                      setUnlockPassphrase(e.target.value);
+                      setUnlockError('');
+                    }}
+                    placeholder="Enter your encryption passphrase"
+                    autoComplete="current-password"
+                    style={{ width: '100%' }}
+                  />
+                </div>
+                {unlockError && (
+                  <p role="alert" style={{ color: '#ef4444', fontSize: '0.82rem', margin: 0 }}>
+                    {unlockError}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={isUnlocking}
+                  style={{ padding: '0.75rem 1.75rem', fontSize: '1rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+                >
+                  <Unlock size={18} />
+                  <span>{isUnlocking ? 'Decrypting Vault...' : 'Unlock Encrypted Vault'}</span>
+                </button>
+              </form>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleUnlockVault}
+                style={{ padding: '0.75rem 1.75rem', fontSize: '1rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <Unlock size={18} />
+                <span>Unlock Vault</span>
+              </button>
+            )}
           </div>
         ) : (
           <>
@@ -821,6 +986,19 @@ const Vault = () => {
           isOpen={isBackupModalOpen}
           onClose={() => setIsBackupModalOpen(false)}
           onVaultUpdated={refreshVault}
+          onAuthorizeAction={authorizeSensitiveAction}
+        />
+
+        {/* Encryption & Session Security Modal */}
+        <VaultSecurityControlsModal
+          isOpen={isSecurityModalOpen}
+          onClose={() => setIsSecurityModalOpen(false)}
+          userId={user?.id || 'local-citizen'}
+          currentSessionId={vaultSessionId}
+          stepUpActive={stepUpVerified}
+          onCompleteStepUp={completeStepUpChallenge}
+          onAuthorizeAction={authorizeSensitiveAction}
+          onVaultUpdated={refreshVault}
         />
 
         {/* Inactivity Privacy Lock Modal */}
@@ -833,7 +1011,7 @@ const Vault = () => {
           }}
           onLockNow={() => {
             setShowInactivityWarning(false);
-            setIsVaultLocked(true);
+            engagePrivacyLock();
           }}
         />
 
