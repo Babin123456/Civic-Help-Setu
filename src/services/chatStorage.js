@@ -28,6 +28,7 @@ export const saveChatHistory = (messages) => {
     const serializable = trimHistory(messages).map((m) => ({
       id: m.id || `msg-${Date.now()}-${Math.random()}`,
       role: m.role,
+      status: m.status || null,
       text: m.text || (typeof m.content === 'string' ? m.content : ''),
       data: m.data || null,
       serviceId: m.serviceId || null,
@@ -35,6 +36,23 @@ export const saveChatHistory = (messages) => {
       grounded: m.grounded,
       confidenceScore: m.confidenceScore,
       retrievedChunks: m.retrievedChunks || [],
+      guardrailPii: m.guardrailPii || null,
+      guardrail: m.guardrail
+        ? {
+            decision: m.guardrail.decision,
+            pii: m.guardrail.pii || null,
+            injection: m.guardrail.injection || null,
+          }
+        : null,
+      entailment: m.entailment
+        ? {
+            overallSupported: m.entailment.overallSupported,
+            verifiedCount: m.entailment.verifiedCount,
+            unsupportedCount: m.entailment.unsupportedCount,
+            contradictedCount: m.entailment.contradictedCount,
+            failClosedNotice: m.entailment.failClosedNotice || null,
+          }
+        : null,
       timestamp: m.timestamp || new Date().toISOString(),
     }));
     localStorage.setItem(STORAGE_KEY, JSON.stringify(serializable));

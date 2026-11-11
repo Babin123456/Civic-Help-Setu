@@ -6,6 +6,11 @@
 
 import { retrieveGroundedChunks } from './sourceGroundedRetriever.js';
 import { getActiveBuiltInServices } from '../services/serviceCatalog.js';
+import {
+  runPreInferenceGuardrails,
+  evaluateGroundedAnswerEntailment,
+  stripRedactionPlaceholders,
+} from './aiGuardrailPipeline.js';
 
 export const MANDATORY_LEGAL_DISCLAIMER =
   'Notice: This guidance is retrieved from approved civic service guidelines and does not constitute an official government eligibility decision. Rules, deadlines, and fees may vary by municipality.';
@@ -37,8 +42,27 @@ export async function askGroundedCivicAssistant(query, options = {}) {
     };
   }
 
-  // 1. Perform Source-Grounded Retrieval
-  const retrieval = retrieveGroundedChunks(trimmedQuery, options);
+  // 0. Run Pre-Inference PII Scrubbing & Prompt-Injection Guardrails
+  const preGuardrail = runPreInferenceGuardrails(trimmedQuery, {
+    disclaimer: MANDATORY_LEGAL_DISCLAIMER,
+  });
+
+  if (preGuardrail.decision === 'block') {
+    return {
+      ...preGuardrail.blockedResponse,
+      guardrail: {
+        decision: preGuardrail.decision,
+        pii: preGuardrail.pii,
+        injection: preGuardrail.injection,
+      },
+    };
+  }
+
+  const sanitizedQuery = preGuardrail.sanitizedQuery;
+  const retrievalQuery = stripRedactionPlaceholders(sanitizedQuery);
+
+  // 1. Perform Source-Grounded Retrieval without biasing BM25 on redaction tag labels
+  const retrieval = retrieveGroundedChunks(retrievalQuery, options);
 
   // 2. Handle out-of-scope or unsupported inquiries where no verified sources exist
   if (!retrieval.grounded || retrieval.retrievedChunks.length === 0) {
@@ -46,9 +70,14 @@ export async function askGroundedCivicAssistant(query, options = {}) {
       status: 'unsupported',
       grounded: false,
       confidenceScore: retrieval.confidenceScore,
+      guardrail: {
+        decision: preGuardrail.decision,
+        pii: preGuardrail.pii,
+        injection: preGuardrail.injection,
+      },
       data: {
         title: 'No Verified Government Source Found',
-        summary: `We could not find verified government documentation or official guidelines supporting this request ("${trimmedQuery}"). To prevent inaccurate information, Civic-Help-Setu does not generate unverified answers.`,
+        summary: `We could not find verified government documentation or official guidelines supporting this request ("${sanitizedQuery}"). To prevent inaccurate information, Civic-Help-Setu does not generate unverified answers.`,
         missingInformationNotice: 'Missing or unsupported claims: No official government guidelines were retrieved for this specific question.',
         officialSources: [
           {
@@ -68,7 +97,7 @@ export async function askGroundedCivicAssistant(query, options = {}) {
     };
   }
 
-  // 3. Grounded Answer Synthesis
+  // 3. Grounded Answer Synthesis & Post-Synthesis Entailment Verification
   const topChunk = retrieval.retrievedChunks[0];
   const service = getActiveBuiltInServices().find((s) => s.id === topChunk.serviceId) || null;
 
@@ -76,6 +105,11 @@ export async function askGroundedCivicAssistant(query, options = {}) {
   const primarySummary = retrieval.retrievedChunks
     .map((c) => `[${c.sectionTitle}]: ${c.content}`)
     .join('\n\n');
+
+  const entailment = evaluateGroundedAnswerEntailment(
+    primarySummary,
+    retrieval.retrievedChunks
+  );
 
   // Generate contextual suggestions
   const serviceName = topChunk.serviceName;
@@ -87,8 +121,15 @@ export async function askGroundedCivicAssistant(query, options = {}) {
 
   return {
     status: 'success',
-    grounded: true,
+    grounded: retrieval.grounded && entailment.contradictedCount === 0,
     confidenceScore: retrieval.confidenceScore,
+    entailment,
+    guardrail: {
+      decision: preGuardrail.decision,
+      pii: preGuardrail.pii,
+      injection: preGuardrail.injection,
+      entailment,
+    },
     retrievedChunks: retrieval.retrievedChunks.map((c) => ({
       chunkId: c.chunkId,
       sectionType: c.sectionType,
@@ -103,6 +144,9 @@ export async function askGroundedCivicAssistant(query, options = {}) {
       title: `${serviceName} (Verified Civic Guidance)`,
       summary: topChunk.content,
       detailedSummary: primarySummary,
+      missingInformationNotice: !entailment.overallSupported
+        ? entailment.failClosedNotice
+        : undefined,
       steps: service?.steps || [],
       documents: service?.documents || [],
       eligibility: service?.eligibility || [],
