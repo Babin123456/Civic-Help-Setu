@@ -50,7 +50,7 @@ const DocumentModal = ({ isOpen, onClose, onSave, existingDocs = [] }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     const { valid, errors } = validateDocumentForm(form, existingDocs);
@@ -58,7 +58,7 @@ const DocumentModal = ({ isOpen, onClose, onSave, existingDocs = [] }) => {
     if (!valid || fileError) return;
 
     try {
-      onSave({
+      await onSave({
         ...form,
         type: form.type.trim(),
         number: form.number.trim(),

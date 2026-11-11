@@ -14,13 +14,16 @@ describe('VaultBackupRestoreModal Component', () => {
     expect(html).toBe('');
   });
 
-  it('renders modal with documented allowed file formats and maximum size', () => {
+  it('renders modal with passphrase-protected export and documented restore constraints', () => {
     const html = renderToStaticMarkup(
       <ToastProvider>
         <VaultBackupRestoreModal isOpen={true} onClose={() => {}} onVaultUpdated={() => {}} />
       </ToastProvider>
     );
     expect(html).toContain('Backup &amp; Restore Vault');
+    expect(html).toContain('Export Encrypted Vault Backup');
+    expect(html).toContain('Backup Encryption Passphrase');
+    expect(html).toContain('Download Encrypted Backup (.json)');
     expect(html).toContain('Allowed format: JSON (.json), up to 2 MB.');
     expect(html).toContain('accept=".json"');
     expect(html).toContain('id="backup-file-hint"');
