@@ -1,16 +1,35 @@
 import { getActiveBuiltInServices } from '../services/serviceCatalog';
 import { FAQ_DATABASE } from '../data/faq_database';
 import { buildCivicAssistantFallback } from './civicAssistantFallback';
+import {
+  runPreInferenceGuardrails,
+  stripRedactionPlaceholders,
+} from './aiGuardrailPipeline';
 
-export const askCivicAssistant = async (query, options = {}) => {
+export const askCivicAssistant = async (rawQuery, options = {}) => {
   const { timeoutMs } = options;
+  const preGuardrail = runPreInferenceGuardrails(rawQuery || '');
+  const guardrailMeta = {
+    decision: preGuardrail.decision,
+    pii: preGuardrail.pii,
+    injection: preGuardrail.injection,
+  };
+
+  if (preGuardrail.decision === 'block') {
+    return {
+      ...preGuardrail.blockedResponse,
+      guardrail: guardrailMeta,
+    };
+  }
+
+  const query = preGuardrail.sanitizedQuery;
   const activeServices = getActiveBuiltInServices();
 
   const aiResult = (async () => {
     // Simulate AI network processing latency
     await new Promise((resolve) => setTimeout(resolve, 600));
 
-    const lowerQuery = query.toLowerCase().trim();
+    const lowerQuery = stripRedactionPlaceholders(query).toLowerCase().trim();
 
     // 1. Direct Service Guide matching
     const serviceMatch = activeServices.find((s) => {
@@ -120,6 +139,7 @@ export const askCivicAssistant = async (query, options = {}) => {
         return {
           ...buildCivicAssistantFallback(query, { activeServices, timeout: true }),
           grounded: false,
+          guardrail: guardrailMeta,
         };
       }
       throw err;
@@ -128,5 +148,8 @@ export const askCivicAssistant = async (query, options = {}) => {
     response = await aiResult;
   }
 
-  return response;
+  return {
+    ...response,
+    guardrail: guardrailMeta,
+  };
 };

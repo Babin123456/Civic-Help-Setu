@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { parseAssistantQuery, parseSlugParam } from '../utils/searchParams';
 import { useLocation, Link } from 'react-router-dom';
-import { Send, AlertCircle, Loader2, Sparkles, Mic, MicOff, BookOpen, RefreshCw, Pencil } from 'lucide-react';
+import { Send, AlertCircle, Loader2, Sparkles, Mic, MicOff, BookOpen, RefreshCw, Pencil, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { runPreInferenceGuardrails } from '../ai/aiGuardrailPipeline';
 import { askCivicAssistant } from '../ai/civicAssistant';
 import { askGroundedCivicAssistant } from '../ai/groundedCivicAssistant';
 import SourceGroundedBadge from '../components/assistant/SourceGroundedBadge';
@@ -60,24 +61,31 @@ const Assistant = () => {
   const getAnswer = async (query, history) => {
     // Short follow-ups like "what are the fees?" reuse the service from the last answer
     const resolved = resolveFollowUpQuery(query, history);
+    const preGuardrail = runPreInferenceGuardrails(resolved);
+    const safeQuery = preGuardrail.sanitizedQuery;
+
     let ragResult = null;
-    try {
-      const activeServices = getAllServices({ includeArchived: false });
-      ragResult = queryCivicKnowledge(resolved, activeServices);
-    } catch (e) {
-      logDiagnostic('RAG knowledge retrieval error', e);
+    if (preGuardrail.decision !== 'block') {
+      try {
+        const activeServices = getAllServices({ includeArchived: false });
+        ragResult = queryCivicKnowledge(safeQuery, activeServices);
+      } catch (e) {
+        logDiagnostic('RAG knowledge retrieval error', e);
+      }
     }
+
     let response;
     try {
-      response = await askGroundedCivicAssistant(resolved);
+      response = await askGroundedCivicAssistant(safeQuery);
     } catch (groundingErr) {
       logDiagnostic('Grounded retrieval error, falling back to basic assistant:', groundingErr);
-      response = await askCivicAssistant(resolved);
+      response = await askCivicAssistant(safeQuery);
     }
     return {
       id: `asst-${Date.now()}`,
       role: 'assistant',
       text: '',
+      status: response.status || null,
       data: response.data,
       serviceId: response.serviceId,
       ragResult,
@@ -85,6 +93,8 @@ const Assistant = () => {
       confidenceScore: response.confidenceScore,
       retrievedChunks: response.retrievedChunks || [],
       suggestions: response.suggestions || [],
+      guardrail: response.guardrail || null,
+      entailment: response.entailment || null,
       timestamp: new Date().toISOString(),
     };
   };
@@ -94,6 +104,9 @@ const Assistant = () => {
     if (!query || isLoading || requestInFlightRef.current) return;
     requestInFlightRef.current = true;
 
+    const preGuardrail = runPreInferenceGuardrails(query);
+    const safeQuery = preGuardrail.sanitizedQuery || query;
+
     // Sending a new question starts a different conversation, so the old one can no longer be restored
     setUndoSnapshot(null);
     const history = messages;
@@ -101,7 +114,14 @@ const Assistant = () => {
       const userMessage = {
         id: `user-${Date.now()}`,
         role: 'user',
-        text: query,
+        text: safeQuery,
+        guardrailPii: preGuardrail.pii.wasRedacted
+          ? {
+              wasRedacted: true,
+              categories: preGuardrail.pii.redactedCategories,
+              notice: preGuardrail.pii.notice,
+            }
+          : null,
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, userMessage]);
@@ -112,12 +132,12 @@ const Assistant = () => {
     setFailedQuery(null);
 
     try {
-      const assistantMessage = await getAnswer(query, history);
+      const assistantMessage = await getAnswer(safeQuery, history);
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err) {
       logDiagnostic('Assistant request failed', err);
       setError("We couldn't process your request. Please try again.");
-      setFailedQuery(query);
+      setFailedQuery(safeQuery);
     } finally {
       requestInFlightRef.current = false;
       setIsLoading(false);
@@ -265,6 +285,62 @@ const Assistant = () => {
           confidenceScore={msg.confidenceScore ?? 0.85}
           sourcesCount={data.officialSources?.length || (msg.retrievedChunks?.length || 1)}
         />
+
+        {(msg.status === 'blocked' || msg.guardrail?.injection?.blocked) && (
+          <div
+            role="status"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.45rem 0.8rem',
+              borderRadius: '0.5rem',
+              background: 'rgba(245, 158, 11, 0.12)',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
+              color: '#fbbf24',
+              fontSize: '0.82rem',
+              fontWeight: '600',
+              alignSelf: 'flex-start',
+            }}
+          >
+            <ShieldAlert size={15} aria-hidden="true" />
+            <span>AI Safety Guardrail: Request blocked before inference</span>
+          </div>
+        )}
+
+        {msg.entailment && (msg.entailment.verifiedCount > 0 || !msg.entailment.overallSupported) && (
+          <div
+            role="note"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              padding: '0.35rem 0.75rem',
+              borderRadius: '99px',
+              background: msg.entailment.overallSupported
+                ? 'rgba(16, 185, 129, 0.1)'
+                : 'rgba(245, 158, 11, 0.1)',
+              border: msg.entailment.overallSupported
+                ? '1px solid rgba(16, 185, 129, 0.3)'
+                : '1px solid rgba(245, 158, 11, 0.3)',
+              color: msg.entailment.overallSupported ? '#34d399' : '#fbbf24',
+              fontSize: '0.78rem',
+              fontWeight: '600',
+              alignSelf: 'flex-start',
+            }}
+          >
+            {msg.entailment.overallSupported ? (
+              <ShieldCheck size={14} aria-hidden="true" />
+            ) : (
+              <ShieldAlert size={14} aria-hidden="true" />
+            )}
+            <span>
+              {msg.entailment.overallSupported
+                ? `Entailment Check: Verified (${msg.entailment.verifiedCount} claim${msg.entailment.verifiedCount === 1 ? '' : 's'})`
+                : `Entailment Caution: ${msg.entailment.unsupportedCount + msg.entailment.contradictedCount} unverified/conflicting claim(s)`}
+            </span>
+          </div>
+        )}
 
         {data.missingInformationNotice && (
           <div
@@ -515,6 +591,28 @@ const Assistant = () => {
                     <div>
                     <p style={{ fontSize: '1.05rem', color: 'var(--text-primary)', fontWeight: '500' }}>
                       {msg.text || msg.content}</p>
+
+                    {msg.guardrailPii?.wasRedacted && (
+                      <div
+                        role="status"
+                        style={{
+                          marginTop: '0.55rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                          padding: '0.35rem 0.65rem',
+                          borderRadius: '0.5rem',
+                          background: 'var(--glass-bg)',
+                          border: '1px solid var(--border-light)',
+                          color: 'var(--accent-main)',
+                          fontSize: '0.78rem',
+                          lineHeight: '1.35',
+                        }}
+                      >
+                        <ShieldCheck size={14} aria-hidden="true" style={{ flexShrink: 0 }} />
+                        <span>{msg.guardrailPii.notice}</span>
+                      </div>
+                    )}
 
                     <IntentRoutingSuggestions query={msg.text || msg.content} />
                     </div>
