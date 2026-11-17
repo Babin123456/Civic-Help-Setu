@@ -1,4 +1,4 @@
-import { minimizeForExternal } from './dataMinimization';
+import { minimizeForExternal } from './dataMinimization.js';
 
 /**
  * The one place that decides what a diagnostic event may contain.

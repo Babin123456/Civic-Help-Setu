@@ -228,7 +228,12 @@ describe('vercel.json', () => {
   });
 
   it('keeps the single page app rewrite, except for the /api serverless functions', () => {
-    expect(vercel().rewrites).toEqual([{ source: '/((?!api/).*)', destination: '/index.html' }]);
+    // Nested API paths (email/verify) only reach the catch-all function through the first rewrite;
+    // single-segment routes with their own file under api/ are served by that file first.
+    expect(vercel().rewrites).toEqual([
+      { source: '/api/(.*)', destination: '/api/[...path]?path=$1' },
+      { source: '/((?!api/|assets/|.*\\.[^/]+$).*)', destination: '/index.html' },
+    ]);
   });
 
   it('applies the headers to every route', () => {

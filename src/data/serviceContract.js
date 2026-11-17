@@ -3,8 +3,8 @@
 // NOT a deployed network API: nothing here is served over HTTP.
 // Full field reference: docs/SERVICE_DATA_CONTRACT.md
 
-import { SERVICE_CATEGORIES } from './serviceCategories';
-import { validateJurisdiction as validateAppJurisdiction } from '../services/jurisdictionService';
+import { SERVICE_CATEGORIES } from './serviceCategories.js';
+import { validateJurisdiction as validateAppJurisdiction } from '../services/jurisdictionService.js';
 
 export const SERVICE_SCHEMA_VERSION = 1;
 export const SUPPORTED_SCHEMA_VERSIONS = [1];
