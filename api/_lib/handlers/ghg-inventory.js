@@ -8,7 +8,8 @@
  *   2. Clerk session verification (injected so the rule can be tested without a network);
  *   3. operator/administrator role and jurisdiction scope from verified claims only;
  *   4. strict schema, unit, file-metadata and PII validation;
- *   5. rate limiting and idempotent replay (the same key returns the original receipt).
+ *   5. rate limiting and durable atomic idempotency with conflict detection;
+ *   6. shared database persistence via the GHG repository.
  *
  * It never returns another department's records and never publishes unapproved data.
  */
@@ -24,9 +25,12 @@ import {
   findPersonalData,
   sanitizeText,
 } from '../../../src/services/ghgInventoryValidation.js';
+import {
+  createGhgMemoryRepository,
+  hashGhgSubmissionPayload,
+} from '../ghgInventoryRepository.js';
 
-export const GHG_SUBMISSION_QUEUE = [];
-const receiptByKey = new Map();
+const defaultSharedMemoryRepository = createGhgMemoryRepository();
 const MAX_BODY_BYTES = 256 * 1024;
 
 const ERROR_HELP = {
@@ -40,6 +44,8 @@ const ERROR_HELP = {
   rate_limited: 'Too many submissions. Wait for the retry window.',
   method_not_allowed: 'Use GET for published totals or POST for a department submission.',
   replayed: 'This idempotency key was already received; the original receipt is returned.',
+  idempotency_conflict: 'This idempotency key was already used with a different activity payload. Use a new idempotency key.',
+  database_unavailable: 'The submission could not be persisted to shared storage. Try again later.',
 };
 
 const fail = (status, code, details = null, extraHeaders = {}) => ({
@@ -207,10 +213,11 @@ export function createGhgInventoryHandler({
   verifySession = null,
   resolveActor = null,
   getPublishedSummary = null,
-  queue = GHG_SUBMISSION_QUEUE,
+  repository = null,
   ipLimiter = createRateLimiter({ limit: 10, windowMs: 60_000 }),
 } = {}) {
   const singleFlight = createSingleFlight();
+  const repo = repository || defaultSharedMemoryRepository;
 
   return async function handle({ method, headers = {}, body = null, query = {} }) {
     if (method === 'GET') {
@@ -305,26 +312,10 @@ export function createGhgInventoryHandler({
       return fail(422, 'validation_failed', errors);
     }
 
-    const key = `${payload.jurisdictionId.toUpperCase()}:${payload.idempotencyKey}`;
-    const existing = receiptByKey.get(key);
-    if (existing) {
-      return {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-        body: { ok: true, replayed: true, help: ERROR_HELP.replayed, receipt: existing },
-      };
-    }
+    const payloadHash = hashGhgSubmissionPayload(payload);
+    const flightKey = `${payload.jurisdictionId.toUpperCase()}:${payload.idempotencyKey}`;
 
-    return singleFlight.run(key, async () => {
-      const replay = receiptByKey.get(key);
-      if (replay) {
-        return {
-          status: 200,
-          headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-          body: { ok: true, replayed: true, help: ERROR_HELP.replayed, receipt: replay },
-        };
-      }
-
+    return singleFlight.run(flightKey, async () => {
       const receivedAt = new Date().toISOString();
       const submissionId = `ghg_sub_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       const receipt = {
@@ -342,7 +333,7 @@ export function createGhgInventoryHandler({
         ),
       };
 
-      queue.push({
+      const submissionRecord = {
         ...receipt,
         department: sanitizeText(payload.department, 120),
         title: sanitizeText(payload.title, 160),
@@ -370,12 +361,37 @@ export function createGhgInventoryHandler({
             : null,
         })),
         verifiedRole: actor.ghgRole || actor.role,
-      });
-      if (queue.length > 500) queue.splice(0, queue.length - 500);
-      receiptByKey.set(key, receipt);
-      if (receiptByKey.size > 1000) {
-        const oldest = receiptByKey.keys().next().value;
-        receiptByKey.delete(oldest);
+      };
+
+      let recordResult;
+      try {
+        recordResult = await repo.recordSubmission({
+          submission: submissionRecord,
+          receipt,
+          idempotencyKey: payload.idempotencyKey,
+          jurisdictionId: payload.jurisdictionId,
+          payloadHash,
+          actorId: actor.id,
+        });
+      } catch (error) {
+        return fail(503, 'database_unavailable', error?.message || null);
+      }
+
+      if (recordResult.status === 'conflict') {
+        return fail(409, 'idempotency_conflict');
+      }
+
+      if (recordResult.status === 'replayed') {
+        return {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+          body: {
+            ok: true,
+            replayed: true,
+            help: ERROR_HELP.replayed,
+            receipt: recordResult.receipt,
+          },
+        };
       }
 
       return {
@@ -384,27 +400,41 @@ export function createGhgInventoryHandler({
         body: {
           ok: true,
           help: 'Activity data is queued for municipal review. It does not affect published totals until a reviewer approves it.',
-          receipt,
+          receipt: recordResult.receipt,
         },
       };
     });
   };
 }
 
-export const resetGhgSubmissionQueueForTests = () => {
-  GHG_SUBMISSION_QUEUE.length = 0;
-  receiptByKey.clear();
+export const resetGhgRepositoryForTests = () => {
+  defaultSharedMemoryRepository.clear();
 };
+
+export const resetGhgSubmissionQueueForTests = resetGhgRepositoryForTests;
 
 let defaultHandler = null;
 let defaultHandlerError = null;
 
-async function buildDefaultHandler() {
+export async function buildDefaultHandler() {
   /* global process */
-  const { CLERK_SECRET_KEY } = process.env || {};
+  const { CLERK_SECRET_KEY, FIREBASE_SERVICE_ACCOUNT } = process.env || {};
   if (!CLERK_SECRET_KEY) return null;
   const { verifyToken, createClerkClient } = await import('@clerk/backend');
   const clerk = createClerkClient({ secretKey: CLERK_SECRET_KEY });
+
+  let repository = null;
+  if (FIREBASE_SERVICE_ACCOUNT) {
+    const { getFirestoreAdmin } = await import('../firebaseAdmin.js');
+    const firestore = await getFirestoreAdmin();
+    if (firestore) {
+      const { createGhgFirestoreRepository } = await import('../ghgInventoryRepository.js');
+      repository = createGhgFirestoreRepository({ firestore });
+    }
+  }
+
+  const { getPublicInventorySummary } = await import('../../../src/services/ghgInventoryService.js');
+
   return createGhgInventoryHandler({
     verifySession: async (token) => {
       const claims = await verifyToken(token, { secretKey: CLERK_SECRET_KEY });
@@ -424,6 +454,8 @@ async function buildDefaultHandler() {
             : [],
       };
     },
+    getPublishedSummary: getPublicInventorySummary,
+    repository,
   });
 }
 
@@ -437,7 +469,14 @@ export default async function handler(req, res) {
     defaultHandlerError = error;
     defaultHandler = null;
   }
-  const route = defaultHandler || createGhgInventoryHandler();
+  const route =
+    defaultHandler ||
+    createGhgInventoryHandler({
+      getPublishedSummary: async (params) => {
+        const { getPublicInventorySummary } = await import('../../../src/services/ghgInventoryService.js');
+        return getPublicInventorySummary(params);
+      },
+    });
   const result = await route({
     method: req.method,
     headers: req.headers,
