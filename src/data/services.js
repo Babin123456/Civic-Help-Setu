@@ -691,7 +691,11 @@ export const MOCK_SERVICES = [
     shortDescription: 'Lifecycle compliance tracker for small enterprises across municipal trade licences, Shops & Establishments registrations, FSSAI, SPCB consents, and statutory surrender acknowledgement archiving (#721).',
     description: 'Lifecycle compliance tracker for small enterprises across municipal trade licences, Shops & Establishments registrations, FSSAI, SPCB consents, and statutory surrender acknowledgement archiving (#721).',
     department: 'Urban Local Bodies (Municipal Corporations) & Directorate of Commercial Licencing',
-    category: 'Business & Commercial',
+    category: 'Business',
+    type: 'Online / Offline',
+    difficulty: 'Medium',
+    feeType: 'paid',
+    speedDays: 30,
     popularityScore: 94,
     eligibility: [
       'Micro, Small and Medium Enterprises (MSMEs)',
@@ -842,6 +846,13 @@ export const MOCK_SERVICES = [
         description: 'Remediate any inspection deficiencies within 15 days to secure the final Fire Safety Certificate required for occupancy.'
       }
     ],
+    fees: 'Varies by state, building category and built-up area. Check the fee schedule on your state fire service portal.',
+    processingTime: 'Around 30 days, varies by state and occupancy',
+    officialSources: [
+      { name: 'Delhi Fire Service', url: 'https://dfs.delhigovt.nic.in' },
+      { name: 'Maharashtra Fire Services', url: 'https://mahafireservice.gov.in' },
+      { name: 'Karnataka State Fire Services', url: 'https://ksfes.karnataka.gov.in' }
+    ],
     warnings: [
       'Procedural guidance only. This guide does NOT replace certified fire safety auditors or fire-protection engineering calculations.',
       'Operating commercial premises or assembly halls without a valid Fire Safety Certificate is punishable with closure notices and penal action under State Fire Acts.'
@@ -862,7 +873,7 @@ export const MOCK_SERVICES = [
     department: 'State Forest Departments & Municipal Tree Authorities',
     type: 'Online (e-Forest / Single Window) / In-person Inspection',
     difficulty: 'Medium',
-    feeType: 'variable',
+    feeType: 'paid',
     speedDays: 21,
     popularityScore: 88,
     eligibility: [
@@ -921,6 +932,8 @@ export const MOCK_SERVICES = [
         description: 'Execute approved work strictly conforming to permit conditions and plant/nurture required replacement saplings.'
       }
     ],
+    fees: 'Varies by state and by the work approved (pruning, lopping, transplanting or felling). Check the notice of your state Tree Officer.',
+    processingTime: 'Around 21 days, varies by state',
     officialSources: [
       {
         name: 'Delhi e-Forest Online Citizen Services Portal',
@@ -959,17 +972,27 @@ export const MOCK_SERVICES = [
   {
     id: 'counter-demand-forecasting',
     name: 'Civic Service Counter Demand & Queue Staffing Forecast',
-    category: 'Civic Governance',
+    category: 'Complaints',
+    type: 'Online',
+    difficulty: 'Medium',
+    feeType: 'free',
+    speedDays: 1,
     department: 'Department of Administrative Reforms & Public Grievances / Municipal Administration',
-    description: 'Statistical estimation of daily and hourly civic service counter footfall from appointment and visit aggregates, combined with Erlang-C queue capacity staffing optimization for municipal facilitation centres.',
-    timeRequired: '1 business day (planning cycle)',
+    shortDescription: 'Statistical estimation of daily and hourly civic service counter footfall from appointment and visit aggregates, combined with Erlang-C queue capacity staffing optimization for municipal facilitation centres.',
+    processingTime: '1 business day (planning cycle)',
     fees: 'Free / Internal Operational Planning Tool',
     eligibility: [
       'Municipal Facilitation Centre Managers and Supervisors',
       'Civic Centre Shift Officers and Desk Dispatchers',
       'Urban Local Body Public Delivery Administrative Reviewers'
     ],
-    documents: {
+    documents: [
+      'Historical hourly appointment and walk-in footfall aggregates',
+      'Office physical counter capacity inventory',
+      'Jurisdiction gazetted and emergency holiday calendar',
+      'Statutory service duration and benchmark wait-time standards'
+    ],
+    documentRequirements: {
       'Historical hourly appointment and walk-in footfall aggregates': { type: 'mandatory' },
       'Office physical counter capacity inventory': { type: 'mandatory' },
       'Jurisdiction gazetted and emergency holiday calendar': { type: 'mandatory' },
@@ -1023,17 +1046,10 @@ export const MOCK_SERVICES = [
   },
   {
     id: 'ward-budget-proposal',
-    jurisdiction: {
-      level: 'municipal',
-      states: [
-        'All States / Municipal Corporations'
-      ],
-      districts: [],
-      localBody: 'Ward Committees / Municipal Corporations'
-    },
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
     name: 'Participatory Ward Budget Proposal & Public Deliberation',
     shortDescription: 'Submit, deliberate, and track citizen-initiated ward budget proposals for local public infrastructure improvements, pedestrian footpaths, drainage, and parks.',
-    category: 'Civic Participation',
+    category: 'Complaints',
     department: 'Urban Local Bodies / Ward Committees / Municipal Corporation Directorate',
     type: 'Online / Ward Sabha',
     difficulty: 'Easy',
@@ -1052,13 +1068,13 @@ export const MOCK_SERVICES = [
       'Preliminary itemized cost estimate or municipal schedule of rates reference (optional but recommended)'
     ],
     documentRequirements: {
-      'Proof of ward residency or voter registration': {
+      'Proof of ward residency or voter registration (Electors Photo Identity Card / utility bill / property tax receipt)': {
         type: 'mandatory'
       },
-      'Photographic evidence or survey notes': {
+      'Photographic evidence or survey notes of location defect / required civic improvement': {
         type: 'mandatory'
       },
-      'Preliminary itemized cost estimate': {
+      'Preliminary itemized cost estimate or municipal schedule of rates reference (optional but recommended)': {
         type: 'optional'
       }
     },
@@ -1088,6 +1104,8 @@ export const MOCK_SERVICES = [
         description: 'Follow milestone updates, tender issuance, contractor assignment, and ground inspection photos.'
       }
     ],
+    fees: 'Free',
+    processingTime: 'Around 45 days',
     officialSources: [
       {
         name: 'Ministry of Housing and Urban Affairs (MoHUA) Citizen Participation Guidelines',
@@ -1115,15 +1133,10 @@ export const MOCK_SERVICES = [
   },
   {
     id: 'water-quality-register',
-    jurisdiction: {
-      level: 'municipal',
-      states: ['All States & Union Territories'],
-      districts: [],
-      localBody: 'Urban Local Bodies / Municipal Water Boards / Public Health Engineering Departments'
-    },
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
     name: 'Community Water-Quality Sampling & Laboratory Result Register',
     shortDescription: 'Search public drinking water points, view verified laboratory test parameters against Bureau of Indian Standards IS 10500:2012, and track municipal corrective actions.',
-    category: 'Public Health & Utilities',
+    category: 'Health',
     department: 'Public Health Engineering Department (PHED) / Municipal Water Supply & Sewerage Board',
     type: 'Public Register / Surveillance',
     difficulty: 'Easy',
@@ -1140,10 +1153,10 @@ export const MOCK_SERVICES = [
       'Sealed container identification code and chain-of-custody log (for field samplers)'
     ],
     documentRequirements: {
-      'Accredited NABL laboratory report certificate': {
+      'Accredited NABL laboratory report certificate (for laboratory analysts and officials)': {
         type: 'mandatory'
       },
-      'Sealed container identification code': {
+      'Sealed container identification code and chain-of-custody log (for field samplers)': {
         type: 'mandatory'
       }
     },
@@ -1165,6 +1178,8 @@ export const MOCK_SERVICES = [
         description: 'Track municipal pipeline repairs, super-chlorination disinfections, or filtration membrane replacements for out-of-range water points.'
       }
     ],
+    fees: 'Free',
+    processingTime: 'Around 3 days',
     officialSources: [
       {
         name: 'Bureau of Indian Standards (BIS) IS 10500:2012 Drinking Water Specification',
@@ -1198,15 +1213,10 @@ export const MOCK_SERVICES = [
   },
   {
     id: 'civic-survey-builder',
-    jurisdiction: {
-      level: 'national',
-      states: ['All States & Union Territories'],
-      districts: [],
-      localBody: 'Urban Local Bodies / Municipal Corporations'
-    },
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
     name: 'Civic Survey Builder & Sampling Diagnostics',
     shortDescription: 'Design structured public surveys, manage sample representation targets, review question missingness, and inspect response-bias diagnostics with anonymous response protection.',
-    category: 'Governance & Planning',
+    category: 'Complaints',
     department: 'Directorate of Public Consultation & Urban Planning',
     type: 'Online',
     difficulty: 'Easy',
@@ -1256,6 +1266,8 @@ export const MOCK_SERVICES = [
         description: 'Review ruleset-versioned recommendations and export data dictionaries for transparent statistical analysis.'
       }
     ],
+    fees: 'Free',
+    processingTime: 'Around 1 day',
     officialSources: [
       {
         name: 'Ministry of Housing and Urban Affairs — Citizen Engagement Guidelines',
@@ -1283,15 +1295,10 @@ export const MOCK_SERVICES = [
   },
   {
     id: 'public-toilet-directory',
-    jurisdiction: {
-      level: 'national',
-      states: ['All States & Union Territories'],
-      districts: [],
-      localBody: 'Urban Local Bodies / Municipal Corporations'
-    },
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
     name: 'Public Toilet Availability, Accessibility & Maintenance Status',
     shortDescription: 'Searchable public sanitation facility directory with operating hours, wheelchair accessibility, sanitary amenities, cleaning logs, and verified maintenance status.',
-    category: 'Public Amenities & Sanitation',
+    category: 'Health',
     department: 'Municipal Corporation / Urban Local Bodies — Sanitation Wing',
     type: 'Online',
     difficulty: 'Easy',
@@ -1325,6 +1332,8 @@ export const MOCK_SERVICES = [
         description: 'Submit maintenance tickets or hygiene observations with instant cryptographic tracking receipts.'
       }
     ],
+    fees: 'Free',
+    processingTime: 'Around 1 day',
     officialSources: [
       {
         name: 'Ministry of Housing and Urban Affairs — Swachh Bharat Mission (Urban)',
@@ -1346,7 +1355,7 @@ export const MOCK_SERVICES = [
     id: 'pedestrian-barrier-map',
     name: 'Accessible Pedestrian Route & Barrier Map',
     shortDescription: 'Plan accessible pedestrian routes avoiding broken footpaths, missing curb ramps, steep gradients, and temporary obstructions with community reporting and official municipal audits.',
-    category: 'Infrastructure',
+    category: 'Transport',
     department: 'Municipal Corporation / Directorate of Urban Land Transport (DULT)',
     type: 'Online Tool / Civic Audit',
     difficulty: 'Easy',
@@ -1354,8 +1363,8 @@ export const MOCK_SERVICES = [
     speedDays: 1,
     popularityScore: 94,
     jurisdiction: {
-      level: 'municipal',
-      states: ['Karnataka', 'All States'],
+      level: 'local',
+      states: ['Karnataka'],
       districts: ['Bengaluru Urban'],
       localBody: 'Bruhat Bengaluru Mahanagara Palike (BBMP)'
     },
@@ -1394,6 +1403,8 @@ export const MOCK_SERVICES = [
         description: 'Submit geo-tagged descriptions of missing curb cuts, broken pavers, or temporary roadwork to update the routing graph for all citizens.'
       }
     ],
+    fees: 'Free',
+    processingTime: 'Around 1 day',
     officialSources: [
       {
         name: 'Harmonised Guidelines and Standards for Universal Accessibility in India (MoHUA)',
@@ -1421,18 +1432,13 @@ export const MOCK_SERVICES = [
   },
   {
     id: 'open-contracting-red-flags',
-    jurisdiction: {
-      level: 'national',
-      states: ['All States & Union Territories'],
-      districts: [],
-      localBody: 'Central, State & Municipal Procurement Entities'
-    },
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
     name: 'Open Contracting Red-Flag Analytics & Audit Workspace',
     shortDescription: 'Audit public procurement records across tender notice, bid, award, and amendment stages using explainable anomaly detection and OCDS red-flag benchmarks without declaring wrongdoing.',
-    category: 'Governance & Planning',
+    category: 'Complaints',
     department: 'Central Vigilance Commission & State Public Procurement Oversight Authorities',
     type: 'Online',
-    difficulty: 'Intermediate',
+    difficulty: 'Medium',
     feeType: 'free',
     speedDays: 1,
     popularityScore: 94,
@@ -1448,46 +1454,40 @@ export const MOCK_SERVICES = [
       'Price Outlier'
     ],
     summary: 'Auditors, researchers, and citizens can review public procurement notices, detect statistical anomalies (repeated single-bid awards, unusual amendments, price creep, abbreviated notice periods), inspect linked procurement lifecycles, and document reasoned human review outcomes.',
-    eligibility: {
-      whoCanApply: [
-        'Municipal and state auditors conducting procurement reviews',
-        'Civil society oversight researchers and transparency watchdogs',
-        'Citizen observers reviewing local public works and goods tenders',
-        'Procurement analysts verifying supplier concentrations'
-      ],
-      criteria: [
-        'Public procurement records published under Open Contracting Data Standard (OCDS) or state e-Procurement portals',
-        'Auditors must provide statutory justifications when recording review decisions or clearing flags'
-      ]
-    },
+    eligibility: [
+      'Municipal and state auditors conducting procurement reviews',
+      'Civil society oversight researchers and transparency watchdogs',
+      'Citizen observers reviewing local public works and goods tenders',
+      'Procurement analysts verifying supplier concentrations',
+      'Public procurement records published under Open Contracting Data Standard (OCDS) or state e-Procurement portals',
+      'Auditors must provide statutory justifications when recording review decisions or clearing flags'
+    ],
     documents: [
       'Published Tender Notice & Corrigenda (Official tender advertisement with dates and criteria)',
       'Technical & Financial Bid Evaluation Sheets (Documenting received quotes and bidder rankings)',
       'Contract Award Order & Amendments (Documenting awarded amount and variation orders)'
     ],
-    processSteps: [
+    fees: 'Free',
+    processingTime: 'Around 1 day',
+    steps: [
       {
-        step: 1,
         title: 'Import & Harmonize Procurement Records',
         description: 'Tender notices, bids, award details, and contract amendments are normalized under Open Contracting schemas.'
       },
       {
-        step: 2,
         title: 'Run Explainable Anomaly Analytics',
         description: 'Deterministic rulesets detect single-bid awards, short turnaround windows, excessive amendments, and price outliers with comparison cohorts.'
       },
       {
-        step: 3,
         title: 'Inspect Linked Lifecycle Stages',
         description: 'Reviewers explore the timeline connecting notice to bids, award to amendments, and compare against category cohort benchmarks.'
       },
       {
-        step: 4,
         title: 'Record Human Audit Review & Issue Seal',
         description: 'Authorized auditors examine file records, mark false positives with documented reasons or escalate for formal audit with cryptographic seals.'
       }
     ],
-    officialPortals: [
+    officialSources: [
       {
         name: 'Government e-Marketplace (GeM)',
         url: 'https://gem.gov.in',
@@ -1520,15 +1520,10 @@ export const MOCK_SERVICES = [
   },
   {
     id: 'ward-issue-heatmap',
-    jurisdiction: {
-      level: 'municipal',
-      states: ['All States & Urban Local Bodies'],
-      districts: [],
-      localBody: 'Municipal Corporations / Urban Local Bodies'
-    },
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
     name: 'Anonymized Ward-Level Civic Issue Heatmap & Trend Explorer',
     shortDescription: 'Aggregate analytics view for understanding recurring civic issues across municipal wards without exposing individual complainants or exact private locations.',
-    category: 'Governance & Analytics',
+    category: 'Complaints',
     department: 'Directorate of Municipal Administration & Urban Data Governance Cell',
     type: 'Online Analytics & Public Dashboard',
     difficulty: 'Easy',
@@ -1571,6 +1566,8 @@ export const MOCK_SERVICES = [
         description: 'Contribute ground observations with coordinates snapped strictly to the municipal ward centroid.'
       }
     ],
+    fees: 'Free',
+    processingTime: 'Around 1 day',
     officialSources: [
       {
         name: 'Ministry of Housing and Urban Affairs (MoHUA) — Urban Data Guidelines',
