@@ -3,7 +3,6 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import CgrfPetitionDrafterCard from './CgrfPetitionDrafterCard.jsx';
 
 describe('CgrfPetitionDrafterCard Component (#891)', () => {
-describe('CgrfPetitionDrafterCard Component (#890)', () => {
   it('renders Section 42(5) CGRF petition drafter and preview', () => {
     const html = renderToStaticMarkup(<CgrfPetitionDrafterCard />);
 

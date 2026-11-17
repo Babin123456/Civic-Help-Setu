@@ -3,7 +3,6 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import DisconnectionLegalityCard from './DisconnectionLegalityCard.jsx';
 
 describe('DisconnectionLegalityCard Component (#891)', () => {
-describe('DisconnectionLegalityCard Component (#890)', () => {
   it('renders Section 56(1) disconnection legality auditor', () => {
     const html = renderToStaticMarkup(<DisconnectionLegalityCard />);
 
