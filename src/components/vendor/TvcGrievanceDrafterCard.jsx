@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { generateSection20GrievancePetition } from '../../services/streetVendorService.js';
 import { saveVendorRightsRecord } from '../../services/streetVendorStorage.js';
+import { fillTextPrintWindow, PETITION_PRINT_BODY_STYLE } from '../../utils/printHtml.js';
 
 export default function TvcGrievanceDrafterCard({
   immunityData,
@@ -72,18 +73,7 @@ export default function TvcGrievanceDrafterCard({
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Section 20 Street Vendor Statutory Appeal - ${vendorName}</title>
-          <style>
-            body { font-family: monospace; padding: 2rem; white-space: pre-wrap; font-size: 12px; line-height: 1.5; color: #000; }
-          </style>
-        </head>
-        <body>${petitionText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</body>
-      </html>
-    `);
-    printWindow.document.close();
+    fillTextPrintWindow(printWindow, `Section 20 Street Vendor Statutory Appeal - ${vendorName}`, petitionText, PETITION_PRINT_BODY_STYLE);
     printWindow.focus();
     printWindow.print();
   };

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { generateCgrfPetition } from '../../services/electricityConsumerService.js';
 import { saveElectricityGrievanceRecord } from '../../services/electricityConsumerStorage.js';
+import { fillTextPrintWindow, PETITION_PRINT_BODY_STYLE } from '../../utils/printHtml.js';
 
 export default function CgrfPetitionDrafterCard({
   sopData,
@@ -78,18 +79,7 @@ export default function CgrfPetitionDrafterCard({
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>CGRF Section 42(5) Petition - ${consumerName}</title>
-          <style>
-            body { font-family: monospace; padding: 2rem; white-space: pre-wrap; font-size: 12px; line-height: 1.5; color: #000; }
-          </style>
-        </head>
-        <body>${petitionText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</body>
-      </html>
-    `);
-    printWindow.document.close();
+    fillTextPrintWindow(printWindow, `CGRF Section 42(5) Petition - ${consumerName}`, petitionText, PETITION_PRINT_BODY_STYLE);
     printWindow.focus();
     printWindow.print();
   };
