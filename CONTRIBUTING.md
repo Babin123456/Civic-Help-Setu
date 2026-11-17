@@ -23,6 +23,19 @@ Public service information changes frequently. If you notice outdated or incorre
 7. Issue that pull request!
 
 ## Testing
+The [pull request quality workflow](.github/workflows/pr-quality.yml) runs on every pull request to `main` and every push to `main`. It uses Node.js 22.12.0 and the committed npm lockfile. Run the same checks locally before opening a pull request:
+
+```bash
+npm ci
+npm run lint
+npm test
+npm run build
+```
+
+The workflow shows install, lint, test, and build as separate steps. Lint, test, and build still run after another check fails, provided installation succeeded, so each result is visible. Any failed step makes the job fail; rerun the same command locally and include the fix in the PR. The npm cache stores downloaded packages only, with a key scoped to the runner OS, Node.js version, and lockfile hash. It does not cache `node_modules` or require deployment secrets.
+
+For a successful run, confirm that the PR points to the intended `main` branch, `npm ci` used `package-lock.json`, lint and Vitest report no failures, the Vite production build succeeds, and the overall `Lint, tests and build` job is green. Maintainers can then mark that job as required in branch protection. The existing security checks remain separate.
+
 Run unit and integration tests locally with Vitest:
 ```bash
 npm test                                                      # run all tests
