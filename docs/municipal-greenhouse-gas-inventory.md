@@ -271,8 +271,12 @@ an `available: false` payload when no summary provider is configured.
 4. operator or administrator role (`403 forbidden_role`);
 5. jurisdiction assignment (`403 jurisdiction_forbidden`);
 6. strict schema, unit, duplicate-record, document-metadata and PII validation (`422`);
-7. idempotent replay: the same `jurisdictionId:idempotencyKey` returns the original receipt
-   with `replayed: true`; concurrent duplicates are collapsed by single-flight.
+7. durable persistence via GHG repository (`api/_lib/ghgInventoryRepository.js`) with atomic
+   Firestore transactions:
+   - the same `jurisdictionId:idempotencyKey` returns the original receipt with `replayed: true` (200);
+   - key reuse with a conflicting activity payload is rejected with `409 idempotency_conflict`;
+   - concurrent duplicates are collapsed by single-flight execution and transaction locks;
+   - shared storage failures answer `503 database_unavailable`.
 
 Document contents (`file`, `fileData`, `base64`, `content`, `documentData`, `buffer`) are
 rejected; only name, MIME type, size and checksum are accepted, and only PDF, CSV and XLSX
