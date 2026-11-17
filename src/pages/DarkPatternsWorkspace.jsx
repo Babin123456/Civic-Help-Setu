@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import CheckoutTimeline from '../components/darkPatterns/CheckoutTimeline.jsx';
+import EvidenceManifest from '../components/darkPatterns/EvidenceManifest.jsx';
 import { PATTERNS, classifyPatterns, auditPricing, draftNotice } from '../services/darkPatternsService.js';
 import { listRecords, saveRecord, deleteRecord, verifyRecord, exportJson, exportText } from '../services/darkPatternsStorage.js';
 import './DarkPatternsWorkspace.css';
@@ -44,6 +45,7 @@ export default function DarkPatternsWorkspace() {
       {audit && <p>Difference: ₹{audit.difference.toFixed(2)}; unexplained increase: ₹{audit.unexplained.toFixed(2)} ({audit.percentage === null ? 'percentage unavailable for zero headline price' : `${audit.percentage}%`}). {audit.assessment} Not all surcharges are unlawful; compare disclosures and evidence under the 2023 Guidelines.</p>}
     </section>
     <CheckoutTimeline />
+    <EvidenceManifest />
     <section><h2>3. Draft redressal</h2><label>Document <select value={kind} onChange={e => setKind(e.target.value)}><option value="notice">15-day legal notice</option><option value="ccpa">CCPA petition</option><option value="dcdrc">District Commission complaint</option></select></label><pre>{draft}</pre><button onClick={() => download('redressal-draft.txt', draft, 'text/plain')}>Download draft</button><p>Add your details and verify jurisdiction, evidence and statutory references before sending. No submission is made by this tool.</p></section>
     <section><h2>4. Local evidence vault</h2><p>Text only; do not enter card details, addresses, order numbers or contact details. Automatic scrubbing is best effort and can miss personal information. Review saved data and exports. Local storage is not encrypted and is accessible to others using this browser. A hash detects changes, not authenticity.</p><button onClick={save}>Scrub, seal and save</button> <span role="status">{status}</span>
       {records.map(record => <article key={record.id}><h3>{record.trader || 'Unnamed trader'} — {record.createdAt}</h3><pre>{exportText(record)}</pre><button onClick={() => verify(record)}>Verify seal</button> <button onClick={() => download('dossier.json', exportJson(record), 'application/json')}>Export JSON</button> <button onClick={() => download('dossier.txt', exportText(record), 'text/plain')}>Export text</button> <button onClick={() => remove(record.id)}>Delete</button></article>)}
