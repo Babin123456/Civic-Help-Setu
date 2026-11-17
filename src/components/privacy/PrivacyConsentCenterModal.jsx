@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   Shield,
   Download,
+  FileText,
   Trash2,
   Lock,
   CheckCircle2,
