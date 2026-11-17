@@ -113,7 +113,7 @@ export function extractNoticeDetails(noticeInput = {}) {
   const cleanText = String(rawText || '').trim();
 
   // 1. Extract Reference Number
-  const refMatch = cleanText.match(/(?:ref(?:erence)?\s*(?:no\.?|id)?|memo\s*(?:no\.?|#)|file\s*no\.?)\s*[:\-]?\s*([A-Za-z0-9\/\-_]{5,30})/i);
+  const refMatch = cleanText.match(/(?:ref(?:erence)?\s*(?:no\.?|id)?|memo\s*(?:no\.?|#)|file\s*no\.?)\s*[:-]?\s*([A-Za-z0-9/\-_]{5,30})/i);
   const applicationReference = refMatch
     ? {
         value: refMatch[1].trim(),
@@ -129,15 +129,15 @@ export function extractNoticeDetails(noticeInput = {}) {
       };
 
   // 2. Extract Explicit Deadline Date first
-  const explicitMatch = cleanText.match(/(?:on\s+or\s+before|last\s+date|deadline\s*is)\s*[:\-]?\s*([0-9\/\-\.]{8,12})/i);
-  const explicitDeadlineDate = explicitMatch ? explicitMatch[1].replace(/[\.\,\;]+$/, '').trim() : null;
+  const explicitMatch = cleanText.match(/(?:on\s+or\s+before|last\s+date|deadline\s*is)\s*[:-]?\s*([0-9/\-.]{8,12})/i);
+  const explicitDeadlineDate = explicitMatch ? explicitMatch[1].replace(/[.,;]+$/, '').trim() : null;
 
   // 3. Extract Notice Date(s)
   // Look specifically for notice date / dated header
-  const noticeDateHeaderMatch = cleanText.match(/(?:notice\s*date|dated?)\s*[:\-]?\s*([0-9\/\-\.]{8,12}|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,]+\d{4})/i);
-  const dispatchDateMatch = cleanText.match(/(?:dispatch\s*date|issued\s*on)\s*[:\-]?\s*([0-9\/\-\.]{8,12})/i);
+  const noticeDateHeaderMatch = cleanText.match(/(?:notice\s*date|dated?)\s*[:-]?\s*([0-9/\-.]{8,12}|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,]+\d{4})/i);
+  const dispatchDateMatch = cleanText.match(/(?:dispatch\s*date|issued\s*on)\s*[:-]?\s*([0-9/\-.]{8,12})/i);
 
-  const dateRegex = /\b(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,]+\d{4})\b/gi;
+  const dateRegex = /\b(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4}|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,]+\d{4})\b/gi;
   const allFoundDates = [...cleanText.matchAll(dateRegex)].map((m) => m[0]);
 
   // Exclude explicit deadline date from notice dates pool
@@ -145,7 +145,7 @@ export function extractNoticeDetails(noticeInput = {}) {
     ? allFoundDates.filter((d) => d !== explicitDeadlineDate)
     : allFoundDates;
 
-  let noticeDate = null;
+  let noticeDate;
   let hasConflictingDates = false;
 
   if (noticeDateHeaderMatch && dispatchDateMatch && noticeDateHeaderMatch[1] !== dispatchDateMatch[1]) {
@@ -190,7 +190,7 @@ export function extractNoticeDetails(noticeInput = {}) {
   }
 
   // 3. Extract Issuing Office / Authority
-  const officeMatch = cleanText.match(/(?:office\s+of\s+the|department\s+of|ministry\s+of|tahsildar|collectorate|municipal\s+corporation)[^\n,\.]{4,60}/i);
+  const officeMatch = cleanText.match(/(?:office\s+of\s+the|department\s+of|ministry\s+of|tahsildar|collectorate|municipal\s+corporation)[^\n,.]{4,60}/i);
   const issuingOffice = officeMatch
     ? {
         value: officeMatch[0].trim(),
@@ -329,9 +329,9 @@ export function evaluateNoticeDeadline(text, noticeDateObj, hasConflictingDates 
   }
 
   // Case B: Explicit deadline stated (e.g. "submit on or before 25/04/2026")
-  const explicitMatch = text.match(/(?:on\s+or\s+before|last\s+date|deadline\s*is)\s*[:\-]?\s*([0-9\/\-\.]{8,12})/i);
+  const explicitMatch = text.match(/(?:on\s+or\s+before|last\s+date|deadline\s*is)\s*[:-]?\s*([0-9/\-.]{8,12})/i);
   if (explicitMatch) {
-    const rawClean = explicitMatch[1].replace(/[\.\,\;]+$/, '').trim();
+    const rawClean = explicitMatch[1].replace(/[.,;]+$/, '').trim();
     return {
       type: DEADLINE_TYPE.EXTRACTED,
       deadlineDate: rawClean,
