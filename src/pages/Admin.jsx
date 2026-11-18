@@ -28,6 +28,8 @@ import {
   approveServiceSubmission,
   rejectServiceSubmission,
 } from '../services/adminService';
+
+import * as importBatchService from '../services/importBatchService';
 import AdminStatsGrid from '../components/admin/AdminStatsGrid';
 import ServiceModal from '../components/admin/ServiceModal';
 import ReportResolutionModal from '../components/admin/ReportResolutionModal';
@@ -66,6 +68,7 @@ import LinkHealthPanel from '../components/admin/LinkHealthPanel';
 import ServiceDraftsPanel from '../components/admin/ServiceDraftsPanel';
 import { getDraftForService, listDrafts, saveDraft } from '../services/serviceDrafts';
 import CatalogueMigrationPanel from '../components/admin/CatalogueMigrationPanel';
+import ImportConsole from '../pages/ImportConsole';
 import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
 import CatalogueCompletenessPanel from '../components/admin/CatalogueCompletenessPanel';
 import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchPanel';
@@ -755,6 +758,11 @@ const Admin = () => {
                 badge: null,
               },
               { id: 'duplicates', label: 'Duplicate Detection', badge: null },
+  {
+    id: 'imports',
+    label: `Imports (${stats?.total || 0})`,
+    badge: null,
+  },
               { id: 'conflicts', label: 'Requirement Conflicts', badge: null },
               { id: 'civic-works', label: 'Ward Public Works', badge: null },
               { id: 'pedestrian-barriers', label: 'Pedestrian Route Barriers', badge: null },
@@ -1873,6 +1881,11 @@ const Admin = () => {
               <div>
                 <AuditLogViewer auditLogs={auditLogs} />
               </div>
+            )}
+
+            {/* Import Console Tab */}
+            {activeTab === 'imports' && (
+              <ImportConsole />
             )}
           </div>
         </div>
