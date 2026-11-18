@@ -129,6 +129,8 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_dark_patterns_vault', category: 'drafts', exportAs: 'darkPatternsVault', empty: [] },
   { key: 'civicbridge_vendor_rights_vault', category: 'drafts', exportAs: 'vendorRightsVault', empty: [] }, // streetVendorStorage.js
   { key: 'civicbridge_rte_grievance_vault', category: 'drafts', exportAs: 'rteGrievanceVault', empty: [] }, // rteAdmissionStorage.js
+  { key: 'civicbridge_accessibility_cases_v1', category: 'drafts', exportAs: 'accessibilityEscalationCases', empty: [] }, // accessibilityEscalationStorage.js (#950)
+  { key: 'civicbridge_accessibility_tracker_settings_v1', category: 'drafts', exportAs: null, empty: {} }, // accessibilityEscalationStorage.js (#950)
   { key: 'civicbridge_legal_sources_v1', category: 'drafts', exportAs: 'legalSourcesRegistry', empty: [] }, // legalSourceStorage.js
   { key: 'civicbridge_legal_draft_snapshots_v1', category: 'drafts', exportAs: 'legalDraftSnapshots', empty: [] }, // legalSourceStorage.js
   { key: 'civicbridge_legal_sources_audit_v1', category: 'drafts', exportAs: 'legalSourcesAuditLogs', empty: [] }, // legalSourceStorage.js

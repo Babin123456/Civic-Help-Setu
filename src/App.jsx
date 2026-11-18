@@ -89,6 +89,8 @@ const CatalogueVisualQaWorkspace = lazy(() => import('./pages/CatalogueVisualQaW
 const StreetVendorWorkspace = lazy(() => import('./pages/StreetVendorWorkspace'));
 const DarkPatternsWorkspace = lazy(() => import('./pages/DarkPatternsWorkspace'));
 const AccessibilityAuditWorkspace = lazy(() => import('./pages/AccessibilityAuditWorkspace'));
+const AccessibilityComplaintTrackerWorkspace = lazy(() => import('./pages/AccessibilityComplaintTrackerWorkspace'));
+
 const LegalSourceReviewWorkspace = lazy(() => import('./pages/LegalSourceReviewWorkspace'));
 const RteAdmissionWorkspace = lazy(() => import('./pages/RteAdmissionWorkspace'));
 const EvidenceDossierWorkspace = lazy(() => import('./pages/EvidenceDossierWorkspace'));
@@ -227,6 +229,10 @@ function AppRoot() {
                       <Route path="/discom-outage-audit" element={<ElectricityConsumerWorkspace />} />
                       <Route path="/cgrf-compensation-drafter" element={<ElectricityConsumerWorkspace />} />
                       <Route path="/accessibility-audit-workspace" element={<AccessibilityAuditWorkspace />} />
+                      <Route path="/accessibility-tracker" element={<AccessibilityComplaintTrackerWorkspace />} />
+                      <Route path="/accessibility-complaint-tracker" element={<AccessibilityComplaintTrackerWorkspace />} />
+                      <Route path="/accessibility-escalation" element={<AccessibilityComplaintTrackerWorkspace />} />
+                      <Route path="/services/accessibility-tracker" element={<AccessibilityComplaintTrackerWorkspace />} />
                       <Route path="/dark-patterns-workspace" element={<DarkPatternsWorkspace />} />
                       <Route path="/drip-pricing-audit" element={<DarkPatternsWorkspace />} />
                       <Route path="/ccpa-redressal" element={<DarkPatternsWorkspace />} />
