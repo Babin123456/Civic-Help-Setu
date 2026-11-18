@@ -19,73 +19,73 @@ import BackToTop from './components/common/BackToTop';
 import RouteErrorFallback from './components/common/RouteErrorFallback';
 import RouteErrorBoundary from './components/common/RouteErrorBoundary';
 
-import Home from './pages/Home';
-import Login from './pages/Login';
-import SignUpPage from './pages/SignUp';
-import SSOCallback from './pages/SSOCallback';
-import Assistant from './pages/Assistant';
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const SignUpPage = lazy(() => import('./pages/SignUp'));
+const SSOCallback = lazy(() => import('./pages/SSOCallback'));
+const Assistant = lazy(() => import('./pages/Assistant'));
 import { ServiceCardSkeletonGrid } from './components/ServiceCardSkeleton';
-import ServiceDetails from './pages/ServiceDetails';
-import Acronyms from './pages/Acronyms';
-import Eligibility from './pages/Eligibility';
-import NearbyOffices from './pages/NearbyOffices';
-import Track from './pages/Track';
-import Saved from './pages/Saved';
-import Vault from './pages/Vault';
-import Profile from './pages/Profile';
-import OpenSource from './pages/OpenSource';
-import Privacy from './pages/Privacy';
-import Admin from './pages/Admin';
-import TenantAdministrationWorkspace from './pages/TenantAdministrationWorkspace';
-import SharedChecklistView from './pages/SharedChecklistView';
-import SharedDirectoryView from './pages/SharedDirectoryView';
-import PublicApplicationStatusView from './pages/PublicApplicationStatusView';
-import SharedProfileView from './pages/SharedProfileView';
-import NotFound from './pages/NotFound';
-import VerifyEmail from './pages/VerifyEmail';
-import AadhaarGuidePage from './pages/AadhaarGuidePage';
-import SmallBusinessLicencePage from './pages/SmallBusinessLicencePage';
-import FireSafetyGuidePage from './pages/FireSafetyGuidePage';
-import TreePermissionGuidePage from './pages/TreePermissionGuidePage';
-import CivicWorksBoard from './pages/CivicWorksBoard';
-import TreeHealthInventory from './pages/TreeHealthInventory';
-import CrematoriumDirectory from './pages/CrematoriumDirectory';
-import FairPriceShopBoard from './pages/FairPriceShopBoard';
-import TenderReadinessWorkspace from './pages/TenderReadinessWorkspace';
-import CommunityFacilityDirectory from './pages/CommunityFacilityDirectory';
-import RoadSafetyDashboard from './pages/RoadSafetyDashboard';
-import LibraryDirectory from './pages/LibraryDirectory';
-import WaterTankerTracker from './pages/WaterTankerTracker';
-import AddressChangePlanner from './pages/AddressChangePlanner';
-import RentalTransitionWorkspace from './pages/RentalTransitionWorkspace';
-import CitizenDraftSyncWorkspace from './pages/CitizenDraftSyncWorkspace';
-import SyntheticDatasetWorkspace from './pages/SyntheticDatasetWorkspace';
-import CounterDemandForecastingWorkspace from './pages/CounterDemandForecastingWorkspace';
-import WardBudgetWorkspace from './pages/WardBudgetWorkspace';
-import LineageExplorerWorkspace from './pages/LineageExplorerWorkspace';
-import CivicSurveyWorkspace from './pages/CivicSurveyWorkspace';
-import PublicToiletDirectory from './pages/PublicToiletDirectory';
-import AccessibleRouteBarrierWorkspace from './pages/AccessibleRouteBarrierWorkspace';
-import StreetlightOutageWorkspace from './pages/StreetlightOutageWorkspace';
-import GhgInventoryWorkspace from './pages/GhgInventoryWorkspace';
-import WaterQualityRegister from './pages/WaterQualityRegister';
-import PublicProjectsWorkspace from './pages/PublicProjectsWorkspace';
-import WardIssueHeatmapWorkspace from './pages/WardIssueHeatmapWorkspace';
-import ContinuityPlannerWorkspace from './pages/ContinuityPlannerWorkspace';
-import SeniorCitizenTribunalWorkspace from './pages/SeniorCitizenTribunalWorkspace';
-import ReraDisputeWorkspace from './pages/ReraDisputeWorkspace';
-import StrayAnimalAbcWorkspace from './pages/StrayAnimalAbcWorkspace';
-import NoisePollutionWorkspace from './pages/NoisePollutionWorkspace';
-import SolidWasteAuditWorkspace from './pages/SolidWasteAuditWorkspace';
-import OpenContractingWorkspace from './pages/OpenContractingWorkspace';
-import ClinicalEstablishmentWorkspace from './pages/ClinicalEstablishmentWorkspace';
-import ElectricityConsumerWorkspace from './pages/ElectricityConsumerWorkspace';
-import CatalogueVisualQaWorkspace from './pages/CatalogueVisualQaWorkspace';
-import StreetVendorWorkspace from './pages/StreetVendorWorkspace';
-import DarkPatternsWorkspace from './pages/DarkPatternsWorkspace';
-import AccessibilityAuditWorkspace from './pages/AccessibilityAuditWorkspace';
+const ServiceDetails = lazy(() => import('./pages/ServiceDetails'));
+const Acronyms = lazy(() => import('./pages/Acronyms'));
+const Eligibility = lazy(() => import('./pages/Eligibility'));
+const NearbyOffices = lazy(() => import('./pages/NearbyOffices'));
+const Track = lazy(() => import('./pages/Track'));
+const Saved = lazy(() => import('./pages/Saved'));
+const Vault = lazy(() => import('./pages/Vault'));
+const Profile = lazy(() => import('./pages/Profile'));
+const OpenSource = lazy(() => import('./pages/OpenSource'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Admin = lazy(() => import('./pages/Admin'));
+const TenantAdministrationWorkspace = lazy(() => import('./pages/TenantAdministrationWorkspace'));
+const SharedChecklistView = lazy(() => import('./pages/SharedChecklistView'));
+const SharedDirectoryView = lazy(() => import('./pages/SharedDirectoryView'));
+const PublicApplicationStatusView = lazy(() => import('./pages/PublicApplicationStatusView'));
+const SharedProfileView = lazy(() => import('./pages/SharedProfileView'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
+const AadhaarGuidePage = lazy(() => import('./pages/AadhaarGuidePage'));
+const SmallBusinessLicencePage = lazy(() => import('./pages/SmallBusinessLicencePage'));
+const FireSafetyGuidePage = lazy(() => import('./pages/FireSafetyGuidePage'));
+const TreePermissionGuidePage = lazy(() => import('./pages/TreePermissionGuidePage'));
+const CivicWorksBoard = lazy(() => import('./pages/CivicWorksBoard'));
+const TreeHealthInventory = lazy(() => import('./pages/TreeHealthInventory'));
+const CrematoriumDirectory = lazy(() => import('./pages/CrematoriumDirectory'));
+const FairPriceShopBoard = lazy(() => import('./pages/FairPriceShopBoard'));
+const TenderReadinessWorkspace = lazy(() => import('./pages/TenderReadinessWorkspace'));
+const CommunityFacilityDirectory = lazy(() => import('./pages/CommunityFacilityDirectory'));
+const RoadSafetyDashboard = lazy(() => import('./pages/RoadSafetyDashboard'));
+const LibraryDirectory = lazy(() => import('./pages/LibraryDirectory'));
+const WaterTankerTracker = lazy(() => import('./pages/WaterTankerTracker'));
+const AddressChangePlanner = lazy(() => import('./pages/AddressChangePlanner'));
+const RentalTransitionWorkspace = lazy(() => import('./pages/RentalTransitionWorkspace'));
+const CitizenDraftSyncWorkspace = lazy(() => import('./pages/CitizenDraftSyncWorkspace'));
+const SyntheticDatasetWorkspace = lazy(() => import('./pages/SyntheticDatasetWorkspace'));
+const CounterDemandForecastingWorkspace = lazy(() => import('./pages/CounterDemandForecastingWorkspace'));
+const WardBudgetWorkspace = lazy(() => import('./pages/WardBudgetWorkspace'));
+const LineageExplorerWorkspace = lazy(() => import('./pages/LineageExplorerWorkspace'));
+const CivicSurveyWorkspace = lazy(() => import('./pages/CivicSurveyWorkspace'));
+const PublicToiletDirectory = lazy(() => import('./pages/PublicToiletDirectory'));
+const AccessibleRouteBarrierWorkspace = lazy(() => import('./pages/AccessibleRouteBarrierWorkspace'));
+const StreetlightOutageWorkspace = lazy(() => import('./pages/StreetlightOutageWorkspace'));
+const GhgInventoryWorkspace = lazy(() => import('./pages/GhgInventoryWorkspace'));
+const WaterQualityRegister = lazy(() => import('./pages/WaterQualityRegister'));
+const PublicProjectsWorkspace = lazy(() => import('./pages/PublicProjectsWorkspace'));
+const WardIssueHeatmapWorkspace = lazy(() => import('./pages/WardIssueHeatmapWorkspace'));
+const ContinuityPlannerWorkspace = lazy(() => import('./pages/ContinuityPlannerWorkspace'));
+const SeniorCitizenTribunalWorkspace = lazy(() => import('./pages/SeniorCitizenTribunalWorkspace'));
+const ReraDisputeWorkspace = lazy(() => import('./pages/ReraDisputeWorkspace'));
+const StrayAnimalAbcWorkspace = lazy(() => import('./pages/StrayAnimalAbcWorkspace'));
+const NoisePollutionWorkspace = lazy(() => import('./pages/NoisePollutionWorkspace'));
+const SolidWasteAuditWorkspace = lazy(() => import('./pages/SolidWasteAuditWorkspace'));
+const OpenContractingWorkspace = lazy(() => import('./pages/OpenContractingWorkspace'));
+const ClinicalEstablishmentWorkspace = lazy(() => import('./pages/ClinicalEstablishmentWorkspace'));
+const ElectricityConsumerWorkspace = lazy(() => import('./pages/ElectricityConsumerWorkspace'));
+const CatalogueVisualQaWorkspace = lazy(() => import('./pages/CatalogueVisualQaWorkspace'));
+const StreetVendorWorkspace = lazy(() => import('./pages/StreetVendorWorkspace'));
+const DarkPatternsWorkspace = lazy(() => import('./pages/DarkPatternsWorkspace'));
+const AccessibilityAuditWorkspace = lazy(() => import('./pages/AccessibilityAuditWorkspace'));
 
-import RteAdmissionWorkspace from './pages/RteAdmissionWorkspace';
+const RteAdmissionWorkspace = lazy(() => import('./pages/RteAdmissionWorkspace'));
 
 const Services = lazy(() => import('./pages/Services'));
 
@@ -113,6 +113,7 @@ function AppRoot() {
                     <Navbar />
                   <main id="main-content" style={{ flex: 1, minWidth: 0, width: '100%' }} tabIndex="-1">
                     <RouteErrorBoundary>
+                    <Suspense fallback={<div className="section" role="status" aria-live="polite"><div className="container">Loading page…</div></div>}>
                     <Routes>
                       <Route path="/" element={<Home />} />
                       <Route path="/login/*" element={<Login />} />
@@ -279,6 +280,7 @@ function AppRoot() {
 
                       <Route path="*" element={<NotFound />} />
                     </Routes>
+                    </Suspense>
                     </RouteErrorBoundary>
                   </main>
                   <Footer />
