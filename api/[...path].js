@@ -15,6 +15,7 @@ import fireCompliance from "./_lib/handlers/fire-compliance-feedback.js";
 import knowledgeProvenance from "./_lib/handlers/knowledge-provenance.js";
 import libraryCorrections from "./_lib/handlers/library-corrections.js";
 import pdsObservations from "./_lib/handlers/pds-observations.js";
+import officeComparison from "./_lib/handlers/office-comparison.js";
 import privacyExports from "./_lib/handlers/privacy-exports.js";
 import rentalChecklist from "./_lib/handlers/rental-checklist-corrections.js";
 import sendEmail from "./_lib/handlers/send-email.js";
@@ -24,6 +25,8 @@ import openContractingAnalytics from "./_lib/handlers/open-contracting-analytics
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import accessibilityInspector from "./_lib/handlers/accessibility-inspector.js";
+=======
 import publicToilets from "./_lib/handlers/public-toilets.js";
 import pedestrianBarriers from "./_lib/handlers/pedestrian-barriers.js";
 import waterQualityRegister from "./_lib/handlers/water-quality-register.js";
@@ -37,6 +40,7 @@ const handlers = {
   "business-licence-feedback": businessLicence,
   "catalogue-visual-qa": catalogueVisualQa,
   "civic-surveys": civicSurveys,
+  "accessibility-inspector": accessibilityInspector,
   "community-facility-corrections": communityFacility,
   "counter-demand-reports": counterDemandReports,
   "crematorium-corrections": crematorium,
@@ -45,6 +49,7 @@ const handlers = {
   "fire-compliance-feedback": fireCompliance,
   "knowledge-provenance": knowledgeProvenance,
   "library-corrections": libraryCorrections,
+  "office-comparison": officeComparison,
   "open-contracting-analytics": openContractingAnalytics,
   "pds-observations": pdsObservations,
   "pedestrian-barriers": pedestrianBarriers,

@@ -75,6 +75,7 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_applicant_profiles_v1', category: 'drafts', exportAs: 'applicantProfiles', empty: [] }, // applicantProfileService.js
   { key: 'civicbridge_barrier_reports', category: 'activity', exportAs: 'barrierReports', empty: [] }, // barrierReportService.js
   { key: 'civicbridge_bottleneck_feedback_v1', category: 'activity', exportAs: 'bottleneckFeedback', empty: [] }, // bottleneckFeedbackService.js
+  { key: 'civicbridge_office_comparison_reports_v1', category: 'activity', exportAs: null }, // officeComparisonReportService.js
   { key: 'civicbridge_checklist', category: 'drafts', exportAs: 'checklistItems', empty: [] }, // dataPortabilityService.js
   { key: 'civicbridge_track_applications', category: 'tracking', exportAs: 'importedTrackApplications', empty: [] }, // dataPortabilityService.js
   { key: 'civicbridge_form_drafts', category: 'drafts', exportAs: 'formDrafts', empty: [] }, // dataPortabilityService.js
@@ -130,6 +131,10 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_rte_grievance_vault', category: 'drafts', exportAs: 'rteGrievanceVault', empty: [] }, // rteAdmissionStorage.js
   { key: 'civicbridge_accessibility_cases_v1', category: 'drafts', exportAs: 'accessibilityEscalationCases', empty: [] }, // accessibilityEscalationStorage.js (#950)
   { key: 'civicbridge_accessibility_tracker_settings_v1', category: 'drafts', exportAs: null, empty: {} }, // accessibilityEscalationStorage.js (#950)
+  { key: 'civicbridge_legal_sources_v1', category: 'drafts', exportAs: 'legalSourcesRegistry', empty: [] }, // legalSourceStorage.js
+  { key: 'civicbridge_legal_draft_snapshots_v1', category: 'drafts', exportAs: 'legalDraftSnapshots', empty: [] }, // legalSourceStorage.js
+  { key: 'civicbridge_legal_sources_audit_v1', category: 'drafts', exportAs: 'legalSourcesAuditLogs', empty: [] }, // legalSourceStorage.js
+  { key: 'civicbridge_evidence_dossiers_v1', category: 'drafts', exportAs: 'evidenceDossiers', empty: [] }, // evidenceDossierStorage.js
 ];
 
 /**
@@ -190,7 +195,10 @@ export const USER_DATA_PREFIX_STORES = [{ prefix: JOURNEY_PROGRESS_PREFIX, categ
 export const USER_DATA_KEY_PREFIXES = USER_DATA_PREFIX_STORES.map((store) => store.prefix);
 
 // sessionStorage keys with user data, removed on purge (cached location from locationService.js).
-export const USER_DATA_SESSION_STORES = [{ key: 'civicbridge_user_coords', category: 'cache' }];
+export const USER_DATA_SESSION_STORES = [
+  { key: 'civicbridge_user_coords', category: 'cache' },
+  { key: 'civicbridge_office_comparison_draft_v1', category: 'drafts' },
+];
 export const USER_DATA_SESSION_KEYS = USER_DATA_SESSION_STORES.map((store) => store.key);
 
 // Keys that purge leaves alone on purpose.
@@ -203,6 +211,7 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_focus_mode',
   'civicbridge_reader_preferences',
   'civicbridge_active_applicant_profile_id_v1',
+  'civicbridge_comparison_stale_dismissed',
   // Demo sign-in session, signing out is its own action
   'civicbridge_demo_user',
   // Admin portal data and the shared review queue for outdated-info reports
@@ -290,6 +299,10 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_editorial_reviews_v1',
   'civicbridge_supersession_links_v1',
   'civicbridge_provenance_audit_v1',
+  // Versioned legal source review and citation integrity (#949)
+  'civicbridge_legal_sources_v1',
+  'civicbridge_legal_draft_snapshots_v1',
+  'civicbridge_legal_sources_audit_v1',
   // Handled by purge itself: consents are reset, the audit log keeps the deletion receipt
   CONSENT_STORAGE_KEY,
   AUDIT_STORAGE_KEY,

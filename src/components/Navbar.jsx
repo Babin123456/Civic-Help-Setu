@@ -41,6 +41,7 @@ import {
   HeartPulse,
   Zap,
   GraduationCap,
+  FolderLock,
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -1116,6 +1117,17 @@ if (normalizedTarget === '/water-quality') {
                 to: '/rte-quota-workspace',
                 label: 'RTE Quota & Child Rights',
                 icon: GraduationCap
+              })}
+
+              {renderNavLink({
+                to: '/evidence-dossier',
+                label: 'Evidence Dossier & Integrity',
+                icon: FolderLock
+              })}
+              {renderNavLink({
+                to: '/legal-sources',
+                label: 'Legal Source Review',
+                icon: Scale
               })}
               {renderNavLink({
                 to: '/tenants',

@@ -25,6 +25,8 @@ const SignUpPage = lazy(() => import('./pages/SignUp'));
 const SSOCallback = lazy(() => import('./pages/SSOCallback'));
 const Assistant = lazy(() => import('./pages/Assistant'));
 import { ServiceCardSkeletonGrid } from './components/ServiceCardSkeleton';
+import WaterBillVisualizerPage from './pages/WaterBillVisualizerPage';
+
 const ServiceDetails = lazy(() => import('./pages/ServiceDetails'));
 const Acronyms = lazy(() => import('./pages/Acronyms'));
 const Eligibility = lazy(() => import('./pages/Eligibility'));
@@ -64,6 +66,8 @@ const CounterDemandForecastingWorkspace = lazy(() => import('./pages/CounterDema
 const WardBudgetWorkspace = lazy(() => import('./pages/WardBudgetWorkspace'));
 const LineageExplorerWorkspace = lazy(() => import('./pages/LineageExplorerWorkspace'));
 const CivicSurveyWorkspace = lazy(() => import('./pages/CivicSurveyWorkspace'));
+const ComparisonWorkspace = lazy(() => import('./pages/ComparisonWorkspace'));
+const OfficeComparisonDetail = lazy(() => import('./pages/OfficeComparisonDetail'));
 const PublicToiletDirectory = lazy(() => import('./pages/PublicToiletDirectory'));
 const AccessibleRouteBarrierWorkspace = lazy(() => import('./pages/AccessibleRouteBarrierWorkspace'));
 const StreetlightOutageWorkspace = lazy(() => import('./pages/StreetlightOutageWorkspace'));
@@ -86,7 +90,9 @@ const DarkPatternsWorkspace = lazy(() => import('./pages/DarkPatternsWorkspace')
 const AccessibilityAuditWorkspace = lazy(() => import('./pages/AccessibilityAuditWorkspace'));
 const AccessibilityComplaintTrackerWorkspace = lazy(() => import('./pages/AccessibilityComplaintTrackerWorkspace'));
 
+const LegalSourceReviewWorkspace = lazy(() => import('./pages/LegalSourceReviewWorkspace'));
 const RteAdmissionWorkspace = lazy(() => import('./pages/RteAdmissionWorkspace'));
+const EvidenceDossierWorkspace = lazy(() => import('./pages/EvidenceDossierWorkspace'));
 
 const Services = lazy(() => import('./pages/Services'));
 
@@ -148,6 +154,8 @@ function AppRoot() {
                       <Route path="/eligibility" element={<Eligibility />} />
                       <Route path="/nearby" element={<NearbyOffices />} />
                       <Route path="/nearby-offices" element={<NearbyOffices />} />
+                      <Route path="/comparison" element={<ComparisonWorkspace />} />
+                      <Route path="/office/:officeId" element={<OfficeComparisonDetail />} />
                       <Route path="/crematorium-directory" element={<CrematoriumDirectory />} />
                       <Route path="/crematoriums" element={<CrematoriumDirectory />} />
                       <Route path="/pds-shops" element={<FairPriceShopBoard />} />
@@ -161,9 +169,13 @@ function AppRoot() {
                       <Route path="/facility-directory" element={<CommunityFacilityDirectory />} />
                       <Route path="/water-tanker" element={<WaterTankerTracker />} />
                       <Route path="/water-tankers" element={<WaterTankerTracker />} />
+
+                      <Route path="/water-bill-visualizer" element={<WaterBillVisualizerPage />} />
+
                       <Route path="/services/water-quality-register" element={<WaterQualityRegister />} />
                       <Route path="/water-quality" element={<WaterQualityRegister />} />
                       <Route path="/water-quality-register" element={<WaterQualityRegister />} />
+
                       <Route path="/rental-checklist" element={<RentalTransitionWorkspace />} />
                       <Route path="/rental-transition" element={<RentalTransitionWorkspace />} />
                       <Route path="/rental-records" element={<RentalTransitionWorkspace />} />
@@ -227,6 +239,12 @@ function AppRoot() {
                       <Route path="/rte-quota-workspace" element={<RteAdmissionWorkspace />} />
                       <Route path="/rte-admission-audit" element={<RteAdmissionWorkspace />} />
                       <Route path="/rte-screening-redressal" element={<RteAdmissionWorkspace />} />
+                      <Route path="/legal-sources" element={<LegalSourceReviewWorkspace />} />
+                      <Route path="/legal-source-review" element={<LegalSourceReviewWorkspace />} />
+                      <Route path="/workspace-template-sources" element={<LegalSourceReviewWorkspace />} />
+                      <Route path="/evidence-dossier" element={<EvidenceDossierWorkspace />} />
+                      <Route path="/verify-evidence" element={<EvidenceDossierWorkspace />} />
+                      <Route path="/evidence-manifest" element={<EvidenceDossierWorkspace />} />
                       <Route path="/track" element={<Track />} />
                       <Route path="/civic-works" element={<CivicWorksBoard />} />
                       <Route path="/public-projects" element={<PublicProjectsWorkspace />} />

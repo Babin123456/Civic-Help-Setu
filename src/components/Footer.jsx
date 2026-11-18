@@ -235,6 +235,18 @@ const Footer = () => {
     RTE Quota &amp; Child Rights
   </Link>
 </li>
+<li>
+  <Link
+    to="/legal-sources"
+    to="/evidence-dossier"
+    style={linkBaseStyle}
+    onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyle)}
+    onBlur={(e) => { e.currentTarget.style.outline = ''; e.currentTarget.style.outlineOffset = ''; }}
+  >
+    Legal Source Review
+    Evidence Dossier &amp; Integrity
+  </Link>
+</li>
               {can('users.read', user) && (
                 <li>
                   <Link
