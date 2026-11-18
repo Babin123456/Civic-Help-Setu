@@ -31,20 +31,144 @@ const sources = (value) =>
     ? value.filter((s) => s && s.name).map((s) => s.name)
     : [];
 
-// Each row value is an array of strings; an empty array means the record has no data for it.
+const sourceIds = (value) =>
+  Array.isArray(value)
+    ? value.filter((s) => s && s.id).map((s) => s.id)
+    : [];
+
+/** Each row value is an array of strings; an empty array means the record has no data for it. */
 const MATRIX_ROWS = [
-  { attribute: 'Department', pick: (s) => text(s.department) },
-  { attribute: 'Category', pick: (s) => text(s.category) },
-  { attribute: 'Application channel', pick: (s) => text(s.type) },
-  { attribute: 'Difficulty', pick: (s) => text(s.difficulty) },
-  { attribute: 'Fees', pick: (s) => text(s.fees) },
-  { attribute: 'Processing time', pick: (s) => text(s.processingTime) },
-  { attribute: 'Eligibility', pick: (s) => list(s.eligibility) },
-  { attribute: 'Required documents', pick: (s) => list(s.documents) },
-  { attribute: 'Official sources', pick: (s) => sources(s.officialSources) },
-  { attribute: 'Last verified', pick: (s) => text(s.lastVerified) },
+  { attribute: 'Department', pick: (s) => text(s.department), sourcePick: (s) => sourceIds(s.department) },
+  { attribute: 'Category', pick: (s) => text(s.category), sourcePick: (s) => sourceIds(s.category) },
+  { attribute: 'Application channel', pick: (s) => text(s.type), sourcePick: (s) => sourceIds(s.type) },
+  { attribute: 'Difficulty', pick: (s) => text(s.difficulty), sourcePick: (s) => sourceIds(s.difficulty) },
+  { attribute: 'Fees', pick: (s) => text(s.fees), sourcePick: (s) => sourceIds(s.fees) },
+  { attribute: 'Processing time', pick: (s) => text(s.processingTime), sourcePick: (s) => sourceIds(s.processingTime) },
+  { attribute: 'Eligibility', pick: (s) => list(s.eligibility), sourcePick: (s) => sourceIds(s.eligibility) },
+  { attribute: 'Required documents', pick: (s) => list(s.documents), sourcePick: (s) => sourceIds(s.documents) },
+  { attribute: 'Official sources', pick: (s) => sources(s.officialSources), sourcePick: (s) => sourceIds(s.officialSources) },
+  { attribute: 'Last verified', pick: (s) => text(s.lastVerified), sourcePick: (s) => sourceIds(s.lastVerified) },
 ];
 
+/** Build a comparison matrix row with both values and their source references. */
+const buildMatrixRow = (serviceList, pick, sourcePick) =>
+  serviceList.map((s) => {
+    const v = pick(s);
+    const src = sourcePick(s);
+    return { value: v, source: src, serviceId: s.id };
+  });
+
+/**
+ * Comparison result for a single attribute across services.
+ * Holds the displayed values, which services provide each value,
+ * and which values are missing vs present.
+ */
+export const ComparisonAttribute = ({
+  attribute,
+  services,
+  serviceMap,
+}) => {
+  const rows = MATRIX_ROWS.filter((row) => row.attribute === attribute);
+  if (rows.length === 0) return null;
+
+  const result = rows.map((row) => {
+    const servicedValues = buildMatrixRow(services, row.pick, row.sourcePick);
+    const allEmpty = servicedValues.every((r) => !r.value || r.value.length === 0);
+    const allSame = new Set(servicedValues.map((r) => r.value.join('\n'))).size <= 1;
+    const differs = allEmpty ? false : !allSame;
+
+    return {
+      attribute: row.attribute,
+      values: servicedValues.map((r) => r.value),
+      sources: servicedValues.map((r) => r.source),
+      serviceIds: servicedValues.map((r) => r.serviceId),
+      differs,
+      allEmpty,
+      isMissing: allEmpty,
+    };
+  });
+
+  return {
+    attribute,
+    rows: result,
+    totalRows: result.length,
+    hasDiffs: result.some((r) => r.differs),
+    hasMissing: result.some((r) => r.allEmpty),
+  };
+};
+
+/** Generate an AI-drafted explanation summarizing differences across compared services.
+ * Uses only the exact compared fields; does not rank options as better;
+ * cites source service records by ID.
+ */
+export const generateAIExplanation = (comparedServices) => {
+  if (!comparedServices || comparedServices.length < 2) {
+    return { explanation: '', sources: [] };
+  }
+
+  const serviceMap = new Map(
+    comparedServices.map((s) => [s.id, { name: s.name, department: s.department }])
+  );
+
+  // Collect all non-empty values per attribute across services
+  const attributeValues = {};
+  comparedServices.forEach((s) => {
+    const matrix = comparisonService.buildComparisonMatrix([s]);
+    matrix.forEach((row) => {
+      const attr = row.attribute;
+      if (!attributeValues[attr]) attributeValues[attr] = [];
+      attributeValues[attr].push({
+        serviceId: s.id,
+        value: row.values[0] || [],
+      });
+    });
+  });
+
+  // Build summary citing only exact fields
+  const lines = [];
+  const citedSources = new Set();
+
+  MATRIX_ROWS.forEach((rowDef) => {
+    const attr = rowDef.attribute;
+    const values = attributeValues[attr];
+    if (!values || values.length === 0) return;
+
+    const serviceNames = values
+      .filter((v) => v.value && v.value.length > 0)
+      .map((v) => serviceMap.get(v.serviceId)?.name || v.serviceId);
+
+    if (serviceNames.length > 0) {
+      const uniqueServices = [...new Set(serviceNames)];
+      let summary;
+      if (uniqueServices.length === 1) {
+        summary = `${uniqueServices[0]} ${
+          values[0].value.length > 0
+            ? 'has: ' + values[0].value[0]
+            : 'no data available'
+        }`;
+      } else {
+        summary = `${uniqueServices.join(' and ')} ${
+          values[0].value.length > 0
+            ? 'have differing values: '
+            : 'have no data for this attribute'
+        } ${values
+          .filter((v) => v.value && v.value.length > 0)
+          .map((v) => `${serviceMap.get(v.serviceId)?.name}: ${v.value[0]}`)
+          .join(', ')}`;
+      }
+      lines.push(`• ${attr}: ${summary}`);
+      // Cite source service IDs
+      values.forEach((v) => citedSources.add(v.serviceId));
+    }
+  });
+
+  return {
+    explanation: lines.join('\n    '),
+    sources: Array.from(citedSources),
+  };
+};
+
+/** Add a service to the comparison store. */
 export const comparisonService = {
   getComparedIds() {
     return readIds();
@@ -116,4 +240,13 @@ export const comparisonService = {
       identicalRows: matrix.length - differingRows,
     };
   },
+};
+
+/** Reset localStorage comparison state (useful for testing or stale-data recovery). */
+comparisonService.resetStorage = () => {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // ignore
+  }
 };
