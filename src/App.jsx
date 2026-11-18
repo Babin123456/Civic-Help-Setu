@@ -86,6 +86,7 @@ const DarkPatternsWorkspace = lazy(() => import('./pages/DarkPatternsWorkspace')
 const AccessibilityAuditWorkspace = lazy(() => import('./pages/AccessibilityAuditWorkspace'));
 
 const RteAdmissionWorkspace = lazy(() => import('./pages/RteAdmissionWorkspace'));
+const EvidenceDossierWorkspace = lazy(() => import('./pages/EvidenceDossierWorkspace'));
 
 const Services = lazy(() => import('./pages/Services'));
 
@@ -222,6 +223,9 @@ function AppRoot() {
                       <Route path="/rte-quota-workspace" element={<RteAdmissionWorkspace />} />
                       <Route path="/rte-admission-audit" element={<RteAdmissionWorkspace />} />
                       <Route path="/rte-screening-redressal" element={<RteAdmissionWorkspace />} />
+                      <Route path="/evidence-dossier" element={<EvidenceDossierWorkspace />} />
+                      <Route path="/verify-evidence" element={<EvidenceDossierWorkspace />} />
+                      <Route path="/evidence-manifest" element={<EvidenceDossierWorkspace />} />
                       <Route path="/track" element={<Track />} />
                       <Route path="/civic-works" element={<CivicWorksBoard />} />
                       <Route path="/public-projects" element={<PublicProjectsWorkspace />} />

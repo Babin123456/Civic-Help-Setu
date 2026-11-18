@@ -59,6 +59,7 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_accessibility_audit_vault` | `accessibilityAuditStorage.js` | Structured accessibility screening results | Drafts and in-progress work |
 | `civicbridge_dark_patterns_vault` | `darkPatternsStorage.js` | Scrubbed dark pattern evidence and pricing records | Drafts and in-progress work |
 | `civicbridge_vendor_rights_vault` | `streetVendorStorage.js` | Saved street vendor Section 3(3) eviction immunity audits, Section 19 goods seizure inventories, and TVC grievance records | Drafts and in-progress work |
+| `civicbridge_evidence_dossiers_v1` | `evidenceDossierStorage.js` | Saved citizen evidence manifests, file SHA-256 digests, and verification dossiers with storage seals | Drafts and in-progress work |
 | `civicbridge_electricity_cgrf_vault` | `electricityConsumerStorage.js` | Saved electricity consumer outage compensation claims, Section 56(1) disconnection audits, meter test reports and CGRF petitions with SHA-256 seals | Drafts and in-progress work |
 | `civicbridge_rte_grievance_vault` | `rteAdmissionStorage.js` | Saved RTE Section 12(1)(c) quota eligibility, screening violation audits, capitation penalties, and Section 32 petitions with SHA-256 seals | Drafts and in-progress work |
 | `civicbridge_checklists` | `checklistStorage.js` | Which checklist items are ticked, per checklist or application id | Drafts and in-progress work |

@@ -129,6 +129,7 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_vendor_rights_vault', category: 'drafts', exportAs: 'vendorRightsVault', empty: [] }, // streetVendorStorage.js
   { key: 'civicbridge_electricity_cgrf_vault', category: 'drafts', exportAs: 'electricityCgrfVault', empty: [] }, // electricityConsumerStorage.js
   { key: 'civicbridge_rte_grievance_vault', category: 'drafts', exportAs: 'rteGrievanceVault', empty: [] }, // rteAdmissionStorage.js
+  { key: 'civicbridge_evidence_dossiers_v1', category: 'drafts', exportAs: 'evidenceDossiers', empty: [] }, // evidenceDossierStorage.js
 ];
 
 /**
