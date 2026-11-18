@@ -46,6 +46,7 @@ const SharedProfileView = lazy(() => import('./pages/SharedProfileView'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const AadhaarGuidePage = lazy(() => import('./pages/AadhaarGuidePage'));
+const PropertyTaxNoDuesGuidePage = lazy(() => import('./pages/PropertyTaxNoDuesGuidePage'));
 const SmallBusinessLicencePage = lazy(() => import('./pages/SmallBusinessLicencePage'));
 const FireSafetyGuidePage = lazy(() => import('./pages/FireSafetyGuidePage'));
 const TreePermissionGuidePage = lazy(() => import('./pages/TreePermissionGuidePage'));
@@ -132,6 +133,8 @@ function AppRoot() {
                       <Route path="/services" element={<Suspense fallback={<ServicesFallback />}><Services /></Suspense>} />
                       <Route path="/services/aadhaar-guide" element={<AadhaarGuidePage />} />
                       <Route path="/aadhaar-guide" element={<AadhaarGuidePage />} />
+                      <Route path="/services/property-tax-no-dues" element={<PropertyTaxNoDuesGuidePage />} />
+                      <Route path="/property-tax-no-dues" element={<PropertyTaxNoDuesGuidePage />} />
                       <Route path="/services/business-licence-checklist" element={<SmallBusinessLicencePage />} />
                       <Route path="/business-licence-checklist" element={<SmallBusinessLicencePage />} />
                       <Route path="/services/fire-noc-guide" element={<FireSafetyGuidePage />} />

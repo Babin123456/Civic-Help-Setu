@@ -42,6 +42,7 @@ import ApplicationReadinessCheckerModal from '../components/services/Application
 import FeeWaiverEligibilityCard from '../components/services/FeeWaiverEligibilityCard';
 import ServiceSlaReliabilityCard from '../components/services/ServiceSlaReliabilityCard';
 import AadhaarGuide from '../components/services/AadhaarGuide';
+import PropertyTaxNoDuesGuide from '../components/services/PropertyTaxNoDuesGuide';
 import SmallBusinessLicenceCentre from '../components/services/SmallBusinessLicenceCentre';
 import FireSafetyComplianceGuide from '../components/services/FireSafetyComplianceGuide';
 import TreePermissionGuide from '../components/services/TreePermissionGuide';
@@ -107,6 +108,7 @@ const ServiceDetails = ({ previewService = null }) => {
   const [showReadinessCheckerModal, setShowReadinessCheckerModal] = useState(false);
   const [showShareByEmailModal, setShowShareByEmailModal] = useState(false);
   const [showDedicatedAadhaarGuide, setShowDedicatedAadhaarGuide] = useState(false);
+  const [showDedicatedPropertyTaxGuide, setShowDedicatedPropertyTaxGuide] = useState(false);
   const [showDedicatedBusinessLicenceCentre, setShowDedicatedBusinessLicenceCentre] = useState(false);
   const [showDedicatedFireGuide, setShowDedicatedFireGuide] = useState(false);
   const [showDedicatedTreeGuide, setShowDedicatedTreeGuide] = useState(false);
@@ -860,6 +862,49 @@ const ServiceDetails = ({ previewService = null }) => {
             </div>
           )}
 
+          {service.id === 'property-tax-no-dues' && (
+            <div
+              style={{
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.12))',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                borderRadius: 'var(--radius-lg, 12px)',
+                padding: '1.25rem 1.5rem',
+                marginBottom: '1.5rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ maxWidth: '650px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <ShieldCheck size={18} color="var(--accent-main, #10b981)" />
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
+                      Dedicated Property Tax No-Dues Certificate &amp; Payment Receipt Guide
+                    </h3>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Jurisdiction-aware guide across major Indian ULBs (MCD, BBMP, BMC, GCC, KMC, GHMC, AMC, PMC) with payment receipt vs No-Dues distinction, document checklists, and offline/online journeys.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => setShowDedicatedPropertyTaxGuide((v) => !v)}
+                    style={{ fontSize: '0.85rem' }}
+                  >
+                    {showDedicatedPropertyTaxGuide ? 'Switch to Standard Guide' : 'Open Interactive Property Tax Guide'}
+                  </button>
+                  <Link
+                    to="/services/property-tax-no-dues"
+                    className="btn btn-secondary"
+                    style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                  >
+                    Dedicated Page
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
           {service.id === 'business-licence-checklist' && (
             <div
               style={{
@@ -1253,6 +1298,10 @@ const ServiceDetails = ({ previewService = null }) => {
             <AadhaarGuide
               initialState={service.jurisdiction?.states?.[0] || 'Delhi'}
               onBack={() => setShowDedicatedAadhaarGuide(false)}
+            />
+          ) : service.id === 'property-tax-no-dues' && showDedicatedPropertyTaxGuide ? (
+            <PropertyTaxNoDuesGuide
+              onBack={() => setShowDedicatedPropertyTaxGuide(false)}
             />
           ) : service.id === 'fire-noc' && showDedicatedFireGuide ? (
             <FireSafetyComplianceGuide
