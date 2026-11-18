@@ -24,6 +24,7 @@ const Login = lazy(() => import('./pages/Login'));
 const SignUpPage = lazy(() => import('./pages/SignUp'));
 const SSOCallback = lazy(() => import('./pages/SSOCallback'));
 const Assistant = lazy(() => import('./pages/Assistant'));
+const CounterJourney = lazy(() => import('./pages/CounterJourney'));
 import { ServiceCardSkeletonGrid } from './components/ServiceCardSkeleton';
 import WaterBillVisualizerPage from './pages/WaterBillVisualizerPage';
 
@@ -173,12 +174,21 @@ function AppRoot() {
                       <Route path="/water-tanker" element={<WaterTankerTracker />} />
                       <Route path="/water-tankers" element={<WaterTankerTracker />} />
 
+                      {/* Counter journey simulator — public catalogue, evaluable for any citizen */}
+                      <Route path="/counter-journey" element={
+                        <CounterJourney />
+                      } />
+
+                      {/* Focus on one service's counter journey */}
+                      <Route path="/services/:serviceId/counter-journey" element={
+                        <CounterJourney />
+                      } />
+
                       <Route path="/water-bill-visualizer" element={<WaterBillVisualizerPage />} />
 
                       <Route path="/services/water-quality-register" element={<WaterQualityRegister />} />
                       <Route path="/water-quality" element={<WaterQualityRegister />} />
                       <Route path="/water-quality-register" element={<WaterQualityRegister />} />
-
                       <Route path="/rental-checklist" element={<RentalTransitionWorkspace />} />
                       <Route path="/rental-transition" element={<RentalTransitionWorkspace />} />
                       <Route path="/rental-records" element={<RentalTransitionWorkspace />} />
