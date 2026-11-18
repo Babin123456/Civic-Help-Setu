@@ -24,6 +24,8 @@ import openContractingAnalytics from "./_lib/handlers/open-contracting-analytics
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import accessibilityInspector from "./_lib/handlers/accessibility-inspector.js";
+=======
 import publicToilets from "./_lib/handlers/public-toilets.js";
 import pedestrianBarriers from "./_lib/handlers/pedestrian-barriers.js";
 import waterQualityRegister from "./_lib/handlers/water-quality-register.js";
@@ -37,6 +39,7 @@ const handlers = {
   "business-licence-feedback": businessLicence,
   "catalogue-visual-qa": catalogueVisualQa,
   "civic-surveys": civicSurveys,
+  "accessibility-inspector": accessibilityInspector,
   "community-facility-corrections": communityFacility,
   "counter-demand-reports": counterDemandReports,
   "crematorium-corrections": crematorium,
