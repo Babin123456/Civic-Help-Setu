@@ -24,6 +24,7 @@ import Login from './pages/Login';
 import SignUpPage from './pages/SignUp';
 import SSOCallback from './pages/SSOCallback';
 import Assistant from './pages/Assistant';
+import CounterJourney from './pages/CounterJourney';
 import { ServiceCardSkeletonGrid } from './components/ServiceCardSkeleton';
 import ServiceDetails from './pages/ServiceDetails';
 import Acronyms from './pages/Acronyms';
@@ -112,6 +113,16 @@ function AppRoot() {
                       <Route path="/facility-directory" element={<CommunityFacilityDirectory />} />
                       <Route path="/water-tanker" element={<WaterTankerTracker />} />
                       <Route path="/water-tankers" element={<WaterTankerTracker />} />
+
+                      {/* Counter journey simulator — public catalogue, evaluable for any citizen */}
+                      <Route path="/counter-journey" element={
+                        <CounterJourney />
+                      } />
+
+                      {/* Focus on one service's counter journey */}
+                      <Route path="/services/:serviceId/counter-journey" element={
+                        <CounterJourney />
+                      } />
                       <Route path="/rental-checklist" element={<RentalTransitionWorkspace />} />
                       <Route path="/rental-transition" element={<RentalTransitionWorkspace />} />
                       <Route path="/rental-records" element={<RentalTransitionWorkspace />} />
