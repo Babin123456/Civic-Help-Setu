@@ -103,11 +103,6 @@ export default function CounterJourneySimulator({
   evaluationError: propEvaluationError,
   evaluationStale: propEvaluationStale,
   showComparison: propShowComparison,
-  evaluation: propEvaluation,
-  evaluationLoading: propEvaluationLoading,
-  evaluationError: propEvaluationError,
-  evaluationStale: propEvaluationStale,
-  showComparison: propShowComparison,
 }) {
   const [reducedMotion] = useReducedMotion();
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { AlertOctagon, ArrowLeft, Bookmark, Calculator, Check, Link2, Printer, Share2, Zap, Users, Eye, CheckSquare, FileText, Sparkles, RotateCcw, Edit2, ShieldCheck, Mail, Leaf } from 'lucide-react';
+import { AlertOctagon, ArrowLeft, Bookmark, Calculator, Check, Link2, Printer, Share2, Zap, Users, Eye, CheckSquare, FileText, Sparkles, RotateCcw, Edit2, ShieldCheck, Mail, Leaf, Navigation, GitFork, ShieldAlert } from 'lucide-react';
 import { getServiceById } from '../services/serviceCatalog';
 import RetiredServiceNotice from '../components/common/RetiredServiceNotice';
 import ServiceQrHandout from '../components/services/ServiceQrHandout';
@@ -42,8 +42,14 @@ import ApplicationReadinessCheckerModal from '../components/services/Application
 import FeeWaiverEligibilityCard from '../components/services/FeeWaiverEligibilityCard';
 import ServiceSlaReliabilityCard from '../components/services/ServiceSlaReliabilityCard';
 import AadhaarGuide from '../components/services/AadhaarGuide';
+import SmallBusinessLicenceCentre from '../components/services/SmallBusinessLicenceCentre';
 import FireSafetyComplianceGuide from '../components/services/FireSafetyComplianceGuide';
 import TreePermissionGuide from '../components/services/TreePermissionGuide';
+
+import ServicePrintPacketModal from '../components/services/ServicePrintPacketModal';
+import ShareByEmailModal from '../components/services/ShareByEmailModal';
+import CivicAcronymTooltip from '../components/acronyms/CivicAcronymTooltip.jsx';
+import { CIVIC_ACRONYMS } from '../data/civicAcronyms.js';
 
 const getSavedServices = () => {
   try {
@@ -54,17 +60,12 @@ const getSavedServices = () => {
   }
 };
 
-import ServicePrintPacketModal from '../components/services/ServicePrintPacketModal';
-import ShareByEmailModal from '../components/services/ShareByEmailModal';
-import CivicAcronymTooltip from '../components/acronyms/CivicAcronymTooltip.jsx';
-import { CIVIC_ACRONYMS } from '../data/civicAcronyms.js';
 const copyServiceLink = async (url) => {
   try {
     if (navigator?.clipboard?.writeText) {
       await navigator.clipboard.writeText(url);
       return true;
     }
-
     return false;
   } catch {
     return false;
@@ -75,7 +76,6 @@ const getServiceUrl = (serviceId) => {
   if (typeof window === 'undefined') {
     return `/services/${encodeURIComponent(serviceId)}`;
   }
-
   return `${window.location.origin}/services/${encodeURIComponent(serviceId)}`;
 };
 
@@ -107,6 +107,7 @@ const ServiceDetails = ({ previewService = null }) => {
   const [showReadinessCheckerModal, setShowReadinessCheckerModal] = useState(false);
   const [showShareByEmailModal, setShowShareByEmailModal] = useState(false);
   const [showDedicatedAadhaarGuide, setShowDedicatedAadhaarGuide] = useState(false);
+  const [showDedicatedBusinessLicenceCentre, setShowDedicatedBusinessLicenceCentre] = useState(false);
   const [showDedicatedFireGuide, setShowDedicatedFireGuide] = useState(false);
   const [showDedicatedTreeGuide, setShowDedicatedTreeGuide] = useState(false);
   const service = previewService ?? getServiceById(id);
@@ -616,6 +617,32 @@ const ServiceDetails = ({ previewService = null }) => {
                 <span>Make checklist</span>
               </button>
 
+              <Link
+                to={`/provenance?service=${encodeURIComponent(service.id)}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(`/provenance?service=${encodeURIComponent(service.id)}`);
+                }}
+                className="btn btn-secondary"
+                style={{
+                  padding: '0.6rem 1rem',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                  backgroundColor: 'rgba(99, 102, 241, 0.08)',
+                  borderColor: 'rgba(99, 102, 241, 0.3)',
+                  color: 'var(--accent-main)',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                }}
+                aria-label={`Trace data lineage and authoritative provenance for ${service.name}`}
+              >
+                <GitFork size={16} />
+                <span>Trace Data Lineage</span>
+              </Link>
+
               <button
                 type="button"
                 onClick={() => setShowPrepPlanModal(true)}
@@ -833,6 +860,49 @@ const ServiceDetails = ({ previewService = null }) => {
             </div>
           )}
 
+          {service.id === 'business-licence-checklist' && (
+            <div
+              style={{
+                padding: '1.25rem',
+                marginBottom: '1.25rem',
+                border: '1px solid var(--accent-main, #3b82f6)',
+                background: 'var(--bg-card)',
+                borderRadius: '1rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ maxWidth: '650px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <ShieldCheck size={18} color="var(--accent-main, #3b82f6)" />
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
+                      Interactive Small-Business Licence Renewal &amp; Closure Checklist Centre
+                    </h3>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Multi-establishment compliance tracker across municipal trade licences, Shops &amp; Establishments registrations, amendment evidence, and formal surrender acknowledgement archiving (#721).
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => setShowDedicatedBusinessLicenceCentre((v) => !v)}
+                    style={{ fontSize: '0.85rem' }}
+                  >
+                    {showDedicatedBusinessLicenceCentre ? 'Switch to Standard Guide' : 'Open Interactive Centre'}
+                  </button>
+                  <Link
+                    to="/services/business-licence-checklist"
+                    className="btn btn-secondary"
+                    style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                  >
+                    Dedicated Page
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
           {service.id === 'fire-noc' && (
             <div
               className="card"
@@ -919,7 +989,267 @@ const ServiceDetails = ({ previewService = null }) => {
             </div>
           )}
 
-          {service.id === 'aadhaar-card' && showDedicatedAadhaarGuide ? (
+          {service.id === 'counter-demand-forecasting' && (
+            <div
+              className="card"
+              style={{
+                marginBottom: '1.5rem',
+                border: '1.5px solid var(--accent-main, #2563eb)',
+                background: 'var(--bg-card)',
+                borderRadius: '1rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ maxWidth: '650px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <ShieldCheck size={18} color="var(--accent-main, #2563eb)" />
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
+                      Dedicated Counter Demand Forecasting &amp; Queue Staffing Workspace
+                    </h3>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Internal operational capacity planning model using Erlang-C queue theory, historical aggregate arrivals, walk-forward backtesting, and auditable shift staffing.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <Link
+                    to="/counter-demand"
+                    className="btn btn-primary"
+                    style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                  >
+                    Open Forecasting Workspace
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {service.id === 'ward-budget-proposal' && (
+            <div
+              style={{
+                padding: '1.25rem',
+                marginBottom: '1.25rem',
+                border: '1px solid var(--accent-main, #3b82f6)',
+                background: 'var(--bg-card)',
+                borderRadius: '1rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ maxWidth: '650px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <Users size={18} color="#3b82f6" />
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
+                      Participatory Ward Budget Proposal &amp; Public Deliberation Platform
+                    </h3>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Submit local infrastructure proposals, deliberate with neighbors, participate in advisory ward ballots, and track ground implementation.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <Link
+                    to="/services/ward-budget-proposal"
+                    className="btn btn-primary"
+                    style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                  >
+                    Open Ward Budget Platform
+                  </Link>
+                  <Link
+                    to="/ward-budget"
+                    className="btn btn-secondary"
+                    style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                  >
+                    Deliberation Board
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {service.id === 'civic-survey-builder' && (
+            <div
+              style={{
+                padding: '1.25rem',
+                marginBottom: '1.25rem',
+                border: '1px solid var(--accent-main, #3b82f6)',
+                background: 'var(--bg-card)',
+                borderRadius: '1rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ maxWidth: '650px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <ShieldCheck size={18} color="var(--accent-main, #3b82f6)" />
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
+                      Dedicated Civic Survey Builder &amp; Sampling Diagnostics Hub
+                    </h3>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    End-to-end civic survey creator with branching logic, voluntary demographic quotas, item missingness analysis, and explainable response-bias diagnostics.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <Link
+                    to="/surveys"
+                    className="btn btn-primary"
+                    style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                  >
+                    Launch Survey Workspace
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {service.id === 'public-toilet-directory' && (
+            <div
+              style={{
+                padding: '1.25rem',
+                marginBottom: '1.25rem',
+                border: '1px solid var(--accent-main, #3b82f6)',
+                background: 'var(--bg-card)',
+                borderRadius: '1rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ maxWidth: '650px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <ShieldCheck size={18} color="var(--accent-main, #3b82f6)" />
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
+                      Dedicated Public Toilet Availability &amp; Maintenance Directory
+                    </h3>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Search verified sanitation facilities with real-time open/closed calculations, wheelchair accessibility fixtures, supervisor cleaning logs, and issue reporting.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <Link
+                    to="/public-toilets"
+                    className="btn btn-primary"
+                    style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                  >
+                    Launch Sanitation Directory
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Accessible Pedestrian Route & Barrier Map */}
+          {service.id === 'pedestrian-barrier-map' && (
+            <div
+              style={{
+                padding: '1.25rem',
+                marginBottom: '1.25rem',
+                border: '1px solid var(--accent-main, #3b82f6)',
+                background: 'var(--bg-card)',
+                borderRadius: '1rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ maxWidth: '650px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <Navigation size={18} color="#3b82f6" />
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
+                      Accessible Pedestrian Route &amp; Barrier Map
+                    </h3>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Calculate accessible walking routes, configure mobility constraints without medical diagnosis, report street obstacles, and view official inspection records.
+                  </p>
+                </div>
+                <Link
+                  to="/pedestrian-barrier-map"
+                  className="btn btn-primary"
+                  style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                >
+                  Open Route &amp; Barrier Map
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Open Contracting Red-Flag Analytics */}
+          {service.id === 'open-contracting-red-flags' && (
+            <div
+              style={{
+                padding: '1.25rem',
+                marginBottom: '1.25rem',
+                border: '1px solid var(--accent-main, #38bdf8)',
+                background: 'var(--bg-card)',
+                borderRadius: '1rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ maxWidth: '650px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <ShieldAlert size={18} color="#38bdf8" />
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
+                      Open Contracting Red-Flag Analytics &amp; Audit Workspace
+                    </h3>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Audit public procurement records across tender notice, bid, award, and amendment stages using explainable anomaly detection and OCDS red-flag benchmarks without declaring wrongdoing.
+                  </p>
+                </div>
+                <Link
+                  to="/open-contracting"
+                  className="btn btn-primary"
+                  style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                >
+                  Open Contracting Workspace
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Anonymized Ward-Level Civic Issue Heatmap */}
+          {service.id === 'ward-issue-heatmap' && (
+            <div
+              style={{
+                padding: '1.25rem',
+                marginBottom: '1.25rem',
+                border: '1px solid var(--accent-main, #38bdf8)',
+                background: 'var(--bg-card)',
+                borderRadius: '1rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ maxWidth: '650px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <ShieldCheck size={18} color="var(--accent-main, #38bdf8)" />
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
+                      Anonymized Ward-Level Civic Issue Heatmap &amp; Trend Explorer
+                    </h3>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Explore recurring civic issues across municipal wards with k-anonymity privacy safeguards, trend velocity comparisons, and explainable intervention recommendations.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <Link
+                    to="/ward-issue-heatmap"
+                    className="btn btn-primary"
+                    style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                  >
+                    Open Heatmap &amp; Explorer
+                  </Link>
+                  <Link
+                    to="/services/ward-issue-heatmap"
+                    className="btn btn-secondary"
+                    style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                  >
+                    Dedicated Workspace
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {service.id === 'business-licence-checklist' && showDedicatedBusinessLicenceCentre ? (
+            <SmallBusinessLicenceCentre />
+          ) : service.id === 'aadhaar-card' && showDedicatedAadhaarGuide ? (
             <AadhaarGuide
               initialState={service.jurisdiction?.states?.[0] || 'Delhi'}
               onBack={() => setShowDedicatedAadhaarGuide(false)}

@@ -4,8 +4,8 @@
  * Tokens are single-use, time-limited, and stored securely.
  */
 
-import { logDiagnostic } from '../utils/diagnostics';
-import { emailVerificationResendLimiter as resendRateLimiter } from './rateLimiter';
+import { logDiagnostic } from '../utils/diagnostics.js';
+import { emailVerificationResendLimiter as resendRateLimiter } from './rateLimiter.js';
 
 const VERIFICATION_TOKEN_PREFIX = 'ev_';
 const VERIFICATION_TOKEN_LENGTH = 32;
