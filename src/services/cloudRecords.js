@@ -79,6 +79,7 @@ export const DEVICE_ONLY_STORES = [
   { key: 'civicbridge_road_safety_rate_limit_v1', reason: 'Road safety rate-limiting timestamps are local bookkeeping and are never cloud-synced.' },
   { key: 'civicbridge_review_cases_v1', reason: 'Road safety review cases and inspection logs stay on device.' },
   { key: 'civicbridge_intervention_records_v1', reason: 'Road safety countermeasure records stay on device.' },
+  { key: 'civicbridge_office_comparison_reports_v1', reason: 'Outdated office-record reports are non-sensitive community submissions kept on device until the review endpoint accepts them.' },
 ];
 
 const byKey = new Map(CLOUD_STORES.map((store) => [store.key, store]));

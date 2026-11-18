@@ -60,6 +60,8 @@ import RentalTransitionWorkspace from './pages/RentalTransitionWorkspace';
 import CitizenDraftSyncWorkspace from './pages/CitizenDraftSyncWorkspace';
 import WardBudgetWorkspace from './pages/WardBudgetWorkspace';
 import CivicSurveyWorkspace from './pages/CivicSurveyWorkspace';
+import ComparisonWorkspace from './pages/ComparisonWorkspace';
+import OfficeComparisonDetail from './pages/OfficeComparisonDetail';
 
 const Services = lazy(() => import('./pages/Services'));
 
@@ -114,6 +116,8 @@ function AppRoot() {
                       <Route path="/eligibility" element={<Eligibility />} />
                       <Route path="/nearby" element={<NearbyOffices />} />
                       <Route path="/nearby-offices" element={<NearbyOffices />} />
+                      <Route path="/comparison" element={<ComparisonWorkspace />} />
+                      <Route path="/office/:officeId" element={<OfficeComparisonDetail />} />
                       <Route path="/crematorium-directory" element={<CrematoriumDirectory />} />
                       <Route path="/crematoriums" element={<CrematoriumDirectory />} />
                       <Route path="/pds-shops" element={<FairPriceShopBoard />} />

@@ -12,6 +12,7 @@ import emailVerify from "./_lib/handlers/email/verify.js";
 import fireCompliance from "./_lib/handlers/fire-compliance-feedback.js";
 import libraryCorrections from "./_lib/handlers/library-corrections.js";
 import pdsObservations from "./_lib/handlers/pds-observations.js";
+import officeComparison from "./_lib/handlers/office-comparison.js";
 import privacyExports from "./_lib/handlers/privacy-exports.js";
 import rentalChecklist from "./_lib/handlers/rental-checklist-corrections.js";
 import sendEmail from "./_lib/handlers/send-email.js";
@@ -31,6 +32,7 @@ const handlers = {
   "email/verify": emailVerify,
   "fire-compliance-feedback": fireCompliance,
   "library-corrections": libraryCorrections,
+  "office-comparison": officeComparison,
   "pds-observations": pdsObservations,
   "privacy-exports": privacyExports,
   "rental-checklist-corrections": rentalChecklist,
