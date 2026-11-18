@@ -93,6 +93,7 @@ import RuleConflictInspectorModal from '../components/admin/RuleConflictInspecto
 import DuplicateServiceDetectorPanel from '../components/admin/DuplicateServiceDetectorPanel';
 import CatalogueConflictDetectorPanel from '../components/admin/CatalogueConflictDetectorPanel';
 import CivicWorksModeratorPanel from '../components/civicWorks/CivicWorksModeratorPanel';
+import AccessibilityInspectorPanel from '../components/AccessibilityInspectorPanel';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -827,6 +828,9 @@ const Admin = () => {
 
                 {/* Citizen-Reported Service Barrier Insights Dashboard (#148) */}
                 <BarrierInsightsDashboard />
+
+                {/* AI-assisted Accessibility Inspector (#832) */}
+                <AccessibilityInspectorPanel />
               </div>
             )}
 
