@@ -54,14 +54,14 @@ export function decomposeClaims(responseText = '') {
   // Split by newlines, list items, or sentence terminators (. ! ?)
   const rawSegments = responseText
     .split(/(?:\r?\n+|(?<=[.!?])\s+(?=[A-Z0-9]))/)
-    .map((s) => s.trim().replace(/^[-*•]\s+/, '').replace(/^\d+[\).]\s*/, ''))
+    .map((s) => s.trim().replace(/^[-*•]\s+/, '').replace(/^\d+[).]\s*/, ''))
     .filter((s) => s.length > 10);
 
   return rawSegments.map((text, idx) => {
     let riskCategory = CLAIM_RISK_CATEGORY.GENERAL_FACT;
 
     // Detect high risk categories
-    if (/(?:fee|charge|cost|rupees?|inr|rs\.?|\₹|\bpay\b)/i.test(text)) {
+    if (/(?:fee|charge|cost|rupees?|inr|rs\.?|₹|\bpay\b)/i.test(text)) {
       riskCategory = CLAIM_RISK_CATEGORY.HIGH_RISK_FEE;
     } else if (/(?:deadline|window|within\s+\d+|timeline|days?|months?|tat|validity)/i.test(text)) {
       riskCategory = CLAIM_RISK_CATEGORY.HIGH_RISK_DEADLINE;

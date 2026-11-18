@@ -113,6 +113,15 @@ describe('ServiceCard component (#568)', () => {
     expect(html).not.toContain('compare-toggle');
   });
 
+  it('renders a non-navigating accessible group in preview mode for synthetic fixtures', () => {
+    const html = renderCard({ previewMode: true });
+
+    expect(html).toContain('role="group"');
+    expect(html).toContain('aria-label="PAN Card (Permanent Account Number) card preview"');
+    expect(html).toContain('service-card--preview');
+    expect(html).not.toContain('href="/services/pan-card"');
+  });
+
   it('returns null safely when service is null or undefined', () => {
     const htmlNull = renderToStaticMarkup(
       <MemoryRouter>
