@@ -1592,6 +1592,81 @@ export const MOCK_SERVICES = [
       { label: 'Municipal Control Room', phone: '1916', url: 'https://nudm.mohua.gov.in' }
     ],
     lastVerified: '2026-11-15'
+  },
+  {
+    id: 'property-tax-no-dues',
+    name: 'Property Tax No-Dues Certificate & Payment Receipt Guide',
+    title: 'Property Tax No-Dues Certificate & Payment Receipt Guide',
+    shortDescription: 'Authoritative citizen guide for checking property tax dues, downloading official payment receipts, and securing a Municipal No-Dues Certificate across Indian Urban Local Bodies (#531).',
+    description: 'Comprehensive, jurisdiction-aware citizen guide for checking municipal property tax dues, downloading official payment receipts, and obtaining certified Property Tax No-Dues Certificates across Indian municipal corporations and municipalities (MCD, BBMP, BMC, GCC, KMC, GHMC, AMC, PMC). Clearly differentiates payment receipts from No-Dues Certificates and explains that neither document confers legal ownership or title.',
+    department: 'Urban Local Bodies (Municipal Corporations, Councils & Nagar Palikas) — Revenue & Assessment Department',
+    category: 'Certificates',
+    type: 'Online / Offline',
+    difficulty: 'Easy',
+    feeType: 'free',
+    speedDays: 1,
+    popularityScore: 97,
+    eligibility: [
+      'Registered property owners, co-owners, or recorded occupiers in municipal records',
+      'Authorized family members, power of attorney (POA) holders, or legal representatives',
+      'All property tax dues, solid waste management cesses, arrears, and penalties cleared in full'
+    ],
+    documents: [
+      'Property Identification Number (UPIC, SAS/PID, SAC, Bill No, PTIN, or Tenement No)',
+      'Latest Property Tax Paid Receipt / Bank Challan',
+      'Government Photo Identity Proof of Applicant (Aadhaar, Voter ID, PAN, Passport)',
+      'Registered Sale Deed / Title Deed (conditional, if mutation or name transfer is pending)',
+      'Power of Attorney or Owner Authorization Letter (conditional, if representative applies)',
+      'Death Certificate & Legal Heir Certificate (conditional, if registered owner is deceased)'
+    ],
+    steps: [
+      { title: 'Identify Municipal Authority', description: 'Determine the competent Urban Local Body (e.g. MCD, BBMP, BMC, GCC, KMC, GHMC) holding territorial jurisdiction.' },
+      { title: 'Locate Property in Ledger', description: 'Search using your city-specific Property ID, UPIC, SAS number, SAC, or PTIN on the official municipal revenue portal.' },
+      { title: 'Inspect Demands & Arrears', description: 'Review current assessment year demand, accumulated arrears, cess line-items, and statutory penal interest.' },
+      { title: 'Remit Pending Dues & Save Receipt', description: 'Clear all outstanding amounts via official payment gateways or bank challan and download the digitally signed payment receipt.' },
+      { title: 'Apply & Download No-Dues Certificate', description: 'Generate the certified No-Dues Certificate online or submit a clearance application at the zonal revenue office.' }
+    ],
+    validityNote: 'Payment receipts verify a single transaction. No-Dues Certificates certify zero outstanding dues and are valid for the ongoing assessment cycle (typically ending 31 March) or until the next statutory demand is raised.',
+    fees: 'No government fee for online No-Dues Certificate generation in most major ULBs; all assessed tax dues, cesses, and accumulated arrears must be cleared in full.',
+    processingTime: 'Instant online download upon ledger zero-balance; 3 to 15 working days for manual zonal revenue office applications under State Right to Services Acts.',
+    officialSources: [
+      {
+        name: 'Municipal Corporation of Delhi (MCD) Property Tax Portal',
+        url: 'https://mcdonline.nic.in',
+        verified: true,
+        lastVerified: '2026-11-18'
+      },
+      {
+        name: 'Bruhat Bengaluru Mahanagara Palike (BBMP) Property Tax System',
+        url: 'https://bbmptax.karnataka.gov.in',
+        verified: true,
+        lastVerified: '2026-11-18'
+      },
+      {
+        name: 'Brihanmumbai Municipal Corporation (BMC) Citizen Portal',
+        url: 'https://ptaxportal.mcgm.gov.in',
+        verified: true,
+        lastVerified: '2026-11-18'
+      },
+      {
+        name: 'Greater Chennai Corporation (GCC) Property Tax Portal',
+        url: 'https://chennaicorporation.gov.in',
+        verified: true,
+        lastVerified: '2026-11-18'
+      }
+    ],
+    warnings: [
+      'A Property Tax Payment Receipt or No-Dues Certificate does NOT confer or prove legal ownership, title, or proprietary right over real estate.',
+      'Payment of property tax does NOT regularize unauthorized constructions or shield them from municipal enforcement action.',
+      'Never remit property taxes on unverified third-party websites or search engine advertisements. Verify that the portal URL ends with .gov.in or .nic.in.'
+    ],
+    contacts: [
+      { label: 'Delhi MCD Helpline', phone: '155304', url: 'https://mcdonline.nic.in' },
+      { label: 'Bengaluru BBMP Control Room', phone: '080-22660000', url: 'https://bbmptax.karnataka.gov.in' },
+      { label: 'Mumbai BMC Helpline', phone: '1916', url: 'https://ptaxportal.mcgm.gov.in' },
+      { label: 'Chennai GCC Helpline', phone: '1913', url: 'https://chennaicorporation.gov.in' }
+    ],
+    lastVerified: '2026-11-18'
   }
 ];
 

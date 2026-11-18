@@ -44,6 +44,14 @@ describe('ServiceDetails', () => {
     expect(html).toContain('/services/aadhaar-guide');
   });
 
+  it('renders the dedicated Property Tax No-Dues guide entry card when viewing the property-tax-no-dues service (#531)', () => {
+    const html = render('/services/property-tax-no-dues');
+    expect(html).toContain('Property Tax No-Dues Certificate &amp; Payment Receipt Guide');
+    expect(html).toContain('Dedicated Property Tax No-Dues Certificate &amp; Payment Receipt Guide');
+    expect(html).toContain('Open Interactive Property Tax Guide');
+    expect(html).toContain('/services/property-tax-no-dues');
+  });
+
   it('renders the dedicated Small-Business Licence Renewal & Closure Centre entry card (#721)', () => {
     const html = render('/services/business-licence-checklist');
     expect(html).toContain('Small-Business Licence Renewal &amp; Closure Checklist Centre');

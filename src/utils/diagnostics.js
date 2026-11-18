@@ -31,6 +31,8 @@ export const ROUTE_PATTERNS = [
   '/services',
   '/services/aadhaar-guide',
   '/aadhaar-guide',
+  '/services/property-tax-no-dues',
+  '/property-tax-no-dues',
   '/services/business-licence-checklist',
   '/business-licence-checklist',
   '/services/fire-noc-guide',
