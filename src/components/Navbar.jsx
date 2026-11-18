@@ -1148,6 +1148,12 @@ if (normalizedTarget === '/water-quality') {
               })}
 
               {renderNavLink({
+                to: '/volunteer',
+                label: t('nav.volunteer', 'Volunteer Coordination'),
+                icon: KeyRound
+              })}
+
+              {renderNavLink({
                 to: '/ward-budget',
                 label: t('nav.wardBudget', 'Ward Budget & Deliberation'),
                 icon: Users
