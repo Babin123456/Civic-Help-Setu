@@ -87,6 +87,7 @@ const AccessibilityAuditWorkspace = lazy(() => import('./pages/AccessibilityAudi
 const LegalSourceReviewWorkspace = lazy(() => import('./pages/LegalSourceReviewWorkspace'));
 
 const RteAdmissionWorkspace = lazy(() => import('./pages/RteAdmissionWorkspace'));
+const EvidenceDossierWorkspace = lazy(() => import('./pages/EvidenceDossierWorkspace'));
 
 const Services = lazy(() => import('./pages/Services'));
 
@@ -226,6 +227,9 @@ function AppRoot() {
                       <Route path="/legal-sources" element={<LegalSourceReviewWorkspace />} />
                       <Route path="/legal-source-review" element={<LegalSourceReviewWorkspace />} />
                       <Route path="/workspace-template-sources" element={<LegalSourceReviewWorkspace />} />
+                      <Route path="/evidence-dossier" element={<EvidenceDossierWorkspace />} />
+                      <Route path="/verify-evidence" element={<EvidenceDossierWorkspace />} />
+                      <Route path="/evidence-manifest" element={<EvidenceDossierWorkspace />} />
                       <Route path="/track" element={<Track />} />
                       <Route path="/civic-works" element={<CivicWorksBoard />} />
                       <Route path="/public-projects" element={<PublicProjectsWorkspace />} />
