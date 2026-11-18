@@ -1,0 +1,126 @@
+name: Lighthouse CI & Accessibility Budgets
+
+# Runs automated accessibility audits and Lighthouse performance budgets on PRs
+# against public routes in a controlled preview environment.
+# Exceptions and policy: docs/LHCI_BASELINE_REPORT.md
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lighthouse-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    name: Accessibility & Performance Audits
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build preview application
+        run: npm run build
+
+      - name: Run Lighthouse CI collect
+        run: npm run lhci:collect
+
+      - name: Assert Lighthouse & Accessibility budgets
+        run: npm run lhci:assert
+
+      - name: Generate separate Accessibility & Performance summaries
+        if: always()
+        run: |
+          node -e '
+          const fs = require("node:fs");
+          const path = require("node:path");
+          const reportsDir = ".lighthouseci";
+          if (!fs.existsSync(reportsDir)) process.exit(0);
+          const reportFiles = fs.readdirSync(reportsDir).filter(f => f.startsWith("lhr-") && f.endsWith(".json"));
+          if (!reportFiles.length) process.exit(0);
+
+          const reportsByUrl = new Map();
+          for (const file of reportFiles) {
+            try {
+              const lhr = JSON.parse(fs.readFileSync(path.join(reportsDir, file), "utf8"));
+              const url = lhr.requestedUrl || lhr.finalUrl;
+              if (!reportsByUrl.has(url)) reportsByUrl.set(url, []);
+              reportsByUrl.get(url).push(lhr);
+            } catch {}
+          }
+
+          const summaries = [];
+          for (const [url, runs] of reportsByUrl.entries()) {
+            let pathname = url;
+            try { pathname = new URL(url).pathname; } catch {}
+            const sortedByPerf = [...runs].sort((a, b) => (a.categories.performance?.score ?? 0) - (b.categories.performance?.score ?? 0));
+            const medianRun = sortedByPerf[Math.floor(sortedByPerf.length / 2)];
+            const perfScore = Math.round((medianRun.categories.performance?.score ?? 0) * 100);
+            const a11yScore = Math.round((medianRun.categories.accessibility?.score ?? 0) * 100);
+            const bpScore = Math.round((medianRun.categories["best-practices"]?.score ?? 0) * 100);
+            const seoScore = Math.round((medianRun.categories.seo?.score ?? 0) * 100);
+            const fcp = Math.round(medianRun.audits["first-contentful-paint"]?.numericValue ?? 0);
+            const lcp = Math.round(medianRun.audits["largest-contentful-paint"]?.numericValue ?? 0);
+            const tbt = Math.round(medianRun.audits["total-blocking-time"]?.numericValue ?? 0);
+            const cls = (medianRun.audits["cumulative-layout-shift"]?.numericValue ?? 0).toFixed(3);
+            const resourceItems = medianRun.audits["resource-summary"]?.details?.items || [];
+            const scriptItem = resourceItems.find(i => i.resourceType === "script");
+            const totalItem = resourceItems.find(i => i.resourceType === "total");
+            const scriptKb = scriptItem ? Math.round(scriptItem.transferSize / 1024) : 0;
+            const totalKb = totalItem ? Math.round(totalItem.transferSize / 1024) : 0;
+            const failingA11y = (medianRun.categories.accessibility?.auditRefs || [])
+              .map(r => ({ ref: r, audit: medianRun.audits[r.id] }))
+              .filter(i => i.audit && i.audit.score !== null && i.audit.score < 1)
+              .map(i => `- **${i.audit.title}** (\`${i.ref.id}\`)`);
+
+            summaries.push({ pathname, perfScore, a11yScore, bpScore, seoScore, fcp, lcp, tbt, cls, scriptKb, totalKb, failingA11y });
+          }
+
+          let md = "# Lighthouse CI Audit Summary\n\n> Controlled Environment: Local preview server (`http://localhost:4173`)\n> Scope: Public routes only (no citizen data or authenticated pages)\n\n";
+          md += "## ♿ Accessibility Audit Report\n\n| Route | Accessibility Score | Status | Critical Gate (>= 90%) |\n|---|---|---|---|\n";
+          for (const s of summaries) {
+            md += `| \`${s.pathname}\` | **${s.a11yScore}%** | ${s.a11yScore >= 90 ? "✅ Pass" : "❌ Fail"} | ${s.a11yScore >= 90 ? "Compliant" : "Violation"} |\n`;
+          }
+          md += "\n### Accessibility Audit Findings\n";
+          for (const s of summaries) {
+            md += `\n#### Route: \`${s.pathname}\`\n`;
+            md += s.failingA11y.length ? s.failingA11y.join("\n") + "\n" : "- Zero accessibility violations detected.\n";
+          }
+          md += "\n## ⚡ Performance & Bundle Size Budgets\n\n| Route | Perf Score | Budget | FCP | LCP | TBT | CLS | Script Bundle | Total Transfer |\n|---|---|---|---|---|---|---|---|---|\n";
+          for (const s of summaries) {
+            md += `| \`${s.pathname}\` | **${s.perfScore}%** | >= 65% | ${s.fcp}ms | ${s.lcp}ms | ${s.tbt}ms | ${s.cls} | ${(s.scriptKb / 1024).toFixed(2)} MB | ${(s.totalKb / 1024).toFixed(2)} MB |\n`;
+          }
+
+          if (process.env.GITHUB_STEP_SUMMARY) {
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `\n\n${md}\n`, "utf8");
+          }
+          console.log(md);
+          '
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          retention-days: 14
