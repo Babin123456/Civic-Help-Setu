@@ -48,6 +48,15 @@ export const PERMISSIONS = {
   'civicWorks.moderate': { roles: ['admin'], resource: 'civicbridge_civic_works_reports_v1', description: 'Moderate ward-level civic work reports, cluster duplicates, record official acknowledgements and verify completion evidence' },
   'roadSafety.review': { roles: ['admin'], resource: 'civicbridge_review_cases_v1', description: 'Review detected road safety blackspots, conduct site inspections, and plan interventions' },
   'roadSafety.admin': { roles: ['admin'], resource: 'civicbridge_risk_runs_v1', description: 'Configure risk weighting parameters, trigger risk runs, and archive road safety cases' },
+  // Flood Hotspot Forecast and Safe-Route Advisory Engine
+  'flood.intelligence.execute': { roles: ['admin'], resource: 'civicbridge_flood_forecast_runs_v1', description: 'Execute flood risk model runs and generate hotspot cells' },
+  'flood.report.submit': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_reports_v1', description: 'Submit a flood waterlogging observation or report' },
+  'flood.report.moderate': { roles: ['admin'], resource: 'civicbridge_flood_reports_v1', description: 'Moderate flood reports: validate, reject, or flag as spam' },
+  'flood.report.read': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_reports_v1', description: 'Read flood reports within jurisdiction' },
+  'flood.hotspot.read': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_hotspot_cells_v1', description: 'Read computed hotspot cells and risk levels' },
+  'flood.route.advisory': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_route_advisories_v1', description: 'Generate safe route advisories avoiding flood hotspots' },
+  'flood.route.read': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_route_advisories_v1', description: 'Read route advisories within jurisdiction' },
+  'flood.admin': { roles: ['admin'], resource: 'civicbridge_flood_forecast_runs_v1', description: 'Configure flood intelligence parameters, trigger runs, and archive data' },
 };
 
 export class PermissionDeniedError extends Error {
