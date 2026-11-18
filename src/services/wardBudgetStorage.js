@@ -11,6 +11,7 @@ import {
   INITIAL_IMPLEMENTATION_UPDATES,
 } from '../data/wardBudgetSeed.js';
 import { SCHEMA_VERSION } from '../data/wardBudgetContract.js';
+import { logDiagnostic } from '../utils/diagnostics';
 
 const STORAGE_KEY_PROPOSALS = 'civicbridge_ward_proposals_v1';
 const STORAGE_KEY_CYCLE = 'civicbridge_ward_cycle_v1';
@@ -33,7 +34,7 @@ const safeGetItem = (key, fallback) => {
     }
     return fallback;
   } catch (err) {
-    console.warn(`[wardBudgetStorage] Error reading ${key}:`, err);
+    logDiagnostic(`[wardBudgetStorage] Error reading ${key}`, err);
     return fallback;
   }
 };
@@ -45,7 +46,7 @@ const safeSetItem = (key, value) => {
     }
     inMemoryStore.set(key, JSON.parse(JSON.stringify(value)));
   } catch (err) {
-    console.warn(`[wardBudgetStorage] Error saving ${key}:`, err);
+    logDiagnostic(`[wardBudgetStorage] Error saving ${key}`, err);
   }
 };
 

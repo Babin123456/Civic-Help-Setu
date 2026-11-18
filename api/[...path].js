@@ -5,11 +5,14 @@
  */
 import addressChange from "./_lib/handlers/address-change-corrections.js";
 import businessLicence from "./_lib/handlers/business-licence-feedback.js";
+import catalogueVisualQa from "./_lib/handlers/catalogue-visual-qa.js";
 import communityFacility from "./_lib/handlers/community-facility-corrections.js";
+import counterDemandReports from "./_lib/handlers/counter-demand-reports.js";
 import crematorium from "./_lib/handlers/crematorium-corrections.js";
 import emailPreferences from "./_lib/handlers/email/preferences.js";
 import emailVerify from "./_lib/handlers/email/verify.js";
 import fireCompliance from "./_lib/handlers/fire-compliance-feedback.js";
+import knowledgeProvenance from "./_lib/handlers/knowledge-provenance.js";
 import libraryCorrections from "./_lib/handlers/library-corrections.js";
 import pdsObservations from "./_lib/handlers/pds-observations.js";
 import officeComparison from "./_lib/handlers/office-comparison.js";
@@ -18,29 +21,51 @@ import rentalChecklist from "./_lib/handlers/rental-checklist-corrections.js";
 import sendEmail from "./_lib/handlers/send-email.js";
 import shareByEmail from "./_lib/handlers/share-by-email.js";
 import tenderCorrections from "./_lib/handlers/tender-corrections.js";
+import openContractingAnalytics from "./_lib/handlers/open-contracting-analytics.js";
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import accessibilityInspector from "./_lib/handlers/accessibility-inspector.js";
+=======
+import publicToilets from "./_lib/handlers/public-toilets.js";
+import pedestrianBarriers from "./_lib/handlers/pedestrian-barriers.js";
+import waterQualityRegister from "./_lib/handlers/water-quality-register.js";
+import publicProjects from "./_lib/handlers/public-projects.js";
+import wardIssueHeatmap from "./_lib/handlers/ward-issue-heatmap.js";
+import tenantAdministration from "./_lib/handlers/tenant-administration.js";
+import ghgInventory from "./_lib/handlers/ghg-inventory.js";
 
 const handlers = {
   "address-change-corrections": addressChange,
   "business-licence-feedback": businessLicence,
+  "catalogue-visual-qa": catalogueVisualQa,
   "civic-surveys": civicSurveys,
+  "accessibility-inspector": accessibilityInspector,
   "community-facility-corrections": communityFacility,
+  "counter-demand-reports": counterDemandReports,
   "crematorium-corrections": crematorium,
   "email/preferences": emailPreferences,
   "email/verify": emailVerify,
   "fire-compliance-feedback": fireCompliance,
+  "knowledge-provenance": knowledgeProvenance,
   "library-corrections": libraryCorrections,
   "office-comparison": officeComparison,
+  "open-contracting-analytics": openContractingAnalytics,
   "pds-observations": pdsObservations,
+  "pedestrian-barriers": pedestrianBarriers,
   "privacy-exports": privacyExports,
+  "public-toilets": publicToilets,
   "rental-checklist-corrections": rentalChecklist,
   "send-email": sendEmail,
   "share-by-email": shareByEmail,
   "tender-corrections": tenderCorrections,
   "ward-budget-proposals": wardBudgetProposals,
+  "water-quality-register": waterQualityRegister,
+  "ward-issue-heatmap": wardIssueHeatmap,
   "water-tanker-reports": waterTankerReports,
+  "public-projects": publicProjects,
+  "tenant-administration": tenantAdministration,
+  "ghg-inventory": ghgInventory,
 };
 
 function getRoute(req) {

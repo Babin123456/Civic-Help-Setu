@@ -19,49 +19,78 @@ import BackToTop from './components/common/BackToTop';
 import RouteErrorFallback from './components/common/RouteErrorFallback';
 import RouteErrorBoundary from './components/common/RouteErrorBoundary';
 
-import Home from './pages/Home';
-import Login from './pages/Login';
-import SignUpPage from './pages/SignUp';
-import SSOCallback from './pages/SSOCallback';
-import Assistant from './pages/Assistant';
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const SignUpPage = lazy(() => import('./pages/SignUp'));
+const SSOCallback = lazy(() => import('./pages/SSOCallback'));
+const Assistant = lazy(() => import('./pages/Assistant'));
 import { ServiceCardSkeletonGrid } from './components/ServiceCardSkeleton';
-import ServiceDetails from './pages/ServiceDetails';
-import Acronyms from './pages/Acronyms';
-import Eligibility from './pages/Eligibility';
-import NearbyOffices from './pages/NearbyOffices';
-import Track from './pages/Track';
-import Saved from './pages/Saved';
-import Vault from './pages/Vault';
-import Profile from './pages/Profile';
-import OpenSource from './pages/OpenSource';
-import Privacy from './pages/Privacy';
-import Admin from './pages/Admin';
-import SharedChecklistView from './pages/SharedChecklistView';
-import SharedDirectoryView from './pages/SharedDirectoryView';
-import PublicApplicationStatusView from './pages/PublicApplicationStatusView';
-import SharedProfileView from './pages/SharedProfileView';
-import NotFound from './pages/NotFound';
-import VerifyEmail from './pages/VerifyEmail';
-import AadhaarGuidePage from './pages/AadhaarGuidePage';
-import SmallBusinessLicencePage from './pages/SmallBusinessLicencePage';
-import FireSafetyGuidePage from './pages/FireSafetyGuidePage';
-import TreePermissionGuidePage from './pages/TreePermissionGuidePage';
-import CivicWorksBoard from './pages/CivicWorksBoard';
-import TreeHealthInventory from './pages/TreeHealthInventory';
-import CrematoriumDirectory from './pages/CrematoriumDirectory';
-import FairPriceShopBoard from './pages/FairPriceShopBoard';
-import TenderReadinessWorkspace from './pages/TenderReadinessWorkspace';
-import CommunityFacilityDirectory from './pages/CommunityFacilityDirectory';
-import RoadSafetyDashboard from './pages/RoadSafetyDashboard';
-import LibraryDirectory from './pages/LibraryDirectory';
-import WaterTankerTracker from './pages/WaterTankerTracker';
-import AddressChangePlanner from './pages/AddressChangePlanner';
-import RentalTransitionWorkspace from './pages/RentalTransitionWorkspace';
-import CitizenDraftSyncWorkspace from './pages/CitizenDraftSyncWorkspace';
-import WardBudgetWorkspace from './pages/WardBudgetWorkspace';
-import CivicSurveyWorkspace from './pages/CivicSurveyWorkspace';
-import ComparisonWorkspace from './pages/ComparisonWorkspace';
-import OfficeComparisonDetail from './pages/OfficeComparisonDetail';
+import WaterBillVisualizerPage from './pages/WaterBillVisualizerPage';
+
+const ServiceDetails = lazy(() => import('./pages/ServiceDetails'));
+const Acronyms = lazy(() => import('./pages/Acronyms'));
+const Eligibility = lazy(() => import('./pages/Eligibility'));
+const NearbyOffices = lazy(() => import('./pages/NearbyOffices'));
+const Track = lazy(() => import('./pages/Track'));
+const Saved = lazy(() => import('./pages/Saved'));
+const Vault = lazy(() => import('./pages/Vault'));
+const Profile = lazy(() => import('./pages/Profile'));
+const OpenSource = lazy(() => import('./pages/OpenSource'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Admin = lazy(() => import('./pages/Admin'));
+const TenantAdministrationWorkspace = lazy(() => import('./pages/TenantAdministrationWorkspace'));
+const SharedChecklistView = lazy(() => import('./pages/SharedChecklistView'));
+const SharedDirectoryView = lazy(() => import('./pages/SharedDirectoryView'));
+const PublicApplicationStatusView = lazy(() => import('./pages/PublicApplicationStatusView'));
+const SharedProfileView = lazy(() => import('./pages/SharedProfileView'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
+const AadhaarGuidePage = lazy(() => import('./pages/AadhaarGuidePage'));
+const SmallBusinessLicencePage = lazy(() => import('./pages/SmallBusinessLicencePage'));
+const FireSafetyGuidePage = lazy(() => import('./pages/FireSafetyGuidePage'));
+const TreePermissionGuidePage = lazy(() => import('./pages/TreePermissionGuidePage'));
+const CivicWorksBoard = lazy(() => import('./pages/CivicWorksBoard'));
+const TreeHealthInventory = lazy(() => import('./pages/TreeHealthInventory'));
+const CrematoriumDirectory = lazy(() => import('./pages/CrematoriumDirectory'));
+const FairPriceShopBoard = lazy(() => import('./pages/FairPriceShopBoard'));
+const TenderReadinessWorkspace = lazy(() => import('./pages/TenderReadinessWorkspace'));
+const CommunityFacilityDirectory = lazy(() => import('./pages/CommunityFacilityDirectory'));
+const RoadSafetyDashboard = lazy(() => import('./pages/RoadSafetyDashboard'));
+const LibraryDirectory = lazy(() => import('./pages/LibraryDirectory'));
+const WaterTankerTracker = lazy(() => import('./pages/WaterTankerTracker'));
+const AddressChangePlanner = lazy(() => import('./pages/AddressChangePlanner'));
+const RentalTransitionWorkspace = lazy(() => import('./pages/RentalTransitionWorkspace'));
+const CitizenDraftSyncWorkspace = lazy(() => import('./pages/CitizenDraftSyncWorkspace'));
+const SyntheticDatasetWorkspace = lazy(() => import('./pages/SyntheticDatasetWorkspace'));
+const CounterDemandForecastingWorkspace = lazy(() => import('./pages/CounterDemandForecastingWorkspace'));
+const WardBudgetWorkspace = lazy(() => import('./pages/WardBudgetWorkspace'));
+const LineageExplorerWorkspace = lazy(() => import('./pages/LineageExplorerWorkspace'));
+const CivicSurveyWorkspace = lazy(() => import('./pages/CivicSurveyWorkspace'));
+const ComparisonWorkspace = lazy(() => import('./pages/ComparisonWorkspace'));
+const OfficeComparisonDetail = lazy(() => import('./pages/OfficeComparisonDetail'));
+const PublicToiletDirectory = lazy(() => import('./pages/PublicToiletDirectory'));
+const AccessibleRouteBarrierWorkspace = lazy(() => import('./pages/AccessibleRouteBarrierWorkspace'));
+const StreetlightOutageWorkspace = lazy(() => import('./pages/StreetlightOutageWorkspace'));
+const GhgInventoryWorkspace = lazy(() => import('./pages/GhgInventoryWorkspace'));
+const WaterQualityRegister = lazy(() => import('./pages/WaterQualityRegister'));
+const PublicProjectsWorkspace = lazy(() => import('./pages/PublicProjectsWorkspace'));
+const WardIssueHeatmapWorkspace = lazy(() => import('./pages/WardIssueHeatmapWorkspace'));
+const ContinuityPlannerWorkspace = lazy(() => import('./pages/ContinuityPlannerWorkspace'));
+const SeniorCitizenTribunalWorkspace = lazy(() => import('./pages/SeniorCitizenTribunalWorkspace'));
+const ReraDisputeWorkspace = lazy(() => import('./pages/ReraDisputeWorkspace'));
+const StrayAnimalAbcWorkspace = lazy(() => import('./pages/StrayAnimalAbcWorkspace'));
+const NoisePollutionWorkspace = lazy(() => import('./pages/NoisePollutionWorkspace'));
+const SolidWasteAuditWorkspace = lazy(() => import('./pages/SolidWasteAuditWorkspace'));
+const OpenContractingWorkspace = lazy(() => import('./pages/OpenContractingWorkspace'));
+const ClinicalEstablishmentWorkspace = lazy(() => import('./pages/ClinicalEstablishmentWorkspace'));
+const ElectricityConsumerWorkspace = lazy(() => import('./pages/ElectricityConsumerWorkspace'));
+const CatalogueVisualQaWorkspace = lazy(() => import('./pages/CatalogueVisualQaWorkspace'));
+const StreetVendorWorkspace = lazy(() => import('./pages/StreetVendorWorkspace'));
+const DarkPatternsWorkspace = lazy(() => import('./pages/DarkPatternsWorkspace'));
+const AccessibilityAuditWorkspace = lazy(() => import('./pages/AccessibilityAuditWorkspace'));
+const LegalSourceReviewWorkspace = lazy(() => import('./pages/LegalSourceReviewWorkspace'));
+const RteAdmissionWorkspace = lazy(() => import('./pages/RteAdmissionWorkspace'));
+const EvidenceDossierWorkspace = lazy(() => import('./pages/EvidenceDossierWorkspace'));
 
 const Services = lazy(() => import('./pages/Services'));
 
@@ -89,6 +118,7 @@ function AppRoot() {
                     <Navbar />
                   <main id="main-content" style={{ flex: 1, minWidth: 0, width: '100%' }} tabIndex="-1">
                     <RouteErrorBoundary>
+                    <Suspense fallback={<div className="section" role="status" aria-live="polite"><div className="container">Loading page…</div></div>}>
                     <Routes>
                       <Route path="/" element={<Home />} />
                       <Route path="/login/*" element={<Login />} />
@@ -108,6 +138,12 @@ function AppRoot() {
                       <Route path="/fire-noc-guide" element={<FireSafetyGuidePage />} />
                       <Route path="/services/tree-permission-guide" element={<TreePermissionGuidePage />} />
                       <Route path="/tree-permission-guide" element={<TreePermissionGuidePage />} />
+                      <Route path="/services/ward-issue-heatmap" element={<WardIssueHeatmapWorkspace />} />
+                      <Route path="/ward-issue-heatmap" element={<WardIssueHeatmapWorkspace />} />
+                      <Route path="/civic-issue-heatmap" element={<WardIssueHeatmapWorkspace />} />
+                      <Route path="/services/catalogue-visual-qa" element={<CatalogueVisualQaWorkspace />} />
+                      <Route path="/catalogue-visual-qa" element={<CatalogueVisualQaWorkspace />} />
+                      <Route path="/visual-qa" element={<CatalogueVisualQaWorkspace />} />
                       <Route path="/services/ward-budget-proposal" element={<WardBudgetWorkspace />} />
                       <Route path="/ward-budget" element={<WardBudgetWorkspace />} />
                       <Route path="/ward-budget/:id" element={<WardBudgetWorkspace />} />
@@ -124,10 +160,20 @@ function AppRoot() {
                       <Route path="/fair-price-shops" element={<FairPriceShopBoard />} />
                       <Route path="/tenders" element={<TenderReadinessWorkspace />} />
                       <Route path="/tender-readiness" element={<TenderReadinessWorkspace />} />
+                      <Route path="/open-contracting" element={<OpenContractingWorkspace />} />
+                      <Route path="/procurement-analytics" element={<OpenContractingWorkspace />} />
+                      <Route path="/open-contracting/:id" element={<OpenContractingWorkspace />} />
                       <Route path="/community-facilities" element={<CommunityFacilityDirectory />} />
                       <Route path="/facility-directory" element={<CommunityFacilityDirectory />} />
                       <Route path="/water-tanker" element={<WaterTankerTracker />} />
                       <Route path="/water-tankers" element={<WaterTankerTracker />} />
+
+                      <Route path="/water-bill-visualizer" element={<WaterBillVisualizerPage />} />
+
+                      <Route path="/services/water-quality-register" element={<WaterQualityRegister />} />
+                      <Route path="/water-quality" element={<WaterQualityRegister />} />
+                      <Route path="/water-quality-register" element={<WaterQualityRegister />} />
+
                       <Route path="/rental-checklist" element={<RentalTransitionWorkspace />} />
                       <Route path="/rental-transition" element={<RentalTransitionWorkspace />} />
                       <Route path="/rental-records" element={<RentalTransitionWorkspace />} />
@@ -138,15 +184,76 @@ function AppRoot() {
                       <Route path="/move-planner" element={<AddressChangePlanner />} />
                       <Route path="/citizen-drafts" element={<CitizenDraftSyncWorkspace />} />
                       <Route path="/draft-sync" element={<CitizenDraftSyncWorkspace />} />
+                      <Route path="/synthetic-datasets" element={<SyntheticDatasetWorkspace />} />
+                      <Route path="/dataset-generator" element={<SyntheticDatasetWorkspace />} />
+                      <Route path="/provenance" element={<LineageExplorerWorkspace />} />
+                      <Route path="/provenance/:id" element={<LineageExplorerWorkspace />} />
+                      <Route path="/lineage-explorer" element={<LineageExplorerWorkspace />} />
+                      <Route path="/counter-demand" element={<CounterDemandForecastingWorkspace />} />
+                      <Route path="/counter-demand-forecasting" element={<CounterDemandForecastingWorkspace />} />
+                      <Route path="/queue-staffing" element={<CounterDemandForecastingWorkspace />} />
                       <Route path="/surveys" element={<CivicSurveyWorkspace />} />
                       <Route path="/survey-builder" element={<CivicSurveyWorkspace />} />
                       <Route path="/civic-surveys" element={<CivicSurveyWorkspace />} />
+                      <Route path="/public-toilets" element={<PublicToiletDirectory />} />
+                      <Route path="/toilet-directory" element={<PublicToiletDirectory />} />
+                      <Route path="/toilets" element={<PublicToiletDirectory />} />
+                      <Route path="/pedestrian-barrier-map" element={<AccessibleRouteBarrierWorkspace />} />
+                      <Route path="/accessible-routes" element={<AccessibleRouteBarrierWorkspace />} />
+                      <Route path="/pedestrian-routes" element={<AccessibleRouteBarrierWorkspace />} />
+                      <Route path="/continuity-planner" element={<ContinuityPlannerWorkspace />} />
+                      <Route path="/continuity-planner/:id" element={<ContinuityPlannerWorkspace />} />
+                      <Route path="/incident-drills" element={<ContinuityPlannerWorkspace />} />
+                      <Route path="/senior-citizen-tribunal" element={<SeniorCitizenTribunalWorkspace />} />
+                      <Route path="/senior-tribunal" element={<SeniorCitizenTribunalWorkspace />} />
+                      <Route path="/rera-dispute-workspace" element={<ReraDisputeWorkspace />} />
+                      <Route path="/rera-homebuyer-rights" element={<ReraDisputeWorkspace />} />
+                      <Route path="/stray-animal-workspace" element={<StrayAnimalAbcWorkspace />} />
+                      <Route path="/rabies-pep-tracker" element={<StrayAnimalAbcWorkspace />} />
+                      <Route path="/animal-birth-control" element={<StrayAnimalAbcWorkspace />} />
+                      <Route path="/noise-pollution-workspace" element={<NoisePollutionWorkspace />} />
+                      <Route path="/decibel-logger" element={<NoisePollutionWorkspace />} />
+                      <Route path="/noise-curfew-auditor" element={<NoisePollutionWorkspace />} />
+                      <Route path="/solid-waste-workspace" element={<SolidWasteAuditWorkspace />} />
+                      <Route path="/bulk-waste-audit" element={<SolidWasteAuditWorkspace />} />
+                      <Route path="/ngt-compensation" element={<SolidWasteAuditWorkspace />} />
+                      <Route path="/clinical-establishment-workspace" element={<ClinicalEstablishmentWorkspace />} />
+                      <Route path="/patient-rights-charter" element={<ClinicalEstablishmentWorkspace />} />
+                      <Route path="/hospital-billing-audit" element={<ClinicalEstablishmentWorkspace />} />
+                      <Route path="/electricity-consumer-workspace" element={<ElectricityConsumerWorkspace />} />
+                      <Route path="/discom-outage-audit" element={<ElectricityConsumerWorkspace />} />
+                      <Route path="/cgrf-compensation-drafter" element={<ElectricityConsumerWorkspace />} />
+                      <Route path="/accessibility-audit-workspace" element={<AccessibilityAuditWorkspace />} />
+                      <Route path="/dark-patterns-workspace" element={<DarkPatternsWorkspace />} />
+                      <Route path="/drip-pricing-audit" element={<DarkPatternsWorkspace />} />
+                      <Route path="/ccpa-redressal" element={<DarkPatternsWorkspace />} />
+                      <Route path="/street-vendor-workspace" element={<StreetVendorWorkspace />} />
+                      <Route path="/vendor-eviction-immunity" element={<StreetVendorWorkspace />} />
+                      <Route path="/goods-seizure-reconciler" element={<StreetVendorWorkspace />} />
+                      <Route path="/rte-quota-workspace" element={<RteAdmissionWorkspace />} />
+                      <Route path="/rte-admission-audit" element={<RteAdmissionWorkspace />} />
+                      <Route path="/rte-screening-redressal" element={<RteAdmissionWorkspace />} />
+                      <Route path="/legal-sources" element={<LegalSourceReviewWorkspace />} />
+                      <Route path="/legal-source-review" element={<LegalSourceReviewWorkspace />} />
+                      <Route path="/workspace-template-sources" element={<LegalSourceReviewWorkspace />} />
+                      <Route path="/evidence-dossier" element={<EvidenceDossierWorkspace />} />
+                      <Route path="/verify-evidence" element={<EvidenceDossierWorkspace />} />
+                      <Route path="/evidence-manifest" element={<EvidenceDossierWorkspace />} />
                       <Route path="/track" element={<Track />} />
                       <Route path="/civic-works" element={<CivicWorksBoard />} />
+                      <Route path="/public-projects" element={<PublicProjectsWorkspace />} />
+                      <Route path="/projects" element={<PublicProjectsWorkspace />} />
+                      <Route path="/public-projects/:id" element={<PublicProjectsWorkspace />} />
                       <Route path="/road-safety" element={<RoadSafetyDashboard />} />
                       <Route path="/blackspots" element={<RoadSafetyDashboard />} />
                       <Route path="/tree-health" element={<TreeHealthInventory />} />
                       <Route path="/tree-inventory" element={<TreeHealthInventory />} />
+                      <Route path="/streetlights" element={<StreetlightOutageWorkspace />} />
+                      <Route path="/streetlight-outages" element={<StreetlightOutageWorkspace />} />
+                      <Route path="/services/streetlight-outages" element={<StreetlightOutageWorkspace />} />
+                      <Route path="/ghg-inventory" element={<GhgInventoryWorkspace />} />
+                      <Route path="/emissions-inventory" element={<GhgInventoryWorkspace />} />
+                      <Route path="/services/ghg-inventory" element={<GhgInventoryWorkspace />} />
                       <Route path="/shared-checklist/:token" element={<SharedChecklistView />} />
                       <Route path="/shared-directory/:token" element={<SharedDirectoryView />} />
                       <Route path="/app-status/:token" element={<PublicApplicationStatusView />} />
@@ -173,14 +280,24 @@ function AppRoot() {
                       <Route path="/open-source" element={<OpenSource />} />
                       <Route path="/privacy" element={<Privacy />} />
 
-                      <Route path="/admin" element={
+                      <Route path="/admin/imports" element={
+                        <ProtectedRoute requiredRole="admin">
+                          <Admin />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/admin/import" element={
                         <ProtectedRoute requiredRole="admin">
                           <Admin />
                         </ProtectedRoute>
                       } />
 
+                      <Route path="/tenants" element={<TenantAdministrationWorkspace />} />
+                      <Route path="/tenants/:tenantId" element={<TenantAdministrationWorkspace />} />
+                      <Route path="/tenant-workspace" element={<TenantAdministrationWorkspace />} />
+
                       <Route path="*" element={<NotFound />} />
                     </Routes>
+                    </Suspense>
                     </RouteErrorBoundary>
                   </main>
                   <Footer />
