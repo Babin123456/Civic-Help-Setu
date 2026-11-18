@@ -1104,6 +1104,7 @@ if (normalizedTarget === '/water-quality') {
                 icon: Zap
               })}
               {renderNavLink({ to: '/accessibility-audit-workspace', label: 'Universal Accessibility Audit', icon: Scale })}
+              {renderNavLink({ to: '/accessibility-tracker', label: 'Accessibility Complaint Tracker', icon: Scale })}
               {renderNavLink({ to: '/dark-patterns-workspace', label: 'Dark Patterns & Consumer Redressal', icon: Scale })}
               {renderNavLink({
                 to: '/street-vendor-workspace',
