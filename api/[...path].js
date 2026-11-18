@@ -20,11 +20,13 @@ import tenderCorrections from "./_lib/handlers/tender-corrections.js";
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import accessibilityInspector from "./_lib/handlers/accessibility-inspector.js";
 
 const handlers = {
   "address-change-corrections": addressChange,
   "business-licence-feedback": businessLicence,
   "civic-surveys": civicSurveys,
+  "accessibility-inspector": accessibilityInspector,
   "community-facility-corrections": communityFacility,
   "crematorium-corrections": crematorium,
   "email/preferences": emailPreferences,
