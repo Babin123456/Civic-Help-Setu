@@ -61,6 +61,9 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_vendor_rights_vault` | `streetVendorStorage.js` | Saved street vendor Section 3(3) eviction immunity audits, Section 19 goods seizure inventories, and TVC grievance records | Drafts and in-progress work |
 | `civicbridge_electricity_cgrf_vault` | `electricityConsumerStorage.js` | Saved electricity consumer outage compensation claims, Section 56(1) disconnection audits, meter test reports and CGRF petitions with SHA-256 seals | Drafts and in-progress work |
 | `civicbridge_rte_grievance_vault` | `rteAdmissionStorage.js` | Saved RTE Section 12(1)(c) quota eligibility, screening violation audits, capitation penalties, and Section 32 petitions with SHA-256 seals | Drafts and in-progress work |
+| `civicbridge_legal_sources_v1` | `legalSourceStorage.js` | Versioned statutory source citations, provisions, and SemVer lifecycle states | Drafts and in-progress work |
+| `civicbridge_legal_draft_snapshots_v1` | `legalSourceStorage.js` | Immutable historical citation snapshots sealed in citizen drafting templates | Drafts and in-progress work |
+| `civicbridge_legal_sources_audit_v1` | `legalSourceStorage.js` | Append-only audit trail for statutory reviews, publications, and rollbacks | Drafts and in-progress work |
 | `civicbridge_checklists` | `checklistStorage.js` | Which checklist items are ticked, per checklist or application id | Drafts and in-progress work |
 | `civicbridge_preparation_plans_v1` | `applicationPreparationPlanService.js` | Saved application preparation plan and customized checklist progress | Drafts and in-progress work |
 | `civic_journey_progress_<journeyId>` (one per journey) | `journeyDependencyEngine.js` | Completed tasks of a journey plan | Drafts and in-progress work |

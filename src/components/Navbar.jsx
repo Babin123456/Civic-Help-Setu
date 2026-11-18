@@ -1117,6 +1117,11 @@ if (normalizedTarget === '/water-quality') {
                 icon: GraduationCap
               })}
               {renderNavLink({
+                to: '/legal-sources',
+                label: 'Legal Source Review',
+                icon: Scale
+              })}
+              {renderNavLink({
                 to: '/tenants',
                 label: 'Authority Workspaces',
                 icon: Building2

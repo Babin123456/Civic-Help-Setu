@@ -84,6 +84,7 @@ const CatalogueVisualQaWorkspace = lazy(() => import('./pages/CatalogueVisualQaW
 const StreetVendorWorkspace = lazy(() => import('./pages/StreetVendorWorkspace'));
 const DarkPatternsWorkspace = lazy(() => import('./pages/DarkPatternsWorkspace'));
 const AccessibilityAuditWorkspace = lazy(() => import('./pages/AccessibilityAuditWorkspace'));
+const LegalSourceReviewWorkspace = lazy(() => import('./pages/LegalSourceReviewWorkspace'));
 
 const RteAdmissionWorkspace = lazy(() => import('./pages/RteAdmissionWorkspace'));
 
@@ -222,6 +223,9 @@ function AppRoot() {
                       <Route path="/rte-quota-workspace" element={<RteAdmissionWorkspace />} />
                       <Route path="/rte-admission-audit" element={<RteAdmissionWorkspace />} />
                       <Route path="/rte-screening-redressal" element={<RteAdmissionWorkspace />} />
+                      <Route path="/legal-sources" element={<LegalSourceReviewWorkspace />} />
+                      <Route path="/legal-source-review" element={<LegalSourceReviewWorkspace />} />
+                      <Route path="/workspace-template-sources" element={<LegalSourceReviewWorkspace />} />
                       <Route path="/track" element={<Track />} />
                       <Route path="/civic-works" element={<CivicWorksBoard />} />
                       <Route path="/public-projects" element={<PublicProjectsWorkspace />} />
