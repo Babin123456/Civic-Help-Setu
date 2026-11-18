@@ -30,6 +30,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const isObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 const isText = (v) => typeof v === 'string' && v.trim().length > 0;
+const isNonEmptyText = isText;
 const isTextList = (v) => Array.isArray(v) && v.every(isText);
 
 export { isObject, isText, isTextList, isRealDate, ID_PATTERN, DATE_PATTERN, EMAIL_PATTERN, isNonEmptyText };
