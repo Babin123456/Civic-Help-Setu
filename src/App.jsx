@@ -145,7 +145,12 @@ function AppRoot() {
                       <Route path="/open-source" element={<OpenSource />} />
                       <Route path="/privacy" element={<Privacy />} />
 
-                      <Route path="/admin" element={
+                      <Route path="/admin/imports" element={
+                        <ProtectedRoute requiredRole="admin">
+                          <Admin />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/admin/import" element={
                         <ProtectedRoute requiredRole="admin">
                           <Admin />
                         </ProtectedRoute>
