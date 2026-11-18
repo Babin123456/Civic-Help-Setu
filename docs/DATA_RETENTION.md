@@ -123,6 +123,7 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_tree_reports_v1` | `treeInventoryMigrations.js` | Legacy citizen tree reports read once during migration | Reviews, votes and reports |
 | `civicbridge_tree_reporter_key` | `TreeHealthInventory.jsx` | Random local key used only to rate-limit and deduplicate citizen tree reports | Reviews, votes and reports |
 | `civicbridge_civic_works_reports_v1` | `civicWorksBoardService.js` | Ward civic works reports and moderation state | Reviews, votes and reports |
+| `civicbridge_office_comparison_reports_v1` | `officeComparisonReportService.js` | Outdated office-record reports queued on this device when the review endpoint is unavailable: office id, reason, short note and optional official source. No identity or contact fields | Reviews, votes and reports |
 | `civicbridge_civic_works_clusters_v1` | `civicWorksBoardService.js` | Clustered duplicate ward reports | Reviews, votes and reports |
 | `civicbridge_civic_works_rate_limit_v1` | `civicWorksBoardService.js` | Ward report submission rate limit tracking | Reviews, votes and reports |
 | `civicbridge_hazard_reports_v1` | `roadSafetyBlackspotService.js` | Citizen-reported road hazards and defects (sanitized, PII stripped) | Reviews, votes and reports |
@@ -140,6 +141,7 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_offline_last_sync` | `offlineCacheService.js` | Time of the last offline sync | Offline copies and location |
 | `civicbridge_cached_shelters` | `disasterReliefService.js` | Copy of the public relief shelter list (no personal data) | Offline copies and location |
 | `civicbridge_user_coords` (sessionStorage) | `locationService.js` | Last location the browser gave the app, for the nearby offices page. Gone when the tab closes | Offline copies and location |
+| `civicbridge_office_comparison_draft_v1` (sessionStorage) | `officeComparisonDraft.js` | Service, state, district, locality, contact channel, wheelchair filter, distance radius, view mode and up to three selected office IDs for the office comparison workspace. No names, identity numbers or contact details. Gone when the tab closes | Drafts and in-progress work |
 | `civic_fire_noc_checklist_dossier` | `fireNocService.js` | Fire safety and NOC application compliance dossiers | Drafts and in-progress work |
 | `civicbridge_civic_works_reporter_id` | `civicWorksBoardService.js` | Anonymous device-scoped reporter identifier | Tracking records |
 | `civic_admin_operations_digest_config` | `adminDigestService.js` | Administrative operations digest frequency configuration | Tracking records |
@@ -190,6 +192,7 @@ After clearing, the sample reviews, sample audit reports and the sample vault do
 | `civicbridge_barrier_audit_logs`, `civicbridge_freshness_trust_reviews_v1`, `civicbridge_public_notices_digest_v1`, `civicbridge_service_availability_notices_v1`, `civicbridge_source_conflicts`, `civicbridge_conflict_audit_logs` | Admin barrier moderation, freshness reviews, public gazette digest cache, and source conflict audit queues | Admin portal moderation and public digest cache |
 | `civicbridge_barrier_audit_logs`, `civicbridge_freshness_trust_reviews_v1`, `civicbridge_service_ownership_v1`, `civicbridge_public_notices_digest_v1`, `civicbridge_source_conflicts`, `civicbridge_conflict_audit_logs` | Admin barrier moderation, freshness reviews, service reviewer assignments, public gazette digest cache, and source conflict audit queues | Admin portal moderation and public digest cache |
 | `civicbridge_location_denied` (sessionStorage) | A flag that the location permission was refused in this tab | No personal data, gone when the tab closes |
+| `civicbridge_comparison_stale_dismissed` (sessionStorage) | A flag that the comparison stale-data warning was dismissed in this tab | No personal data, gone when the tab closes |
 | `civicbridge_app_status_qr_tokens` | QR tokens for application status sharing | Shared feature data |
 | `civicbridge_app_status_qr_rate_limits` | Rate limits for application status QR generation | Shared feature data |
 | `civicbridge_catalogue_auditor_dismissals_v2` | Dismissed catalogue auditor review items | Admin moderation state |

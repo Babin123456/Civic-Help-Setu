@@ -75,6 +75,7 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_applicant_profiles_v1', category: 'drafts', exportAs: 'applicantProfiles', empty: [] }, // applicantProfileService.js
   { key: 'civicbridge_barrier_reports', category: 'activity', exportAs: 'barrierReports', empty: [] }, // barrierReportService.js
   { key: 'civicbridge_bottleneck_feedback_v1', category: 'activity', exportAs: 'bottleneckFeedback', empty: [] }, // bottleneckFeedbackService.js
+  { key: 'civicbridge_office_comparison_reports_v1', category: 'activity', exportAs: null }, // officeComparisonReportService.js
   { key: 'civicbridge_checklist', category: 'drafts', exportAs: 'checklistItems', empty: [] }, // dataPortabilityService.js
   { key: 'civicbridge_track_applications', category: 'tracking', exportAs: 'importedTrackApplications', empty: [] }, // dataPortabilityService.js
   { key: 'civicbridge_form_drafts', category: 'drafts', exportAs: 'formDrafts', empty: [] }, // dataPortabilityService.js
@@ -192,7 +193,10 @@ export const USER_DATA_PREFIX_STORES = [{ prefix: JOURNEY_PROGRESS_PREFIX, categ
 export const USER_DATA_KEY_PREFIXES = USER_DATA_PREFIX_STORES.map((store) => store.prefix);
 
 // sessionStorage keys with user data, removed on purge (cached location from locationService.js).
-export const USER_DATA_SESSION_STORES = [{ key: 'civicbridge_user_coords', category: 'cache' }];
+export const USER_DATA_SESSION_STORES = [
+  { key: 'civicbridge_user_coords', category: 'cache' },
+  { key: 'civicbridge_office_comparison_draft_v1', category: 'drafts' },
+];
 export const USER_DATA_SESSION_KEYS = USER_DATA_SESSION_STORES.map((store) => store.key);
 
 // Keys that purge leaves alone on purpose.
@@ -205,6 +209,7 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_focus_mode',
   'civicbridge_reader_preferences',
   'civicbridge_active_applicant_profile_id_v1',
+  'civicbridge_comparison_stale_dismissed',
   // Demo sign-in session, signing out is its own action
   'civicbridge_demo_user',
   // Admin portal data and the shared review queue for outdated-info reports

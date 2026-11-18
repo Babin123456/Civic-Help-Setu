@@ -25,8 +25,8 @@ const SignUpPage = lazy(() => import('./pages/SignUp'));
 const SSOCallback = lazy(() => import('./pages/SSOCallback'));
 const Assistant = lazy(() => import('./pages/Assistant'));
 import { ServiceCardSkeletonGrid } from './components/ServiceCardSkeleton';
-
 import WaterBillVisualizerPage from './pages/WaterBillVisualizerPage';
+
 const ServiceDetails = lazy(() => import('./pages/ServiceDetails'));
 const Acronyms = lazy(() => import('./pages/Acronyms'));
 const Eligibility = lazy(() => import('./pages/Eligibility'));
@@ -66,6 +66,8 @@ const CounterDemandForecastingWorkspace = lazy(() => import('./pages/CounterDema
 const WardBudgetWorkspace = lazy(() => import('./pages/WardBudgetWorkspace'));
 const LineageExplorerWorkspace = lazy(() => import('./pages/LineageExplorerWorkspace'));
 const CivicSurveyWorkspace = lazy(() => import('./pages/CivicSurveyWorkspace'));
+const ComparisonWorkspace = lazy(() => import('./pages/ComparisonWorkspace'));
+const OfficeComparisonDetail = lazy(() => import('./pages/OfficeComparisonDetail'));
 const PublicToiletDirectory = lazy(() => import('./pages/PublicToiletDirectory'));
 const AccessibleRouteBarrierWorkspace = lazy(() => import('./pages/AccessibleRouteBarrierWorkspace'));
 const StreetlightOutageWorkspace = lazy(() => import('./pages/StreetlightOutageWorkspace'));
@@ -87,10 +89,8 @@ const StreetVendorWorkspace = lazy(() => import('./pages/StreetVendorWorkspace')
 const DarkPatternsWorkspace = lazy(() => import('./pages/DarkPatternsWorkspace'));
 const AccessibilityAuditWorkspace = lazy(() => import('./pages/AccessibilityAuditWorkspace'));
 const LegalSourceReviewWorkspace = lazy(() => import('./pages/LegalSourceReviewWorkspace'));
-
 const RteAdmissionWorkspace = lazy(() => import('./pages/RteAdmissionWorkspace'));
 const EvidenceDossierWorkspace = lazy(() => import('./pages/EvidenceDossierWorkspace'));
-
 
 const Services = lazy(() => import('./pages/Services'));
 
@@ -152,6 +152,8 @@ function AppRoot() {
                       <Route path="/eligibility" element={<Eligibility />} />
                       <Route path="/nearby" element={<NearbyOffices />} />
                       <Route path="/nearby-offices" element={<NearbyOffices />} />
+                      <Route path="/comparison" element={<ComparisonWorkspace />} />
+                      <Route path="/office/:officeId" element={<OfficeComparisonDetail />} />
                       <Route path="/crematorium-directory" element={<CrematoriumDirectory />} />
                       <Route path="/crematoriums" element={<CrematoriumDirectory />} />
                       <Route path="/pds-shops" element={<FairPriceShopBoard />} />
