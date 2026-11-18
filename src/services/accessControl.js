@@ -46,6 +46,28 @@ export const PERMISSIONS = {
   'ownership.read': { roles: ['admin'], resource: 'civicbridge_service_ownership_v1', description: 'Read who is assigned to review each service guide, with private notes' },
   'ownership.manage': { roles: ['admin'], resource: 'civicbridge_service_ownership_v1', description: 'Assign, reassign or clear the reviewer of a service guide' },
   'civicWorks.moderate': { roles: ['admin'], resource: 'civicbridge_civic_works_reports_v1', description: 'Moderate ward-level civic work reports, cluster duplicates, record official acknowledgements and verify completion evidence' },
+  'synthetic.generate': { roles: ['admin', 'citizen'], resource: 'civicbridge_synthetic_profiles_v1', description: 'Generate reproducible synthetic civic datasets' },
+  'synthetic.manage': { roles: ['admin'], resource: 'civicbridge_synthetic_profiles_v1', description: 'Configure schema catalog and synthetic profiles' },
+  'synthetic.audit': { roles: ['admin', 'citizen'], resource: 'civicbridge_synthetic_validation_runs_v1', description: 'Audit PII detection and validation runs' },
+  'roadSafety.review': { roles: ['admin'], resource: 'civicbridge_review_cases_v1', description: 'Review detected road safety blackspots, conduct site inspections, and plan interventions' },
+  'roadSafety.admin': { roles: ['admin'], resource: 'civicbridge_risk_runs_v1', description: 'Configure risk weighting parameters, trigger risk runs, and archive road safety cases' },
+  'publicProjects.create': { roles: ['admin'], resource: 'civicbridge_public_projects_v1', description: 'Create and configure public infrastructure projects, milestones and geometries' },
+  'publicProjects.verify': { roles: ['admin'], resource: 'civicbridge_verification_reviews_v1', description: 'Verify evidence and record milestone decisions for public projects' },
+  'publicProjects.audit': { roles: ['admin'], resource: 'civicbridge_project_audit_logs_v1', description: 'Inspect append-only project verification audit logs and unredacted assets' },
+  'continuity.write': { roles: ['admin'], resource: 'civicbridge_continuity_plans_v1', description: 'Create or update public service continuity plans and service dependencies' },
+  'continuity.approve': { roles: ['admin'], resource: 'civicbridge_continuity_plans_v1', description: 'Approve, activate or supersede continuity plans' },
+  'continuity.drill': { roles: ['admin'], resource: 'civicbridge_exercise_runs_v1', description: 'Schedule and facilitate incident tabletop exercises and record decisions' },
+  // Flood Hotspot Forecast and Safe-Route Advisory Engine
+  'flood.intelligence.execute': { roles: ['admin'], resource: 'civicbridge_flood_forecast_runs_v1', description: 'Execute flood risk model runs and generate hotspot cells' },
+  'flood.report.submit': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_reports_v1', description: 'Submit a flood waterlogging observation or report' },
+  'flood.report.moderate': { roles: ['admin'], resource: 'civicbridge_flood_reports_v1', description: 'Moderate flood reports: validate, reject, or flag as spam' },
+  'flood.report.read': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_reports_v1', description: 'Read flood reports within jurisdiction' },
+  'flood.hotspot.read': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_hotspot_cells_v1', description: 'Read computed hotspot cells and risk levels' },
+  'flood.route.advisory': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_route_advisories_v1', description: 'Generate safe route advisories avoiding flood hotspots' },
+  'flood.route.read': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_route_advisories_v1', description: 'Read route advisories within jurisdiction' },
+  'flood.admin': { roles: ['admin'], resource: 'civicbridge_flood_forecast_runs_v1', description: 'Configure flood intelligence parameters, trigger runs, and archive data' },
+  'legalSources.manage': { roles: ['admin'], resource: 'civicbridge_legal_sources_v1', description: 'Create, edit, or supersede legal sources' },
+  'legalSources.review': { roles: ['admin'], resource: 'civicbridge_legal_sources_v1', description: 'Review, approve, publish or roll back legal source versions' },
 };
 
 export class PermissionDeniedError extends Error {
@@ -85,8 +107,8 @@ export const checkPermission = (action, actor = currentActor) => {
 export const can = (action, actor = currentActor) => checkPermission(action, actor) === 'ok';
 
 /** Throws PermissionDeniedError unless the signed-in user may do `action`. */
-export const requirePermission = (action) => {
-  const result = checkPermission(action);
+export const requirePermission = (action, actor = currentActor) => {
+  const result = checkPermission(action, actor);
   if (result !== 'ok') throw new PermissionDeniedError(action, result);
 };
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import AccessibleModal from '../common/AccessibleModal';
 import { Send, CheckCircle2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
-import { generateCorrectionSeal } from '../../../api/community-facility-corrections.js';
+import { generateCommunityFacilityCorrectionSeal as generateCorrectionSeal } from '../../utils/correctionSeals.js';
 
 export default function FacilityCorrectionModal({
   isOpen,

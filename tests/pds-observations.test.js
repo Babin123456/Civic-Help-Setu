@@ -3,7 +3,7 @@ import handler, {
   validateObservationPayload,
   generateObservationSeal,
   PDS_OBSERVATION_QUEUE,
-} from '../api/pds-observations.js';
+} from '../api/_lib/handlers/pds-observations.js';
 
 describe('api/pds-observations endpoint (#723)', () => {
   beforeEach(() => {
