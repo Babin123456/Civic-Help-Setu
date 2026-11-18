@@ -66,6 +66,8 @@ export const PERMISSIONS = {
   'flood.route.advisory': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_route_advisories_v1', description: 'Generate safe route advisories avoiding flood hotspots' },
   'flood.route.read': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_route_advisories_v1', description: 'Read route advisories within jurisdiction' },
   'flood.admin': { roles: ['admin'], resource: 'civicbridge_flood_forecast_runs_v1', description: 'Configure flood intelligence parameters, trigger runs, and archive data' },
+  'legalSources.manage': { roles: ['admin'], resource: 'civicbridge_legal_sources_v1', description: 'Create, edit, or supersede legal sources' },
+  'legalSources.review': { roles: ['admin'], resource: 'civicbridge_legal_sources_v1', description: 'Review, approve, publish or roll back legal source versions' },
 };
 
 export class PermissionDeniedError extends Error {
@@ -105,8 +107,8 @@ export const checkPermission = (action, actor = currentActor) => {
 export const can = (action, actor = currentActor) => checkPermission(action, actor) === 'ok';
 
 /** Throws PermissionDeniedError unless the signed-in user may do `action`. */
-export const requirePermission = (action) => {
-  const result = checkPermission(action);
+export const requirePermission = (action, actor = currentActor) => {
+  const result = checkPermission(action, actor);
   if (result !== 'ok') throw new PermissionDeniedError(action, result);
 };
 
