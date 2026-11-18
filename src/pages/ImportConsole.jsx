@@ -11,7 +11,6 @@ import {
   ShieldCheck,
   Shield,
   Trash2,
-  ArrowCurveLeft,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
