@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import handler, { validateCorrectionPayload, generateCorrectionSeal } from './crematorium-corrections.js';
+import handler, { validateCorrectionPayload, generateCorrectionSeal } from '../api/crematorium-corrections.js';
 
 function createMockRes() {
   const res = {
