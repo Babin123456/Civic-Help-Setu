@@ -127,8 +127,10 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_accessibility_audit_vault', category: 'drafts', exportAs: 'accessibilityAuditVault', empty: [] },
   { key: 'civicbridge_dark_patterns_vault', category: 'drafts', exportAs: 'darkPatternsVault', empty: [] },
   { key: 'civicbridge_vendor_rights_vault', category: 'drafts', exportAs: 'vendorRightsVault', empty: [] }, // streetVendorStorage.js
-  { key: 'civicbridge_electricity_cgrf_vault', category: 'drafts', exportAs: 'electricityCgrfVault', empty: [] }, // electricityConsumerStorage.js
   { key: 'civicbridge_rte_grievance_vault', category: 'drafts', exportAs: 'rteGrievanceVault', empty: [] }, // rteAdmissionStorage.js
+  { key: 'civicbridge_legal_sources_v1', category: 'drafts', exportAs: 'legalSourcesRegistry', empty: [] }, // legalSourceStorage.js
+  { key: 'civicbridge_legal_draft_snapshots_v1', category: 'drafts', exportAs: 'legalDraftSnapshots', empty: [] }, // legalSourceStorage.js
+  { key: 'civicbridge_legal_sources_audit_v1', category: 'drafts', exportAs: 'legalSourcesAuditLogs', empty: [] }, // legalSourceStorage.js
   { key: 'civicbridge_evidence_dossiers_v1', category: 'drafts', exportAs: 'evidenceDossiers', empty: [] }, // evidenceDossierStorage.js
 ];
 
@@ -290,6 +292,10 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_editorial_reviews_v1',
   'civicbridge_supersession_links_v1',
   'civicbridge_provenance_audit_v1',
+  // Versioned legal source review and citation integrity (#949)
+  'civicbridge_legal_sources_v1',
+  'civicbridge_legal_draft_snapshots_v1',
+  'civicbridge_legal_sources_audit_v1',
   // Handled by purge itself: consents are reset, the audit log keeps the deletion receipt
   CONSENT_STORAGE_KEY,
   AUDIT_STORAGE_KEY,
