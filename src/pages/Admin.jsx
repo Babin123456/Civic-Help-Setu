@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   FileCheck,
   Upload,
+  ScanSearch,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -27,6 +28,8 @@ import {
   approveServiceSubmission,
   rejectServiceSubmission,
 } from '../services/adminService';
+
+import * as importBatchService from '../services/importBatchService';
 import AdminStatsGrid from '../components/admin/AdminStatsGrid';
 import ServiceModal from '../components/admin/ServiceModal';
 import ReportResolutionModal from '../components/admin/ReportResolutionModal';
@@ -40,8 +43,13 @@ import CommunityFacilityCorrectionQueue from '../components/admin/CommunityFacil
 import LibraryCorrectionQueue from '../components/admin/LibraryCorrectionQueue';
 import RentalCorrectionQueue from '../components/admin/RentalCorrectionQueue';
 import RoadHazardReviewQueue from '../components/admin/RoadHazardReviewQueue';
+import PedestrianBarrierReviewQueue from '../components/admin/PedestrianBarrierReviewQueue';
 import AddressChangeCorrectionQueue from '../components/admin/AddressChangeCorrectionQueue';
+import ProvenanceReviewQueue from '../components/admin/ProvenanceReviewQueue';
+import CounterDemandReviewQueue from '../components/admin/CounterDemandReviewQueue';
 import SurveyAuditQueue from '../components/admin/SurveyAuditQueue';
+import PublicToiletReviewQueue from '../components/admin/PublicToiletReviewQueue';
+import OpenContractingAuditQueue from '../components/admin/OpenContractingAuditQueue';
 import AuditLogViewer from '../components/admin/AuditLogViewer';
 import ServiceImportPanel from '../components/admin/ServiceImportPanel';
 import ServiceRecordList from '../components/admin/ServiceRecordList';
@@ -60,6 +68,7 @@ import LinkHealthPanel from '../components/admin/LinkHealthPanel';
 import ServiceDraftsPanel from '../components/admin/ServiceDraftsPanel';
 import { getDraftForService, listDrafts, saveDraft } from '../services/serviceDrafts';
 import CatalogueMigrationPanel from '../components/admin/CatalogueMigrationPanel';
+import ImportConsole from '../pages/ImportConsole';
 import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
 import CatalogueCompletenessPanel from '../components/admin/CatalogueCompletenessPanel';
 import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchPanel';
@@ -87,6 +96,7 @@ import RuleConflictInspectorModal from '../components/admin/RuleConflictInspecto
 import DuplicateServiceDetectorPanel from '../components/admin/DuplicateServiceDetectorPanel';
 import CatalogueConflictDetectorPanel from '../components/admin/CatalogueConflictDetectorPanel';
 import CivicWorksModeratorPanel from '../components/civicWorks/CivicWorksModeratorPanel';
+import AccessibilityInspectorPanel from '../components/AccessibilityInspectorPanel';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -625,6 +635,21 @@ const Admin = () => {
 
             <button
               type="button"
+              onClick={() => navigate('/services/catalogue-visual-qa')}
+              className="btn btn-secondary"
+              style={{
+                padding: '0.5rem 0.85rem',
+                fontSize: '0.85rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+              }}
+            >
+              <ScanSearch size={16} /> Catalogue visual QA
+            </button>
+
+            <button
+              type="button"
               onClick={handleLogout}
               className="btn btn-secondary"
               style={{
@@ -733,8 +758,17 @@ const Admin = () => {
                 badge: null,
               },
               { id: 'duplicates', label: 'Duplicate Detection', badge: null },
+  {
+    id: 'imports',
+    label: `Imports (${stats?.total || 0})`,
+    badge: null,
+  },
               { id: 'conflicts', label: 'Requirement Conflicts', badge: null },
               { id: 'civic-works', label: 'Ward Public Works', badge: null },
+              { id: 'pedestrian-barriers', label: 'Pedestrian Route Barriers', badge: null },
+              { id: 'public-projects', label: 'Public Project Timeline', badge: null },
+              { id: 'provenance-reviews', label: 'Knowledge Provenance', badge: null },
+              { id: 'counter-demand', label: 'Counter Demand & Staffing', badge: null },
               { id: 'audit', label: 'Audit Trail Logs', badge: null },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
@@ -802,6 +836,9 @@ const Admin = () => {
 
                 {/* Citizen-Reported Service Barrier Insights Dashboard (#148) */}
                 <BarrierInsightsDashboard />
+
+                {/* AI-assisted Accessibility Inspector (#832) */}
+                <AccessibilityInspectorPanel />
               </div>
             )}
 
@@ -1164,8 +1201,16 @@ const Admin = () => {
                   <AddressChangeCorrectionQueue />
                 </div>
                 <div style={{ marginTop: '2rem' }}>
+                  <CounterDemandReviewQueue />
+                </div>
+                <div style={{ marginTop: '2rem' }}>
                   <SurveyAuditQueue />
                   <RoadHazardReviewQueue />
+                  <PublicToiletReviewQueue />
+                  <div style={{ marginTop: '2rem' }}>
+                    <PedestrianBarrierReviewQueue />
+                  </div>
+                  <OpenContractingAuditQueue />
                 </div>
               </div>
             )}
@@ -1771,11 +1816,76 @@ const Admin = () => {
               </div>
             )}
 
+            {/* Pedestrian Route Barrier Moderation Tab */}
+            {activeTab === 'pedestrian-barriers' && (
+              <div>
+                <PedestrianBarrierReviewQueue />
+              </div>
+            )}
+
+            {/* Public Infrastructure Projects Verification Tab */}
+            {activeTab === 'public-projects' && (
+              <div
+                style={{
+                  background: 'var(--bg-card)',
+                  padding: '1.5rem',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-light)',
+                }}
+              >
+                <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)' }}>
+                  Geospatial Public Project Verification &amp; Evidence Timeline
+                </h3>
+                <p
+                  style={{
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.9rem',
+                    marginBottom: '1.25rem',
+                  }}
+                >
+                  Manage public civil infrastructure projects across roads, stormwater
+                  drains, schools, and civic buildings. Review photographic evidence
+                  submissions and commit authorized verification decisions.
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => navigate('/public-projects')}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                  }}
+                >
+                  Open Public Projects Workspace &amp; Review Queue
+                </button>
+              </div>
+            )}
+
+            {/* Knowledge Provenance Review Queue Tab (#777) */}
+            {activeTab === 'provenance-reviews' && (
+              <div>
+                <ProvenanceReviewQueue />
+              </div>
+            )}
+
+            {/* Counter Demand & Queue Staffing Moderation Tab (#764) */}
+            {activeTab === 'counter-demand' && (
+              <div>
+                <CounterDemandReviewQueue />
+              </div>
+            )}
+
             {/* Audit Trail Tab */}
             {activeTab === 'audit' && (
               <div>
                 <AuditLogViewer auditLogs={auditLogs} />
               </div>
+            )}
+
+            {/* Import Console Tab */}
+            {activeTab === 'imports' && (
+              <ImportConsole />
             )}
           </div>
         </div>
