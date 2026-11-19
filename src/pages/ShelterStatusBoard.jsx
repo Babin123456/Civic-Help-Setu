@@ -1052,7 +1052,7 @@ export default function ShelterStatusBoard() {
                           {getServiceStatusLabel(service.status)}
                         </span>
                         <div style={{ flex: 1 }}>
-                          <div style={{ marginBottom: '4px', color: '#0f172a', fontWeight: 500', fontSize: '0.75rem' }}>
+                          <div style={{ marginBottom: '4px', color: '#0f172a', fontWeight: 500, fontSize: '0.75rem' }}>
                             {service.serviceType}: {service.capacityAvailable || 0}/{service.capacityTotal || 0}
                           </div>
                           <div style={{ color: '#64748b', fontSize: '0.6875rem' }}>
