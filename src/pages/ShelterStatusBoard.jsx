@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useNetwork } from '../contexts/NetworkContext';
-import { useToast } from '../contexts/ToastContext';
+import { useAuth } from '../context/AuthContext';
+import { useNetwork } from '../context/NetworkContext';
+import { useToast } from '../context/ToastContext';
 import {
   SHELTER_STATES,
   ALLOWED_TRANSITIONS,
