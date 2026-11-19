@@ -3,8 +3,8 @@
 // NOT a deployed network API: nothing here is served over HTTP.
 // Full field reference: docs/SERVICE_DATA_CONTRACT.md
 
-import { SERVICE_CATEGORIES } from './serviceCategories';
-import { validateJurisdiction as validateAppJurisdiction } from '../services/jurisdictionService';
+import { SERVICE_CATEGORIES } from './serviceCategories.js';
+import { validateJurisdiction as validateAppJurisdiction } from '../services/jurisdictionService.js';
 
 export const SERVICE_SCHEMA_VERSION = 1;
 export const SUPPORTED_SCHEMA_VERSIONS = [1];
@@ -30,7 +30,10 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const isObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 const isText = (v) => typeof v === 'string' && v.trim().length > 0;
+const isNonEmptyText = isText;
 const isTextList = (v) => Array.isArray(v) && v.every(isText);
+
+export { isObject, isText, isTextList, isRealDate, ID_PATTERN, DATE_PATTERN, EMAIL_PATTERN, isNonEmptyText };
 
 function isHttpsUrl(value) {
   if (typeof value !== 'string') return false;

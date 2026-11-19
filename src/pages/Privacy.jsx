@@ -19,6 +19,7 @@ import {
 import PrivacyConsentCenterModal from '../components/privacy/PrivacyConsentCenterModal';
 import PrivacyExportCentre from '../components/privacy/PrivacyExportCentre';
 import ClearMyDataPanel from '../components/privacy/ClearMyDataPanel';
+import { useToast } from '../context/ToastContext';
 
 const POLICY_SECTIONS = [
   { id: 'data-minimization', title: '1. Principles of Data Minimization' },
@@ -29,6 +30,7 @@ const POLICY_SECTIONS = [
 ];
 
 const Privacy = () => {
+  const { toast } = useToast();
   const [isCenterOpen, setIsCenterOpen] = useState(false);
   const [preferences, setPreferences] = useState(() => getConsentPreferences());
   const [auditLogs, setAuditLogs] = useState(() => getPrivacyAuditLogs());
@@ -67,32 +69,6 @@ const Privacy = () => {
       }
     } catch (err) {
       toast?.error?.(`Retention check failed: ${err.message}`);
-    }
-  };
-
-  const handleQuickExport = () => {
-    try {
-      const data = exportUserData();
-      const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
-        JSON.stringify(data, null, 2)
-      )}`;
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute('href', jsonString);
-      downloadAnchor.setAttribute(
-        'download',
-        `civicbridge_user_data_export_${new Date().toISOString().slice(0, 10)}.json`
-      );
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-
-      refreshPrivacyOverview();
-      const digestPreview = data?.exportMetadata?.integrityDigest
-        ? ` (SHA-256: ${data.exportMetadata.integrityDigest.slice(0, 12)}...)`
-        : '';
-      toast?.success?.(`Personal data exported successfully${digestPreview}.`);
-    } catch (err) {
-      toast?.error?.(`Export failed: ${err.message}`);
     }
   };
 

@@ -1,0 +1,211 @@
+/* WaterBillVisualizerPage.css
+ * Styling for the municipal water bill consumption and charge visualizer.
+ * Follows existing design conventions from the Civic Help Setu codebase.
+ */
+
+/* Page-level variables (these are defined in App.css or theme contexts) */
+
+/* -------------------------------------------------
+   General layout
+   ------------------------------------------------- */
+.water-visualizer-page {
+  min-height: 100vh;
+  background-color: var(--bg-primary, #f8fafc);
+  color: var(--text-primary, #1e293b);
+}
+
+/* Header */
+.water-visualizer-page header {
+  border-color: var(--border-main, #e2e8f0);
+  background-color: var(--accent-main, #3b82f6);
+  color: var(--accent-contrast, #ffffff);
+}
+
+/* Main content */
+.water-visualizer-page main {
+  padding: var(--spacing-4, 1rem);
+  max-width: var(--max-width, 1280px);
+  margin: 0 auto;
+}
+
+/* Sections */
+.water-visualizer-page section {
+  margin-bottom: var(--spacing-6, 1.5rem);
+}
+
+.water-visualizer-page section:last-child {
+  margin-bottom: 0;
+}
+
+/* Section headers */
+.water-visualizer-page h2 {
+  font-size: var(--font-size-xl, 1.25rem);
+  font-weight: var(--font-weight-semibold, 600);
+  margin-bottom: var(--spacing-3, 0.75rem);
+  color: var(--text-primary, #1e293b);
+}
+
+/* -------------------------------------------------
+   Form inputs & controls
+   ------------------------------------------------- */
+.water-visualizer-page input,
+.water-visualizer-page select,
+.water-visualizer-page textarea {
+  width: 100%;
+  padding: var(--spacing-2, 0.5rem) var(--spacing-3, 0.75rem);
+  font-size: var(--font-size-sm, 0.875rem);
+  border: 1px solid var(--border-main, #e2e8f0);
+  border-radius: var(--radius-sm, 0.375rem);
+  background-color: var(--bg-input, #ffffff);
+  color: var(--text-primary, #1e293b);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.water-visualizer-page input:focus,
+.water-visualizer-page select:focus {
+  outline: none;
+  border-color: var(--accent-main, #3b82f6);
+  box-shadow: 0 0 0 3px var(--accent-main, #3b82f6)/20;
+}
+
+.water-visualizer-page input::placeholder,
+.water-visualizer-page textarea::placeholder {
+  color: var(--text-tertiary, #64748b);
+}
+
+/* Buttons */
+.water-visualizer-page .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-2, 0.5rem);
+  padding: var(--spacing-2, 0.5rem) var(--spacing-3, 0.75rem);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-medium, 500);
+  border-radius: var(--radius-sm, 0.375rem);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+  font-family: inherit;
+}
+
+.water-visualizer-page .btn:hover {
+  background-color: var(--accent-main, #3b82f6)/10;
+}
+
+.water-visualizer-page .btn:focus-visible {
+  outline: 2px solid var(--accent-main, #3b82f6);
+  outline-offset: 2px;
+}
+
+.water-visualizer-page .btn:active {
+  transform: scale(0.99);
+}
+
+.water-visualizer-page .btn-primary {
+  background-color: var(--accent-main, #3b82f6);
+  color: var(--accent-contrast, #ffffff);
+}
+
+.water-visualizer-page .btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.water-visualizer-page .btn-secondary {
+  background-color: var(--bg-input, #ffffff);
+  color: var(--text-primary, #1e293b);
+  border: 1px solid var(--border-main, #e2e8f0);
+}
+
+.water-visualizer-page .btn-secondary:hover {
+  background-color: var(--accent-main, #3b82f6)/10;
+}
+
+/* -------------------------------------------------
+   Cards & panels
+   ------------------------------------------------- */
+.water-visualizer-page .card {
+  background-color: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-main, #e2e8f0);
+  border-radius: var(--radius-md, 0.5rem);
+  padding: var(--spacing-4, 1rem);
+}
+
+/* -------------------------------------------------
+   Tables & lists
+   ------------------------------------------------- */
+.water-visualizer-page ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.water-visualizer-page li {
+  margin-bottom: var(--spacing-2, 0.5rem);
+}
+
+/* -------------------------------------------------
+   Details element (slab breakdown)
+   ------------------------------------------------- */
+.water-visualizer-page details {
+  margin-top: var(--spacing-2, 0.5rem);
+  border: none;
+}
+
+.water-visualizer-page details summary {
+  cursor: pointer;
+  font-weight: var(--font-weight-medium, 500);
+  margin: -var(--spacing-2, -0.5rem) -var(--spacing-4, -1rem);
+  padding: var(--spacing-2, 0.5rem) var(--spacing-4, 1rem);
+  list-style: none;
+  background-color: var(--bg-input, #ffffff);
+}
+
+/* -------------------------------------------------
+   Notices & modals
+   ------------------------------------------------- */
+.water-visualizer-page .consent-banner {
+  background-color: var(--warning, #f59e0b)/10;
+  border-color: var(--warning, #f59e0b);
+  color: var(--warning, #f59e0b);
+}
+
+.water-visualizer-page .error-panel {
+  background-color: var(--error, #ef4444)/10;
+  border-color: var(--error, #ef4444);
+  color: var(--error, #ef4444);
+}
+
+.water-visualizer-page .informative-banner {
+  background-color: var(--accent-main, #3b82f6)/5;
+  border-color: var(--accent-main, #3b82f6);
+  color: var(--accent-main, #3b82f6);
+}
+
+/* -------------------------------------------------
+   Reduced motion
+   ------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .water-visualizer-page .animate-spin {
+    animation: none;
+  }
+}
+
+/* -------------------------------------------------
+   Accessibility: focus visible
+   ------------------------------------------------- */
+.water-visualizer-page :focus-visible {
+  outline: 2px solid var(--accent-main, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* -------------------------------------------------
+   Consent banner specifics
+   ------------------------------------------------- */
+.consent-banner .btn-primary {
+  margin-left: var(--spacing-2, 0.75rem);
+}
+
+/* -------------------------------------------------
+   Toast container overrides (if needed)
+   ------------------------------------------------- */
