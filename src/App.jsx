@@ -27,44 +27,9 @@ const Assistant = lazy(() => import('./pages/Assistant'));
 const CounterJourney = lazy(() => import('./pages/CounterJourney'));
 import { ServiceCardSkeletonGrid } from './components/ServiceCardSkeleton';
 
-import ServiceDetails from './pages/ServiceDetails';
-import Acronyms from './pages/Acronyms';
-import Eligibility from './pages/Eligibility';
-import NearbyOffices from './pages/NearbyOffices';
-import Track from './pages/Track';
-import Saved from './pages/Saved';
-import Vault from './pages/Vault';
-import Profile from './pages/Profile';
-import OpenSource from './pages/OpenSource';
-import Privacy from './pages/Privacy';
-import Admin from './pages/Admin';
-import SharedChecklistView from './pages/SharedChecklistView';
-import SharedDirectoryView from './pages/SharedDirectoryView';
-import PublicApplicationStatusView from './pages/PublicApplicationStatusView';
-import SharedProfileView from './pages/SharedProfileView';
-import NotFound from './pages/NotFound';
-import VerifyEmail from './pages/VerifyEmail';
-import AadhaarGuidePage from './pages/AadhaarGuidePage';
-import SmallBusinessLicencePage from './pages/SmallBusinessLicencePage';
-import FireSafetyGuidePage from './pages/FireSafetyGuidePage';
-import TreePermissionGuidePage from './pages/TreePermissionGuidePage';
-import CivicWorksBoard from './pages/CivicWorksBoard';
-import TreeHealthInventory from './pages/TreeHealthInventory';
-import CrematoriumDirectory from './pages/CrematoriumDirectory';
-import FairPriceShopBoard from './pages/FairPriceShopBoard';
-import TenderReadinessWorkspace from './pages/TenderReadinessWorkspace';
-import CommunityFacilityDirectory from './pages/CommunityFacilityDirectory';
-import RoadSafetyDashboard from './pages/RoadSafetyDashboard';
-import LibraryDirectory from './pages/LibraryDirectory';
-import WaterTankerTracker from './pages/WaterTankerTracker';
-import AddressChangePlanner from './pages/AddressChangePlanner';
-import RentalTransitionWorkspace from './pages/RentalTransitionWorkspace';
-import CitizenDraftSyncWorkspace from './pages/CitizenDraftSyncWorkspace';
-import WardBudgetWorkspace from './pages/WardBudgetWorkspace';
-import CivicSurveyWorkspace from './pages/CivicSurveyWorkspace';
-import ServiceAppointmentHeatmapPage from './pages/ServiceAppointmentHeatmapPage';
+const WaterBillVisualizerPage = lazy(() => import('./pages/WaterBillVisualizerPage'));
 
-import WaterBillVisualizerPage from './pages/WaterBillVisualizerPage';
+
 
 const ServiceDetails = lazy(() => import('./pages/ServiceDetails'));
 const Acronyms = lazy(() => import('./pages/Acronyms'));
