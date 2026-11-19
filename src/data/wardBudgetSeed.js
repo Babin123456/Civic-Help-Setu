@@ -1,0 +1,261 @@
+/**
+ * src/data/wardBudgetSeed.js
+ * Default seed dataset for the Participatory Ward Budget Platform (#765).
+ */
+
+export const INITIAL_BUDGET_CYCLE = {
+  id: 'CYCLE-BLR-2026-W150',
+  title: 'Ward 150 (Bellandur) Participatory Citizen Budget 2026-27',
+  fiscalYear: '2026-2027',
+  municipality: 'Bruhat Bengaluru Mahanagara Palike (BBMP)',
+  ward: 'Ward 150 - Bellandur',
+  totalBudgetCap: 50000000, // ₹5 Crore
+  allocatedBudget: 28000000,
+  currency: 'INR',
+  status: 'deliberation_open',
+  schedule: {
+    submissionStart: '2026-10-01',
+    submissionEnd: '2026-11-20',
+    deliberationStart: '2026-11-01',
+    deliberationEnd: '2026-12-05',
+    reviewStart: '2026-11-15',
+    reviewEnd: '2026-12-15',
+    votingStart: '2026-12-16',
+    votingEnd: '2026-12-31',
+  },
+  committeeChair: 'Assistant Executive Engineer (Ward 150)',
+  advisoryDisclaimer: 'Citizen votes and deliberation inputs are advisory under Section 13B of the Municipal Corporation Act to guide Ward Committee allocation decisions.',
+};
+
+export const INITIAL_PROPOSALS = [
+  {
+    id: 'PROP-2026-001',
+    cycleId: 'CYCLE-BLR-2026-W150',
+    title: 'Footpath Restoration and Tactile Paving on 14th Main Road',
+    category: 'roads_footpaths',
+    ward: 'Ward 150 - Bellandur',
+    approximateLocation: '14th Main Road, from Green Glen Layout entrance to Outer Ring Road Junction',
+    summary: 'Construct continuous 1.8m pedestrian footpaths with disabled-friendly ramps and tactile guiding paving.',
+    description: 'The 1.8km stretch along 14th Main currently lacks continuous footpaths, forcing over 4,000 daily metro commuters and school students to walk in mixed traffic. This proposal funds kerb redesign, paver block installation, and bollards preventing two-wheeler encroachment.',
+    costEstimateRange: {
+      min: 1200000,
+      max: 1500000,
+      currency: 'INR',
+      basis: 'Based on BBMP Schedule of Rates 2025-26 for 1.8km pedestrian walkway paving.',
+    },
+    supportingEvidence: [
+      {
+        id: 'EV-01',
+        label: 'Photo survey of missing walkways',
+        type: 'photo_evidence',
+        sizeBytes: 1048576,
+        sourceUrl: 'https://civic-data.gov.in/docs/w150-14main-survey.pdf',
+        description: 'Citizen pedestrian audit conducted in October 2026.',
+      },
+    ],
+    submittedBy: {
+      citizenId: 'CIT-8921',
+      displayName: 'Kavitha R. (Resident)',
+      role: 'citizen',
+    },
+    status: 'approved_for_voting',
+    duplicateClusterId: null,
+    canonicalProposalId: null,
+    metrics: {
+      voteCount: 142,
+      commentCount: 8,
+    },
+    createdAt: '2026-10-15T09:30:00Z',
+    updatedAt: '2026-11-10T14:20:00Z',
+    schemaVersion: '1.0.0',
+  },
+  {
+    id: 'PROP-2026-002',
+    cycleId: 'CYCLE-BLR-2026-W150',
+    title: 'Secondary Stormwater Drain Desilting and Trash Rack Placement',
+    category: 'sanitation_drainage',
+    ward: 'Ward 150 - Bellandur',
+    approximateLocation: 'Kasavanahalli Feeder Canal culvert near Central Jail Road junction',
+    summary: 'Desilting and structural trash rack installation to prevent monsoonal inundation of nearby layouts.',
+    description: 'During moderate downpours, floating solid waste blocks the 3-meter feeder canal culvert, causing stormwater backflow into residential basements in Rainbow Drive and Kasavanahalli. Installing galvanized trash racks and mechanical desilting will alleviate severe flooding risks for 1,200 households.',
+    costEstimateRange: {
+      min: 2400000,
+      max: 2800000,
+      currency: 'INR',
+      basis: 'Hydraulic engineer estimate including 2 galvanized mesh screens and 12-month maintenance.',
+    },
+    supportingEvidence: [
+      {
+        id: 'EV-02',
+        label: 'Flood watermark survey 2026',
+        type: 'technical_memo',
+        sizeBytes: 2048576,
+        sourceUrl: 'https://civic-data.gov.in/docs/kasavanahalli-drainage-2026.pdf',
+        description: 'Joint survey report prepared with Ward Sanitation Inspector.',
+      },
+    ],
+    submittedBy: {
+      citizenId: 'CIT-4412',
+      displayName: 'Venkatraman S. (RWA Representative)',
+      role: 'citizen',
+    },
+    status: 'work_in_progress',
+    duplicateClusterId: null,
+    canonicalProposalId: null,
+    metrics: {
+      voteCount: 289,
+      commentCount: 14,
+    },
+    createdAt: '2026-10-10T08:15:00Z',
+    updatedAt: '2026-11-12T11:00:00Z',
+    schemaVersion: '1.0.0',
+  },
+  {
+    id: 'PROP-2026-003',
+    cycleId: 'CYCLE-BLR-2026-W150',
+    title: 'Solar High-Mast Streetlights for 4 Dark Stretches on Halanayakanahalli Link Road',
+    category: 'street_lighting',
+    ward: 'Ward 150 - Bellandur',
+    approximateLocation: 'Halanayakanahalli Link Road between Carmelaram railway underpass and lake perimeter',
+    summary: 'Install 4 energy-efficient solar high-mast towers with automatic day/night sensors on dark commuter road.',
+    description: 'Over 2.5km of this link road has no streetlight coverage, leading to repeated night-time vehicle collisions and safety concerns for night-shift healthcare and IT workers returning home. Solar standalone poles will operate independently of grid power surges.',
+    costEstimateRange: {
+      min: 750000,
+      max: 950000,
+      currency: 'INR',
+      basis: 'Energy department standard procurement schedule for 4 solar high masts.',
+    },
+    supportingEvidence: [],
+    submittedBy: {
+      citizenId: 'CIT-7731',
+      displayName: 'Dr. Ananya Sen',
+      role: 'citizen',
+    },
+    status: 'submitted',
+    duplicateClusterId: null,
+    canonicalProposalId: null,
+    metrics: {
+      voteCount: 97,
+      commentCount: 5,
+    },
+    createdAt: '2026-11-02T16:45:00Z',
+    updatedAt: '2026-11-02T16:45:00Z',
+    schemaVersion: '1.0.0',
+  },
+  {
+    id: 'PROP-2026-004',
+    cycleId: 'CYCLE-BLR-2026-W150',
+    title: 'Footpath Repair on 14th Main & Concrete Pavers',
+    category: 'roads_footpaths',
+    ward: 'Ward 150 - Bellandur',
+    approximateLocation: '14th Main near Green Glen junction',
+    summary: 'Repair sidewalk along 14th Main Road for walking residents.',
+    description: 'The pavement on 14th Main has broken tiles and needs new concrete blocks so elderly citizens can walk safely.',
+    costEstimateRange: {
+      min: 800000,
+      max: 1100000,
+      currency: 'INR',
+      basis: 'Resident rough estimate.',
+    },
+    supportingEvidence: [],
+    submittedBy: {
+      citizenId: 'CIT-1102',
+      displayName: 'Suresh Kumar',
+      role: 'citizen',
+    },
+    status: 'consolidated_duplicate',
+    duplicateClusterId: 'CLUSTER-14MAIN-FOOTPATH',
+    canonicalProposalId: 'PROP-2026-001',
+    metrics: {
+      voteCount: 18,
+      commentCount: 2,
+    },
+    createdAt: '2026-11-05T10:00:00Z',
+    updatedAt: '2026-11-10T14:20:00Z',
+    schemaVersion: '1.0.0',
+  },
+];
+
+export const INITIAL_COMMENTS = [
+  {
+    id: 'COMM-001',
+    proposalId: 'PROP-2026-001',
+    parentCommentId: null,
+    author: {
+      id: 'CIT-5050',
+      displayName: 'Ayesha Banu',
+      role: 'citizen',
+    },
+    content: 'Very crucial proposal. Please ensure bollards are spaced tightly so two-wheelers do not drive over the new footpaths during peak traffic jams.',
+    moderationStatus: 'visible',
+    createdAt: '2026-10-18T10:15:00Z',
+  },
+  {
+    id: 'COMM-002',
+    proposalId: 'PROP-2026-001',
+    parentCommentId: 'COMM-001',
+    author: {
+      id: 'OFF-101',
+      displayName: 'Junior Engineer (Roads Infrastructure)',
+      role: 'reviewer',
+    },
+    content: 'Thank you for the input. The technical estimate includes cast-iron bollards spaced at 1.0-meter intervals in compliance with IRC-103 pedestrian standards.',
+    moderationStatus: 'visible',
+    createdAt: '2026-10-19T14:30:00Z',
+  },
+  {
+    id: 'COMM-003',
+    proposalId: 'PROP-2026-002',
+    parentCommentId: null,
+    author: {
+      id: 'CIT-9901',
+      displayName: 'K. Parthasarathy',
+      role: 'citizen',
+    },
+    content: 'The trash rack is urgent before the pre-monsoon showers in May. Can we also include a CCTV camera to catch illegal debris dumping?',
+    moderationStatus: 'visible',
+    createdAt: '2026-10-25T11:00:00Z',
+  },
+];
+
+export const INITIAL_DECISIONS = [
+  {
+    id: 'DEC-001',
+    proposalId: 'PROP-2026-001',
+    reviewerId: 'AEE-BLR-150',
+    reviewerRole: 'Executive Engineer',
+    decision: 'approved_for_voting',
+    reasonCode: 'FEASIBILITY_VERIFIED_STANDARDS_MET',
+    publicSummary: 'Proposal fulfills all criteria under Pedestrian Safety & NMT Guidelines. Estimate verified against BBMP SR 2025-26. Approved for citizen ballot.',
+    internalNotes: 'Road widening rights-of-way verified. No utility relocation needed on east side.',
+    decisionDate: '2026-11-08T12:00:00Z',
+  },
+  {
+    id: 'DEC-002',
+    proposalId: 'PROP-2026-004',
+    reviewerId: 'AEE-BLR-150',
+    reviewerRole: 'Executive Engineer',
+    decision: 'merged_as_duplicate',
+    reasonCode: 'CONSOLIDATED_LOCATION_OVERLAP',
+    canonicalProposalId: 'PROP-2026-001',
+    publicSummary: 'Consolidated into canonical proposal PROP-2026-001 which includes a comprehensive 1.8km stretch covering this exact location.',
+    internalNotes: 'Automated clustering suggested duplicate match (89% similarity). Confirmed and merged.',
+    decisionDate: '2026-11-10T14:20:00Z',
+  },
+];
+
+export const INITIAL_IMPLEMENTATION_UPDATES = [
+  {
+    id: 'IMP-001',
+    proposalId: 'PROP-2026-002',
+    milestoneTitle: 'Hydraulic Cleaning & Mesh Screen Fabrication',
+    stage: 'work_in_progress',
+    progressPercent: 45,
+    expenditureToDate: 1250000,
+    targetCompletionDate: '2026-12-20',
+    publicNotes: 'Canal bed desilted over 850 meters. Heavy silt removed to designated quarry dump. Mesh screens undergoing galvanization at foundry.',
+    updatedAt: '2026-11-12T11:00:00Z',
+    updatedBy: 'Ward Technical Officer (Drainage)',
+  },
+];
+

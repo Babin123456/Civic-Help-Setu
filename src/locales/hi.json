@@ -2,6 +2,7 @@
 "nav": {
     "brand": "सिविक सेतु",
     "services": "सेवाएं",
+    "translationWorkspace": "अनुवाद कार्यक्षेत्र",
     "nearby": "निकटवर्ती केंद्र",
     "track": "स्थिति ट्रैक करें",
     "assistant": "एआई सहायक",
@@ -9,7 +10,11 @@
     "saved": "सहेजे गए गाइ드",
     "profile": "मेरी प्रोफ़ाइल",
     "admin": "व्यवस्थापक पोर्टल",
+
     "neighbourhoodResource": "इलाकाई संसाधन आदान-प्रदान",
+
+    "treeHealth": "वृक्ष स्वास्थ्य सूची",
+
     "signIn": "साइन इन करें",
     "signOut": "साइन आउट करें",
     "toggleTheme": "थीम बदलें"
@@ -56,6 +61,35 @@
     "toggle_description": "जटिल कानूनी और प्रशासनिक शब्दों को आसान नागरिक भाषा में समझें",
     "glossary_title": "नागरिक शब्दावली शब्दकोश",
     "search_terms": "कानूनी और नगर निगम शब्दावली खोजें..."
+  },
+  "gram_sabha": {
+    "title": "ग्राम सभा बैठक",
+    "description": "ग्राम पंचायत की सामान्य सभा बैठक जहां गांव के सभी वयस्क निवासी भाग लेते हैं",
+    "agenda": "एजेंडा",
+    "attendance": "उपस्थिति",
+    "resolution": "निर्णय",
+    "meeting_date": "बैठ की तारीख",
+    "source_document": "स्रोत दस्तावेज",
+    "departments": {
+      "basic_education": "बुनियादी शिक्षा",
+      "health": "स्वास्थ्य",
+      "irrigation": "सिंचाई",
+      "rural_development": "ग्रामीण विकास",
+      "panchayati_raj": "पंचायती राज",
+      "animal_husbandry": "पशुपालन",
+      "fisheries": "मत्स्य पालन",
+      "water_supply": "पानी की आपूर्ति"
+    },
+    "quorum": "quorum",
+    "minimum_ attendance": "न्यूनतम उपस्थिति",
+    "citizen_questions": "नागरिक प्रश्न",
+    "submit_questions": "7 दिन पहले प्रश्न जमा करें",
+    "max_questions": "एक बैठक में अधिकतम 5 प्रश्न",
+    "action_taken": "कार्य किया गया",
+    "next_update": "अद्यतन",
+    "missing_minutes": "मिनट्स उपलब्ध नहीं",
+    "rti_guidance": "RTI मार्गदर्शन",
+    "correction_route": "सुधार रास्ता"
   },
   "footer": {
     "tagline": "नागरिकों को सरकारी और सार्वजनिक सेवाओं को स्पष्टता, स्वाभिमान और सत्यापित मार्गदर्शन के साथ समझने में सहायक मंच।",

@@ -63,6 +63,9 @@ const COMMON_CIVIC_DICTIONARY = [
   'scholarship',
 ];
 
+// A record with a malformed list field (an object instead of an array) must not crash the search.
+const asList = (value) => (Array.isArray(value) ? value : []);
+
 const addSuggestion = (suggestions, value, kind, priority) => {
   const label = String(value || '').trim();
   if (!label) return;
@@ -86,7 +89,7 @@ export const getSearchSuggestions = (services = [], query = '', limit = 6) => {
     addSuggestion(candidates, service.name, 'Service', 0);
     addSuggestion(candidates, service.category, 'Category', 1);
     addSuggestion(candidates, service.department, 'Department', 2);
-    (service.documents || []).forEach((document) => {
+    asList(service.documents).forEach((document) => {
       addSuggestion(candidates, document, 'Document', 3);
     });
   });
@@ -168,8 +171,8 @@ export const calculateServiceRelevance = (service, query) => {
   const descLower = (service.shortDescription || '').toLowerCase();
   const catLower = (service.category || '').toLowerCase();
   const deptLower = (service.department || '').toLowerCase();
-  const docs = (service.documents || []).map((d) => d.toLowerCase());
-  const eligibility = (service.eligibility || []).map((e) => e.toLowerCase());
+  const docs = asList(service.documents).map((d) => String(d).toLowerCase());
+  const eligibility = asList(service.eligibility).map((e) => String(e).toLowerCase());
 
   // 1. Exact phrase match
   if (nameLower.includes(q)) score += 25;
