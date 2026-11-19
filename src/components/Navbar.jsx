@@ -1094,6 +1094,12 @@ if (normalizedTarget === '/water-quality') {
               })}
 
               {renderNavLink({
+                to: '/route-planning',
+                label: 'Route Planning & Audit',
+                icon: Route
+              })}
+
+              {renderNavLink({
                 to: '/clinical-establishment-workspace',
                 label: 'Clinical Establishment & Patient Rights',
                 icon: HeartPulse
@@ -1139,6 +1145,12 @@ if (normalizedTarget === '/water-quality') {
                 to: '/synthetic-datasets',
                 label: 'Synthetic Dataset Generator',
                 icon: Database
+              })}
+
+              {renderNavLink({
+                to: '/civic-data-api',
+                label: 'Civic Data API',
+                icon: KeyRound
               })}
 
               {renderNavLink({
@@ -1205,6 +1217,13 @@ if (normalizedTarget === '/water-quality') {
               })}
 
               {renderNavLink({
+                to: '/relief-operations',
+                activeTarget: '/relief-operations',
+                label: t('nav.reliefOperations', 'Disaster Relief Operations'),
+                icon: HeartHandshake
+              })}
+
+              {renderNavLink({
                 to: '/ghg-inventory',
                 activeTarget: '/ghg-inventory',
                 label: t('nav.ghgInventory', 'GHG Inventory'),
@@ -1215,6 +1234,12 @@ if (normalizedTarget === '/water-quality') {
                 to: '/assistant',
                 label: t('nav.assistant', 'AI Assistant'),
                 icon: Bot
+              })}
+
+              {renderNavLink({
+                to: '/translation-workspace',
+                label: t('nav.translationWorkspace', 'Translation Workspace'),
+                icon: KeyRound
               })}
             </div>
 

@@ -104,13 +104,34 @@ npx vitest run src/services/publicProjectService.test.js       # public project 
 npx vitest run src/services/evidenceVerificationService.test.js # evidence integrity & CV advisory tests (#752)
 npx vitest run tests/public-projects.test.js                 # public project serverless API & abuse tests (#752)
 npx vitest run src/pages/PublicProjectsWorkspace.test.jsx      # public project workspace UI & a11y tests (#752)
+npx vitest run src/services/routePlanning/service.test.js       # waste collection route planning service & optimization tests (#755)
+npx vitest run src/services/routePlanning/migrations.test.js    # route planning schema migration & rollback tests (#755)
+npx vitest run tests/route-planning-security.test.js            # route planning anti-PII, injection & tamper tests (#755)
+npx vitest run src/pages/RoutePlanningWorkspace.test.jsx        # route planning workspace UI & accessibility tests (#755)
 ```
+
+Architecture, data model, vehicle capacity optimization, segregation audit seals, and privacy safeguards for municipal waste collection route planning are documented in [docs/route-planning-architecture.md](docs/route-planning-architecture.md) (#755).
 
 Architecture, data model, state machines, CV discrepancy policy, and rollback strategy for public projects are documented in [docs/geospatial-public-projects.md](docs/geospatial-public-projects.md).
 
 Architecture, data model, roles, triage boundaries, CSV format, migrations and operational limits for the tree inventory are documented in [docs/tree-health-inventory.md](docs/tree-health-inventory.md).
 Water quality standards (IS 10500:2012), data models, cryptographic seals, and audit runbooks are documented in [docs/water-quality-register.md](docs/water-quality-register.md).
 Architecture, data model, k-anonymity privacy safeguards, explainable recommendations, and test suites for the Anonymized Ward-Level Civic Issue Heatmap are documented in [docs/ANONYMIZED_WARD_ISSUE_HEATMAP.md](docs/ANONYMIZED_WARD_ISSUE_HEATMAP.md) (#763).
+
+Relief operations (#747) — need intake, verification, deterministic forecasting,
+transactional stock reservations, human approval, dispatch, delivery
+confirmation, audit and public projections:
+```bash
+npx vitest run src/services/reliefOperationsService.test.js       # workflow, RBAC, transactions, duplicates, PII
+npx vitest run src/services/reliefForecastEngine.test.js          # clustering, forecast, fallback, medical boundary
+npx vitest run src/services/reliefOperationsMigrations.test.js    # empty DB, legacy data, rollback, retention
+npx vitest run src/pages/ReliefOperationsWorkspace.test.jsx       # page and component/accessibility tests
+npx vitest run tests/relief-operations-api.test.js                # public API validation, abuse and privacy
+```
+
+Architecture, data model, state machines, role/capability matrix, forecast
+boundaries, threat model, retention, rollback and the manual acceptance script
+are documented in [docs/RELIEF_OPERATIONS.md](docs/RELIEF_OPERATIONS.md).
 
 ## Security checks
 Every PR runs a secret scan, a dependency audit and a lint for unsafe HTML/JS patterns. Locally:

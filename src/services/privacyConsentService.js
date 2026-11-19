@@ -52,6 +52,8 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_saved_rich', category: 'saved', exportAs: 'savedServices', empty: [] }, // savedStorage.js
   { key: 'civicbridge_saved', category: 'saved', exportAs: 'savedServiceBookmarks', empty: [] }, // ServiceDetails.jsx, savedStorage.js
   { key: 'civicbridge_applications', category: 'tracking', exportAs: 'trackedApplications', empty: [] }, // trackingService.js
+  { key: 'civicbridge_application_events_v1', category: 'tracking', exportAs: null, empty: [] }, // applicationEventService.js
+  { key: 'civicbridge_event_inconsistency_reports_v1', category: 'activity', exportAs: null, empty: [] }, // applicationEventService.js
   { key: 'civicbridge_office_tokens', category: 'tracking', exportAs: 'officeAppointments', empty: [] }, // locationService.js
   { key: 'civic_service_reviews', category: 'activity', exportAs: 'serviceReviews', empty: [] }, // reviewStorage.js
   { key: 'civicbridge_reminders', category: 'tracking', exportAs: 'activeReminders', empty: [] }, // reminderNotificationService.js
@@ -307,6 +309,22 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_legal_sources_v1',
   'civicbridge_legal_draft_snapshots_v1',
   'civicbridge_legal_sources_audit_v1',
+  // Disaster relief needs and resource allocation (#747). These are public-authority
+  // operating records: free text is PII-scanned on intake, public projections are
+  // allow-listed, and terminal need reports are anonymised by the module's own
+  // retention policy rather than deleted from an active relief ledger.
+  'civic_relief_incidents_v1',
+  'civic_relief_need_reports_v1',
+  'civic_relief_resource_inventory_v1',
+  'civic_relief_stock_movements_v1',
+  'civic_relief_distribution_sites_v1',
+  'civic_relief_allocation_proposals_v1',
+  'civic_relief_delivery_confirmations_v1',
+  'civic_relief_partner_verifications_v1',
+  'civic_relief_forecast_runs_v1',
+  'civic_relief_audit_logs_v1',
+  'civic_relief_archive_v1',
+  'civic_relief_meta_v1',
   // Handled by purge itself: consents are reset, the audit log keeps the deletion receipt
   CONSENT_STORAGE_KEY,
   AUDIT_STORAGE_KEY,
