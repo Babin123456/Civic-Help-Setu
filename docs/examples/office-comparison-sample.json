@@ -1,0 +1,168 @@
+{
+  "_note": "SYNTHETIC REVIEW DATA ONLY. These offices, contacts and URLs are invented for issue #824 fixtures and documentation. They do not describe real government offices and are not loaded by the app as real registry data.",
+  "dataVersion": "office-registry-2026-11-18.1",
+  "query": {
+    "serviceId": "driving-license",
+    "state": "Delhi",
+    "district": "South Delhi",
+    "page": 1,
+    "pageSize": 6
+  },
+  "service": {
+    "id": "driving-license",
+    "name": "Driving License",
+    "jurisdiction": {
+      "level": "national",
+      "states": [],
+      "districts": [],
+      "localBody": ""
+    },
+    "officialSources": [
+      {
+        "name": "Synthetic transport department source",
+        "url": "https://transport.example.gov.in/driving-licence",
+        "verified": true,
+        "lastVerified": "2026-11-12"
+      }
+    ]
+  },
+  "offices": [
+    {
+      "id": "sample-alpha-rto",
+      "name": "SAMPLE ONLY - Alpha RTO",
+      "category": "Transport",
+      "type": "Regional Transport Office",
+      "channels": ["in-person", "phone"],
+      "serviceIds": ["driving-license"],
+      "state": "Delhi",
+      "district": "South Delhi",
+      "city": "New Delhi",
+      "pincode": "110001",
+      "address": "1 Synthetic Road, New Delhi",
+      "landmark": "Next to the sample test fixture",
+      "coordinates": { "lat": 28.6, "lng": 77.2 },
+      "coordinateVerification": {
+        "verified": true,
+        "sourceUrl": "https://transport.example.gov.in/alpha-location",
+        "verifiedOn": "2026-11-10",
+        "sourceName": "Synthetic office location register"
+      },
+      "contact": {
+        "phone": "+91 11 0000 0001",
+        "helpline": "1000",
+        "email": "alpha@example.gov.in",
+        "portalUrl": "https://transport.example.gov.in/alpha"
+      },
+      "officeHours": {
+        "days": "Monday to Friday",
+        "hours": "09:30 AM - 05:30 PM",
+        "openSaturdays": false
+      },
+      "accessibility": {
+        "wheelchairRamp": true,
+        "elevator": true,
+        "accessibleRestroom": false,
+        "brailleSignage": true,
+        "assistiveListening": null,
+        "signLanguageSupport": null,
+        "tactilePaving": true,
+        "accessibleParking": true
+      },
+      "auditMetadata": {
+        "verifiedBy": "Synthetic transport audit",
+        "reviewDate": "2026-11-01",
+        "sourceUrl": "https://transport.example.gov.in/alpha-audit"
+      }
+    },
+    {
+      "id": "sample-beta-rto",
+      "name": "SAMPLE ONLY - Beta RTO",
+      "category": "Transport",
+      "type": "Regional Transport Office",
+      "channels": ["in-person"],
+      "serviceIds": ["driving-license"],
+      "state": "Delhi",
+      "district": "South Delhi",
+      "city": "New Delhi",
+      "pincode": "110002",
+      "address": "2 Synthetic Road, New Delhi",
+      "landmark": "Opposite the sample test fixture",
+      "coordinates": { "lat": 28.61, "lng": 77.21 },
+      "contact": {
+        "phone": "+91 11 0000 0002",
+        "portalUrl": "https://transport.example.gov.in/beta"
+      },
+      "officeHours": {
+        "days": "Monday to Friday",
+        "hours": "10:00 AM - 04:00 PM",
+        "openSaturdays": false
+      },
+      "accessibility": {
+        "wheelchairRamp": true,
+        "elevator": null,
+        "accessibleRestroom": null,
+        "brailleSignage": null,
+        "assistiveListening": null,
+        "signLanguageSupport": null,
+        "tactilePaving": null,
+        "accessibleParking": null
+      },
+      "auditMetadata": {
+        "verifiedBy": "Old synthetic audit",
+        "reviewDate": "2025-01-01",
+        "sourceUrl": "https://transport.example.gov.in/beta-old-audit"
+      }
+    },
+    {
+      "id": "sample-gamma-office",
+      "name": "SAMPLE ONLY - Gamma Municipal Office",
+      "category": "Municipal",
+      "type": "Municipal Office",
+      "channels": ["in-person"],
+      "serviceIds": [],
+      "state": "Delhi",
+      "district": "South Delhi",
+      "city": "New Delhi",
+      "pincode": "110003",
+      "address": "3 Synthetic Road, New Delhi",
+      "landmark": "Near the sample review fixture",
+      "coordinates": { "lat": 28.62, "lng": 77.22 },
+      "contact": {},
+      "officeHours": {},
+      "accessibility": {},
+      "auditMetadata": {}
+    }
+  ],
+  "expectedRanking": [
+    {
+      "officeId": "sample-alpha-rto",
+      "status": "VERIFIED_MATCH",
+      "score": 1,
+      "reason": "Lists the service, the national guide applies, and the record is dated and fresh."
+    },
+    {
+      "officeId": "sample-beta-rto",
+      "status": "STALE_MATCH",
+      "score": 0.9,
+      "reason": "Lists the service and the national guide applies, but the 2025-01-01 audit is older than 180 days."
+    },
+    {
+      "officeId": "sample-gamma-office",
+      "status": "JURISDICTION_ONLY",
+      "score": 0.32,
+      "reason": "In the service jurisdiction, but no service capability is recorded."
+    }
+  ],
+  "expectedUnknownFields": {
+    "sample-gamma-office": {
+      "contactChannels": [],
+      "contactVerified": false,
+      "accessibilityValues": "all null / Unknown",
+      "verificationStatus": "unknown",
+      "coordinatesVerified": false,
+      "mapPin": false
+    }
+  },
+  "expectedMapPins": ["sample-alpha-rto"],
+  "expectedNoMapPins": ["sample-beta-rto", "sample-gamma-office"]
+}

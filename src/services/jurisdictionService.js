@@ -1,4 +1,4 @@
-import { INDIAN_STATES_AND_UTS, JURISDICTION_LEVELS, JURISDICTION_LEVEL_LABELS } from '../data/jurisdictions';
+import { INDIAN_STATES_AND_UTS, JURISDICTION_LEVELS, JURISDICTION_LEVEL_LABELS } from '../data/jurisdictions.js';
 
 /**
  * Service applicability by jurisdiction (#260).
