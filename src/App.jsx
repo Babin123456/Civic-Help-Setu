@@ -46,6 +46,7 @@ import AadhaarGuidePage from './pages/AadhaarGuidePage';
 import SmallBusinessLicencePage from './pages/SmallBusinessLicencePage';
 import FireSafetyGuidePage from './pages/FireSafetyGuidePage';
 import TreePermissionGuidePage from './pages/TreePermissionGuidePage';
+import NationalCivicDocumentHub from './pages/NationalCivicDocumentHub';
 import CivicWorksBoard from './pages/CivicWorksBoard';
 import TreeHealthInventory from './pages/TreeHealthInventory';
 import CrematoriumDirectory from './pages/CrematoriumDirectory';
@@ -100,6 +101,8 @@ function AppRoot() {
                       <Route path="/services" element={<Suspense fallback={<ServicesFallback />}><Services /></Suspense>} />
                       <Route path="/services/aadhaar-guide" element={<AadhaarGuidePage />} />
                       <Route path="/aadhaar-guide" element={<AadhaarGuidePage />} />
+                      <Route path="/national-civic-document-hub" element={<NationalCivicDocumentHub />} />
+                      <Route path="/national-civic-document-hub/" element={<NationalCivicDocumentHub />} />
                       <Route path="/services/business-licence-checklist" element={<SmallBusinessLicencePage />} />
                       <Route path="/business-licence-checklist" element={<SmallBusinessLicencePage />} />
                       <Route path="/services/fire-noc-guide" element={<FireSafetyGuidePage />} />
