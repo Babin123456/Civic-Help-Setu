@@ -11,25 +11,21 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useToast } from '../contexts/toastContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { useToast } from '../../context/ToastContext';
 import { useResourceExchange } from '../../hooks/useResourceExchange';
-import { useAuth } from '../../contexts/authContext';
-import { Icon } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import { ITEM_CATEGORIES, AVAILABILITY_WINDOWS, RESOURCE_LISTING_STATES } from '../../data/resourceContract';
-import Spinner from '../common/Spinner';
-import Skeleton from '../common/Skeleton';
-import ListingCard from '../resource-exchange/ListingCard';
-import RequestForm from '../resource-exchange/RequestForm';
+import ListingCard from './ListingCard';
+import RequestForm from './RequestForm';
 import { checkPermission, can } from '../../services/accessControl';
-import { useRouteStatus } from '../../hooks/useRouteStatus';
 
 const ResourceExchangePage = () => {
-  const { t } = useTranslation();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { user, role } = useAuth();
-  const { data: routeStatus = {} } = useRouteStatus();
+  const { toast } = useToast() || {};
   const { listings, loadListings, loadMoreListings, hasMore, loading, error, refetch } = useResourceExchange(
     'listings'
   );
@@ -140,10 +136,10 @@ const ResourceExchangePage = () => {
         });
         refetch();
       } else {
-        useToast()(('error', result.errors?.[0]?.reason || t('errors.submission_failed')));
+        toast?.error(result.errors?.[0]?.reason || t('errors.submission_failed'));
       }
     } catch (err) {
-      useToast()(('error', t('errors.submission_failed')));
+      toast?.error(t('errors.submission_failed'));
     } finally {
       setCreatingRequest(false);
     }
@@ -152,8 +148,7 @@ const ResourceExchangePage = () => {
   if (loading) {
     return (
       <div style={{ padding: '2rem' }}>
-        <Spinner aria-label={t('loading_resources')} />
-        <p>{t('loading_resources')}</p>
+        <p>{t('loading_resources', 'Loading resources…')}</p>
       </div>
     );
   }
@@ -227,7 +222,7 @@ const ResourceExchangePage = () => {
 
       {/* Listings grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-        {loading && <Skeleton rows={8} />}
+        {loading && <p>{t('loading_resources', 'Loading resources…')}</p>}
         {error && <p>{t('error_loading_resources', { error })}</p>}
         {listings.length === 0 && (
           <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
@@ -292,7 +287,7 @@ const ResourceExchangePage = () => {
                 rows={3}
                 style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border-main)', resize: 'vertical' }}
                 required
-              /></textarea>
+              />
             </div>
             <div style={{ gridTemplateAreas: '"condition" "availability" "pickup" "expires"', gridTemplateColumns: '1fr 1fr 1fr 1fr' }}>
               <div>

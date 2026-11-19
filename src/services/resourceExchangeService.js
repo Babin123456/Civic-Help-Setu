@@ -13,10 +13,9 @@
  *  - Rate-limited public submissions to prevent abuse
  */
 
-import { SCHEMA_VERSION, ITEM_CATEGORIES, ITEM_CONDITIONS, AVAILABILITY_WINDOWS, REQUEST_STATES, HANDOVER_STATES, MODERATION_FLAGS_TYPES, RESOURCE_LISTING_STATES } from '../data/resourceContract.js';
+import { SCHEMA_VERSION, ITEM_CATEGORIES, ITEM_CONDITIONS, AVAILABILITY_WINDOWS, REQUEST_STATES, HANDOVER_STATES, MODERATION_FLAGS_TYPES, RESOURCE_LISTING_STATES, isValidCategory, isValidCondition, isValidAvailabilityWindow, isValidRequestState, isValidHandoverState, isValidModerationFlagType, isValidResourceListingState } from '../data/resourceContract.js';
 import { validateResourceListing, validateExchangeRequest, validateHandoverConfirmation, validateModerationFlag, validateResourceCatalogue, validateExchangeCatalogue, validateHandoverCatalogue, validateModerationCatalogue, formatContractError } from '../data/resourceContract.js';
 import { createRateLimiter } from './rateLimiter.js';
-import { generateId, generateSeal } from './idService.js';
 
 // Public submission rate limiter (max 5 submissions per 10 minutes per IP)
 export const publicSubmissionLimiter = createRateLimiter({ limit: 5, windowMs: 10 * 60 * 1000 });
@@ -330,6 +329,7 @@ export function createModerationFlag(flag) {
   const record = {
     ...flag,
     schemaVersion: flag.schemaVersion ?? SCHEMA_VERSION,
+    state: flag.state ?? 'pending',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -409,4 +409,4 @@ export function appendAuditLog(action, target, details = '') {
   return auditEntry;
 }
 
-export { isValidCategory, isValidCondition, isValidAvailabilityWindow, isValidRequestState, isValidHandoverState, isValidModerationFlagType, isValidResourceListingState };
+export { SCHEMA_VERSION, isValidCategory, isValidCondition, isValidAvailabilityWindow, isValidRequestState, isValidHandoverState, isValidModerationFlagType, isValidResourceListingState };

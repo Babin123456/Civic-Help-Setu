@@ -55,13 +55,14 @@ export const RESOURCE_LISTING_STATES = [
 export const SCHEMA_VERSION = 2;
 
 // Validation helpers
-const isValidCategory = (v) => typeof v === 'string' && ITEM_CATEGORIES.includes(v);
-const isValidCondition = (v) => typeof v === 'string' && ITEM_CONDITIONS.includes(v);
-const isValidAvailabilityWindow = (v) => typeof v === 'string' && AVAILABILITY_WINDOWS.includes(v);
-const isValidRequestState = (v) => typeof v === 'string' && REQUEST_STATES.includes(v);
-const isValidHandoverState = (v) => typeof v === 'string' && HANDOVER_STATES.includes(v);
-const isValidModerationFlagType = (v) => typeof v === 'string' && MODERATION_FLAGS_TYPES.includes(v);
-const isValidResourceListingState = (v) => typeof v === 'string' && RESOURCE_LISTING_STATES.includes(v);
+export const isValidCategory = (v) => typeof v === 'string' && ITEM_CATEGORIES.includes(v);
+export const isValidCondition = (v) => typeof v === 'string' && ITEM_CONDITIONS.includes(v);
+export const isValidAvailabilityWindow = (v) => typeof v === 'string' && AVAILABILITY_WINDOWS.includes(v);
+export const isValidRequestState = (v) => typeof v === 'string' && REQUEST_STATES.includes(v);
+export const isValidHandoverState = (v) => typeof v === 'string' && HANDOVER_STATES.includes(v);
+export const isValidModerationFlagType = (v) => typeof v === 'string' && MODERATION_FLAGS_TYPES.includes(v);
+export const isValidResourceListingState = (v) => typeof v === 'string' && RESOURCE_LISTING_STATES.includes(v);
+export const isValidSchemaVersion = (v) => v === SCHEMA_VERSION || v === String(SCHEMA_VERSION);
 
 const isText = (v) => typeof v === 'string' && v.trim().length > 0;
 const isTextList = (v) => Array.isArray(v) && v.every(isText);
@@ -114,14 +115,16 @@ export function validateResourceListing(record) {
   if (!isText(record.expiresAt)) fail('expiresAt', 'is required and must be a valid date');
   if (!isText(record.state)) fail('state', `must be one of: ${RESOURCE_LISTING_STATES.join(', ')}`);
   if (!isText(record.createdBy)) fail('createdBy', 'is required and must be a non-empty string');
-  if (!isText(record.schemaVersion)) fail('schemaVersion', 'is required and must be a non-empty string');
+  if (!isValidSchemaVersion(record.schemaVersion)) fail('schemaVersion', `must be ${SCHEMA_VERSION}`);
 
   // Validate timestamps
-  const createdAt = new Date(record.createdAt);
-  const expiresAt = new Date(record.expiresAt);
-  if (isNaN(createdAt.getTime())) fail('createdAt', 'must be a valid date');
-  if (isNaN(expiresAt.getTime())) fail('expiresAt', 'must be a valid date');
-  if (!isNaN(expiresAt.getTime()) && expiresAt <= createdAt) fail('expiresAt', 'must be after createdAt');
+  const createdAt = record.createdAt ? new Date(record.createdAt) : null;
+  const expiresAt = record.expiresAt ? new Date(record.expiresAt) : null;
+  if (createdAt && isNaN(createdAt.getTime())) fail('createdAt', 'must be a valid date');
+  if (expiresAt && isNaN(expiresAt.getTime())) fail('expiresAt', 'must be a valid date');
+  if (createdAt && expiresAt && !isNaN(createdAt.getTime()) && !isNaN(expiresAt.getTime()) && expiresAt <= createdAt) {
+    fail('expiresAt', 'must be after createdAt');
+  }
 
   return errors;
 }
@@ -157,12 +160,12 @@ export function validateExchangeRequest(record) {
   if (!isText(record.id)) fail('id', 'is required and must be a non-empty string');
   if (!isText(record.listingId)) fail('listingId', 'is required and must reference a ResourceListing');
   if (!isText(record.requesterId)) fail('requesterId', 'is required and must be a non-empty string');
-  if (!isText(record.responderId)) fail('responderId', 'is required and must be a non-empty string');
+  if (record.responderId && !isText(record.responderId)) fail('responderId', 'must be a non-empty string');
   if (!isValidRequestState(record.state)) fail('state', `must be one of: ${REQUEST_STATES.join(', ')}`);
   if (!isText(record.handoverLocation)) fail('handoverLocation', 'is required and must be a non-empty string');
   if (!isText(record.handoverWindow)) fail('handoverWindow', 'is required and must be a non-empty string');
   if (!isText(record.statusMessage)) fail('statusMessage', 'is required and must be a non-empty string');
-  if (!isText(record.schemaVersion)) fail('schemaVersion', 'is required and must be a non-empty string');
+  if (!isValidSchemaVersion(record.schemaVersion)) fail('schemaVersion', `must be ${SCHEMA_VERSION}`);
 
   return errors;
 }
@@ -201,7 +204,7 @@ export function validateHandoverConfirmation(record) {
   if (!isText(record.handoverLocation)) fail('handoverLocation', 'is required and must be a non-empty string');
   if (!isText(record.confirmedAt)) fail('confirmedAt', 'is required and must be a valid date');
   if (!isValidHandoverState(record.state)) fail('state', `must be one of: ${HANDOVER_STATES.join(', ')}`);
-  if (!isText(record.schemaVersion)) fail('schemaVersion', 'is required and must be a non-empty string');
+  if (!isValidSchemaVersion(record.schemaVersion)) fail('schemaVersion', `must be ${SCHEMA_VERSION}`);
 
   return errors;
 }
@@ -234,12 +237,13 @@ export function validateModerationFlag(record) {
   }
   scanForbidden(record, '');
 
+  const listingId = record.resourceListingId || record.listingId;
+  const flagType = record.type || record.flagType;
   if (!isText(record.id)) fail('id', 'is required and must be a non-empty string');
-  if (!isText(resourceListingId)) fail('resourceListingId', 'is required and must reference a ResourceListing');
-  if (!isValidModerationFlagType(record.type)) fail('type', `must be one of: ${MODERATION_FLAGS_TYPES.join(', ')}`);
+  if (!isText(listingId)) fail('resourceListingId', 'is required and must reference a ResourceListing');
+  if (!isValidModerationFlagType(flagType)) fail('type', `must be one of: ${MODERATION_FLAGS_TYPES.join(', ')}`);
   if (!isText(record.reason)) fail('reason', 'is required and must be a non-empty string');
-  if (!isText(record.claimedBy)) fail('claimedBy', 'is required and must be a non-empty string');
-  if (!isText(record.schemaVersion)) fail('schemaVersion', 'is required and must be a non-empty string');
+  if (!isValidSchemaVersion(record.schemaVersion)) fail('schemaVersion', `must be ${SCHEMA_VERSION}`);
 
   return errors;
 }

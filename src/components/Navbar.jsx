@@ -27,7 +27,7 @@ import {
   KeyRound,
   Store,
 
-  Gift
+  Gift,
 
   Database,
   Building2,
@@ -1007,14 +1007,15 @@ if (normalizedTarget === '/water-quality') {
               })}
 
               {renderNavLink({
-
                 to: '/neighbourhood-resource-exchange',
                 label: t('nav.neighbourhoodResource', 'Neighbourhood Resource Exchange'),
-                icon: Gift
+                icon: Gift,
+              })}
 
+              {renderNavLink({
                 to: '/public-toilets',
                 label: 'Public Toilets',
-                icon: MapPin
+                icon: MapPin,
               })}
 
               {renderNavLink({

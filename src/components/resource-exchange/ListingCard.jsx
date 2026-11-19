@@ -4,13 +4,11 @@
  * Accessible: semantic markup, screen-reader labels, keyboard focus.
  */
 
-import { useTranslation } from 'react-i18next';
-import { useBadgeAccessibility } from '../../hooks/useBadgeAccessibility';
+import { useLanguage } from '../../context/LanguageContext';
 import { ITEM_CONDITIONS, AVAILABILITY_WINDOWS } from '../../data/resourceContract';
-import { Icon } from 'lucide-react';
 
 const ListingCard = ({ listing, canRequest, onRequest, t }) => {
-  const { t: translate } = useTranslation();
+  const { t: translate } = useLanguage();
   const categoryLabel = translate(listing.category) || listing.category;
   const conditionLabel = translate(listing.condition) || listing.condition;
   const availabilityLabel = translate(listing.availabilityWindow) || listing.availabilityWindow;
@@ -28,6 +26,12 @@ const ListingCard = ({ listing, canRequest, onRequest, t }) => {
 
   return (
     <div
+      role="region"
+      aria-label={`${translate('listing_card_aria', {
+        title: listing.title,
+        category: categoryLabel,
+        state: stateLabel,
+      })}`}
       style={{
         border: '1px solid var(--border-main)',
         borderRadius: '0.75rem',
@@ -35,13 +39,6 @@ const ListingCard = ({ listing, canRequest, onRequest, t }) => {
         padding: '1.5rem',
         marginBottom: '1rem',
         transition: 'box-shadow 0.2s',
-        ':hover': { boxShadow: 'var(--shadow-hover)' },
-        role: 'region',
-        aria-label: `${translate('listing_card_aria', {
-          title: listing.title,
-          category: categoryLabel,
-          state: stateLabel,
-        })}`,
       }}
     >
       {/* Header with category badge */}

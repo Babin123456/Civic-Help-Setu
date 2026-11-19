@@ -4,14 +4,13 @@
  * Accessible: semantic labels, keyboard operation, screen-reader announcements.
  */
 
-import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '../contexts/toastContext';
-import { Icon } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
+import { useToast } from '../../context/ToastContext';
 
 const RequestForm = ({ listing, onClose, onSubmit }) => {
-  const { t } = useTranslation();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     handoverLocation: '',
@@ -100,7 +99,7 @@ const RequestForm = ({ listing, onClose, onSubmit }) => {
               width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border-main)', resize: 'vertical',
             }}
             required
-          /></textarea>
+          />
         </div>
 
         <button
