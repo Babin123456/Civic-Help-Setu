@@ -1,56 +1,5 @@
 {
   "indexes": [
-
-    // shelter_sites indexes
-    {
-      "collectionGroup": "shelter_sites",
-      "fields": [
-        { "fieldPath": "status", "mode": "ASC" },
-        { "fieldPath": "jurisdiction", "mode": "ASC" },
-        { "fieldPath": "accessibility.wheelchairAccessible", "mode": "ASC" },
-        { "fieldPath": "accessibility.hearingImpaired", "mode": "ASC" },
-        { "fieldPath": "accessibility.visuallyImpaired", "mode": "ASC" },
-        { "fieldPath": "capacityTotal", "mode": "DESC" },
-        { "fieldPath": "createdAt", "mode": "DESC" }
-      ]
-    },
-    // capacity_snapshots indexes
-    {
-      "collectionGroup": "capacity_snapshots",
-      "fields": [
-        { "fieldPath": "shelterSiteId", "mode": "ASC" },
-        { "fieldPath": "occupancyRate", "mode": "DESC" },
-        { "fieldPath": "createdAt", "mode": "DESC" }
-      ]
-    },
-    // facility_services indexes
-    {
-      "collectionGroup": "facility_services",
-      "fields": [
-        { "fieldPath": "shelterSiteId", "mode": "ASC" },
-        { "fieldPath": "serviceType", "mode": "ASC" },
-        { "fieldPath": "status", "mode": "ASC" },
-        { "fieldPath": "createdAt", "mode": "DESC" }
-      ]
-    },
-    // status_events indexes
-    {
-      "collectionGroup": "status_events",
-      "fields": [
-        { "fieldPath": "shelterSiteId", "mode": "ASC" },
-        { "fieldPath": "eventType", "mode": "ASC" },
-        { "fieldPath": "createdAt", "mode": "DESC" }
-      ]
-    },
-    // verification_checks indexes
-    {
-      "collectionGroup": "verification_checks",
-      "fields": [
-        { "fieldPath": "shelterSiteId", "mode": "ASC" },
-        { "fieldPath": "checkType", "mode": "ASC" },
-        { "fieldPath": "status", "mode": "ASC" },
-        { "fieldPath": "createdAt", "mode": "DESC" }
-
     {
       "collectionGroup": "publicProjects",
       "queryScope": "COLLECTION",
@@ -75,7 +24,6 @@
       "fields": [
         { "fieldPath": "projectId", "order": "ASCENDING" },
         { "fieldPath": "sequenceOrder", "order": "ASCENDING" }
-
       ]
     }
   ],
