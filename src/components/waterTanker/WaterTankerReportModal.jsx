@@ -5,7 +5,7 @@ import {
   Send,
   CheckCircle,
 } from 'lucide-react';
-import { REPORT_TYPES } from '../../../api/water-tanker-reports.js';
+import { REPORT_TYPES } from '../../constants/waterTanker.js';
 import { useToast } from '../../context/ToastContext';
 
 const REPORT_TYPE_LABELS = {
