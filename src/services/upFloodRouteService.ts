@@ -13,7 +13,6 @@ import {
   DEFAULT_HELPLINE,
 } from '../data/upFloodRoutes';
 import { EMERGENCY_SURVIVAL_CHECKLIST } from '../data/emergencyReliefData';
-import { localStorageService } from './localStorageService';
 
 const CACHE_KEY = 'civicbridge_upflood_route_plan';
 
