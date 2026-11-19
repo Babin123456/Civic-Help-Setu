@@ -10,6 +10,7 @@ import {
   expireOldObservations,
   generatePreparednessList,
   generateTextRouteDirectory,
+  setSegmentBlockage as updateSegmentBlockage,
 } from '../../services/upFloodRouteService';
 import {
   RouteSegment,
@@ -38,11 +39,13 @@ export default function UpFloodRoutePlanner() {
   const [helpline, setHelpline] = useState<string>('');
   const [blockedSegments, setBlockedSegments] = useState<string[]>([]);
   const [showPreparedness, setShowPreparedness] = useState(false);
+  const [selectedSegmentId, setSelectedSegmentId] = useState('');
 
   // Load data on mount
   useEffect(() => {
     const plan = getRoutePlan();
     setRoutePlan(plan);
+    setSelectedSegmentId(plan?.primaryRoute?.[0]?.id || '');
     setShelters(plan ? plan.shelters : []);
     setEmergencyContact(plan ? getOfficialEmergencyContact() : '');
     setHelpline(plan ? getHelpline() : '');
@@ -124,7 +127,7 @@ export default function UpFloodRoutePlanner() {
               ? 'One or more primary route segments are officially blocked. Do NOT use these routes for evacuation.'
               : 'Route(s) have community-reported blockages that need verification. Proceed with caution.'}
           </p>
-          <ul className "text-sm text-red-600 mt-2">
+          <ul className="text-sm text-red-600 mt-2">
             {blockedSegments.map((id) => {
               const seg = routePlan?.primaryRoute.find((s) => s.id === id);
               return (
@@ -156,7 +159,7 @@ export default function UpFloodRoutePlanner() {
           time-expired unless revalidated). Official routes are from the district
           disaster-management authority; community reports are unverified and expire
           after 7 days unless revalidated by an approved local responder.
-        </div>
+        </p>
 
         <div className="overflow-x-auto">
           <table className="w-full border-collapse border border-border">
@@ -364,6 +367,7 @@ export default function UpFloodRoutePlanner() {
                         shelter.amenities.foodDistribution
                           ? 'bg-green-100 text-green-800 mr-1'
                           : 'bg-red-100 text-red-800 mr-1'
+                      }
                     >
                       Food: {shelter.amenities.foodDistribution ? '✓' : '✗'}
                     </span>
@@ -414,6 +418,12 @@ export default function UpFloodRoutePlanner() {
           These controls are restricted to approved local disaster-response personnel.
         </p>
 
+        <label className="block text-xs text-blue-700 mb-2">
+          Route segment
+          <select className="ml-2 rounded border p-1" value={selectedSegmentId} onChange={(event) => setSelectedSegmentId(event.target.value)}>
+            {routePlan?.primaryRoute.map((segment) => <option key={segment.id} value={segment.id}>{segment.name}</option>)}
+          </select>
+        </label>
         <div className="grid grid-cols-2 gap-3 mb-3">
           <button
             onClick={() => {
@@ -422,10 +432,10 @@ export default function UpFloodRoutePlanner() {
                 'Describe the blockage (e.g., "Water over road 2ft deep", "Bridge damaged"):'
               );
               if (description) {
-                setSegmentBlockage(seg.id, BLOCKAGE_STATUS.BLOCKED, '/evidence/photo.jpg');
+                setSegmentBlockage(selectedSegmentId, BLOCKAGE_STATUS.BLOCKED, description);
               }
             }}
-            disabled={!routePlan}
+            disabled={!selectedSegmentId}
             className="w-full py-2 px-3 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200"
           >
             Report Segment Blocked
@@ -438,7 +448,7 @@ export default function UpFloodRoutePlanner() {
                 'Describe the reopening (e.g., "Water receded", "Debris cleared"):'
               );
               if (description) {
-                setSegmentBlockage(seg.id, BLOCKAGE_STATUS.CLEAR, '/evidence/clear.jpg');
+                setSegmentBlockage(selectedSegmentId, BLOCKAGE_STATUS.CLEAR, description);
               }
             }}
             disabled={!routePlan}
@@ -514,7 +524,7 @@ function setSegmentBlockage(
   status: BLOCKAGE_STATUS,
   evidence?: string
 ) {
-  const result = upFloodRouteService.setSegmentBlockage(
+  const result = updateSegmentBlockage(
     segmentId,
     status,
     evidence,
