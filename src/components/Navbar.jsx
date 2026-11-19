@@ -798,6 +798,18 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
               })}
 
               {renderNavLink({
+                to: '/up-heatwave-relief',
+                label: t('nav.heatwaveRelief', 'UP Heatwave & Cooling Map'),
+                icon: Sun
+              })}
+
+              {renderNavLink({
+                to: '/up-heatwave-relief',
+                label: t('nav.heatwaveRelief', 'UP Heatwave & Cooling Map'),
+                icon: Sun
+              })}
+
+              {renderNavLink({
                 to: '/pds-shops',
                 label: 'Fair Price Shops (PDS)',
                 icon: Store
