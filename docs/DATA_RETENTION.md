@@ -130,6 +130,9 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_office_comparison_reports_v1` | `officeComparisonReportService.js` | Outdated office-record reports queued on this device when the review endpoint is unavailable: office id, reason, short note and optional official source. No identity or contact fields | Reviews, votes and reports |
 | `civicbridge_civic_works_clusters_v1` | `civicWorksBoardService.js` | Clustered duplicate ward reports | Reviews, votes and reports |
 | `civicbridge_civic_works_rate_limit_v1` | `civicWorksBoardService.js` | Ward report submission rate limit tracking | Reviews, votes and reports |
+
+| `civicbridge_notice_deadline_state_v1` | `dateCandidateService.js` | Citizen confirmations, edits and dismissals for public notice deadlines | Tracking records |
+
 | `civicbridge_hazard_reports_v1` | `roadSafetyBlackspotService.js` | Citizen-reported road hazards and defects (sanitized, PII stripped) | Reviews, votes and reports |
 | `civicbridge_road_segments_v1` | `roadSafetyBlackspotService.js` | Monitored road segment geometries, classifications, and speed limits | Cached public reference data |
 | `civicbridge_crash_aggregates_v1` | `roadSafetyBlackspotService.js` | Aggregated government crash figures and exposure denominators | Cached public reference data |
@@ -139,6 +142,7 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_intervention_records_v1` | `roadSafetyBlackspotService.js` | Planned and executed engineering countermeasures, budgets, and outcomes | Operational countermeasure records |
 | `civicbridge_road_safety_rate_limit_v1` | `roadSafetyBlackspotService.js` | Rolling submission rate limit timestamps for hazard reports (15m window) | Technical anti-abuse rate limits |
 | `civicbridge_road_safety_audit_logs_v1` | `roadSafetyBlackspotService.js` | Append-only audit events for municipal blackspot case transitions and interventions | Audit and execution records |
+
 | `civicbridge_journey_handoffs_v1` | `journeyHandoffService.js` | Journey handoff bundles and shared checklist links | Drafts and in-progress work |
 | `civicbridge_readiness_scorecards` | `readinessScorecardService.js` | Citizen application readiness scores and missing document audits | Drafts and in-progress work |
 | `civicbridge_offline_cache` | `offlineCacheService.js` | Copies of saved guides and application stages for offline use | Offline copies and location |

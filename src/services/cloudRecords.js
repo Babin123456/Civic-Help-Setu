@@ -77,6 +77,9 @@ export const DEVICE_ONLY_STORES = [
   { key: 'civicbridge_conflict_records_v1', reason: 'Local conflict records stay on device until resolved.' },
   { key: 'civicbridge_device_cursors_v1', reason: 'Device sync cursors stay on the device.' },
   { key: 'civicbridge_tombstones_v1', reason: 'Deletion tombstones stay on the device.' },
+
+  { key: 'civicbridge_notice_deadline_state_v1', reason: 'Citizen deadline confirmations, edits and notes stay on this device until a cloud collection exists.' },
+
   { key: 'civicbridge_hazard_reports_v1', reason: 'Citizen road hazard reports are local submissions kept on device before moderation.' },
   { key: 'civicbridge_road_safety_rate_limit_v1', reason: 'Road safety rate-limiting timestamps are local bookkeeping and are never cloud-synced.' },
   { key: 'civicbridge_review_cases_v1', reason: 'Road safety review cases and inspection logs stay on device.' },
@@ -103,6 +106,7 @@ export const DEVICE_ONLY_STORES = [
   { key: 'civicbridge_continuity_audit_logs_v1', reason: 'Continuity drill audit logs remain on device.' },
   { key: 'civicbridge_continuity_recommendations_v1', reason: 'Continuity drill recommendations remain on device.' },
   { key: 'civicbridge_senior_tribunal_petitions', reason: 'Senior citizen maintenance tribunal petitions remain on device.' },
+
 ];
 
 const byKey = new Map(CLOUD_STORES.map((store) => [store.key, store]));

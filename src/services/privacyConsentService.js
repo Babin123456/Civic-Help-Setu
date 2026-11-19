@@ -90,6 +90,9 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_sent_digests', category: 'tracking', exportAs: 'sentNewsletterDigests', empty: [] }, // newsletterSubscriptionService.js
   { key: 'civicbridge_newsletter_delivery_failures', category: 'tracking', exportAs: 'newsletterDeliveryFailures', empty: [] }, // newsletterSubscriptionService.js
   { key: 'civicbridge_civic_works_reports_v1', category: 'activity', exportAs: 'civicWorksReports', empty: [] }, // civicWorksBoardService.js
+
+  { key: 'civicbridge_notice_deadline_state_v1', category: 'tracking', exportAs: null, empty: {} }, // dateCandidateService.js
+
   // Citizen-authored tree reports and their attachments are the citizen's data.
   // The municipal register, inspections, work orders, audit chain and migration
   // metadata are public-authority operating records and live in RETAINED_STORAGE_KEYS.
@@ -97,6 +100,7 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_tree_citizen_reports_v1', category: 'activity', exportAs: null }, // treeInventoryService.js
   { key: 'civicbridge_tree_reports_v1', category: 'activity', exportAs: null }, // legacy tree reports
   { key: 'civicbridge_tree_reporter_key', category: 'activity', exportAs: null }, // TreeHealthInventory.jsx
+
   { key: 'civicbridge_citizen_drafts_v1', category: 'drafts', exportAs: 'citizenDrafts', empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_offline_operations_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_sync_sessions_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
