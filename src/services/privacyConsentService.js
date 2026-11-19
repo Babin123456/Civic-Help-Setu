@@ -101,6 +101,8 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_conflict_records_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_device_cursors_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_tombstones_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
+  { key: 'civicbridge_npsc_fee_history_v1', category: 'saved', exportAs: 'serviceFeeHistory', empty: [] }, // nationalPublicServiceCentreService.js
+  { key: 'civicbridge_npsc_fee_observations_v1', category: 'activity', exportAs: 'serviceFeeObservations', empty: [] }, // nationalPublicServiceCentreService.js
 ];
 
 /**

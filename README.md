@@ -112,6 +112,10 @@ A responsive design with theme support, built to provide a consistent experience
 
 Clear navigation, readable content, consistent interaction patterns, and a user-centered approach to public-service information.
 
+### 🧾 14. Public Service Centre Fee Evidence Assistant
+
+Compare charges on an assisted-service-centre receipt with verified, versioned fee schedules. Government, portal, authorised-centre, and optional service charges are shown separately; receipt identifiers are redacted by default and unknown components are marked unverified. The assistant never collects payment credentials or initiates transactions. See [the fee evidence guide](docs/public-service-centre-fee-evidence-assistant.md).
+
 ---
 
 ## 📊 Project at a Glance

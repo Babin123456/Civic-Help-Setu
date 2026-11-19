@@ -2,24 +2,36 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   FEE_VERSION_STATUS,
   FEE_COMPONENT_TYPES,
+  COMMUNITY_OBSERVATION_STATUS,
+  RECEIPT_REDACTION_DEFAULT,
+  JURISDICTION_LEVELS,
   createVersionedFeeRecord,
   createGovernmentFee,
   createPortalCharge,
   createAuthorisedCentreCharge,
   createOptionalServiceCharge,
   validateVersionedFeeRecord,
+  createFeeFingerprint,
+  getFeeHistory,
+  recordFeeVersion,
+  getFeeVersion,
+  getApplicableFeeVersion,
+  listVerifiedServices,
+  resetFeeEvidenceAssistantData,
+  redactReceiptText,
   createReceiptEvidence,
+  correctOcrText,
+  detectOcrCorrections,
+  inferFeeComponentType,
+  parseReceiptText,
   generateDiscrepancyReport,
   getGrievanceRoute,
-  COMMUNITY_OBSERVATION_STATUS,
+  containsPaymentCredentials,
   createCommunityFeeObservation,
   moderateCommunityObservation,
   getModeratedObservations,
-  RECEIPT_REDACTION_DEFAULT,
-  JURISDICTION_LEVELS,
+  getPendingCommunityObservations,
 } from './nationalPublicServiceCentreService';
-
-import { getServiceFeeBreakdown } from './feeTransparencyService';
 
 const createStorageMock = () => {
   let store = {};
@@ -44,731 +56,1273 @@ if (typeof globalThis.window === 'undefined') {
   globalThis.window = globalThis;
 }
 
+const baseRecord = (overrides = {}) => ({
+  serviceId: 'passport',
+  componentType: FEE_COMPONENT_TYPES.GOVERNMENT_FEE,
+  authority: 'Ministry of External Affairs',
+  jurisdiction: 'national',
+  effectiveDate: '2024-01-01',
+  source: 'https://www.passportindia.gov.in',
+  verificationDate: '2024-06-15',
+  amount: 1500,
+  isMandatory: true,
+  status: FEE_VERSION_STATUS.PUBLISHED,
+  currency: 'INR',
+  label: 'Standard Adult Passport Fee (36 Pages)',
+  ...overrides,
+});
+
+beforeEach(() => {
+  globalThis.localStorage?.clear?.();
+  resetFeeEvidenceAssistantData();
+});
+
 // ============================================================
-// FEE VERSIONED RECORD TESTS
+// VERSIONED FEE RECORDS
 // ============================================================
 
-describe('NationalPublicServiceCentreService - Versioned Fee Records', () => {
-  describe('FEE_VERSION_STATUS constants', () => {
-    it('has all required status values', () => {
-      expect(FEE_VERSION_STATUS.PUBLISHED).toBe('published');
-      expect(FEE_VERSION_STATUS.FREE).toBe('free');
-      expect(FEE_VERSION_STATUS.UNVERIFIED).toBe('unverified');
-      expect(FEE_VERSION_STATUS.OBSOLETE).toBe('obsolete');
+describe('Versioned fee records', () => {
+  it('exposes the required status, component, and jurisdiction constants', () => {
+    expect(FEE_VERSION_STATUS.PUBLISHED).toBe('published');
+    expect(FEE_VERSION_STATUS.FREE).toBe('free');
+    expect(FEE_VERSION_STATUS.UNVERIFIED).toBe('unverified');
+    expect(FEE_VERSION_STATUS.OBSOLETE).toBe('obsolete');
+
+    expect(FEE_COMPONENT_TYPES.GOVERNMENT_FEE).toBe('government_fee');
+    expect(FEE_COMPONENT_TYPES.PORTAL_CHARGE).toBe('portal_charge');
+    expect(FEE_COMPONENT_TYPES.AUTHORISED_CENTRE_CHARGE).toBe(
+      'authorised_centre_charge',
+    );
+    expect(FEE_COMPONENT_TYPES.OPTIONAL_SERVICE_CHARGE).toBe(
+      'optional_service_charge',
+    );
+
+    expect(JURISDICTION_LEVELS).toEqual([
+      'national',
+      'state',
+      'district',
+      'local',
+    ]);
+  });
+
+  it('creates a valid government fee record with an audit-ready id', () => {
+    const record = createGovernmentFee({
+      serviceId: 'passport',
+      authority: 'Ministry of External Affairs',
+      jurisdiction: 'national',
+      effectiveDate: '2024-01-01',
+      source: 'https://www.passportindia.gov.in',
+      verificationDate: '2024-06-15',
+      amount: 1500,
+      label: 'Standard Adult Passport Fee (36 Pages)',
+    });
+
+    expect(record.serviceId).toBe('passport');
+    expect(record.componentType).toBe('government_fee');
+    expect(record.jurisdiction).toBe('national');
+    expect(record.amount).toBe(1500);
+    expect(record.status).toBe('published');
+    expect(record.currency).toBe('INR');
+    expect(record.id).toMatch(/^fee-passport-government-fee-\d+$/);
+    expect(record.fingerprint).toMatch(/^fee-[0-9a-f]{8}$/);
+    expect(record.createdAt).toBeDefined();
+    expect(record.validationErrors).toBeUndefined();
+  });
+
+  it('lets the component helpers record an explicitly obsolete version', () => {
+    const record = createGovernmentFee(
+      baseRecord({ status: FEE_VERSION_STATUS.OBSOLETE }),
+    );
+    expect(record.status).toBe('obsolete');
+  });
+
+  it('creates portal, authorised-centre, and optional charge records separately', () => {
+    const portal = createPortalCharge({
+      ...baseRecord(),
+      serviceId: 'driving-license',
+      amount: 30,
+      label: 'Online portal convenience charge',
+    });
+    const centre = createAuthorisedCentreCharge({
+      ...baseRecord(),
+      serviceId: 'pan-card',
+      amount: 50,
+      label: 'CSC scanning and upload charge',
+    });
+    const optional = createOptionalServiceCharge({
+      ...baseRecord(),
+      serviceId: 'aadhaar-card',
+      amount: 50,
+      label: 'Optional SMS updates',
+    });
+
+    expect(portal.componentType).toBe('portal_charge');
+    expect(centre.componentType).toBe('authorised_centre_charge');
+    expect(optional.componentType).toBe('optional_service_charge');
+  });
+
+  it('preserves supplementary metadata and creates a stable fingerprint', () => {
+    const record = createVersionedFeeRecord({
+      ...baseRecord(),
+      amount: 100,
+      supplementary: { notificationNumber: 'G.S.R. 123(E)' },
+    });
+    const same = createFeeFingerprint({ ...record });
+    const changed = createFeeFingerprint({ ...record, amount: 200 });
+
+    expect(record.notificationNumber).toBe('G.S.R. 123(E)');
+    expect(same).toBe(record.fingerprint);
+    expect(changed).not.toBe(record.fingerprint);
+  });
+
+  it('passes validation for a complete record', () => {
+    const result = validateVersionedFeeRecord(baseRecord());
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('rejects missing or malformed required fields', () => {
+    const cases = [
+      [{ serviceId: '' }, 'serviceId'],
+      [{ componentType: 'invalid_type' }, 'componentType'],
+      [{ authority: '' }, 'authority'],
+      [{ jurisdiction: 'invalid_level' }, 'jurisdiction'],
+      [{ jurisdiction: 'state' }, 'state is required'],
+      [{ jurisdiction: 'district', state: 'Delhi' }, 'district is required'],
+      [
+        { jurisdiction: 'local', state: 'Delhi', district: 'New Delhi' },
+        'localBody is required',
+      ],
+      [{ effectiveDate: '01/15/2024' }, 'effectiveDate'],
+      [{ effectiveDate: '2024-02-31' }, 'effectiveDate'],
+      [{ source: 'ftp://invalid.example' }, 'source'],
+      [{ verificationDate: '' }, 'verificationDate'],
+      [{ verificationDate: '2024-13-40' }, 'verificationDate'],
+      [{ amount: -50 }, 'non-negative'],
+      [{ amount: Number.NaN }, 'non-negative'],
+      [{ status: 'invented' }, 'status'],
+      [{ currency: 'IN' }, '3-letter'],
+      [{ version: 0 }, 'version'],
+    ];
+
+    cases.forEach(([overrides, expected]) => {
+      const result = validateVersionedFeeRecord(baseRecord(overrides));
+      expect(result.isValid).toBe(false);
+      expect(result.errors.some((error) => error.includes(expected))).toBe(true);
     });
   });
 
-  describe('FEE_COMPONENT_TYPES constants', () => {
-    it('has all component type values', () => {
-      expect(FEE_COMPONENT_TYPES.GOVERNMENT_FEE).toBe('government_fee');
-      expect(FEE_COMPONENT_TYPES.PORTAL_CHARGE).toBe('portal_charge');
-      expect(FEE_COMPONENT_TYPES.AUTHORISED_CENTRE_CHARGE).toBe(
-        'authorised_centre_charge',
-      );
-      expect(FEE_COMPONENT_TYPES.OPTIONAL_SERVICE_CHARGE).toBe(
-        'optional_service_charge',
-      );
-    });
+  it('rejects effective dates more than 365 days in the future', () => {
+    const future = new Date();
+    future.setFullYear(future.getFullYear() + 2);
+    const result = validateVersionedFeeRecord(
+      baseRecord({ effectiveDate: future.toISOString().slice(0, 10) }),
+    );
+
+    expect(result.isValid).toBe(false);
+    expect(
+      result.errors.some((error) => error.includes('365 days in the future')),
+    ).toBe(true);
   });
 
-  describe('createVersionedFeeRecord', () => {
-    it('creates a valid government fee record', () => {
-      const record = createGovernmentFee({
-        serviceId: 'passport',
-        authority: 'Ministry of External Affairs',
-        jurisdiction: 'national',
-        effectiveDate: '2024-01-01',
-        source: 'https://example.gov.in',
-        verificationDate: '2026-01-15',
-        amount: 1500,
-      });
+  it('rejects verification dates in the future', () => {
+    const future = new Date();
+    future.setDate(future.getDate() + 10);
+    const result = validateVersionedFeeRecord(
+      baseRecord({ verificationDate: future.toISOString().slice(0, 10) }),
+    );
 
-      expect(record.serviceId).toBe('passport');
-      expect(record.componentType).toBe('government_fee');
-      expect(record.authority).toBe('Ministry of External Affairs');
-      expect(record.jurisdiction).toBe('national');
-      expect(record.effectiveDate).toBe('2024-01-01');
-      expect(record.source).toBe('https://example.gov.in');
-      expect(record.verificationDate).toBe('2026-01-15');
-      expect(record.amount).toBe(1500);
-      expect(record.isMandatory).toBe(true);
-      expect(record.status).toBe('published');
-      expect(record.currency).toBe('INR');
-      expect(record.id).toMatch(/^fee-passport-government-fee-\d+$/);
-      expect(record.createdAt).toBeDefined();
-      expect(record.updatedAt).toBeDefined();
-    });
-
-    it('creates a portal charge record', () => {
-      const record = createPortalCharge({
-        serviceId: 'driving-license',
-        authority: 'Ministry of Road Transport',
-        jurisdiction: 'state',
-        effectiveDate: '2024-03-01',
-        source: 'https://parivahan.gov.in',
-        verificationDate: '2026-05-15',
-        amount: 500,
-      });
-
-      expect(record.componentType).toBe('portal_charge');
-      expect(record.jurisdiction).toBe('state');
-      expect(record.amount).toBe(500);
-    });
-
-    it('creates an authorised centre charge record', () => {
-      const record = createAuthorisedCentreCharge({
-        serviceId: 'pan-card',
-        authority: 'Income Tax Department',
-        jurisdiction: 'district',
-        effectiveDate: '2024-04-01',
-        source: 'https://nsdl.co.in',
-        verificationDate: '2026-06-01',
-        amount: 50,
-      });
-
-      expect(record.componentType).toBe('authorised_centre_charge');
-      expect(record.jurisdiction).toBe('district');
-      expect(record.amount).toBe(50);
-    });
-
-    it('creates an optional service charge record', () => {
-      const record = createOptionalServiceCharge({
-        serviceId: 'aadhaar-card',
-        authority: 'UIDAI',
-        jurisdiction: 'local',
-        effectiveDate: '2023-11-01',
-        source: 'https://uidai.gov.in',
-        verificationDate: '2026-08-15',
-        amount: 700,
-      });
-
-      expect(record.componentType).toBe('optional_service_charge');
-      expect(record.jurisdiction).toBe('local');
-      expect(record.amount).toBe(700);
-    });
-
-    it('accepts custom supplementary data', () => {
-      const record = createVersionedFeeRecord({
-        serviceId: 'test-svc',
-        componentType: 'government_fee',
-        authority: 'Test Auth',
-        jurisdiction: 'national',
-        effectiveDate: '2024-01-01',
-        source: 'https://test.gov.in',
-        verificationDate: '2026-01-15',
-        amount: 100,
-        supplementary: { customField: 'custom value' },
-      });
-
-      expect(record.customField).toBe('custom value');
-    });
+    expect(result.isValid).toBe(false);
+    expect(
+      result.errors.some((error) => error.includes('cannot be in the future')),
+    ).toBe(true);
   });
 
-  describe('validateVersionedFeeRecord', () => {
-    it('passes validation for a complete valid record', () => {
-      const validRecord = {
-        serviceId: 'sample-svc',
-        componentType: 'government_fee',
-        authority: 'Test Department',
-        jurisdiction: 'state',
-        effectiveDate: '2024-06-15',
-        source: 'https://test.gov.in/fees',
-        verificationDate: '2026-01-15',
-        amount: 250,
-        isMandatory: true,
-        status: 'published',
-        currency: 'INR',
-      };
-
-      const result = validateVersionedFeeRecord(validRecord);
-      expect(result.isValid).toBe(true);
-      expect(result.errors).toHaveLength(0);
-    });
-
-    it('rejects missing serviceId', () => {
-      const record = {
-        componentType: 'government_fee',
-        authority: 'Test',
-        jurisdiction: 'national',
-        effectiveDate: '2024-01-01',
-        source: 'https://test.gov.in',
-        verificationDate: '2026-01-15',
-        amount: 100,
-        status: 'published',
-        currency: 'INR',
-      };
-
-      const result = validateVersionedFeeRecord(record);
-      expect(result.isValid).toBe(false);
-      expect(result.errors.some((e) => e.includes('serviceId'))).toBe(true);
-    });
-
-    it('rejects invalid componentType', () => {
-      const record = {
-        serviceId: 'test-svc',
-        componentType: 'invalid_type',
-        authority: 'Test',
-        jurisdiction: 'national',
-        effectiveDate: '2024-01-01',
-        source: 'https://test.gov.in',
-        verificationDate: '2026-01-15',
-        amount: 100,
-        status: 'published',
-        currency: 'INR',
-      };
-
-      const result = validateVersionedFeeRecord(record);
-      expect(result.isValid).toBe(false);
-      expect(result.errors.some((e) => e.includes('componentType'))).toBe(true);
-    });
-
-    it('rejects invalid jurisdiction', () => {
-      const record = {
-        serviceId: 'test-svc',
-        componentType: 'government_fee',
-        authority: 'Test',
-        jurisdiction: 'invalid_level',
-        effectiveDate: '2024-01-01',
-        source: 'https://test.gov.in',
-        verificationDate: '2026-01-15',
-        amount: 100,
-        status: 'published',
-        currency: 'INR',
-      };
-
-      const result = validateVersionedFeeRecord(record);
-      expect(result.isValid).toBe(false);
-      expect(result.errors.some((e) => e.includes('jurisdiction'))).toBe(true);
-    });
-
-    it('rejects malformed effectiveDate', () => {
-      const record = {
-        serviceId: 'test-svc',
-        componentType: 'government_fee',
-        authority: 'Test',
-        jurisdiction: 'national',
-        effectiveDate: '01/15/2024', // Wrong format
-        source: 'https://test.gov.in',
-        verificationDate: '2026-01-15',
-        amount: 100,
-        status: 'published',
-        currency: 'INR',
-      };
-
-      const result = validateVersionedFeeRecord(record);
-      expect(result.isValid).toBe(false);
-      expect(result.errors.some((e) => e.includes('YYYY-MM-DD format'))).toBe(true);
-    });
-
-    it('rejects source without http/https', () => {
-      const record = {
-        serviceId: 'test-svc',
-        componentType: 'government_fee',
-        authority: 'Test',
-        jurisdiction: 'national',
-        effectiveDate: '2024-01-01',
-        source: 'ftp://invalid', // Not http/https
-        verificationDate: '2026-01-15',
-        amount: 100,
-        status: 'published',
-        currency: 'INR',
-      };
-
-      const result = validateVersionedFeeRecord(record);
-      expect(result.isValid).toBe(false);
-      expect(result.errors.some((e) => e.includes('valid HTTP/HTTPS URL'))).toBe(true);
-    });
-
-    it('rejects missing verificationDate', () => {
-      const record = {
-        serviceId: 'test-svc',
-        componentType: 'government_fee',
-        authority: 'Test',
-        jurisdiction: 'national',
-        effectiveDate: '2024-01-01',
-        source: 'https://test.gov.in',
-        verificationDate: '',
-        amount: 100,
-        status: 'published',
-        currency: 'INR',
-      };
-
-      const result = validateVersionedFeeRecord(record);
-      expect(result.isValid).toBe(false);
-      expect(result.errors.some((e) => e.includes('verificationDate'))).toBe(true);
-    });
-
-    it('rejects negative amount', () => {
-      const record = {
-        serviceId: 'test-svc',
-        componentType: 'government_fee',
-        authority: 'Test',
-        jurisdiction: 'national',
-        effectiveDate: '2024-01-01',
-        source: 'https://test.gov.in',
-        verificationDate: '2026-01-15',
-        amount: -50,
-        status: 'published',
-        currency: 'INR',
-      };
-
-      const result = validateVersionedFeeRecord(record);
-      expect(result.isValid).toBe(false);
-      expect(result.errors.some((e) => e.includes('non-negative'))).toBe(true);
-    });
-
-    it('rejects invalid currency (not 3 letters)', () => {
-      const record = {
-        serviceId: 'test-svc',
-        componentType: 'government_fee',
-        authority: 'Test',
-        jurisdiction: 'national',
-        effectiveDate: '2024-01-01',
-        source: 'https://test.gov.in',
-        verificationDate: '2026-01-15',
-        amount: 100,
-        status: 'published',
-        currency: 'IN', // Only 2 letters
-      };
-
-      const result = validateVersionedFeeRecord(record);
-      expect(result.isValid).toBe(false);
-      expect(result.errors.some((e) => e.includes('3-letter ISO code'))).toBe(true);
-    });
-
-    it('rejects future effective date > 365 days', () => {
-      const futureDate = new Date();
-      futureDate.setFullYear(futureDate.getFullYear() + 2); // 2 years in future
-      const futureDateStr = futureDate.toISOString().split('T')[0];
-
-      const record = {
-        serviceId: 'test-svc',
-        componentType: 'government_fee',
-        authority: 'Test',
-        jurisdiction: 'national',
-        effectiveDate: futureDateStr,
-        source: 'https://test.gov.in',
-        verificationDate: '2026-01-15',
-        amount: 100,
-        status: 'published',
-        currency: 'INR',
-      };
-
-      const result = validateVersionedFeeRecord(record);
-      expect(result.isValid).toBe(false);
-      expect(result.errors.some((e) => e.includes('365 days in the future'))).toBe(true);
-    });
+  it('marks invalid created records instead of throwing', () => {
+    const record = createGovernmentFee(
+      baseRecord({ jurisdiction: 'invalid-level' }),
+    );
+    expect(record.validationErrors).toBeDefined();
+    expect(record.validationErrors.length).toBeGreaterThan(0);
   });
 });
 
 // ============================================================
-// RECEIPT EVIDENCE TESTS
+// FEE HISTORY AND JURISDICTION VARIANTS
 // ============================================================
 
-describe('NationalPublicServiceCentreService - Receipt Evidence', () => {
-  beforeEach(() => {
-    globalThis.localStorage.clear();
+describe('Fee history and jurisdiction variants', () => {
+  it('versions fee changes instead of overwriting them', () => {
+    const first = recordFeeVersion(
+      createGovernmentFee(baseRecord({ amount: 1500 })),
+      { actor: 'fee-admin', reason: 'Initial publication' },
+    );
+    const second = recordFeeVersion(
+      createGovernmentFee(
+        baseRecord({
+          amount: 2000,
+          effectiveDate: '2026-01-01',
+          verificationDate: '2026-01-02',
+        }),
+      ),
+      { actor: 'fee-admin', reason: 'Gazette revision' },
+    );
+
+    expect(first.success).toBe(true);
+    expect(first.version).toBe(1);
+    expect(second.success).toBe(true);
+    expect(second.version).toBe(2);
+
+    const history = getFeeHistory('passport', { includeBaseline: false });
+    expect(history).toHaveLength(2);
+    expect(history[0].amount).toBe(2000);
+    expect(history[0].version).toBe(2);
+    expect(history[0].auditTrail.at(-1).action).toBe('version-recorded');
+    expect(history[0].auditTrail.at(-1).actor).toBe('fee-admin');
+    expect(history[1].amount).toBe(1500);
   });
 
-  describe('RECEIPT_REDACTION_DEFAULT', () => {
-    it('is true by default', () => {
-      expect(RECEIPT_REDACTION_DEFAULT).toBe(true);
-    });
+  it('rejects invalid versions without storing them', () => {
+    const result = recordFeeVersion(baseRecord({ amount: -1 }));
+    expect(result.success).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
+    expect(getFeeHistory('passport', { includeBaseline: false })).toEqual([]);
   });
 
-  describe('createReceiptEvidence', () => {
-    it('redacts receipt identifier by default', () => {
-      const receipt = createReceiptEvidence({
-        serviceId: 'passport',
-        rawText: 'Receipt for ₹1,500',
-        jurisdiction: 'national',
-        captureDate: '2026-01-15',
-      });
-
-      expect(receipt.receiptId).toBe('REDACTED');
-      expect(receipt.metadata.redactionApplied).toBe(true);
-    });
-
-    it('keeps receipt ID visible when redaction is disabled', () => {
-      const receipt = createReceiptEvidence({
-        serviceId: 'passport',
-        rawText: 'Receipt for ₹1,500',
-        receiptId: 'REC-98234710',
-        jurisdiction: 'national',
-        captureDate: '2026-01-15',
-        metadata: { redaction: false },
-      });
-
-      // When redaction is not applied, the receipt ID should be preserved
-      // Note: The default behavior REDACTS, so we need to check the logic
-      // Actually the default is RECEIPT_REDACTION_DEFAULT = true, so REDACTED
-      // To test non-redaction, we'd need to override, but the component uses the default
-      expect(receipt.receiptId).toBe('REDACTED'); // Default behavior
-    });
-
-    it('stores raw OCR text', () => {
-      const receipt = createReceiptEvidence({
-        serviceId: 'driving-license',
-        rawText: 'Counter 3 - Smart Card Fee - ₹200',
-        jurisdiction: 'state',
-        captureDate: '2026-03-20',
-      });
-
-      expect(receipt.rawText).toBe('Counter 3 - Smart Card Fee - ₹200');
-      expect(receipt.serviceId).toBe('driving-license');
-      expect(receipt.jurisdiction).toBe('state');
-      expect(receipt.captureDate).toBe('2026-03-20');
-    });
-
-    it('stores fee components with displayed amounts', () => {
-      const receipt = createReceiptEvidence({
-        serviceId: 'pan-card',
-        rawText: 'PAN card fees',
-        feeComponents: [
-          { label: 'Statutory Fee', amount: 107 },
-          { label: 'CSC Scanning', amount: 50 },
-        ],
-        jurisdiction: 'national',
-      });
-
-      expect(receipt.feeComponents.length).toBe(2);
-      expect(receipt.feeComponents[0].amount).toBe(107);
-      expect(receipt.feeComponents[1].amount).toBe(50);
-      // Redaction means receiptId is REDACTED, but fee components still stored
-    });
-
-    it('includes metadata about redaction and OCR quality', () => {
-      const receipt = createReceiptEvidence({
-        serviceId: 'voter-id',
-        rawText: 'Form 6 - Voter Registration',
-        receiptId: 'REC-V6-9999',
-        jurisdiction: 'local',
-        captureDate: '2026-08-10',
-        metadata: { ocrQuality: 'good', operator: 'user' },
-      });
-
-      expect(receipt.metadata.ocrQuality).toBe('good');
-      expect(receipt.metadata.redactionApplied).toBe(true);
-      expect(receipt.metadata.operator).toBe('user');
-    });
+  it('reads one recorded version by number', () => {
+    recordFeeVersion(createGovernmentFee(baseRecord()));
+    expect(getFeeVersion('passport', 1)?.amount).toBe(1500);
+    expect(getFeeVersion('passport', 99)).toBeNull();
   });
 
-  describe('generateDiscrepancyReport', () => {
-    let receipt;
+  it('exposes the published schedule as auditable baseline versions', () => {
+    const history = getFeeHistory('passport');
+    expect(history.length).toBeGreaterThan(0);
 
-    beforeEach(() => {
-      receipt = createReceiptEvidence({
-        serviceId: 'passport',
-        rawText: 'Passport fees receipt',
-        feeComponents: [
-          { label: 'Standard Adult Passport Fee', amount: 1500 },
-          { label: 'SMS Updates', amount: 50 },
-        ],
-        jurisdiction: 'national',
-      });
-    });
+    const baseline = history.find(
+      (record) =>
+        record.origin === 'dataset' &&
+        record.label.includes('Standard Adult Passport Fee'),
+    );
+    expect(baseline).toBeDefined();
+    expect(baseline.version).toBe(0);
+    expect(baseline.authority).toContain('External Affairs');
+    expect(baseline.effectiveDate).toBe('2024-01-01');
+    expect(baseline.verificationDate).toBe('2026-07-10');
+    expect(baseline.source).toBe('https://www.passportindia.gov.in');
+    expect(baseline.auditTrail[0].action).toBe('dataset-import');
+  });
 
-    it('handles unverified fee schedule', () => {
-      const report = generateDiscrepancyReport(receipt, 'unknown-service');
+  it('resolves the applicable version by effective date', () => {
+    recordFeeVersion(
+      createGovernmentFee(
+        baseRecord({
+          amount: 1500,
+          effectiveDate: '2024-01-01',
+          verificationDate: '2024-01-02',
+        }),
+      ),
+    );
+    recordFeeVersion(
+      createGovernmentFee(
+        baseRecord({
+          amount: 2000,
+          effectiveDate: '2026-01-01',
+          verificationDate: '2026-01-02',
+        }),
+      ),
+    );
 
-      expect(report.overallMatch).toBe('unverified');
-      expect(report.summary.componentsUnverified).toBe(2);
-      expect(report.componentComparisons.length).toBe(2);
-      // All should be unverified with the official source disclaimer
-      report.componentComparisons.forEach((comp) => {
-        expect(comp.status).toBe('unverified');
-        expect(comp.discrepancy).toContain(
-          'Fee schedule not verified for this service',
-        );
-      });
-    });
+    expect(
+      getApplicableFeeVersion('passport', { effectiveDate: '2025-06-01' })?.amount,
+    ).toBe(1500);
+    expect(
+      getApplicableFeeVersion('passport', { effectiveDate: '2026-06-01' })?.amount,
+    ).toBe(2000);
+  });
 
-    it('matches components with official fee schedule', () => {
-      const report = generateDiscrepancyReport(receipt, 'passport');
-
-      expect(report.overallMatch).toBeDefined();
-      expect(report.componentComparisons.length).toBe(2);
-      expect(report.summary.totalCharged).toBe(1550); // 1500 + 50
-
-      // The first component (Standard Adult Passport Fee) should match
-      const firstComp = report.componentComparisons[0];
-      expect(firstComp.chargedAmount).toBe(1500);
-      // Should find a match in the passport official fees
-      expect([firstComp.status, firstComp.officialSource]).toContain(
-        'passport' || 'official',
-      );
-    });
-
-    it('labels unknown components as unverified', () => {
-      const receiptWithUnknown = createReceiptEvidence({
-        serviceId: 'driving-license',
-        rawText: 'Unknown fee charged',
-        feeComponents: [
-          { label: 'Unknown Processing Fee', amount: 999 },
-          { label: 'Smart Card Issue', amount: 200 },
-        ],
+  it('prefers a state version over the national baseline', () => {
+    const stateVersion = createGovernmentFee(
+      baseRecord({
+        authority: 'Delhi Fee Authority',
         jurisdiction: 'state',
-      });
+        state: 'Delhi',
+        amount: 1600,
+        effectiveDate: '2025-01-01',
+        verificationDate: '2025-01-02',
+        source: 'https://delhi.gov.in/fees',
+        label: 'Standard Adult Passport Fee',
+      }),
+    );
+    recordFeeVersion(stateVersion);
 
-      const report = generateDiscrepancyReport(receiptWithUnknown, 'driving-license');
-
-      // Should have some unverified components
-      expect(report.summary.componentsUnverified).toBeGreaterThanOrEqual(1);
-      // The unknown fee should be labelled unverified
-      const unknownComp = report.componentComparisons.find(
-        (c) => c.chargedAmount === 999,
-      );
-      expect(unknownComp.status).toBe('unverified');
-      expect(unknownComp.discrepancy).toContain('No official match found');
+    const applicable = getApplicableFeeVersion('passport', {
+      jurisdiction: 'state',
+      state: 'Delhi',
+      effectiveDate: '2026-01-01',
     });
+    expect(applicable.jurisdiction).toBe('state');
+    expect(applicable.state).toBe('Delhi');
+    expect(applicable.amount).toBe(1600);
 
-    it('detects overcharging', () => {
-      const overchargedReceipt = createReceiptEvidence({
-        serviceId: 'passport',
-        rawText: 'Overcharge receipt',
-        feeComponents: [
-          { label: 'Standard Adult Passport Fee', amount: 2000 }, // More than official 1500
-        ],
-        jurisdiction: 'national',
-      });
-
-      const report = generateDiscrepancyReport(overchargedReceipt, 'passport');
-
-      expect(report.overallMatch).toBe('overcharged');
-      expect(report.summary.totalDiscrepancy).toBeGreaterThan(0);
-
-      const comp = report.componentComparisons[0];
-      expect(comp.status).toBe('overcharged');
-      expect(comp.discrepancy).toContain('Overcharged');
+    const nationalOnly = getApplicableFeeVersion('passport', {
+      jurisdiction: 'national',
+      effectiveDate: '2026-01-01',
     });
+    expect(nationalOnly.jurisdiction).toBe('national');
+  });
 
-    it('detects undercharging', () => {
-      const underchargedReceipt = createReceiptEvidence({
-        serviceId: 'passport',
-        rawText: 'Undercharge receipt',
-        feeComponents: [
-          { label: 'Standard Adult Passport Fee', amount: 1000 }, // Less than official 1500
-        ],
-        jurisdiction: 'national',
-      });
+  it('does not apply a state version to a different state', () => {
+    recordFeeVersion(
+      createGovernmentFee(
+        baseRecord({
+          jurisdiction: 'state',
+          state: 'Delhi',
+          amount: 1600,
+          effectiveDate: '2025-01-01',
+          verificationDate: '2025-01-02',
+        }),
+      ),
+    );
 
-      const report = generateDiscrepancyReport(underchargedReceipt, 'passport');
-
-      const comp = report.componentComparisons[0];
-      expect(comp.status).toBe('undercharged');
-      expect(comp.discrepancy).toContain('Under official fee');
+    const applicable = getApplicableFeeVersion('passport', {
+      jurisdiction: 'state',
+      state: 'Kerala',
+      effectiveDate: '2026-01-01',
     });
+    expect(applicable.jurisdiction).toBe('national');
+  });
 
-    it('handles mixed matched and unmatched components', () => {
-      const mixedReceipt = createReceiptEvidence({
-        serviceId: 'driving-license',
-        rawText: 'Mixed fees',
-        feeComponents: [
-          { label: 'Driving Test Fee', amount: 300 }, // Matches official
-          { label: 'Unknown Service', amount: 999 }, // No match
-        ],
-        jurisdiction: 'state',
-      });
+  it('does not apply a state version when no State/UT was selected', () => {
+    recordFeeVersion(
+      createGovernmentFee(
+        baseRecord({
+          jurisdiction: 'state',
+          state: 'Delhi',
+          amount: 1600,
+          effectiveDate: '2025-01-01',
+          verificationDate: '2025-01-02',
+        }),
+      ),
+    );
 
-      const report = generateDiscrepancyReport(mixedReceipt, 'driving-license');
-
-      expect(report.summary.componentsMatched).toBeGreaterThan(0);
-      expect(report.summary.componentsUnverified).toBeGreaterThanOrEqual(1);
-      expect(report.overallMatch).not.toBe('match'); // Not a full match due to unknown
+    const applicable = getApplicableFeeVersion('passport', {
+      jurisdiction: 'state',
+      effectiveDate: '2026-01-01',
     });
+    expect(applicable.jurisdiction).toBe('national');
+    expect(applicable.amount).toBe(1500);
+  });
 
-    it('preserves redaction in discrepancy report', () => {
-      const receipt = createReceiptEvidence({
-        serviceId: 'passport',
-        rawText: 'Receipt',
-        feeComponents: [
-          { label: 'Fee', amount: 1500 },
-        ],
-        jurisdiction: 'national',
-      });
+  it('only applies a district version when the district matches', () => {
+    recordFeeVersion(
+      createGovernmentFee(
+        baseRecord({
+          jurisdiction: 'district',
+          state: 'Delhi',
+          district: 'New Delhi',
+          amount: 1700,
+          effectiveDate: '2025-01-01',
+          verificationDate: '2025-01-02',
+        }),
+      ),
+    );
 
-      const report = generateDiscrepancyReport(receipt, 'passport');
-
-      // The receipt evidence ID should be redacted in the report
-      expect(report.receiptEvidenceId).toContain('receipt-passport');
-      // Component comparisons should have redactionApplied: true
-      report.componentComparisons.forEach((comp) => {
-        expect(comp.redactionApplied).toBe(true);
-      });
+    const withoutDistrict = getApplicableFeeVersion('passport', {
+      jurisdiction: 'district',
+      state: 'Delhi',
+      effectiveDate: '2026-01-01',
     });
+    expect(withoutDistrict.amount).toBe(1500);
+
+    const withDistrict = getApplicableFeeVersion('passport', {
+      jurisdiction: 'district',
+      state: 'Delhi',
+      district: 'New Delhi',
+      effectiveDate: '2026-01-01',
+    });
+    expect(withDistrict.amount).toBe(1700);
+    expect(withDistrict.district).toBe('New Delhi');
+  });
+
+  it('ignores obsolete versions', () => {
+    recordFeeVersion(
+      createGovernmentFee(
+        baseRecord({
+          amount: 8888,
+          effectiveDate: '2025-01-01',
+          verificationDate: '2025-01-02',
+          status: FEE_VERSION_STATUS.OBSOLETE,
+        }),
+      ),
+    );
+    recordFeeVersion(
+      createGovernmentFee(
+        baseRecord({
+          amount: 1600,
+          effectiveDate: '2025-01-01',
+          verificationDate: '2025-01-02',
+        }),
+      ),
+    );
+
+    const applicable = getApplicableFeeVersion('passport', {
+      effectiveDate: '2026-01-01',
+    });
+    expect(applicable.amount).toBe(1600);
+    expect(applicable.version).toBe(2);
+  });
+
+  it('lists verified services and excludes unverified test fixtures', () => {
+    const services = listVerifiedServices();
+    expect(services.some((service) => service.serviceId === 'passport')).toBe(
+      true,
+    );
+    expect(
+      services.some((service) => service.serviceId === 'aadhaar-card'),
+    ).toBe(true);
+    expect(
+      services.some((service) => service.serviceId === 'test-expired-scheme'),
+    ).toBe(false);
   });
 });
 
 // ============================================================
-// GRIEVANCE ROUTE TESTS
+// RECEIPT REDACTION
 // ============================================================
 
-describe('NationalPublicServiceCentreService - Grievance Routes', () => {
-  describe('getGrievanceRoute', () => {
-    it('returns route for verified passport service', () => {
-      const route = getGrievanceRoute('passport');
-
-      expect(route.title).toBe('Passport Grievance Redressal');
-      expect(route.status).toBe('available');
-      expect(route.portalUrl).toBe('https://www.passportindia.gov.in');
-      expect(route.cpgrsLink).toBe('https://pgportal.gov.in');
-      expect(route.department).toBe('Ministry of External Affairs - Consular, Passport and Visa Division');
-      expect(Array.isArray(route.complaintCategories)).toBe(true);
-      expect(route.complaintCategories.length).toBeGreaterThan(0);
+describe('Receipt redaction', () => {
+  it('redacts receipt identifiers by default', () => {
+    const receipt = createReceiptEvidence({
+      serviceId: 'passport',
+      rawText: 'Receipt for Rs. 1,500',
+      receiptId: 'ARN-98234710',
+      jurisdiction: 'national',
+      captureDate: '2026-01-15',
     });
 
-    it('returns route for verified aadhaar service', () => {
-      const route = getGrievanceRoute('aadhaar-card');
+    expect(RECEIPT_REDACTION_DEFAULT).toBe(true);
+    expect(receipt.receiptId).toBe('REDACTED');
+    expect(receipt.metadata.redactionApplied).toBe(true);
+    expect(receipt.rawText).not.toContain('ARN-98234710');
+  });
 
-      expect(route.title).toBe('Aadhaar Grievance Redressal');
-      expect(route.portalUrl).toBe('https://uidai.gov.in');
-      expect(route.cpgrsLink).toBe('https://pgportal.gov.in');
+  it('redacts identifiers found inside pasted receipt text', () => {
+    const receipt = createReceiptEvidence({
+      serviceId: 'passport',
+      rawText:
+        'Receipt No: REC-12345678, mobile +91 9876543210, email citizen@example.org, Aadhaar 1234 5678 9012, PAN ABCDE1234F',
+      feeComponents: [{ label: 'Passport Fee', amount: 1500 }],
+      jurisdiction: 'national',
     });
 
-    it('returns route for verified driving-license service', () => {
-      const route = getGrievanceRoute('driving-license');
+    expect(receipt.rawText).not.toContain('REC-12345678');
+    expect(receipt.rawText).not.toContain('9876543210');
+    expect(receipt.rawText).not.toContain('citizen@example.org');
+    expect(receipt.rawText).not.toContain('1234 5678 9012');
+    expect(receipt.rawText).not.toContain('ABCDE1234F');
+    expect(receipt.rawText).toContain('[REDACTED:');
+    expect(receipt.metadata.redactedIdentifiers).toBeGreaterThanOrEqual(5);
+    expect(receipt.metadata.redactedTypes).toEqual(
+      expect.arrayContaining(['email', 'aadhaar', 'mobile', 'pan']),
+    );
+  });
 
-      expect(route.title).toBe('RTO/Parivahan Grievance');
-      expect(route.portalUrl).toBe('https://parivahan.gov.in');
+  it('redacts payment credentials found in receipt text instead of storing them', () => {
+    const receipt = createReceiptEvidence({
+      serviceId: 'passport',
+      rawText:
+        'Paid by card 4111 1111 1111 1111, CVV 123, UPI citizen@okhdfcbank, IFSC SBIN0001234',
+      feeComponents: [{ label: 'Passport Fee', amount: 1500 }],
+      jurisdiction: 'national',
     });
 
-    it('returns route for verified pan-card service', () => {
-      const route = getGrievanceRoute('pan-card');
+    expect(receipt.rawText).not.toContain('4111 1111 1111 1111');
+    expect(receipt.rawText).not.toContain('CVV 123');
+    expect(receipt.rawText).not.toContain('citizen@okhdfcbank');
+    expect(receipt.rawText).not.toContain('SBIN0001234');
+    expect(receipt.metadata.redactedTypes).toEqual(
+      expect.arrayContaining([
+        'payment-card',
+        'payment-secret',
+        'upi-id',
+        'ifsc',
+      ]),
+    );
+  });
 
-      expect(route.title).toBe('PAN Card Grievance');
-      expect(route.portalUrl).toBe('https://www.onlineservices.nsdl.com');
+  it('redacts any UPI handle and lower-case IFSC code', () => {
+    const result = redactReceiptText(
+      'Paid via asha@axl and IFSC sbin0001234',
+    );
+
+    expect(result.redactedText).not.toContain('asha@axl');
+    expect(result.redactedText).not.toContain('sbin0001234');
+    expect(result.redactedTypes).toEqual(
+      expect.arrayContaining(['upi-id', 'ifsc']),
+    );
+    expect(containsPaymentCredentials('asha@axl')).toBe(true);
+    expect(containsPaymentCredentials('IFSC sbin0001234')).toBe(true);
+  });
+
+  it('can preserve an identifier only with explicit opt-in', () => {
+    const receipt = createReceiptEvidence({
+      serviceId: 'passport',
+      rawText: 'Receipt for ARN-12345678',
+      receiptId: 'ARN-12345678',
+      redactIdentifiers: false,
+      jurisdiction: 'national',
     });
 
-    it('returns route for verified voter-id service', () => {
-      const route = getGrievanceRoute('voter-id');
+    expect(receipt.receiptId).toBe('ARN-12345678');
+    expect(receipt.rawText).toContain('ARN-12345678');
+    expect(receipt.metadata.redactionApplied).toBe(false);
+  });
 
-      expect(route.title).toBe('Electoral Grievance');
-      expect(route.portalUrl).toBe('https://voters.eci.gov.in');
+  it('returns redaction categories without leaking the original values', () => {
+    const result = redactReceiptText(
+      'Call 9876543210 or email user@example.org about ABCDE1234F',
+    );
+    expect(result.redactionCount).toBe(3);
+    expect(result.redactedTypes).toEqual(
+      expect.arrayContaining(['mobile', 'email', 'pan']),
+    );
+    expect(result.redactedText).not.toContain('9876543210');
+    expect(result.redactedText).not.toContain('user@example.org');
+    expect(result.redactedText).not.toContain('ABCDE1234F');
+  });
+
+  it('stores normalized component amounts and labels', () => {
+    const receipt = createReceiptEvidence({
+      serviceId: 'pan-card',
+      feeComponents: [
+        { label: 'Statutory Fee', amount: 107 },
+        { label: 'CSC Scanning', amount: '50' },
+        { label: 'Broken', amount: 'not-a-number' },
+      ],
+      jurisdiction: 'national',
     });
 
-    it('returns default route for unknown service', () => {
-      const route = getGrievanceRoute('unknown-service-123');
-
-      expect(route.title).toBe('Grievance Route');
-      expect(route.cpgrsLink).toBe('https://pgportal.gov.in');
-      expect(route.status).toBe('available');
-    });
-
-    it('returns unverified route for unverified service', () => {
-      // 'test-expired-scheme' is published but expired; still has official source
-      const route = getGrievanceRoute('test-expired-scheme');
-
-      expect(route).toBeDefined();
-      expect(route.title).toBeDefined();
-    });
-
-    it('includes grievance categories', () => {
-      const route = getGrievanceRoute('passport');
-
-      expect(route.complaintCategories).toContain('Overcharging');
-      expect(route.complaintCategories).toContain('Missing receipt');
-    });
+    expect(receipt.feeComponents).toHaveLength(3);
+    expect(receipt.feeComponents[0].amount).toBe(107);
+    expect(receipt.feeComponents[1].amount).toBe(50);
+    expect(receipt.feeComponents[2].amount).toBe(0);
   });
 });
 
 // ============================================================
-// COMMUNITY FEE OBSERVATION TESTS
+// OCR CORRECTION AND PARSING
 // ============================================================
 
-describe('NationalPublicServiceCentreService - Community Fee Observations', () => {
-  describe('COMMUNITY_OBSERVATION_STATUS constants', () => {
-    it('has all required status values', () => {
-      expect(COMMUNITY_OBSERVATION_STATUS.PENDING).toBe('pending');
-      expect(COMMUNITY_OBSERVATION_STATUS.APPROVED).toBe('approved');
-      expect(COMMUNITY_OBSERVATION_STATUS.REJECTED).toBe('rejected');
-      expect(COMMUNITY_OBSERVATION_STATUS.FLAGGED).toBe('flagged');
+describe('OCR correction and receipt parsing', () => {
+  it('repairs digit confusions without changing words', () => {
+    const corrected = correctOcrText(
+      'Standard Adult Passport Fee Rs. 1,5O0 and ₹2OO',
+    );
+    expect(corrected).toContain('1,500');
+    expect(corrected).toContain('₹200');
+    expect(corrected).toContain('Passport');
+  });
+
+  it('reports every correction for user review', () => {
+    const corrections = detectOcrCorrections('Fee 1,5O0 and 2OO');
+    expect(corrections).toEqual(
+      expect.arrayContaining([
+        { original: '1,5O0', corrected: '1,500' },
+        { original: '2OO', corrected: '200' },
+      ]),
+    );
+  });
+
+  it('corrects the number but keeps a currency prefix intact', () => {
+    expect(correctOcrText('INR1,5O0 and Rs.2OO')).toBe('INR1,500 and Rs.200');
+    expect(detectOcrCorrections('INR1,5O0')).toEqual([
+      { original: 'INR1,5O0', corrected: 'INR1,500' },
+    ]);
+  });
+
+  it('parses charges, applies OCR corrections, and ignores totals', () => {
+    const parsed = parseReceiptText(
+      [
+        'Passport Fee Rs. 1,5O0',
+        'SMS Updates Rs. 5O',
+        'Total Rs. 1,550',
+        'Receipt No: REC-12345678',
+        'Date 15/01/2026',
+      ].join('\n'),
+    );
+
+    expect(parsed.corrections).toHaveLength(2);
+    expect(parsed.components).toHaveLength(2);
+    expect(parsed.components[0]).toMatchObject({
+      label: 'Passport Fee',
+      amount: 1500,
+      componentType: FEE_COMPONENT_TYPES.GOVERNMENT_FEE,
+    });
+    expect(parsed.components[1]).toMatchObject({
+      label: 'SMS Updates',
+      amount: 50,
+      componentType: FEE_COMPONENT_TYPES.OPTIONAL_SERVICE_CHARGE,
+    });
+    expect(parsed.warnings.some((warning) => warning.includes('Total'))).toBe(
+      true,
+    );
+    expect(parsed.correctedText).toContain('1,500');
+    expect(parsed.correctedText).not.toContain('1,5O0');
+  });
+
+  it('cleans separators from parsed labels', () => {
+    const parsed = parseReceiptText('Smart Card Fee - ₹2OO');
+    expect(parsed.components).toHaveLength(1);
+    expect(parsed.components[0].label).toBe('Smart Card Fee');
+    expect(parsed.components[0].amount).toBe(200);
+  });
+
+  it('parses charge labels that begin with header-like words', () => {
+    const parsed = parseReceiptText(
+      ['Name Change Fee Rs. 5OO', 'Address Correction Fee Rs. 2OO'].join('\n'),
+    );
+
+    expect(parsed.components).toHaveLength(2);
+    expect(parsed.components[0]).toMatchObject({
+      label: 'Name Change Fee',
+      amount: 500,
+    });
+    expect(parsed.components[1]).toMatchObject({
+      label: 'Address Correction Fee',
+      amount: 200,
     });
   });
 
-  describe('createCommunityFeeObservation', () => {
-    it('creates an observation with PENDING status', () => {
-      const observation = createCommunityFeeObservation({
-        serviceId: 'passport',
-        userId: 'user-123',
-        observedAmount: 2000,
-        officialAmount: 1500,
-        componentType: 'optional_service_charge',
-        location: 'Counter 2',
-        jurisdiction: 'national',
-        description: 'Was charged ₹2000 for SMS updates at Passport Seva Kendra, official rate is ₹50.',
-      });
+  it('still skips identifier, phone, and date header lines', () => {
+    const parsed = parseReceiptText(
+      [
+        'Receipt No: REC-12345678',
+        'Mobile 9876543210',
+        'Date 15/01/2026',
+        'Passport Fee Rs. 1,500',
+      ].join('\n'),
+    );
 
-      expect(observation.serviceId).toBe('passport');
-      expect(observation.userId).toBe('user-123');
-      expect(observation.observedAmount).toBe(2000);
-      expect(observation.officialAmount).toBe(1500);
-      expect(observation.componentType).toBe('optional_service_charge');
-      expect(observation.location).toBe('Counter 2');
-      expect(observation.jurisdiction).toBe('national');
-      expect(observation.description).toContain('₹2000');
-      expect(observation.status).toBe('pending');
-      expect(observation.evidence).toEqual({});
-      expect(observation.moderatorNotes).toBeNull();
-    });
-
-    it('includes optional parameters', () => {
-      const observation = createCommunityFeeObservation({
-        serviceId: 'driving-license',
-        userId: 'user-456',
-        observedAmount: 50,
-        officialAmount: 50,
-        componentType: 'government_fee',
-        jurisdiction: 'state',
-        description: 'Correct fee charged',
-      });
-
-      expect(observation.observedAmount).toBe(50);
-      expect(observation.officialAmount).toBe(50);
-      expect(observation.componentType).toBe('government_fee');
-      expect(observation.jurisdiction).toBe('state');
-      expect(observation.status).toBe('pending');
-    });
+    expect(parsed.components).toHaveLength(1);
+    expect(parsed.components[0].label).toBe('Passport Fee');
+    expect(parsed.components[0].amount).toBe(1500);
   });
 
-  describe('moderateCommunityObservation', () => {
-    it('accepts valid decisions', () => {
-      const result = moderateCommunityObservation(
-        'obs-123',
-        'approved',
-        'User provided receipt as evidence',
+  it('uses configurable component-type suggestions but never claims a match', () => {
+    expect(inferFeeComponentType('Optional SMS alerts')).toBe(
+      FEE_COMPONENT_TYPES.OPTIONAL_SERVICE_CHARGE,
+    );
+    expect(inferFeeComponentType('Online portal charge')).toBe(
+      FEE_COMPONENT_TYPES.PORTAL_CHARGE,
+    );
+    expect(inferFeeComponentType('State fee')).toBe(
+      FEE_COMPONENT_TYPES.GOVERNMENT_FEE,
+    );
+    expect(inferFeeComponentType('Mystery amount')).toBe('unknown');
+
+    const parsed = parseReceiptText('Mystery amount 999');
+    expect(parsed.components[0].componentType).toBe('unknown');
+    expect(parsed.components[0].requiresReview).toBe(true);
+  });
+});
+
+// ============================================================
+// DISCREPANCY REPORTS
+// ============================================================
+
+describe('Discrepancy reports', () => {
+  const passportReceipt = (components) =>
+    createReceiptEvidence({
+      serviceId: 'passport',
+      rawText: 'Passport receipt',
+      feeComponents: components,
+      jurisdiction: 'national',
+    });
+
+  it('labels every component unverified when no verified schedule exists', () => {
+    const report = generateDiscrepancyReport(
+      passportReceipt([
+        { label: 'Standard Adult Passport Fee', amount: 1500 },
+        { label: 'SMS Updates', amount: 50 },
+      ]),
+      'unknown-service',
+    );
+
+    expect(report.overallMatch).toBe('unverified');
+    expect(report.isOfficialScheduleApplicable).toBe(false);
+    expect(report.summary.componentsUnverified).toBe(2);
+    expect(report.summary.totalCharged).toBe(1550);
+    expect(report.componentComparisons).toHaveLength(2);
+    report.componentComparisons.forEach((comparison) => {
+      expect(comparison.status).toBe('unverified');
+      expect(comparison.officialAmount).toBeNull();
+      expect(comparison.discrepancy).toContain(
+        'No overcharge conclusion is drawn',
       );
+    });
+    expect(JSON.stringify(report)).not.toMatch(/illegal/i);
+  });
 
-      expect(result.observationId).toBe('obs-123');
-      expect(result.decision).toBe('approved');
-      expect(result.moderatorNotes).toBe('User provided receipt as evidence');
-      expect(result.moderatedAt).toBeDefined();
-      expect(result.valid).toBe(true);
+  it('labels an expired schedule unverified rather than overcharged', () => {
+    const receipt = passportReceipt([
+      { label: 'Anything', amount: 99999 },
+    ]);
+    const report = generateDiscrepancyReport(receipt, 'test-expired-scheme');
+
+    expect(report.overallMatch).toBe('unverified');
+    expect(report.summary.componentsUnverified).toBe(1);
+    expect(report.warnings[0]).toContain('past its review window');
+  });
+
+  it('does not compare a receipt date with a schedule that was not effective then', () => {
+    const report = generateDiscrepancyReport(
+      passportReceipt([
+        { label: 'Standard Adult Passport Fee', amount: 1500 },
+      ]),
+      'passport',
+      { checkDate: '2023-06-01' },
+    );
+
+    expect(report.overallMatch).toBe('unverified');
+    expect(report.isOfficialScheduleApplicable).toBe(false);
+    expect(report.summary.componentsUnverified).toBe(1);
+    expect(report.componentComparisons[0].officialAmount).toBeNull();
+    expect(report.warnings[0]).toContain('No official fee version is effective');
+  });
+
+  it('matches a component against the published passport schedule', () => {
+    const report = generateDiscrepancyReport(
+      passportReceipt([
+        { label: 'Standard Adult Passport Fee', amount: 1500 },
+        { label: 'SMS Updates', amount: 50 },
+      ]),
+      'passport',
+    );
+
+    expect(report.isOfficialScheduleApplicable).toBe(true);
+    expect(report.summary.totalCharged).toBe(1550);
+    expect(report.summary.totalOfficial).toBe(1500);
+    expect(report.summary.componentsMatched).toBe(1);
+    expect(report.summary.componentsUnverified).toBe(1);
+    expect(report.overallMatch).toBe('partial-match');
+
+    const matched = report.componentComparisons[0];
+    expect(matched.status).toBe('matched');
+    expect(matched.officialAmount).toBe(1500);
+    expect(matched.officialSource).toContain('Passport');
+    expect(matched.officialSourceUrl).toBe('https://www.passportindia.gov.in');
+    expect(matched.officialVerificationDate).toBe('2026-07-10');
+    expect(matched.officialFeeVersion).toBe(0);
+    expect(matched.officialAuthority).toContain('External Affairs');
+    expect(matched.redactionApplied).toBe(true);
+    expect(report.officialSchedule.name).toContain('Passport Rules');
+    expect(report.officialSchedule.url).toBe(
+      'https://www.passportindia.gov.in',
+    );
+    expect(report.officialSchedule.effectiveDate).toBe('2024-01-01');
+  });
+
+  it('detects an overcharge relative to the published fee', () => {
+    const report = generateDiscrepancyReport(
+      passportReceipt([
+        { label: 'Standard Adult Passport Fee', amount: 2000 },
+      ]),
+      'passport',
+    );
+
+    expect(report.overallMatch).toBe('overcharged');
+    expect(report.summary.totalOvercharge).toBe(500);
+    expect(report.summary.componentsOvercharged).toBe(1);
+    expect(report.componentComparisons[0].status).toBe('overcharged');
+    expect(report.componentComparisons[0].discrepancy).toContain(
+      'Above the published fee',
+    );
+    expect(JSON.stringify(report)).not.toMatch(/illegal|unlawful/i);
+  });
+
+  it('detects an undercharge without treating it as a full match', () => {
+    const report = generateDiscrepancyReport(
+      passportReceipt([
+        { label: 'Standard Adult Passport Fee', amount: 1000 },
+      ]),
+      'passport',
+    );
+
+    expect(report.overallMatch).toBe('undercharged');
+    expect(report.summary.componentsUndercharged).toBe(1);
+    expect(report.componentComparisons[0].status).toBe('undercharged');
+    expect(report.componentComparisons[0].discrepancy).toContain(
+      'Below the published fee',
+    );
+  });
+
+  it('uses the newest applicable version instead of matching an old amount', () => {
+    recordFeeVersion(
+      createGovernmentFee(
+        baseRecord({
+          amount: 1500,
+          effectiveDate: '2024-01-01',
+          verificationDate: '2024-01-02',
+        }),
+      ),
+    );
+    recordFeeVersion(
+      createGovernmentFee(
+        baseRecord({
+          amount: 2000,
+          effectiveDate: '2026-01-01',
+          verificationDate: '2026-01-02',
+        }),
+      ),
+    );
+
+    const report = generateDiscrepancyReport(
+      passportReceipt([
+        { label: 'Standard Adult Passport Fee', amount: 1500 },
+      ]),
+      'passport',
+      { checkDate: '2026-06-01' },
+    );
+
+    expect(report.componentComparisons[0].officialAmount).toBe(2000);
+    expect(report.componentComparisons[0].officialFeeVersion).toBe(2);
+    expect(report.componentComparisons[0].status).toBe('undercharged');
+  });
+
+  it('keeps a mixed undercharge and unknown component at partial-match', () => {
+    const report = generateDiscrepancyReport(
+      passportReceipt([
+        { label: 'Standard Adult Passport Fee', amount: 1000 },
+        { label: 'Mystery Surcharge', amount: 999 },
+      ]),
+      'passport',
+    );
+
+    expect(report.summary.componentsUndercharged).toBe(1);
+    expect(report.summary.componentsUnverified).toBe(1);
+    expect(report.overallMatch).toBe('partial-match');
+  });
+
+  it('inherits jurisdiction and district from the receipt when options omit them', () => {
+    recordFeeVersion(
+      createGovernmentFee(
+        baseRecord({
+          jurisdiction: 'district',
+          state: 'Delhi',
+          district: 'New Delhi',
+          amount: 1700,
+          effectiveDate: '2025-01-01',
+          verificationDate: '2025-01-02',
+          source: 'https://delhi.gov.in/fees',
+          label: 'Standard Adult Passport Fee',
+          supplementary: { sourceName: 'Delhi District Fee Notification' },
+        }),
+      ),
+    );
+
+    const receipt = createReceiptEvidence({
+      serviceId: 'passport',
+      jurisdiction: 'district',
+      state: 'Delhi',
+      district: 'New Delhi',
+      feeComponents: [
+        { label: 'Standard Adult Passport Fee', amount: 1700 },
+      ],
+    });
+    const report = generateDiscrepancyReport(receipt, 'passport', {
+      checkDate: '2026-01-01',
     });
 
-    it('rejects invalid decision', () => {
-      const result = moderateCommunityObservation('obs-123', 'invalid_status');
+    expect(report.jurisdiction).toBe('district');
+    expect(report.district).toBe('New Delhi');
+    expect(report.componentComparisons[0].officialAmount).toBe(1700);
+    expect(report.componentComparisons[0].status).toBe('matched');
+    expect(report.officialSchedule.name).toBe('Delhi District Fee Notification');
+    expect(report.officialSchedule.url).toBe('https://delhi.gov.in/fees');
+  });
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBeDefined();
+  it('accepts a small rounding tolerance', () => {
+    const report = generateDiscrepancyReport(
+      passportReceipt([{ label: 'Standard Adult Passport Fee', amount: 1503 }]),
+      'passport',
+    );
+
+    expect(report.componentComparisons[0].status).toBe('matched');
+    expect(report.summary.totalOvercharge).toBe(0);
+  });
+
+  it('handles mixed matched and unknown components', () => {
+    const receipt = createReceiptEvidence({
+      serviceId: 'driving-license',
+      feeComponents: [
+        { label: 'Driving Test Fee', amount: 300 },
+        { label: 'Unknown Service', amount: 999 },
+      ],
+      jurisdiction: 'state',
     });
+    const report = generateDiscrepancyReport(receipt, 'driving-license');
 
-    it('rejects unknown decision', () => {
-      const result = moderateCommunityObservation('obs-123', 'unknown');
+    expect(report.summary.componentsMatched).toBe(1);
+    expect(report.summary.componentsUnverified).toBe(1);
+    expect(report.summary.componentsUnmatched).toBe(1);
+    expect(report.overallMatch).toBe('partial-match');
 
-      expect(result.valid).toBe(false);
-      expect(result.error).toBeDefined();
+    const unknown = report.componentComparisons.find(
+      (comparison) => comparison.chargedAmount === 999,
+    );
+    expect(unknown.status).toBe('unverified');
+    expect(unknown.discrepancy).toContain('No official match found');
+  });
+
+  it('reports partial-overcharge when only some verified charges are above the schedule', () => {
+    const report = generateDiscrepancyReport(
+      passportReceipt([
+        {
+          label: 'Jumbo Adult Passport (60 Pages, 10 Years Validity)',
+          amount: 2500,
+        },
+        { label: 'Standard Adult Passport Fee (36 Pages)', amount: 1000 },
+      ]),
+      'passport',
+    );
+
+    expect(report.summary.componentsOvercharged).toBe(1);
+    expect(report.summary.componentsUndercharged).toBe(1);
+    expect(report.summary.totalOvercharge).toBe(500);
+    expect(report.summary.totalUndercharge).toBe(500);
+    expect(report.overallMatch).toBe('partial-overcharge');
+  });
+
+  it('applies a recorded state fee version when jurisdiction matches', () => {
+    recordFeeVersion(
+      createGovernmentFee(
+        baseRecord({
+          authority: 'Delhi Fee Authority',
+          jurisdiction: 'state',
+          state: 'Delhi',
+          amount: 1600,
+          effectiveDate: '2025-01-01',
+          verificationDate: '2025-01-02',
+          source: 'https://delhi.gov.in/fees',
+          label: 'Standard Adult Passport Fee',
+          supplementary: { sourceName: 'Delhi State Fee Notification' },
+        }),
+      ),
+    );
+
+    const report = generateDiscrepancyReport(
+      passportReceipt([
+        { label: 'Standard Adult Passport Fee', amount: 1500 },
+      ]),
+      'passport',
+      { jurisdiction: 'state', state: 'Delhi', checkDate: '2026-01-01' },
+    );
+
+    expect(report.jurisdiction).toBe('state');
+    expect(report.componentComparisons[0].status).toBe('undercharged');
+    expect(report.componentComparisons[0].officialAmount).toBe(1600);
+    expect(report.componentComparisons[0].officialSource).toBe(
+      'Delhi State Fee Notification',
+    );
+    expect(report.officialSchedule.name).toBe('Delhi State Fee Notification');
+    expect(report.officialSchedule.url).toBe('https://delhi.gov.in/fees');
+  });
+
+  it('does not apply a state version when checking another state', () => {
+    recordFeeVersion(
+      createGovernmentFee(
+        baseRecord({
+          jurisdiction: 'state',
+          state: 'Delhi',
+          amount: 1600,
+          effectiveDate: '2025-01-01',
+          verificationDate: '2025-01-02',
+        }),
+      ),
+    );
+
+    const report = generateDiscrepancyReport(
+      passportReceipt([
+        { label: 'Standard Adult Passport Fee', amount: 1500 },
+      ]),
+      'passport',
+      { jurisdiction: 'state', state: 'Kerala', checkDate: '2026-01-01' },
+    );
+
+    expect(report.componentComparisons[0].officialAmount).toBe(1500);
+    expect(report.componentComparisons[0].status).toBe('matched');
+  });
+
+  it('does not apply a state version in a report without a selected state', () => {
+    recordFeeVersion(
+      createGovernmentFee(
+        baseRecord({
+          jurisdiction: 'state',
+          state: 'Delhi',
+          amount: 1600,
+          effectiveDate: '2025-01-01',
+          verificationDate: '2025-01-02',
+        }),
+      ),
+    );
+
+    const report = generateDiscrepancyReport(
+      passportReceipt([
+        { label: 'Standard Adult Passport Fee', amount: 1500 },
+      ]),
+      'passport',
+      { jurisdiction: 'state', checkDate: '2026-01-01' },
+    );
+
+    expect(report.jurisdiction).toBe('state');
+    expect(report.componentComparisons[0].officialAmount).toBe(1500);
+    expect(report.componentComparisons[0].status).toBe('matched');
+  });
+
+  it('keeps identifiers redacted in the report and exposes no raw text', () => {
+    const receipt = createReceiptEvidence({
+      serviceId: 'passport',
+      rawText: 'Receipt No REC-12345678, mobile 9876543210',
+      receiptId: 'REC-12345678',
+      feeComponents: [
+        { label: 'Standard Adult Passport Fee', amount: 1500 },
+      ],
+      jurisdiction: 'national',
+    });
+    const report = generateDiscrepancyReport(receipt, 'passport');
+    const serialized = JSON.stringify(report);
+
+    expect(report.receiptEvidenceId).toContain('receipt-passport');
+    expect(serialized).not.toContain('REC-12345678');
+    expect(serialized).not.toContain('9876543210');
+    report.componentComparisons.forEach((comparison) => {
+      expect(comparison.redactionApplied).toBe(true);
     });
   });
 
-  describe('getModeratedObservations', () => {
-    it('returns empty array by default (no storage)', () => {
-      const observations = getModeratedObservations('passport');
-      expect(observations).toEqual([]);
-    });
+  it('returns a no-components result for an empty receipt', () => {
+    const report = generateDiscrepancyReport(
+      createReceiptEvidence({ serviceId: 'passport' }),
+      'passport',
+    );
+    expect(report.overallMatch).toBe('no-components');
+    expect(report.summary.totalCharged).toBe(0);
+  });
+});
 
-    it('can be called with status filter', () => {
-      const observations = getModeratedObservations('passport', 'approved');
-      expect(observations).toEqual([]);
-    });
+// ============================================================
+// GRIEVANCE ROUTES
+// ============================================================
+
+describe('Grievance routes', () => {
+  it('returns the published passport route with categories', () => {
+    const route = getGrievanceRoute('passport');
+    expect(route.title).toBe('Passport Grievance Redressal');
+    expect(route.status).toBe('available');
+    expect(route.portalUrl).toBe('https://www.passportindia.gov.in');
+    expect(route.cpgrsLink).toBe('https://pgportal.gov.in');
+    expect(route.department).toContain('External Affairs');
+    expect(route.complaintCategories).toContain('Overcharging');
+    expect(route.complaintCategories).toContain('Missing receipt');
+  });
+
+  it('returns published routes for other verified services', () => {
+    expect(getGrievanceRoute('aadhaar-card').portalUrl).toBe(
+      'https://uidai.gov.in',
+    );
+    expect(getGrievanceRoute('driving-license').portalUrl).toBe(
+      'https://parivahan.gov.in',
+    );
+    expect(getGrievanceRoute('pan-card').portalUrl).toBe(
+      'https://www.onlineservices.nsdl.com',
+    );
+    expect(getGrievanceRoute('voter-id').portalUrl).toBe(
+      'https://voters.eci.gov.in',
+    );
+  });
+
+  it('marks an unknown service as having no published route', () => {
+    const route = getGrievanceRoute('unknown-service-123');
+    expect(route.status).toBe('unverified');
+    expect(route.portalUrl).toBeNull();
+    expect(route.cpgrsLink).toBe('https://pgportal.gov.in');
+    expect(route.message).toContain('No service-specific');
+  });
+
+  it('flags a schedule past its review window', () => {
+    const route = getGrievanceRoute('test-expired-scheme');
+    expect(route.status).toBe('review-required');
+    expect(route.portalUrl).toBeTruthy();
+  });
+});
+
+// ============================================================
+// COMMUNITY FEE OBSERVATIONS
+// ============================================================
+
+describe('Community fee observations', () => {
+  const validObservation = (overrides = {}) => ({
+    serviceId: 'passport',
+    userId: 'user-123',
+    observedAmount: 2000,
+    officialAmount: 1500,
+    componentType: FEE_COMPONENT_TYPES.OPTIONAL_SERVICE_CHARGE,
+    location: 'Counter 2',
+    jurisdiction: 'national',
+    description:
+      'Was charged Rs. 2000 for SMS updates at the Passport Seva Kendra; the published rate is Rs. 50.',
+    ...overrides,
+  });
+
+  it('stores a new observation as PENDING', () => {
+    const observation = createCommunityFeeObservation(validObservation());
+
+    expect(observation.valid).toBe(true);
+    expect(observation.status).toBe(COMMUNITY_OBSERVATION_STATUS.PENDING);
+    expect(observation.observedAmount).toBe(2000);
+    expect(observation.moderatorNotes).toBeNull();
+    expect(getPendingCommunityObservations('passport')).toHaveLength(1);
+  });
+
+  it('rejects invalid amounts and short descriptions', () => {
+    const result = createCommunityFeeObservation(
+      validObservation({ observedAmount: -5, description: 'Too short' }),
+    );
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((error) => error.includes('non-negative'))).toBe(
+      true,
+    );
+    expect(result.errors.some((error) => error.includes('10 characters'))).toBe(
+      true,
+    );
+  });
+
+  it('rejects payment credentials instead of collecting them', () => {
+    expect(containsPaymentCredentials('card 4111 1111 1111 1111')).toBe(true);
+    expect(containsPaymentCredentials('CVV 123')).toBe(true);
+    expect(containsPaymentCredentials('paid at the counter')).toBe(false);
+
+    const result = createCommunityFeeObservation(
+      validObservation({
+        description:
+          'I paid with card 4111 1111 1111 1111 and the operator kept the receipt number.',
+      }),
+    );
+    expect(result.valid).toBe(false);
+    expect(getPendingCommunityObservations('passport')).toHaveLength(0);
+  });
+
+  it('redacts identifier text and strips sensitive keys from evidence', () => {
+    const observation = createCommunityFeeObservation(
+      validObservation({
+        evidence: {
+          photoRef: 'counter-photo.jpg',
+          note: 'receipt REC-12345678',
+        },
+      }),
+    );
+
+    expect(observation.valid).toBe(true);
+    expect(observation.evidence.photoRef).toBe('counter-photo.jpg');
+    expect(observation.evidence.note).not.toContain('REC-12345678');
+  });
+
+  it('rejects payment credentials placed in evidence', () => {
+    const observation = createCommunityFeeObservation(
+      validObservation({
+        evidence: { cardNumber: '4111111111111111', cvv: '123' },
+      }),
+    );
+
+    expect(observation.valid).toBe(false);
+    expect(getPendingCommunityObservations('passport')).toHaveLength(0);
+  });
+
+  it('does not show pending observations publicly', () => {
+    createCommunityFeeObservation(validObservation());
+    expect(getModeratedObservations('passport')).toEqual([]);
+    expect(getModeratedObservations('passport', 'pending')).toHaveLength(1);
+  });
+
+  it('redacts personal identifiers before storing an observation', () => {
+    const observation = createCommunityFeeObservation(
+      validObservation({
+        location: 'Counter 3, call 9876543210',
+        description:
+          'Charged at the counter. Email citizen@example.org or call 9876543210. Receipt REC-12345678 was not given.',
+      }),
+    );
+
+    expect(observation.valid).toBe(true);
+    expect(observation.description).not.toContain('citizen@example.org');
+    expect(observation.description).not.toContain('9876543210');
+    expect(observation.description).not.toContain('REC-12345678');
+    expect(observation.location).not.toContain('9876543210');
+  });
+
+  it('approves an observation before it is displayed', () => {
+    const observation = createCommunityFeeObservation(
+      validObservation({ evidence: { note: 'receipt copy held offline' } }),
+    );
+    const moderation = moderateCommunityObservation(
+      observation.id,
+      COMMUNITY_OBSERVATION_STATUS.APPROVED,
+      'Receipt evidence reviewed.',
+      { moderatorId: 'moderator-1' },
+    );
+
+    expect(moderation.valid).toBe(true);
+    expect(moderation.observation.status).toBe('approved');
+
+    const approved = getModeratedObservations('passport');
+    expect(approved).toHaveLength(1);
+    expect(approved[0].description).toContain('SMS updates');
+    expect(approved[0].userId).toBeUndefined();
+    expect(approved[0].evidence).toBeUndefined();
+    expect(approved[0].moderatorNotes).toBeUndefined();
+    expect(approved[0].moderatedBy).toBeUndefined();
+    expect(approved[0].auditTrail).toBeUndefined();
+    expect(approved[0].evidenceAttached).toBe(true);
+    expect(getPendingCommunityObservations('passport')).toHaveLength(0);
+  });
+
+  it('keeps rejected observations hidden from public display', () => {
+    const observation = createCommunityFeeObservation(validObservation());
+    const moderation = moderateCommunityObservation(
+      observation.id,
+      COMMUNITY_OBSERVATION_STATUS.REJECTED,
+      'No supporting evidence.',
+    );
+
+    expect(moderation.valid).toBe(true);
+    expect(getModeratedObservations('passport')).toEqual([]);
+    expect(getModeratedObservations('passport', 'rejected')).toHaveLength(1);
+  });
+
+  it('rejects invalid moderation decisions and unknown observations', () => {
+    const observation = createCommunityFeeObservation(validObservation());
+    expect(
+      moderateCommunityObservation(observation.id, 'invalid_status').valid,
+    ).toBe(false);
+    expect(
+      moderateCommunityObservation('missing-observation', 'approved').valid,
+    ).toBe(false);
+  });
+
+  it('filters observations by service', () => {
+    const passportObservation = createCommunityFeeObservation(
+      validObservation(),
+    );
+    moderateCommunityObservation(
+      passportObservation.id,
+      COMMUNITY_OBSERVATION_STATUS.APPROVED,
+    );
+    createCommunityFeeObservation(
+      validObservation({ serviceId: 'driving-license' }),
+    );
+
+    expect(getModeratedObservations('passport')).toHaveLength(1);
+    expect(getModeratedObservations('driving-license')).toEqual([]);
   });
 });

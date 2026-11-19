@@ -26,7 +26,8 @@ import {
   Droplets,
   KeyRound,
   Store,
-  Trees
+  Trees,
+  ReceiptText
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -819,6 +820,13 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 to: '/tenders',
                 label: t('nav.tenders', 'Tender Readiness'),
                 icon: FileText
+              })}
+
+              {renderNavLink({
+                to: '/fee-evidence',
+                activeTarget: '/fee-evidence',
+                label: 'Fee Evidence Assistant',
+                icon: ReceiptText
               })}
 
               {renderNavLink({
