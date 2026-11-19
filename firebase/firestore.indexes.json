@@ -70,6 +70,7 @@
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
     },
+    {
       "collectionGroup": "publicProjects",
       "queryScope": "COLLECTION",
       "fields": [
@@ -93,7 +94,6 @@
       "fields": [
         { "fieldPath": "projectId", "order": "ASCENDING" },
         { "fieldPath": "sequenceOrder", "order": "ASCENDING" }
-
       ]
     }
   ],

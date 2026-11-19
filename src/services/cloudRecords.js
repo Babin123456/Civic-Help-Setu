@@ -79,11 +79,6 @@ export const DEVICE_ONLY_STORES = [
   { key: 'civicbridge_tombstones_v1', reason: 'Deletion tombstones stay on the device.' },
 
   { key: 'civicbridge_notice_deadline_state_v1', reason: 'Citizen deadline confirmations, edits and notes stay on this device until a cloud collection exists.' },
-
-  { key: 'civicbridge_hazard_reports_v1', reason: 'Citizen road hazard reports are local submissions kept on device before moderation.' },
-  { key: 'civicbridge_road_safety_rate_limit_v1', reason: 'Road safety rate-limiting timestamps are local bookkeeping and are never cloud-synced.' },
-  { key: 'civicbridge_review_cases_v1', reason: 'Road safety review cases and inspection logs stay on device.' },
-  { key: 'civicbridge_intervention_records_v1', reason: 'Road safety countermeasure records stay on device.' },
   { key: 'civicbridge_office_comparison_reports_v1', reason: 'Outdated office-record reports are non-sensitive community submissions kept on device until the review endpoint accepts them.' },
   { key: 'civicbridge_tenants_v1', reason: 'Tenant authority profiles are administrative workspace configurations.' },
   { key: 'civicbridge_tenant_memberships_v1', reason: 'Tenant staff memberships are authority-scoped RBAC records.' },
@@ -106,6 +101,22 @@ export const DEVICE_ONLY_STORES = [
   { key: 'civicbridge_continuity_audit_logs_v1', reason: 'Continuity drill audit logs remain on device.' },
   { key: 'civicbridge_continuity_recommendations_v1', reason: 'Continuity drill recommendations remain on device.' },
   { key: 'civicbridge_senior_tribunal_petitions', reason: 'Senior citizen maintenance tribunal petitions remain on device.' },
+  { key: 'civicbridge_rera_complaints', reason: 'RERA dispute complaints and statutory interest calculations remain on device.' },
+  { key: 'civicbridge_abc_conflict_records', reason: 'Stray animal conflict and ABC incident records remain on device.' },
+  { key: 'civicbridge_noise_pollution_logs', reason: 'Noise pollution logs and escalation drafts remain on device.' },
+  { key: 'civicbridge_solid_waste_audits', reason: 'Solid waste segregation audit logs remain on device.' },
+  { key: 'civicbridge_patient_grievance_records', reason: 'Clinical establishment grievance records remain on device.' },
+  { key: 'civicbridge_electricity_cgrf_vault', reason: 'Electricity consumer grievance forum records remain on device.' },
+  { key: 'civicbridge_accessibility_audit_vault', reason: 'Accessibility audit vault records remain on device.' },
+  { key: 'civicbridge_dark_patterns_vault', reason: 'Digital consumer dark pattern evidence remains on device.' },
+  { key: 'civicbridge_vendor_rights_vault', reason: 'Street vendor rights petitions remain on device.' },
+  { key: 'civicbridge_rte_grievance_vault', reason: 'RTE admission dispute records remain on device.' },
+  { key: 'civicbridge_accessibility_cases_v1', reason: 'Accessibility escalation cases remain on device.' },
+  { key: 'civicbridge_accessibility_tracker_settings_v1', reason: 'Accessibility tracker preferences remain on device.' },
+  { key: 'civicbridge_legal_sources_v1', reason: 'Verified legal sources registry remains on device.' },
+  { key: 'civicbridge_legal_draft_snapshots_v1', reason: 'Statutory legal draft snapshots remain on device.' },
+  { key: 'civicbridge_legal_sources_audit_v1', reason: 'Legal sources audit log remains on device.' },
+  { key: 'civicbridge_evidence_dossiers_v1', reason: 'Tamper-evident legal evidence dossiers remain on device.' },
 
 ];
 
