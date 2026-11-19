@@ -80,6 +80,8 @@ On the Saved page, a collection switcher groups guides by their folder. A guide 
 
 Use the tracking dashboard to organize service journeys and review available progress information.
 
+Each tracked application also has a timeline replay. It shows append-only event records grouped by submission, acknowledgement, review, query, and outcome; keeps citizen notes separate from official-source events; and compares two stored snapshots field by field. Conflicting or out-of-order evidence is routed to review instead of being overwritten. AI-style summaries are labelled as suggestions, cite event IDs and exact source dates, and never infer an official decision. See [the timeline replay and event-difference documentation](docs/application-timeline-replay-and-event-diff.md).
+
 ### 🔐 6. Secure Authentication
 
 Authentication powered by Clerk, with support for email-based authentication and Google sign-in where configured.
@@ -111,6 +113,25 @@ A responsive design with theme support, built to provide a consistent experience
 ### ♿ 13. Accessibility-Focused Design
 
 Clear navigation, readable content, consistent interaction patterns, and a user-centered approach to public-service information.
+
+### 🧪 14. Privacy-Safe Synthetic Civic Dataset Generator
+
+Generate reproducible, schema-aware service guides, citizen applications, and grievance records with zero production PII, complete referential integrity, and one-click local development database loading (#778).
+### 🚨 14. Civic Incident Response Drill & Public Service Continuity Planner
+
+A dedicated preparedness workspace for municipal authorities and disaster response teams. Model critical service dependencies, detect single points of failure (SPOF) and dependency cycles with graph analysis, run tabletop exercises with timed inject simulations, record tactical decisions, calculate recovery time objective (RTO) gaps, generate printable offline continuity runbooks, and track corrective action items to closure. See [architecture and operational documentation](docs/civic-incident-response-drill-planner.md).
+
+### 🏛️ 15. Multi-Authority Tenant Workspaces
+
+Isolated administration workspaces for distinct municipal and district civic authorities, supporting sovereign staff memberships, anti-IDOR scoped datasets, tamper-evident SHA-256 audit logs, bounded local AI guidance, and controlled cross-tenant public catalogue sharing.
+
+### 🧪 16. Catalogue Visual QA Workspace
+
+A reviewer-only workspace for responsive service-card layout checks. Render the production card against deterministic synthetic long-title, multilingual and missing-metadata fixtures at named desktop, tablet and mobile viewports; inspect bounding boxes, overflow warnings and metadata gaps; review synthetic suggestions; compare a saved screenshot baseline; and export a private snapshot. It never reads or publishes production catalogue or citizen data, and review progress is not an official application status. See [architecture, API and accessibility documentation](docs/civic-service-catalogue-visual-qa.md).
+
+### 🌱 17. Municipal Greenhouse-Gas Inventory & Emissions Reporting
+
+A role-scoped workspace for local-authority climate reporting. Departments submit activity data with units, periods, source-document metadata and correction notes; the service calculates explainable `tCO2e` with immutable versioned emission factors, separates measured, estimated and excluded values, and keeps every calculation reproducible. Reviewers approve submissions before totals are published, missing-data estimates require a human decision, and the public view exposes only approved aggregates. See [architecture, methodology and rollback documentation](docs/municipal-greenhouse-gas-inventory.md).
 
 ---
 
@@ -151,7 +172,14 @@ The platform includes the following major application areas:
 | Open Source     | Explore community contributions           |
 | Privacy Policy  | Review privacy-related information        |
 | Admin           | Access authorized administrative features |
+
 | Form Explainer  | Multilingual UP form field guidance & error-prevention assistant ([#1001](docs/multilingual-government-form-field-explainer.md)) |
+
+| Catalogue Visual QA | Reviewer-only responsive service-card layout checks with synthetic fixtures and private review snapshots |
+| Synthetic Datasets | Generate privacy-safe civic datasets (`/synthetic-datasets`) |
+| Authority Workspaces | Multi-authority sovereign administration, isolated staff, datasets, and audit logs |
+| Greenhouse-Gas Inventory | Department activity data, versioned factors, approvals and public emissions totals (`/ghg-inventory`) |
+
 
 The availability of individual features depends on the application's current implementation and configuration.
 
@@ -302,6 +330,8 @@ npm test
 ```
 
 Run this command if a test script is configured in `package.json`. If the script is not configured, use the test command provided by the project.
+
+Dependency update pull requests follow the [dependency maintenance policy](docs/DEPENDENCY_MAINTENANCE.md).
 
 ---
 

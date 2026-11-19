@@ -1,6 +1,6 @@
 // Language list and saved-choice helpers. Kept free of React so the
 // persistence rules can be unit tested.
-import { logDiagnostic } from './diagnostics';
+import { logDiagnostic } from './diagnostics.js';
 
 export const LANGUAGE_KEY = 'civicbridge_lang';
 export const SOURCE_LANGUAGE = 'en';

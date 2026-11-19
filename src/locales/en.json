@@ -2,6 +2,7 @@
   "nav": {
     "brand": "Civic Help Setu",
     "services": "Services",
+    "translationWorkspace": "Translation Workspace",
     "nearby": "Nearby Centers",
     "track": "Track Status",
     "assistant": "AI Assistant",
@@ -11,11 +12,21 @@
     "admin": "Admin Portal",
     "tenders": "Tender Readiness",
     "civicWorks": "Ward Public Works",
+    "volunteer": "Volunteer Coordination",
     "roadSafety": "Road Safety Blackspots",
     "rentalChecklist": "Rental Checklist",
+
+    "neighbourhoodResource": "Neighbourhood Resource Exchange",
+
     "addressChange": "Address Change Planner",
+
     "formExplainer": "Form Field Explainer",
+
+    "counterDemand": "Counter Demand & Staffing",
+
     "treeHealth": "Tree Health Inventory",
+    "streetlights": "Streetlight Outages",
+
     "signIn": "Sign In",
     "signOut": "Sign Out",
     "toggleTheme": "Toggle Theme"
