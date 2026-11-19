@@ -4,9 +4,9 @@
  * All email sending in the app should go through this service.
  */
 
-import { logDiagnostic } from '../utils/diagnostics';
-import { shouldSendEmail } from './notificationPreferenceService';
-import { isEmailVerified } from './emailVerificationService';
+import { logDiagnostic } from '../utils/diagnostics.js';
+import { shouldSendEmail } from './notificationPreferenceService.js';
+import { isEmailVerified } from './emailVerificationService.js';
 
 export const EMAIL_TEMPLATES = {
   VERIFICATION: 'verification',
