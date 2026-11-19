@@ -26,7 +26,8 @@ import {
   Droplets,
   KeyRound,
   Store,
-  Trees
+  Trees,
+  School
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -133,6 +134,15 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
           normalizedPath === '/road-safety' ||
           normalizedPath === '/blackspots' ||
           normalizedPath.startsWith('/road-safety/')
+        );
+      }
+
+      if (normalizedTarget === '/school-zone-safety') {
+        return (
+          normalizedPath === '/school-zone-safety' ||
+          normalizedPath === '/school-safety' ||
+          normalizedPath === '/up-school-safety' ||
+          normalizedPath.startsWith('/school-zone-safety/')
         );
       }
 
@@ -867,6 +877,12 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 to: '/road-safety',
                 label: t('nav.roadSafety', 'Road Safety Blackspots'),
                 icon: AlertTriangle
+              })}
+
+              {renderNavLink({
+                to: '/school-zone-safety',
+                label: t('nav.schoolZoneSafety', 'School Zone Safety'),
+                icon: School
               })}
 
               {renderNavLink({
