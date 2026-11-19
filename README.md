@@ -151,6 +151,7 @@ The platform includes the following major application areas:
 | Open Source     | Explore community contributions           |
 | Privacy Policy  | Review privacy-related information        |
 | Admin           | Access authorized administrative features |
+| Form Explainer  | Multilingual UP form field guidance & error-prevention assistant ([#1001](docs/multilingual-government-form-field-explainer.md)) |
 
 The availability of individual features depends on the application's current implementation and configuration.
 

@@ -26,7 +26,8 @@ import {
   Droplets,
   KeyRound,
   Store,
-  Trees
+  Trees,
+  HelpCircle
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -831,6 +832,12 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 to: '/address-change-planner',
                 label: t('nav.addressChange', 'Address Change Planner'),
                 icon: Navigation
+              })}
+
+              {renderNavLink({
+                to: '/form-field-explainer',
+                label: t('nav.formExplainer', 'Form Field Explainer'),
+                icon: HelpCircle
               })}
 
               {renderNavLink({

@@ -60,6 +60,7 @@ import RentalTransitionWorkspace from './pages/RentalTransitionWorkspace';
 import CitizenDraftSyncWorkspace from './pages/CitizenDraftSyncWorkspace';
 import WardBudgetWorkspace from './pages/WardBudgetWorkspace';
 import CivicSurveyWorkspace from './pages/CivicSurveyWorkspace';
+import FormFieldExplainerAssistant from './pages/FormFieldExplainerAssistant';
 
 const Services = lazy(() => import('./pages/Services'));
 
@@ -132,6 +133,9 @@ function AppRoot() {
                       <Route path="/address-change-planner" element={<AddressChangePlanner />} />
                       <Route path="/address-change" element={<AddressChangePlanner />} />
                       <Route path="/move-planner" element={<AddressChangePlanner />} />
+                      <Route path="/form-field-explainer" element={<FormFieldExplainerAssistant />} />
+                      <Route path="/up-form-explainer" element={<FormFieldExplainerAssistant />} />
+                      <Route path="/form-explainer" element={<FormFieldExplainerAssistant />} />
                       <Route path="/citizen-drafts" element={<CitizenDraftSyncWorkspace />} />
                       <Route path="/draft-sync" element={<CitizenDraftSyncWorkspace />} />
                       <Route path="/surveys" element={<CivicSurveyWorkspace />} />
