@@ -136,6 +136,15 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
         );
       }
 
+      if (normalizedTarget === '/flood-board') {
+        return (
+          normalizedPath === '/flood-board' ||
+          normalizedPath === '/up-floods' ||
+          normalizedPath === '/waterlogging' ||
+          normalizedPath.startsWith('/flood-board/')
+        );
+      }
+
       if (normalizedTarget === '/admin') {
         return (
           normalizedPath === '/admin' ||
@@ -867,6 +876,12 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 to: '/road-safety',
                 label: t('nav.roadSafety', 'Road Safety Blackspots'),
                 icon: AlertTriangle
+              })}
+
+              {renderNavLink({
+                to: '/flood-board',
+                label: t('nav.floodBoard', 'UP Flood & Drain Response'),
+                icon: Droplets
               })}
 
               {renderNavLink({
