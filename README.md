@@ -80,6 +80,8 @@ On the Saved page, a collection switcher groups guides by their folder. A guide 
 
 Use the tracking dashboard to organize service journeys and review available progress information.
 
+Each tracked application also has a timeline replay. It shows append-only event records grouped by submission, acknowledgement, review, query, and outcome; keeps citizen notes separate from official-source events; and compares two stored snapshots field by field. Conflicting or out-of-order evidence is routed to review instead of being overwritten. AI-style summaries are labelled as suggestions, cite event IDs and exact source dates, and never infer an official decision. See [the timeline replay and event-difference documentation](docs/application-timeline-replay-and-event-diff.md).
+
 ### 🔐 6. Secure Authentication
 
 Authentication powered by Clerk, with support for email-based authentication and Google sign-in where configured.

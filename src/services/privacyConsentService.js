@@ -52,6 +52,8 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_saved_rich', category: 'saved', exportAs: 'savedServices', empty: [] }, // savedStorage.js
   { key: 'civicbridge_saved', category: 'saved', exportAs: 'savedServiceBookmarks', empty: [] }, // ServiceDetails.jsx, savedStorage.js
   { key: 'civicbridge_applications', category: 'tracking', exportAs: 'trackedApplications', empty: [] }, // trackingService.js
+  { key: 'civicbridge_application_events_v1', category: 'tracking', exportAs: null, empty: [] }, // applicationEventService.js
+  { key: 'civicbridge_event_inconsistency_reports_v1', category: 'activity', exportAs: null, empty: [] }, // applicationEventService.js
   { key: 'civicbridge_office_tokens', category: 'tracking', exportAs: 'officeAppointments', empty: [] }, // locationService.js
   { key: 'civic_service_reviews', category: 'activity', exportAs: 'serviceReviews', empty: [] }, // reviewStorage.js
   { key: 'civicbridge_reminders', category: 'tracking', exportAs: 'activeReminders', empty: [] }, // reminderNotificationService.js
