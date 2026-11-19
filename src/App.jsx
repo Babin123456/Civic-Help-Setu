@@ -18,6 +18,7 @@ import OfflineBanner from './components/common/OfflineBanner';
 import BackToTop from './components/common/BackToTop';
 import RouteErrorFallback from './components/common/RouteErrorFallback';
 import RouteErrorBoundary from './components/common/RouteErrorBoundary';
+import { ServiceCardSkeletonGrid } from './components/ServiceCardSkeleton';
 
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
@@ -25,42 +26,10 @@ const SignUpPage = lazy(() => import('./pages/SignUp'));
 const SSOCallback = lazy(() => import('./pages/SSOCallback'));
 const Assistant = lazy(() => import('./pages/Assistant'));
 const CounterJourney = lazy(() => import('./pages/CounterJourney'));
-import { ServiceCardSkeletonGrid } from './components/ServiceCardSkeleton';
-
-import ServiceDetails from './pages/ServiceDetails';
-import Acronyms from './pages/Acronyms';
-import Eligibility from './pages/Eligibility';
-import NearbyOffices from './pages/NearbyOffices';
-import Track from './pages/Track';
-import Saved from './pages/Saved';
-import Vault from './pages/Vault';
-import Profile from './pages/Profile';
-import OpenSource from './pages/OpenSource';
-import Privacy from './pages/Privacy';
-import Admin from './pages/Admin';
-import SharedChecklistView from './pages/SharedChecklistView';
-import SharedDirectoryView from './pages/SharedDirectoryView';
-import PublicApplicationStatusView from './pages/PublicApplicationStatusView';
-import SharedProfileView from './pages/SharedProfileView';
-import NotFound from './pages/NotFound';
-import VerifyEmail from './pages/VerifyEmail';
-import AadhaarGuidePage from './pages/AadhaarGuidePage';
-import FireSafetyGuidePage from './pages/FireSafetyGuidePage';
-import TreePermissionGuidePage from './pages/TreePermissionGuidePage';
-import CivicWorksBoard from './pages/CivicWorksBoard';
-import CrematoriumDirectory from './pages/CrematoriumDirectory';
-import FairPriceShopBoard from './pages/FairPriceShopBoard';
-import TenderReadinessWorkspace from './pages/TenderReadinessWorkspace';
-import CommunityFacilityDirectory from './pages/CommunityFacilityDirectory';
-import WaterTankerTracker from './pages/WaterTankerTracker';
-import RentalTransitionWorkspace from './pages/RentalTransitionWorkspace';
-import CitizenDraftSyncWorkspace from './pages/CitizenDraftSyncWorkspace';
-import CivicDataApi from './pages/CivicDataApi';
-=======
-
+const NationalCivicDocumentHub = lazy(() => import('./pages/NationalCivicDocumentHub'));
+const UpFloodRoutePlanner = lazy(() => import('./components/flood/UpFloodRoutePlanner'));
+const TextRouteDirectory = lazy(() => import('./components/flood/TextRouteDirectory'));
 const WaterBillVisualizerPage = lazy(() => import('./pages/WaterBillVisualizerPage'));
-
-
 
 const ServiceDetails = lazy(() => import('./pages/ServiceDetails'));
 const Acronyms = lazy(() => import('./pages/Acronyms'));
@@ -97,6 +66,7 @@ const WaterTankerTracker = lazy(() => import('./pages/WaterTankerTracker'));
 const AddressChangePlanner = lazy(() => import('./pages/AddressChangePlanner'));
 const RentalTransitionWorkspace = lazy(() => import('./pages/RentalTransitionWorkspace'));
 const CitizenDraftSyncWorkspace = lazy(() => import('./pages/CitizenDraftSyncWorkspace'));
+const CivicDataApi = lazy(() => import('./pages/CivicDataApi'));
 const SyntheticDatasetWorkspace = lazy(() => import('./pages/SyntheticDatasetWorkspace'));
 const CounterDemandForecastingWorkspace = lazy(() => import('./pages/CounterDemandForecastingWorkspace'));
 const WardBudgetWorkspace = lazy(() => import('./pages/WardBudgetWorkspace'));
@@ -117,6 +87,7 @@ const ReraDisputeWorkspace = lazy(() => import('./pages/ReraDisputeWorkspace'));
 const StrayAnimalAbcWorkspace = lazy(() => import('./pages/StrayAnimalAbcWorkspace'));
 const NoisePollutionWorkspace = lazy(() => import('./pages/NoisePollutionWorkspace'));
 const SolidWasteAuditWorkspace = lazy(() => import('./pages/SolidWasteAuditWorkspace'));
+const RoutePlanningWorkspace = lazy(() => import('./pages/RoutePlanningWorkspace'));
 const OpenContractingWorkspace = lazy(() => import('./pages/OpenContractingWorkspace'));
 const ClinicalEstablishmentWorkspace = lazy(() => import('./pages/ClinicalEstablishmentWorkspace'));
 const ElectricityConsumerWorkspace = lazy(() => import('./pages/ElectricityConsumerWorkspace'));
@@ -125,13 +96,9 @@ const StreetVendorWorkspace = lazy(() => import('./pages/StreetVendorWorkspace')
 const DarkPatternsWorkspace = lazy(() => import('./pages/DarkPatternsWorkspace'));
 const AccessibilityAuditWorkspace = lazy(() => import('./pages/AccessibilityAuditWorkspace'));
 const AccessibilityComplaintTrackerWorkspace = lazy(() => import('./pages/AccessibilityComplaintTrackerWorkspace'));
-
 const LegalSourceReviewWorkspace = lazy(() => import('./pages/LegalSourceReviewWorkspace'));
 const RteAdmissionWorkspace = lazy(() => import('./pages/RteAdmissionWorkspace'));
 const EvidenceDossierWorkspace = lazy(() => import('./pages/EvidenceDossierWorkspace'));
-
-
-
 const Services = lazy(() => import('./pages/Services'));
 
 const ServicesFallback = () => (
@@ -153,221 +120,228 @@ function AppRoot() {
                 <ConfirmationDialogProvider>
                   <>
                     <div className="app-layout" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '100vw', overflowX: 'clip' }}>
-                    <OfflineBanner />
-                    <SkipToContent />
-                    <Navbar />
-                  <main id="main-content" style={{ flex: 1, minWidth: 0, width: '100%' }} tabIndex="-1">
-                    <RouteErrorBoundary>
-                    <Suspense fallback={<div className="section" role="status" aria-live="polite"><div className="container">Loading page…</div></div>}>
-                    <Routes>
-                      <Route path="/" element={<Home />} />
-                      <Route path="/login/*" element={<Login />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/signup/*" element={<SignUpPage />} />
-                      <Route path="/signup" element={<SignUpPage />} />
-                      <Route path="/sso-callback" element={<SSOCallback />} />
-                      <Route path="/signup/sso-callback" element={<SSOCallback />} />
-                      <Route path="/verify-email" element={<VerifyEmail />} />
-                      <Route path="/assistant" element={<Assistant />} />
-                      <Route path="/services" element={<Suspense fallback={<ServicesFallback />}><Services /></Suspense>} />
-                      <Route path="/services/aadhaar-guide" element={<AadhaarGuidePage />} />
-                      <Route path="/aadhaar-guide" element={<AadhaarGuidePage />} />
-                      <Route path="/services/property-tax-no-dues" element={<PropertyTaxNoDuesGuidePage />} />
-                      <Route path="/property-tax-no-dues" element={<PropertyTaxNoDuesGuidePage />} />
-                      <Route path="/services/business-licence-checklist" element={<SmallBusinessLicencePage />} />
-                      <Route path="/business-licence-checklist" element={<SmallBusinessLicencePage />} />
-                      <Route path="/services/fire-noc-guide" element={<FireSafetyGuidePage />} />
-                      <Route path="/fire-noc-guide" element={<FireSafetyGuidePage />} />
-                      <Route path="/services/tree-permission-guide" element={<TreePermissionGuidePage />} />
-                      <Route path="/tree-permission-guide" element={<TreePermissionGuidePage />} />
-                      <Route path="/services/ward-issue-heatmap" element={<WardIssueHeatmapWorkspace />} />
-                      <Route path="/ward-issue-heatmap" element={<WardIssueHeatmapWorkspace />} />
-                      <Route path="/civic-issue-heatmap" element={<WardIssueHeatmapWorkspace />} />
-                      <Route path="/services/catalogue-visual-qa" element={<CatalogueVisualQaWorkspace />} />
-                      <Route path="/catalogue-visual-qa" element={<CatalogueVisualQaWorkspace />} />
-                      <Route path="/visual-qa" element={<CatalogueVisualQaWorkspace />} />
-                      <Route path="/services/ward-budget-proposal" element={<WardBudgetWorkspace />} />
-                      <Route path="/ward-budget" element={<WardBudgetWorkspace />} />
-                      <Route path="/ward-budget/:id" element={<WardBudgetWorkspace />} />
-                      <Route path="/services/:id" element={<ServiceDetails />} />
-                      <Route path="/acronyms" element={<Acronyms />} />
-                      <Route path="/eligibility" element={<Eligibility />} />
-                      <Route path="/nearby" element={<NearbyOffices />} />
-                      <Route path="/nearby-offices" element={<NearbyOffices />} />
-                      <Route path="/comparison" element={<ComparisonWorkspace />} />
-                      <Route path="/office/:officeId" element={<OfficeComparisonDetail />} />
-                      <Route path="/crematorium-directory" element={<CrematoriumDirectory />} />
-                      <Route path="/crematoriums" element={<CrematoriumDirectory />} />
-                      <Route path="/pds-shops" element={<FairPriceShopBoard />} />
-                      <Route path="/fair-price-shops" element={<FairPriceShopBoard />} />
-                      <Route path="/tenders" element={<TenderReadinessWorkspace />} />
-                      <Route path="/tender-readiness" element={<TenderReadinessWorkspace />} />
-                      <Route path="/open-contracting" element={<OpenContractingWorkspace />} />
-                      <Route path="/procurement-analytics" element={<OpenContractingWorkspace />} />
-                      <Route path="/open-contracting/:id" element={<OpenContractingWorkspace />} />
-                      <Route path="/community-facilities" element={<CommunityFacilityDirectory />} />
-                      <Route path="/facility-directory" element={<CommunityFacilityDirectory />} />
-                      <Route path="/water-tanker" element={<WaterTankerTracker />} />
-                      <Route path="/water-tankers" element={<WaterTankerTracker />} />
+                      <OfflineBanner />
+                      <SkipToContent />
+                      <Navbar />
+                      <main id="main-content" style={{ flex: 1, minWidth: 0, width: '100%' }} tabIndex="-1">
+                        <RouteErrorBoundary>
+                          <Suspense fallback={<div className="section" role="status" aria-live="polite"><div className="container">Loading page…</div></div>}>
+                            <Routes>
+                              <Route path="/" element={<Home />} />
+                              <Route path="/login/*" element={<Login />} />
+                              <Route path="/login" element={<Login />} />
+                              <Route path="/signup/*" element={<SignUpPage />} />
+                              <Route path="/signup" element={<SignUpPage />} />
+                              <Route path="/sso-callback" element={<SSOCallback />} />
+                              <Route path="/signup/sso-callback" element={<SSOCallback />} />
+                              <Route path="/verify-email" element={<VerifyEmail />} />
+                              <Route path="/assistant" element={<Assistant />} />
+                              <Route path="/services" element={<Suspense fallback={<ServicesFallback />}><Services /></Suspense>} />
+                              <Route path="/services/aadhaar-guide" element={<AadhaarGuidePage />} />
+                              <Route path="/aadhaar-guide" element={<AadhaarGuidePage />} />
 
-                      {/* Counter journey simulator — public catalogue, evaluable for any citizen */}
-                      <Route path="/counter-journey" element={
-                        <CounterJourney />
-                      } />
+                              <Route path="/national-civic-document-hub" element={<NationalCivicDocumentHub />} />
+                              <Route path="/national-civic-document-hub/" element={<NationalCivicDocumentHub />} />
 
-                      {/* Focus on one service's counter journey */}
-                      <Route path="/services/:serviceId/counter-journey" element={
-                        <CounterJourney />
-                      } />
+                              <Route path="/services/property-tax-no-dues" element={<PropertyTaxNoDuesGuidePage />} />
+                              <Route path="/property-tax-no-dues" element={<PropertyTaxNoDuesGuidePage />} />
 
-                      <Route path="/water-bill-visualizer" element={<WaterBillVisualizerPage />} />
+                              <Route path="/services/business-licence-checklist" element={<SmallBusinessLicencePage />} />
+                              <Route path="/business-licence-checklist" element={<SmallBusinessLicencePage />} />
+                              <Route path="/services/fire-noc-guide" element={<FireSafetyGuidePage />} />
+                              <Route path="/fire-noc-guide" element={<FireSafetyGuidePage />} />
+                              <Route path="/services/tree-permission-guide" element={<TreePermissionGuidePage />} />
+                              <Route path="/tree-permission-guide" element={<TreePermissionGuidePage />} />
+                              <Route path="/services/ward-issue-heatmap" element={<WardIssueHeatmapWorkspace />} />
+                              <Route path="/ward-issue-heatmap" element={<WardIssueHeatmapWorkspace />} />
+                              <Route path="/civic-issue-heatmap" element={<WardIssueHeatmapWorkspace />} />
+                              <Route path="/services/catalogue-visual-qa" element={<CatalogueVisualQaWorkspace />} />
+                              <Route path="/catalogue-visual-qa" element={<CatalogueVisualQaWorkspace />} />
+                              <Route path="/visual-qa" element={<CatalogueVisualQaWorkspace />} />
+                              <Route path="/services/ward-budget-proposal" element={<WardBudgetWorkspace />} />
+                              <Route path="/ward-budget" element={<WardBudgetWorkspace />} />
+                              <Route path="/ward-budget/:id" element={<WardBudgetWorkspace />} />
+                              <Route path="/services/:id" element={<ServiceDetails />} />
+                              <Route path="/acronyms" element={<Acronyms />} />
+                              <Route path="/eligibility" element={<Eligibility />} />
+                              <Route path="/nearby" element={<NearbyOffices />} />
+                              <Route path="/nearby-offices" element={<NearbyOffices />} />
+                              <Route path="/comparison" element={<ComparisonWorkspace />} />
+                              <Route path="/office/:officeId" element={<OfficeComparisonDetail />} />
+                              <Route path="/crematorium-directory" element={<CrematoriumDirectory />} />
+                              <Route path="/crematoriums" element={<CrematoriumDirectory />} />
+                              <Route path="/pds-shops" element={<FairPriceShopBoard />} />
+                              <Route path="/fair-price-shops" element={<FairPriceShopBoard />} />
+                              <Route path="/tenders" element={<TenderReadinessWorkspace />} />
+                              <Route path="/tender-readiness" element={<TenderReadinessWorkspace />} />
+                              <Route path="/open-contracting" element={<OpenContractingWorkspace />} />
+                              <Route path="/procurement-analytics" element={<OpenContractingWorkspace />} />
+                              <Route path="/open-contracting/:id" element={<OpenContractingWorkspace />} />
+                              <Route path="/community-facilities" element={<CommunityFacilityDirectory />} />
+                              <Route path="/facility-directory" element={<CommunityFacilityDirectory />} />
+                              <Route path="/water-tanker" element={<WaterTankerTracker />} />
+                              <Route path="/water-tankers" element={<WaterTankerTracker />} />
 
-                      <Route path="/services/water-quality-register" element={<WaterQualityRegister />} />
-                      <Route path="/water-quality" element={<WaterQualityRegister />} />
-                      <Route path="/water-quality-register" element={<WaterQualityRegister />} />
-                      <Route path="/rental-checklist" element={<RentalTransitionWorkspace />} />
-                      <Route path="/rental-transition" element={<RentalTransitionWorkspace />} />
-                      <Route path="/rental-records" element={<RentalTransitionWorkspace />} />
-                      <Route path="/library-directory" element={<LibraryDirectory />} />
-                      <Route path="/libraries" element={<LibraryDirectory />} />
-                      <Route path="/address-change-planner" element={<AddressChangePlanner />} />
-                      <Route path="/address-change" element={<AddressChangePlanner />} />
-                      <Route path="/move-planner" element={<AddressChangePlanner />} />
-                      <Route path="/citizen-drafts" element={<CitizenDraftSyncWorkspace />} />
-                      <Route path="/draft-sync" element={<CitizenDraftSyncWorkspace />} />
+                              <Route path="/flood-planner" element={<UpFloodRoutePlanner />} />
+                              <Route path="/flood-directory" element={<TextRouteDirectory />} />
 
-                      <Route path="/civic-data-api" element={<CivicDataApi />} />
-                      <Route path="/developer-api" element={<CivicDataApi />} />
+                              {/* Counter journey simulator — public catalogue, evaluable for any citizen */}
+                              <Route path="/counter-journey" element={<CounterJourney />} />
 
-                      <Route path="/synthetic-datasets" element={<SyntheticDatasetWorkspace />} />
-                      <Route path="/dataset-generator" element={<SyntheticDatasetWorkspace />} />
-                      <Route path="/provenance" element={<LineageExplorerWorkspace />} />
-                      <Route path="/provenance/:id" element={<LineageExplorerWorkspace />} />
-                      <Route path="/lineage-explorer" element={<LineageExplorerWorkspace />} />
-                      <Route path="/counter-demand" element={<CounterDemandForecastingWorkspace />} />
-                      <Route path="/counter-demand-forecasting" element={<CounterDemandForecastingWorkspace />} />
-                      <Route path="/queue-staffing" element={<CounterDemandForecastingWorkspace />} />
-                      <Route path="/surveys" element={<CivicSurveyWorkspace />} />
-                      <Route path="/survey-builder" element={<CivicSurveyWorkspace />} />
-                      <Route path="/civic-surveys" element={<CivicSurveyWorkspace />} />
-                      <Route path="/public-toilets" element={<PublicToiletDirectory />} />
-                      <Route path="/toilet-directory" element={<PublicToiletDirectory />} />
-                      <Route path="/toilets" element={<PublicToiletDirectory />} />
-                      <Route path="/pedestrian-barrier-map" element={<AccessibleRouteBarrierWorkspace />} />
-                      <Route path="/accessible-routes" element={<AccessibleRouteBarrierWorkspace />} />
-                      <Route path="/pedestrian-routes" element={<AccessibleRouteBarrierWorkspace />} />
-                      <Route path="/continuity-planner" element={<ContinuityPlannerWorkspace />} />
-                      <Route path="/continuity-planner/:id" element={<ContinuityPlannerWorkspace />} />
-                      <Route path="/incident-drills" element={<ContinuityPlannerWorkspace />} />
-                      <Route path="/senior-citizen-tribunal" element={<SeniorCitizenTribunalWorkspace />} />
-                      <Route path="/senior-tribunal" element={<SeniorCitizenTribunalWorkspace />} />
-                      <Route path="/rera-dispute-workspace" element={<ReraDisputeWorkspace />} />
-                      <Route path="/rera-homebuyer-rights" element={<ReraDisputeWorkspace />} />
-                      <Route path="/stray-animal-workspace" element={<StrayAnimalAbcWorkspace />} />
-                      <Route path="/rabies-pep-tracker" element={<StrayAnimalAbcWorkspace />} />
-                      <Route path="/animal-birth-control" element={<StrayAnimalAbcWorkspace />} />
-                      <Route path="/noise-pollution-workspace" element={<NoisePollutionWorkspace />} />
-                      <Route path="/decibel-logger" element={<NoisePollutionWorkspace />} />
-                      <Route path="/noise-curfew-auditor" element={<NoisePollutionWorkspace />} />
-                      <Route path="/solid-waste-workspace" element={<SolidWasteAuditWorkspace />} />
-                      <Route path="/bulk-waste-audit" element={<SolidWasteAuditWorkspace />} />
-                      <Route path="/ngt-compensation" element={<SolidWasteAuditWorkspace />} />
-                      <Route path="/clinical-establishment-workspace" element={<ClinicalEstablishmentWorkspace />} />
-                      <Route path="/patient-rights-charter" element={<ClinicalEstablishmentWorkspace />} />
-                      <Route path="/hospital-billing-audit" element={<ClinicalEstablishmentWorkspace />} />
-                      <Route path="/electricity-consumer-workspace" element={<ElectricityConsumerWorkspace />} />
-                      <Route path="/discom-outage-audit" element={<ElectricityConsumerWorkspace />} />
-                      <Route path="/cgrf-compensation-drafter" element={<ElectricityConsumerWorkspace />} />
-                      <Route path="/accessibility-audit-workspace" element={<AccessibilityAuditWorkspace />} />
-                      <Route path="/accessibility-tracker" element={<AccessibilityComplaintTrackerWorkspace />} />
-                      <Route path="/accessibility-complaint-tracker" element={<AccessibilityComplaintTrackerWorkspace />} />
-                      <Route path="/accessibility-escalation" element={<AccessibilityComplaintTrackerWorkspace />} />
-                      <Route path="/services/accessibility-tracker" element={<AccessibilityComplaintTrackerWorkspace />} />
-                      <Route path="/dark-patterns-workspace" element={<DarkPatternsWorkspace />} />
-                      <Route path="/drip-pricing-audit" element={<DarkPatternsWorkspace />} />
-                      <Route path="/ccpa-redressal" element={<DarkPatternsWorkspace />} />
-                      <Route path="/street-vendor-workspace" element={<StreetVendorWorkspace />} />
-                      <Route path="/vendor-eviction-immunity" element={<StreetVendorWorkspace />} />
-                      <Route path="/goods-seizure-reconciler" element={<StreetVendorWorkspace />} />
-                      <Route path="/rte-quota-workspace" element={<RteAdmissionWorkspace />} />
-                      <Route path="/rte-admission-audit" element={<RteAdmissionWorkspace />} />
-                      <Route path="/rte-screening-redressal" element={<RteAdmissionWorkspace />} />
-                      <Route path="/legal-sources" element={<LegalSourceReviewWorkspace />} />
-                      <Route path="/legal-source-review" element={<LegalSourceReviewWorkspace />} />
-                      <Route path="/workspace-template-sources" element={<LegalSourceReviewWorkspace />} />
-                      <Route path="/evidence-dossier" element={<EvidenceDossierWorkspace />} />
-                      <Route path="/verify-evidence" element={<EvidenceDossierWorkspace />} />
-                      <Route path="/evidence-manifest" element={<EvidenceDossierWorkspace />} />
-                      <Route path="/track" element={<Track />} />
-                      <Route path="/civic-works" element={<CivicWorksBoard />} />
-                      <Route path="/public-projects" element={<PublicProjectsWorkspace />} />
-                      <Route path="/projects" element={<PublicProjectsWorkspace />} />
-                      <Route path="/public-projects/:id" element={<PublicProjectsWorkspace />} />
-                      <Route path="/road-safety" element={<RoadSafetyDashboard />} />
-                      <Route path="/blackspots" element={<RoadSafetyDashboard />} />
-                      <Route path="/tree-health" element={<TreeHealthInventory />} />
-                      <Route path="/tree-inventory" element={<TreeHealthInventory />} />
-                      <Route path="/streetlights" element={<StreetlightOutageWorkspace />} />
-                      <Route path="/streetlight-outages" element={<StreetlightOutageWorkspace />} />
-                      <Route path="/services/streetlight-outages" element={<StreetlightOutageWorkspace />} />
-                      <Route path="/ghg-inventory" element={<GhgInventoryWorkspace />} />
-                      <Route path="/emissions-inventory" element={<GhgInventoryWorkspace />} />
-                      <Route path="/services/ghg-inventory" element={<GhgInventoryWorkspace />} />
-                      <Route path="/shared-checklist/:token" element={<SharedChecklistView />} />
-                      <Route path="/shared-directory/:token" element={<SharedDirectoryView />} />
-                      <Route path="/app-status/:token" element={<PublicApplicationStatusView />} />
-                      <Route path="/shared-profile/:token" element={<SharedProfileView />} />
+                              {/* Focus on one service's counter journey */}
+                              <Route path="/services/:serviceId/counter-journey" element={<CounterJourney />} />
 
-                      <Route path="/saved" element={
-                        <ProtectedRoute>
-                          <Saved />
-                        </ProtectedRoute>
-                      } />
+                              <Route path="/water-bill-visualizer" element={<WaterBillVisualizerPage />} />
 
-                      <Route path="/vault" element={
-                        <ProtectedRoute>
-                          <Vault />
-                        </ProtectedRoute>
-                      } />
+                              <Route path="/services/water-quality-register" element={<WaterQualityRegister />} />
+                              <Route path="/water-quality" element={<WaterQualityRegister />} />
+                              <Route path="/water-quality-register" element={<WaterQualityRegister />} />
 
-                      <Route path="/profile" element={
-                        <ProtectedRoute>
-                          <Profile />
-                        </ProtectedRoute>
-                      } />
+                              <Route path="/rental-checklist" element={<RentalTransitionWorkspace />} />
+                              <Route path="/rental-transition" element={<RentalTransitionWorkspace />} />
+                              <Route path="/rental-records" element={<RentalTransitionWorkspace />} />
+                              <Route path="/library-directory" element={<LibraryDirectory />} />
+                              <Route path="/libraries" element={<LibraryDirectory />} />
+                              <Route path="/address-change-planner" element={<AddressChangePlanner />} />
+                              <Route path="/address-change" element={<AddressChangePlanner />} />
+                              <Route path="/move-planner" element={<AddressChangePlanner />} />
+                              <Route path="/citizen-drafts" element={<CitizenDraftSyncWorkspace />} />
+                              <Route path="/draft-sync" element={<CitizenDraftSyncWorkspace />} />
 
-                      <Route path="/open-source" element={<OpenSource />} />
-                      <Route path="/privacy" element={<Privacy />} />
+                              <Route path="/civic-data-api" element={<CivicDataApi />} />
+                              <Route path="/developer-api" element={<CivicDataApi />} />
 
-                      <Route path="/admin/imports" element={
-                        <ProtectedRoute requiredRole="admin">
-                          <Admin />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/admin/import" element={
-                        <ProtectedRoute requiredRole="admin">
-                          <Admin />
-                        </ProtectedRoute>
-                      } />
+                              <Route path="/synthetic-datasets" element={<SyntheticDatasetWorkspace />} />
+                              <Route path="/dataset-generator" element={<SyntheticDatasetWorkspace />} />
+                              <Route path="/provenance" element={<LineageExplorerWorkspace />} />
+                              <Route path="/provenance/:id" element={<LineageExplorerWorkspace />} />
+                              <Route path="/lineage-explorer" element={<LineageExplorerWorkspace />} />
+                              <Route path="/counter-demand" element={<CounterDemandForecastingWorkspace />} />
+                              <Route path="/counter-demand-forecasting" element={<CounterDemandForecastingWorkspace />} />
+                              <Route path="/queue-staffing" element={<CounterDemandForecastingWorkspace />} />
+                              <Route path="/surveys" element={<CivicSurveyWorkspace />} />
+                              <Route path="/survey-builder" element={<CivicSurveyWorkspace />} />
+                              <Route path="/civic-surveys" element={<CivicSurveyWorkspace />} />
+                              <Route path="/public-toilets" element={<PublicToiletDirectory />} />
+                              <Route path="/toilet-directory" element={<PublicToiletDirectory />} />
+                              <Route path="/toilets" element={<PublicToiletDirectory />} />
+                              <Route path="/pedestrian-barrier-map" element={<AccessibleRouteBarrierWorkspace />} />
+                              <Route path="/accessible-routes" element={<AccessibleRouteBarrierWorkspace />} />
+                              <Route path="/pedestrian-routes" element={<AccessibleRouteBarrierWorkspace />} />
+                              <Route path="/continuity-planner" element={<ContinuityPlannerWorkspace />} />
+                              <Route path="/continuity-planner/:id" element={<ContinuityPlannerWorkspace />} />
+                              <Route path="/incident-drills" element={<ContinuityPlannerWorkspace />} />
+                              <Route path="/senior-citizen-tribunal" element={<SeniorCitizenTribunalWorkspace />} />
+                              <Route path="/senior-tribunal" element={<SeniorCitizenTribunalWorkspace />} />
+                              <Route path="/rera-dispute-workspace" element={<ReraDisputeWorkspace />} />
+                              <Route path="/rera-homebuyer-rights" element={<ReraDisputeWorkspace />} />
+                              <Route path="/stray-animal-workspace" element={<StrayAnimalAbcWorkspace />} />
+                              <Route path="/rabies-pep-tracker" element={<StrayAnimalAbcWorkspace />} />
+                              <Route path="/animal-birth-control" element={<StrayAnimalAbcWorkspace />} />
+                              <Route path="/noise-pollution-workspace" element={<NoisePollutionWorkspace />} />
+                              <Route path="/decibel-logger" element={<NoisePollutionWorkspace />} />
+                              <Route path="/noise-curfew-auditor" element={<NoisePollutionWorkspace />} />
+                              <Route path="/solid-waste-workspace" element={<SolidWasteAuditWorkspace />} />
+                              <Route path="/bulk-waste-audit" element={<SolidWasteAuditWorkspace />} />
+                              <Route path="/ngt-compensation" element={<SolidWasteAuditWorkspace />} />
+                              <Route path="/route-planning" element={<RoutePlanningWorkspace />} />
+                              <Route path="/planning" element={<RoutePlanningWorkspace />} />
+                              <Route path="/clinical-establishment-workspace" element={<ClinicalEstablishmentWorkspace />} />
+                              <Route path="/patient-rights-charter" element={<ClinicalEstablishmentWorkspace />} />
+                              <Route path="/hospital-billing-audit" element={<ClinicalEstablishmentWorkspace />} />
+                              <Route path="/electricity-consumer-workspace" element={<ElectricityConsumerWorkspace />} />
+                              <Route path="/discom-outage-audit" element={<ElectricityConsumerWorkspace />} />
+                              <Route path="/cgrf-compensation-drafter" element={<ElectricityConsumerWorkspace />} />
+                              <Route path="/accessibility-audit-workspace" element={<AccessibilityAuditWorkspace />} />
+                              <Route path="/accessibility-tracker" element={<AccessibilityComplaintTrackerWorkspace />} />
+                              <Route path="/accessibility-complaint-tracker" element={<AccessibilityComplaintTrackerWorkspace />} />
+                              <Route path="/accessibility-escalation" element={<AccessibilityComplaintTrackerWorkspace />} />
+                              <Route path="/services/accessibility-tracker" element={<AccessibilityComplaintTrackerWorkspace />} />
+                              <Route path="/dark-patterns-workspace" element={<DarkPatternsWorkspace />} />
+                              <Route path="/drip-pricing-audit" element={<DarkPatternsWorkspace />} />
+                              <Route path="/ccpa-redressal" element={<DarkPatternsWorkspace />} />
+                              <Route path="/street-vendor-workspace" element={<StreetVendorWorkspace />} />
+                              <Route path="/vendor-eviction-immunity" element={<StreetVendorWorkspace />} />
+                              <Route path="/goods-seizure-reconciler" element={<StreetVendorWorkspace />} />
+                              <Route path="/rte-quota-workspace" element={<RteAdmissionWorkspace />} />
+                              <Route path="/rte-admission-audit" element={<RteAdmissionWorkspace />} />
+                              <Route path="/rte-screening-redressal" element={<RteAdmissionWorkspace />} />
+                              <Route path="/legal-sources" element={<LegalSourceReviewWorkspace />} />
+                              <Route path="/legal-source-review" element={<LegalSourceReviewWorkspace />} />
+                              <Route path="/workspace-template-sources" element={<LegalSourceReviewWorkspace />} />
+                              <Route path="/evidence-dossier" element={<EvidenceDossierWorkspace />} />
+                              <Route path="/verify-evidence" element={<EvidenceDossierWorkspace />} />
+                              <Route path="/evidence-manifest" element={<EvidenceDossierWorkspace />} />
+                              <Route path="/track" element={<Track />} />
+                              <Route path="/civic-works" element={<CivicWorksBoard />} />
+                              <Route path="/public-projects" element={<PublicProjectsWorkspace />} />
+                              <Route path="/projects" element={<PublicProjectsWorkspace />} />
+                              <Route path="/public-projects/:id" element={<PublicProjectsWorkspace />} />
+                              <Route path="/road-safety" element={<RoadSafetyDashboard />} />
+                              <Route path="/blackspots" element={<RoadSafetyDashboard />} />
+                              <Route path="/tree-health" element={<TreeHealthInventory />} />
+                              <Route path="/tree-inventory" element={<TreeHealthInventory />} />
+                              <Route path="/streetlights" element={<StreetlightOutageWorkspace />} />
+                              <Route path="/streetlight-outages" element={<StreetlightOutageWorkspace />} />
+                              <Route path="/services/streetlight-outages" element={<StreetlightOutageWorkspace />} />
+                              <Route path="/ghg-inventory" element={<GhgInventoryWorkspace />} />
+                              <Route path="/emissions-inventory" element={<GhgInventoryWorkspace />} />
+                              <Route path="/services/ghg-inventory" element={<GhgInventoryWorkspace />} />
+                              <Route path="/shared-checklist/:token" element={<SharedChecklistView />} />
+                              <Route path="/shared-directory/:token" element={<SharedDirectoryView />} />
+                              <Route path="/app-status/:token" element={<PublicApplicationStatusView />} />
+                              <Route path="/shared-profile/:token" element={<SharedProfileView />} />
 
-                      <Route path="/tenants" element={<TenantAdministrationWorkspace />} />
-                      <Route path="/tenants/:tenantId" element={<TenantAdministrationWorkspace />} />
-                      <Route path="/tenant-workspace" element={<TenantAdministrationWorkspace />} />
+                              <Route path="/saved" element={
+                                <ProtectedRoute>
+                                  <Saved />
+                                </ProtectedRoute>
+                              } />
 
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                    </Suspense>
-                    </RouteErrorBoundary>
-                  </main>
-                  <Footer />
-                  <BackToTop />
-                  <ToastContainer />
-                  <AccessibilityToolbar />
-                </div>
-              </>
-            </ConfirmationDialogProvider>
-          </NetworkProvider>
-        </LanguageProvider>
+                              <Route path="/vault" element={
+                                <ProtectedRoute>
+                                  <Vault />
+                                </ProtectedRoute>
+                              } />
+
+                              <Route path="/profile" element={
+                                <ProtectedRoute>
+                                  <Profile />
+                                </ProtectedRoute>
+                              } />
+
+                              <Route path="/open-source" element={<OpenSource />} />
+                              <Route path="/privacy" element={<Privacy />} />
+
+                              <Route path="/admin/imports" element={
+                                <ProtectedRoute requiredRole="admin">
+                                  <Admin />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/admin/import" element={
+                                <ProtectedRoute requiredRole="admin">
+                                  <Admin />
+                                </ProtectedRoute>
+                              } />
+
+                              <Route path="/tenants" element={<TenantAdministrationWorkspace />} />
+                              <Route path="/tenants/:tenantId" element={<TenantAdministrationWorkspace />} />
+                              <Route path="/tenant-workspace" element={<TenantAdministrationWorkspace />} />
+
+                              <Route path="*" element={<NotFound />} />
+                            </Routes>
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      </main>
+                      <Footer />
+                      <BackToTop />
+                      <ToastContainer />
+                      <AccessibilityToolbar />
+                    </div>
+                  </>
+                </ConfirmationDialogProvider>
+              </NetworkProvider>
+            </LanguageProvider>
           </AuthProvider>
         </ToastProvider>
       </AccessibilityProvider>

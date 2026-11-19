@@ -1,0 +1,451 @@
+import { requirePermission } from './accessControl';
+import { formatIcsUtcTimestamp } from '../utils/icsText';
+
+const STORAGE_KEY = 'civicbridge_deadline_candidates_v1';
+
+export const ACTION_TYPES = {
+  RESPONSE: 'response',
+  HEARING: 'hearing',
+  PAYMENT: 'payment',
+  APPEAL: 'appeal',
+};
+
+export const CONFIRMATION_STATES = {
+  PENDING: 'pending',
+  CONFIRMED: 'confirmed',
+  REJECTED: 'rejected',
+};
+
+export const DEFAULT_CANDIDATES = [];
+
+/**
+ * Normalizes a date string from various formats to ISO YYYY-MM-DD.
+ * Returns null for invalid/unparseable dates.
+ */
+export const normalizeDateString = (dateStr) => {
+  if (!dateStr || typeof dateStr !== 'string') return null;
+
+  const trimmed = dateStr.trim();
+  if (trimmed.length === 0) return null;
+
+  // Try ISO format YYYY-MM-DD
+  const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    const year = parseInt(isoMatch[1], 10);
+    const month = parseInt(isoMatch[2], 10);
+    const day = parseInt(isoMatch[3], 10);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    if (
+      date.getUTCFullYear() === year &&
+      date.getUTCMonth() + 1 === month &&
+      date.getUTCDate() === day
+    ) {
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+    return null;
+  }
+
+  // Try DD/MM/YYYY or DD-MM-YYYY (Indian format)
+  const indianMatch = trimmed.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (indianMatch) {
+    const day = parseInt(indianMatch[1], 10);
+    const month = parseInt(indianMatch[2], 10);
+    const year = parseInt(indianMatch[3], 10);
+    // Only try Indian format if month is 01-12
+    // If month > 12, this is likely US format MM/DD/YYYY, so skip Indian attempt
+    if (month >= 1 && month <= 12) {
+      const date = new Date(Date.UTC(year, month - 1, day));
+      if (
+        date.getUTCFullYear() === year &&
+        date.getUTCMonth() + 1 === month &&
+        date.getUTCDate() === day
+      ) {
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      }
+    }
+    // Fall through to US format below when month > 12 or Indian parse failed
+  }
+
+  // Try MM/DD/YYYY format
+  const usMatch = trimmed.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (usMatch) {
+    const month = parseInt(usMatch[1], 10);
+    const day = parseInt(usMatch[2], 10);
+    const year = parseInt(usMatch[3], 10);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    if (
+      date.getUTCFullYear() === year &&
+      date.getUTCMonth() + 1 === month &&
+      date.getUTCDate() === day
+    ) {
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+    return null;
+  }
+
+  // Try MM-DD-YY or MM/DD/YY
+  const usShortMatch = trimmed.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2})$/);
+  if (usShortMatch) {
+    const month = parseInt(usShortMatch[1], 10);
+    const day = parseInt(usShortMatch[2], 10);
+    const year = parseInt(usShortMatch[3], 10) + 2000;
+    const date = new Date(Date.UTC(year, month - 1, day));
+    if (
+      date.getUTCFullYear() === year &&
+      date.getUTCMonth() + 1 === month &&
+      date.getUTCDate() === day
+    ) {
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+    return null;
+  }
+
+  // Try YYYY/MM/DD
+  const slashMatch = trimmed.match(/^(\d{4})[/](\d{1,2})[/](\d{1,2})$/);
+  if (slashMatch) {
+    const year = parseInt(slashMatch[1], 10);
+    const month = parseInt(slashMatch[2], 10);
+    const day = parseInt(slashMatch[3], 10);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    if (
+      date.getUTCFullYear() === year &&
+      date.getUTCMonth() + 1 === month &&
+      date.getUTCDate() === day
+    ) {
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+    return null;
+  }
+
+  return null;
+};
+
+/**
+ * Extracts date candidates from notice text with action type associations.
+ * Returns date candidates with source context and proposed action types.
+ */
+export const extractDateCandidates = (text) => {
+  if (!text || typeof text !== 'string' || text.trim().length === 0) {
+    return [];
+  }
+
+  const candidates = [];
+  const seen = new Set();
+
+  // Date regex patterns (priority order: explicit YYYY-MM-DD first, then Indian, then US, then relative)
+  const DATE_PATTERNS = [
+    // ISO format YYYY-MM-DD (most explicit)
+    /(\d{4}-\d{2}-\d{2})/g,
+    // Indian format DD/MM/YYYY or DD-MM-YYYY
+    /(\d{1,2}[/-]\d{1,2}[/-]\d{4})/g,
+    // US format MM/DD/YYYY or MM-DD-YYYY
+    /(\d{1,2}[/-]\d{1,2}[/-]\d{4})/g,
+    // Relative/ordinal dates like "15th November 2026"
+    /(\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4})/gi,
+    // "Month DD, YYYY" format
+    /(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:st|nd|rd|th)?,\s+\d{4}/gi,
+  ];
+
+  const actionKeywords = {
+    [ACTION_TYPES.RESPONSE]: ['submit', 'respond', 'objection', 'reply', 'representations'],
+    [ACTION_TYPES.HEARING]: ['hearing', 'appear', 'proceed', 'court', 'tribunal'],
+    [ACTION_TYPES.PAYMENT]: ['pay', 'fee', 'fine', 'penalty', 'payment', 'tariff'],
+    [ACTION_TYPES.APPEAL]: ['appeal', 'challenge', 'review', 'revise', 'reconsider'],
+  };
+
+  // Build a map of action keyword -> action type
+  const actionKeywordMap = {};
+  Object.entries(actionKeywords).forEach(([actionType, keywords]) => {
+    keywords.forEach((keyword) => {
+      actionKeywordMap[keyword] = actionType;
+    });
+  });
+
+  for (const regex of DATE_PATTERNS) {
+    const matches = text.match(regex) || [];
+    for (const match of matches) {
+      const normalized = match.trim();
+      const lower = normalized.toLowerCase();
+      if (seen.has(lower)) continue;
+      seen.add(lower);
+
+      // Determine action type from context around the date
+      const dateIndex = text.indexOf(match);
+      if (dateIndex === -1) continue;
+
+      const contextStart = Math.max(0, dateIndex - 150);
+      const contextEnd = Math.min(text.length, dateIndex + match.length + 150);
+      const context = text.slice(contextStart, contextEnd).toLowerCase();
+
+      // Find the nearest action keyword within context
+      let detectedAction = ACTION_TYPES.RESPONSE; // default
+      let bestDistance = Infinity;
+
+      Object.entries(actionKeywordMap).forEach(([keyword, actionType]) => {
+        const idx = context.indexOf(keyword);
+        if (idx !== -1) {
+          // Calculate distance from keyword to date within context
+          const distance = Math.abs(contextStart + idx - (dateIndex + match.length / 2));
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            detectedAction = actionType;
+          }
+        }
+      });
+
+      // Extract source anchor (the sentence or phrase containing the date)
+      const sourceAnchor = extractSourceAnchor(text, dateIndex, match.length);
+
+      candidates.push({
+        dateCandidate: normalized,
+        normalizedDate: normalizeDateString(normalized) || null,
+        actionType: detectedAction,
+        sourceAnchor,
+        calculationRule: 'ai-extraction',
+        confirmationState: CONFIRMATION_STATES.PENDING,
+        _aiSuggestion: true,
+        _confirmationSource: 'ai-extraction',
+        jurisdiction: '',
+        version: '',
+        confidence: 0.7,
+      });
+    }
+  }
+
+  // Deduplicate by normalized date + action type
+  const deduped = [];
+  const dedupSeen = new Set();
+  for (const c of candidates) {
+    const key = `${c.normalizedDate}|${c.actionType}`;
+    if (!dedupSeen.has(key)) {
+      dedupSeen.add(key);
+      deduped.push(c);
+    }
+  }
+
+  return deduped;
+};
+
+/**
+ * Extracts a source anchor snippet around a date position in the text.
+ */
+const extractSourceAnchor = (text, dateStart, dateLength) => {
+  const contextBefore = Math.max(0, dateStart - 60);
+  const contextAfter = Math.min(text.length, dateStart + dateLength + 60);
+  let anchor = text.slice(contextBefore, contextAfter).trim();
+  if (contextBefore > 0) anchor = '...' + anchor;
+  if (contextAfter < text.length) anchor = anchor + '...';
+  return anchor;
+};
+
+/**
+ * Saves date candidates to storage
+ */
+export const saveDateCandidates = (candidates) => {
+  requirePermission('notices.manage');
+  const storage = typeof window !== 'undefined' && window.localStorage ? window.localStorage : null;
+  if (!storage) return false;
+  try {
+    storage.setItem(STORAGE_KEY, JSON.stringify(candidates));
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Retrieves date candidates from storage
+ */
+export const getDateCandidates = () => {
+  const storage = typeof window !== 'undefined' && window.localStorage ? window.localStorage : null;
+  if (!storage) return [...DEFAULT_CANDIDATES];
+
+  try {
+    const raw = storage.getItem(STORAGE_KEY);
+    if (!raw) return [...DEFAULT_CANDIDATES];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [...DEFAULT_CANDIDATES];
+  } catch {
+    return [...DEFAULT_CANDIDATES];
+  }
+};
+
+/**
+ * Updates the confirmation state of a date candidate
+ */
+export const updateCandidateConfirmation = (candidateId, confirmationState, customStorage) => {
+  requirePermission('notices.manage');
+  const candidates = getDateCandidates(customStorage);
+  const index = candidates.findIndex((c) => c.id === candidateId);
+  if (index === -1) {
+    throw new Error(`Date candidate with ID "${candidateId}" not found.`);
+  }
+
+  const validStates = Object.values(CONFIRMATION_STATES);
+  if (!validStates.includes(confirmationState)) {
+    throw new Error(`Invalid confirmation state: ${confirmationState}`);
+  }
+
+  candidates[index].confirmationState = confirmationState;
+  candidates[index].confirmedAt = new Date().toISOString();
+  candidates[index].confirmedBy = 'citizen'; // or 'authorized_reviewer'
+
+  return saveDateCandidates(candidates, customStorage);
+};
+
+/**
+ * Calculates dependencies between date candidates.
+ * Earlier dates that are prerequisites for later dates get dependency markers.
+ */
+export const calculateDependencies = (candidates) => {
+  if (!candidates || candidates.length === 0) return candidates;
+
+  // Sort by normalized date (earliest first), then by confirmation state
+  const sorted = [...candidates].sort((a, b) => {
+    const aDate = a.normalizedDate || '9999-12-31';
+    const bDate = b.normalizedDate || '9999-12-31';
+    const dateCompare = aDate.localeCompare(bDate);
+    if (dateCompare !== 0) return dateCompare;
+    // Then by confirmation state (confirmed first)
+    const stateOrder = {
+      [CONFIRMATION_STATES.CONFIRMED]: 0,
+      [CONFIRMATION_STATES.PENDING]: 1,
+      [CONFIRMATION_STATES.REJECTED]: 2,
+    };
+    return (stateOrder[a.confirmationState] || 1) - (stateOrder[b.confirmationState] || 1);
+  });
+
+  // Build dependency map: later dates depend on earlier prerequisite dates
+  const result = sorted.map((candidate) => ({
+    ...candidate,
+    dependsOn: [],
+    dependencyNotes: [],
+  }));
+
+  // For each pair, check if earlier dates could be prerequisites for later ones
+  for (let i = 0; i < result.length; i++) {
+    for (let j = i + 1; j < result.length; j++) {
+      const earlier = result[i];
+      const later = result[j];
+
+      // Skip if already confirmed/rejected with no ambiguity
+      if (earlier.confirmationState === CONFIRMATION_STATES.CONFIRMED) {
+        // A confirmed earlier date may be a prerequisite for a later date
+        // Check if action types suggest dependency
+        const dependency = checkPrerequisiteDependency(earlier, later);
+        if (dependency) {
+          result[j].dependsOn.push(earlier.id);
+          result[j].dependencyNotes.push(dependency.note);
+        }
+      }
+    }
+  }
+
+  return result;
+};
+
+/**
+ * Checks if an earlier date candidate is a prerequisite for a later one.
+ */
+const checkPrerequisiteDependency = (earlier, later) => {
+  // Same action type often indicates a sequence
+  if (earlier.actionType === later.actionType) {
+    return {
+      note: ` ${earlier.actionType.toUpperCase()} window follows previous ${earlier.actionType.toUpperCase()}`,
+    };
+  }
+
+  // Response -> Hearing -> Payment -> Appeal is a typical civic workflow
+  const actionSequence = {
+    [ACTION_TYPES.RESPONSE]: 1,
+    [ACTION_TYPES.HEARING]: 2,
+    [ACTION_TYPES.PAYMENT]: 3,
+    [ACTION_TYPES.APPEAL]: 4,
+  };
+
+  const earlierSeq = actionSequence[earlier.actionType] || 0;
+  const laterSeq = actionSequence[later.actionType] || 0;
+
+  if (earlierSeq > 0 && laterSeq > 0 && earlierSeq < laterSeq) {
+    return {
+      note: ` ${later.actionType.toUpperCase()} typically follows ${earlier.actionType.toUpperCase()} per civic workflow`,
+    };
+  }
+
+  return null;
+};
+
+/**
+ * Exports confirmed date candidates as .ics calendar file
+ */
+export const exportConfirmedDatesToIcs = (candidates) => {
+  const confirmed = candidates.filter(
+    (c) => c.confirmationState === CONFIRMATION_STATES.CONFIRMED && c.normalizedDate
+  );
+
+  if (confirmed.length === 0) return null;
+
+  const events = confirmed.map((c) => ({
+    date: c.normalizedDate,
+    title: `${c.actionType.toUpperCase()}: ${c.sourceAnchor.substring(0, 60)}${c.sourceAnchor.length > 60 ? '...' : ''}`,
+    actionType: c.actionType,
+  }));
+
+  // Build ICS content
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Civic Help Setu//Deadline Calendar//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
+
+  events.forEach((event, idx) => {
+    const start = new Date(Date.UTC(event.date.slice(0, 4), parseInt(event.date.slice(5, 7), 10) - 1, parseInt(event.date.slice(8, 10)), 0, 0, 0));
+    const dtstart = formatIcsUtcTimestamp(start);
+    const dtend = formatIcsUtcTimestamp(new Date(start.getTime() + 24 * 60 * 60 * 1000)); // all-day event next day
+
+    lines.push('BEGIN:VEVENT');
+    lines.push(`UID:civic-deadline-${idx}@civic-help-setu.org`);
+    lines.push(`DTSTAMP:${formatIcsUtcTimestamp()}`);
+    lines.push(`DTSTART:${dtstart}`);
+    lines.push(`DTEND:${dtend}`);
+    lines.push(`SUMMARY:${event.title}`);
+    lines.push(`DESCRIPTION:${event.actionType.toUpperCase()} deadline confirmed from civic notice. Source: ${event.sourceAnchor || 'Official notice'}`);
+    lines.push(`STATUS:CONFIRMED`);
+    lines.push('END:VEVENT');
+  });
+
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+};
+
+/**
+ * Gets a readable list/table alternative for the calendar data.
+ */
+export const getReadableList = (candidates) => {
+  const confirmed = candidates.filter(
+    (c) => c.confirmationState === CONFIRMATION_STATES.CONFIRMED
+  );
+
+  if (confirmed.length === 0) {
+    return { lines: ['No confirmed deadlines.', 'All date candidates are still pending confirmation.'], table: null };
+  }
+
+  const headers = ['Action', 'Date', 'Source Anchor', 'Confirmation'];
+  const rows = confirmed.map((c) => [
+    c.actionType.toUpperCase(),
+    c.normalizedDate || 'Invalid date',
+    c.sourceAnchor.substring(0, 50) + (c.sourceAnchor.length > 50 ? '...' : ''),
+    c.confirmationState.toUpperCase(),
+  ]);
+
+  return { lines: [], table: { headers, rows } };
+};
+
+export default {
+  ACTION_TYPES,
+  CONFIRMATION_STATES,
+  extractDateCandidates,
+  saveDateCandidates,
+  getDateCandidates,
+  updateCandidateConfirmation,
+  calculateDependencies,
+  exportConfirmedDatesToIcs,
+  getReadableList,
+  normalizeDateString,
+};
