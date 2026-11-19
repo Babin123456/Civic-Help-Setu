@@ -60,6 +60,7 @@ import RentalTransitionWorkspace from './pages/RentalTransitionWorkspace';
 import CitizenDraftSyncWorkspace from './pages/CitizenDraftSyncWorkspace';
 import WardBudgetWorkspace from './pages/WardBudgetWorkspace';
 import CivicSurveyWorkspace from './pages/CivicSurveyWorkspace';
+import UpJanSunwaiWorkspace from './pages/UpJanSunwaiWorkspace';
 
 const Services = lazy(() => import('./pages/Services'));
 
@@ -137,6 +138,10 @@ function AppRoot() {
                       <Route path="/surveys" element={<CivicSurveyWorkspace />} />
                       <Route path="/survey-builder" element={<CivicSurveyWorkspace />} />
                       <Route path="/civic-surveys" element={<CivicSurveyWorkspace />} />
+                      <Route path="/up-jan-sunwai" element={<UpJanSunwaiWorkspace />} />
+                      <Route path="/jan-sunwai" element={<UpJanSunwaiWorkspace />} />
+                      <Route path="/jan-sunwai-workspace" element={<UpJanSunwaiWorkspace />} />
+                      <Route path="/public-hearings" element={<UpJanSunwaiWorkspace />} />
                       <Route path="/track" element={<Track />} />
                       <Route path="/civic-works" element={<CivicWorksBoard />} />
                       <Route path="/road-safety" element={<RoadSafetyDashboard />} />

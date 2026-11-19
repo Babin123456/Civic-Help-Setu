@@ -26,7 +26,8 @@ import {
   Droplets,
   KeyRound,
   Store,
-  Trees
+  Trees,
+  Calendar
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -125,6 +126,15 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
           normalizedPath === '/ward-budget' ||
           normalizedPath === '/services/ward-budget-proposal' ||
           normalizedPath.startsWith('/ward-budget/')
+        );
+      }
+
+      if (normalizedTarget === '/up-jan-sunwai') {
+        return (
+          normalizedPath === '/up-jan-sunwai' ||
+          normalizedPath === '/jan-sunwai' ||
+          normalizedPath === '/jan-sunwai-workspace' ||
+          normalizedPath === '/public-hearings'
         );
       }
 
@@ -843,6 +853,12 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 to: '/surveys',
                 label: 'Civic Surveys',
                 icon: FileText
+              })}
+
+              {renderNavLink({
+                to: '/up-jan-sunwai',
+                label: t('nav.upJanSunwai', 'UP Jan Sunwai & Hearings'),
+                icon: Calendar
               })}
 
               {renderNavLink({
