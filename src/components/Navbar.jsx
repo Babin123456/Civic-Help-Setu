@@ -1094,6 +1094,12 @@ if (normalizedTarget === '/water-quality') {
               })}
 
               {renderNavLink({
+                to: '/route-planning',
+                label: 'Route Planning & Audit',
+                icon: Route
+              })}
+
+              {renderNavLink({
                 to: '/clinical-establishment-workspace',
                 label: 'Clinical Establishment & Patient Rights',
                 icon: HeartPulse
