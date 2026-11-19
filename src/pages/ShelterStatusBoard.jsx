@@ -1500,8 +1500,7 @@ export default function ShelterStatusBoard() {
                     }))}
                   >
                     <span
-                      style={{ width: '16px', height: '16px', border: '2px solid #6b7280', borderRadius: '3px' }}
-                      {{ formData.accessibility.wheelchairAccessible && `background: #3b82f6; borderColor: #3b82f6` }}
+                      style={{ width: '16px', height: '16px', border: '2px solid #6b7280', borderRadius: '3px', ...(formData.accessibility.wheelchairAccessible ? { background: '#3b82f6', borderColor: '#3b82f6' } : {}) }}
                     />
                     Wheelchair Accessible
                   </label>
@@ -1523,8 +1522,7 @@ export default function ShelterStatusBoard() {
                     }))}
                   >
                     <span
-                      style={{ width: '16px', height: '16px', border: '2px solid #6b7280', borderRadius: '3px' }}
-                      {{ formData.accessibility.hearingImpaired && `background: #3b82f6; borderColor: #3b82f6` }}
+                      style={{ width: '16px', height: '16px', border: '2px solid #6b7280', borderRadius: '3px', ...(formData.accessibility.hearingImpaired ? { background: '#3b82f6', borderColor: '#3b82f6' } : {}) }}
                     />
                     Hearing Impaired
                   </label>
@@ -1546,8 +1544,7 @@ export default function ShelterStatusBoard() {
                     }))}
                   >
                     <span
-                      style={{ width: '16px', height: '16px', border: '2px solid #6b7280', borderRadius: '3px' }}
-                      {{ formData.accessibility.visuallyImpaired && `background: #3b82f6; borderColor: #3b82f6` }}
+                      style={{ width: '16px', height: '16px', border: '2px solid #6b7280', borderRadius: '3px', ...(formData.accessibility.visuallyImpaired ? { background: '#3b82f6', borderColor: '#3b82f6' } : {}) }}
                     />
                     Visually Impaired
                   </label>
