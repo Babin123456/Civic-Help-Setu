@@ -23,7 +23,8 @@ import {
   Settings,
   Droplets,
   KeyRound,
-  Store
+  Store,
+  Gift
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -776,10 +777,16 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 icon: Store
               })}
 
-              {renderNavLink({
+{renderNavLink({
                 to: '/community-facilities',
                 label: 'Community Facilities',
                 icon: Home
+              })}
+
+              {renderNavLink({
+                to: '/neighbourhood-resource-exchange',
+                label: t('nav.neighbourhoodResource', 'Neighbourhood Resource Exchange'),
+                icon: Gift
               })}
 
               {renderNavLink({
