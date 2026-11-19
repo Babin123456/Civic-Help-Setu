@@ -1,0 +1,547 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`deterministic measurements and issue detection (#841) > matches the visual regression fixture baseline 1`] = `
+[
+  {
+    "cardWidth": 304,
+    "cards": [
+      {
+        "badgeWidth": 173.20000000000002,
+        "fixtureId": "qa-sample-certificates-1",
+        "issues": [
+          {
+            "code": "DEPARTMENT_TRUNCATED",
+            "field": "department",
+            "measured": {
+              "limit": 224,
+              "unit": "px",
+              "value": 693,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "TITLE_OVERFLOW",
+            "field": "name",
+            "measured": {
+              "contentWidth": 224,
+              "estimatedWidth": 1596.9,
+              "limit": 2,
+              "unit": "lines",
+              "value": 8,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "UNBREAKABLE_TOKEN",
+            "field": "name",
+            "measured": {
+              "limit": 24,
+              "unit": "characters",
+              "value": 35,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "DESCRIPTION_CLAMPED",
+            "field": "shortDescription",
+            "measured": {
+              "limit": 3,
+              "unit": "lines",
+              "value": 9,
+            },
+            "severity": "info",
+          },
+          {
+            "code": "MIXED_SCRIPT_METADATA",
+            "field": "type",
+            "measured": {
+              "unit": "field",
+              "value": "Online",
+            },
+            "severity": "info",
+          },
+        ],
+        "suggestionStatus": "suggested",
+        "title": "नमूना बंदरगाह प्रमाण पत्र बंदरगाह प्रमाण पत्र बंदरगाह प्रमाण पत्र बंदरगाह बंदरगाह प्रमाण पत्र QA-CIVIC-000841-001-LONG-IDENTIFIER",
+        "titleLines": 8,
+      },
+      {
+        "badgeWidth": 191.20000000000002,
+        "fixtureId": "qa-sample-certificates-2",
+        "issues": [
+          {
+            "code": "DEPARTMENT_TRUNCATED",
+            "field": "department",
+            "measured": {
+              "limit": 224,
+              "unit": "px",
+              "value": 693,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "DOCUMENT_COUNT_WRAP",
+            "field": "documents",
+            "measured": {
+              "limit": 224,
+              "unit": "px",
+              "value": 462.7,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "TITLE_OVERFLOW",
+            "field": "name",
+            "measured": {
+              "contentWidth": 224,
+              "estimatedWidth": 684.9,
+              "limit": 2,
+              "unit": "lines",
+              "value": 4,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "DESCRIPTION_CLAMPED",
+            "field": "shortDescription",
+            "measured": {
+              "limit": 3,
+              "unit": "lines",
+              "value": 9,
+            },
+            "severity": "info",
+          },
+          {
+            "code": "MIXED_SCRIPT_METADATA",
+            "field": "type",
+            "measured": {
+              "unit": "field",
+              "value": "Offline",
+            },
+            "severity": "info",
+          },
+        ],
+        "suggestionStatus": "suggested",
+        "title": "नमूना दीप लाइसेंस दीप लाइसेंस दीप लाइसेंस दीप दीप लाइसेंस",
+        "titleLines": 4,
+      },
+      {
+        "badgeWidth": 229.8,
+        "fixtureId": "qa-sample-certificates-3",
+        "issues": [
+          {
+            "code": "BADGE_WRAP",
+            "field": "badges",
+            "measured": {
+              "limit": 224,
+              "unit": "px",
+              "value": 229.8,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "DEPARTMENT_TRUNCATED",
+            "field": "department",
+            "measured": {
+              "limit": 224,
+              "unit": "px",
+              "value": 693,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "TITLE_OVERFLOW",
+            "field": "name",
+            "measured": {
+              "contentWidth": 224,
+              "estimatedWidth": 684.9,
+              "limit": 2,
+              "unit": "lines",
+              "value": 4,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "DESCRIPTION_CLAMPED",
+            "field": "shortDescription",
+            "measured": {
+              "limit": 3,
+              "unit": "lines",
+              "value": 9,
+            },
+            "severity": "info",
+          },
+          {
+            "code": "MIXED_SCRIPT_METADATA",
+            "field": "type",
+            "measured": {
+              "unit": "field",
+              "value": "Online / Offline",
+            },
+            "severity": "info",
+          },
+        ],
+        "suggestionStatus": "suggested",
+        "title": "नमूना बाग मंज़ूरी बाग मंज़ूरी बाग मंज़ूरी बाग बाग मंज़ूरी",
+        "titleLines": 4,
+      },
+    ],
+    "columns": 3,
+    "viewport": "desktop",
+  },
+  {
+    "cardWidth": 340,
+    "cards": [
+      {
+        "badgeWidth": 173.20000000000002,
+        "fixtureId": "qa-sample-certificates-1",
+        "issues": [
+          {
+            "code": "DEPARTMENT_TRUNCATED",
+            "field": "department",
+            "measured": {
+              "limit": 260,
+              "unit": "px",
+              "value": 693,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "TITLE_OVERFLOW",
+            "field": "name",
+            "measured": {
+              "contentWidth": 260,
+              "estimatedWidth": 1596.9,
+              "limit": 2,
+              "unit": "lines",
+              "value": 7,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "UNBREAKABLE_TOKEN",
+            "field": "name",
+            "measured": {
+              "limit": 24,
+              "unit": "characters",
+              "value": 35,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "DESCRIPTION_CLAMPED",
+            "field": "shortDescription",
+            "measured": {
+              "limit": 3,
+              "unit": "lines",
+              "value": 8,
+            },
+            "severity": "info",
+          },
+          {
+            "code": "MIXED_SCRIPT_METADATA",
+            "field": "type",
+            "measured": {
+              "unit": "field",
+              "value": "Online",
+            },
+            "severity": "info",
+          },
+        ],
+        "suggestionStatus": "suggested",
+        "title": "नमूना बंदरगाह प्रमाण पत्र बंदरगाह प्रमाण पत्र बंदरगाह प्रमाण पत्र बंदरगाह बंदरगाह प्रमाण पत्र QA-CIVIC-000841-001-LONG-IDENTIFIER",
+        "titleLines": 7,
+      },
+      {
+        "badgeWidth": 191.20000000000002,
+        "fixtureId": "qa-sample-certificates-2",
+        "issues": [
+          {
+            "code": "DEPARTMENT_TRUNCATED",
+            "field": "department",
+            "measured": {
+              "limit": 260,
+              "unit": "px",
+              "value": 693,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "DOCUMENT_COUNT_WRAP",
+            "field": "documents",
+            "measured": {
+              "limit": 260,
+              "unit": "px",
+              "value": 462.7,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "TITLE_OVERFLOW",
+            "field": "name",
+            "measured": {
+              "contentWidth": 260,
+              "estimatedWidth": 684.9,
+              "limit": 2,
+              "unit": "lines",
+              "value": 3,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "DESCRIPTION_CLAMPED",
+            "field": "shortDescription",
+            "measured": {
+              "limit": 3,
+              "unit": "lines",
+              "value": 8,
+            },
+            "severity": "info",
+          },
+          {
+            "code": "MIXED_SCRIPT_METADATA",
+            "field": "type",
+            "measured": {
+              "unit": "field",
+              "value": "Offline",
+            },
+            "severity": "info",
+          },
+        ],
+        "suggestionStatus": "suggested",
+        "title": "नमूना दीप लाइसेंस दीप लाइसेंस दीप लाइसेंस दीप दीप लाइसेंस",
+        "titleLines": 3,
+      },
+      {
+        "badgeWidth": 229.8,
+        "fixtureId": "qa-sample-certificates-3",
+        "issues": [
+          {
+            "code": "DEPARTMENT_TRUNCATED",
+            "field": "department",
+            "measured": {
+              "limit": 260,
+              "unit": "px",
+              "value": 693,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "TITLE_OVERFLOW",
+            "field": "name",
+            "measured": {
+              "contentWidth": 260,
+              "estimatedWidth": 684.9,
+              "limit": 2,
+              "unit": "lines",
+              "value": 3,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "DESCRIPTION_CLAMPED",
+            "field": "shortDescription",
+            "measured": {
+              "limit": 3,
+              "unit": "lines",
+              "value": 8,
+            },
+            "severity": "info",
+          },
+          {
+            "code": "MIXED_SCRIPT_METADATA",
+            "field": "type",
+            "measured": {
+              "unit": "field",
+              "value": "Online / Offline",
+            },
+            "severity": "info",
+          },
+        ],
+        "suggestionStatus": "suggested",
+        "title": "नमूना बाग मंज़ूरी बाग मंज़ूरी बाग मंज़ूरी बाग बाग मंज़ूरी",
+        "titleLines": 3,
+      },
+    ],
+    "columns": 2,
+    "viewport": "tablet",
+  },
+  {
+    "cardWidth": 350,
+    "cards": [
+      {
+        "badgeWidth": 173.20000000000002,
+        "fixtureId": "qa-sample-certificates-1",
+        "issues": [
+          {
+            "code": "DEPARTMENT_TRUNCATED",
+            "field": "department",
+            "measured": {
+              "limit": 310,
+              "unit": "px",
+              "value": 693,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "TITLE_OVERFLOW",
+            "field": "name",
+            "measured": {
+              "contentWidth": 310,
+              "estimatedWidth": 1596.9,
+              "limit": 2,
+              "unit": "lines",
+              "value": 6,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "UNBREAKABLE_TOKEN",
+            "field": "name",
+            "measured": {
+              "limit": 24,
+              "unit": "characters",
+              "value": 35,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "DESCRIPTION_CLAMPED",
+            "field": "shortDescription",
+            "measured": {
+              "limit": 3,
+              "unit": "lines",
+              "value": 7,
+            },
+            "severity": "info",
+          },
+          {
+            "code": "MIXED_SCRIPT_METADATA",
+            "field": "type",
+            "measured": {
+              "unit": "field",
+              "value": "Online",
+            },
+            "severity": "info",
+          },
+        ],
+        "suggestionStatus": "suggested",
+        "title": "नमूना बंदरगाह प्रमाण पत्र बंदरगाह प्रमाण पत्र बंदरगाह प्रमाण पत्र बंदरगाह बंदरगाह प्रमाण पत्र QA-CIVIC-000841-001-LONG-IDENTIFIER",
+        "titleLines": 6,
+      },
+      {
+        "badgeWidth": 191.20000000000002,
+        "fixtureId": "qa-sample-certificates-2",
+        "issues": [
+          {
+            "code": "DEPARTMENT_TRUNCATED",
+            "field": "department",
+            "measured": {
+              "limit": 310,
+              "unit": "px",
+              "value": 693,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "DOCUMENT_COUNT_WRAP",
+            "field": "documents",
+            "measured": {
+              "limit": 310,
+              "unit": "px",
+              "value": 462.7,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "TITLE_OVERFLOW",
+            "field": "name",
+            "measured": {
+              "contentWidth": 310,
+              "estimatedWidth": 684.9,
+              "limit": 2,
+              "unit": "lines",
+              "value": 3,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "DESCRIPTION_CLAMPED",
+            "field": "shortDescription",
+            "measured": {
+              "limit": 3,
+              "unit": "lines",
+              "value": 7,
+            },
+            "severity": "info",
+          },
+          {
+            "code": "MIXED_SCRIPT_METADATA",
+            "field": "type",
+            "measured": {
+              "unit": "field",
+              "value": "Offline",
+            },
+            "severity": "info",
+          },
+        ],
+        "suggestionStatus": "suggested",
+        "title": "नमूना दीप लाइसेंस दीप लाइसेंस दीप लाइसेंस दीप दीप लाइसेंस",
+        "titleLines": 3,
+      },
+      {
+        "badgeWidth": 229.8,
+        "fixtureId": "qa-sample-certificates-3",
+        "issues": [
+          {
+            "code": "DEPARTMENT_TRUNCATED",
+            "field": "department",
+            "measured": {
+              "limit": 310,
+              "unit": "px",
+              "value": 693,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "TITLE_OVERFLOW",
+            "field": "name",
+            "measured": {
+              "contentWidth": 310,
+              "estimatedWidth": 684.9,
+              "limit": 2,
+              "unit": "lines",
+              "value": 3,
+            },
+            "severity": "warning",
+          },
+          {
+            "code": "DESCRIPTION_CLAMPED",
+            "field": "shortDescription",
+            "measured": {
+              "limit": 3,
+              "unit": "lines",
+              "value": 7,
+            },
+            "severity": "info",
+          },
+          {
+            "code": "MIXED_SCRIPT_METADATA",
+            "field": "type",
+            "measured": {
+              "unit": "field",
+              "value": "Online / Offline",
+            },
+            "severity": "info",
+          },
+        ],
+        "suggestionStatus": "suggested",
+        "title": "नमूना बाग मंज़ूरी बाग मंज़ूरी बाग मंज़ूरी बाग बाग मंज़ूरी",
+        "titleLines": 3,
+      },
+    ],
+    "columns": 1,
+    "viewport": "mobile",
+  },
+]
+`;
