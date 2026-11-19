@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Trash2, Printer, Scale, FileDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -25,12 +25,24 @@ const ServiceComparisonModal = ({ isOpen, onClose, comparedServices, onRemove, o
   const [highlightDiffs, setHighlightDiffs] = useState(false);
   const [showOnlyDiffs, setShowOnlyDiffs] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [aiExplanation, setAIExplanation] = useState(null);
   const modalRef = useModalKeyboard(isOpen, onClose);
 
   if (!isOpen) return null;
 
   const matrix = comparisonService.buildComparisonMatrix(comparedServices);
   const diffSummary = comparisonService.getDifferencesSummary(comparedServices);
+
+  // Sync AI explanation when comparedServices changes (client-side only)
+  useEffect(() => {
+    if (comparedServices && comparedServices.length >= 2) {
+      setAIExplanation(
+        comparisonService.generateAIExplanation(comparedServices)
+      );
+    } else {
+      setAIExplanation(null);
+    }
+  }, [comparedServices]);
 
   const modal = (
     <div
@@ -177,7 +189,23 @@ const ServiceComparisonModal = ({ isOpen, onClose, comparedServices, onRemove, o
               </tbody>
             </table>
             <EligibilityComparisonExplainerSection comparedServices={comparedServices} />
-            </>
+
+              {/* AI Explanation Section */}
+              {aiExplanation && aiExplanation.explanation && (
+                <div className="ai-explanation-section" style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(30, 64, 175, 0.05)', borderRadius: '0.5rem', border: '1px solid rgba(30, 64, 175, 0.3)' }}>
+                  <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', color: 'var(--accent-main)' }}>
+                    AI Summary (based on compared fields)
+                  </h3>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    {aiExplanation.explanation}
+                  </p>
+                  <p style={{ fontSize: '0.65rem', marginTop: '0.3rem', color: 'var(--text-tertiary)' }}>
+                    AI-generated suggestion — verify against official sources before relying.
+                  </p>
+                </div>
+              )}
+
+              </>
           )}
         </div>
         <ServiceComparisonExportModal
