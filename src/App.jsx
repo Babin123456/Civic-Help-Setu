@@ -46,6 +46,7 @@ import AadhaarGuidePage from './pages/AadhaarGuidePage';
 import FireSafetyGuidePage from './pages/FireSafetyGuidePage';
 import TreePermissionGuidePage from './pages/TreePermissionGuidePage';
 import CivicWorksBoard from './pages/CivicWorksBoard';
+import ShelterStatusBoard from './pages/ShelterStatusBoard';
 import CrematoriumDirectory from './pages/CrematoriumDirectory';
 import FairPriceShopBoard from './pages/FairPriceShopBoard';
 import TenderReadinessWorkspace from './pages/TenderReadinessWorkspace';
@@ -108,8 +109,11 @@ function AppRoot() {
                       <Route path="/fair-price-shops" element={<FairPriceShopBoard />} />
                       <Route path="/tenders" element={<TenderReadinessWorkspace />} />
                       <Route path="/tender-readiness" element={<TenderReadinessWorkspace />} />
+                      
                       <Route path="/community-facilities" element={<CommunityFacilityDirectory />} />
                       <Route path="/facility-directory" element={<CommunityFacilityDirectory />} />
+                      <Route path="/shelter-status" element={<ShelterStatusBoard />} />
+                      <Route path="/shelter-status-board" element={<ShelterStatusBoard />} />
                       <Route path="/water-tanker" element={<WaterTankerTracker />} />
                       <Route path="/water-tankers" element={<WaterTankerTracker />} />
                       <Route path="/rental-checklist" element={<RentalTransitionWorkspace />} />
@@ -150,6 +154,7 @@ function AppRoot() {
                           <Admin />
                         </ProtectedRoute>
                       } />
+                      
 
                       <Route path="*" element={<NotFound />} />
                     </Routes>
