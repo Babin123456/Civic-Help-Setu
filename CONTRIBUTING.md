@@ -104,7 +104,13 @@ npx vitest run src/services/publicProjectService.test.js       # public project 
 npx vitest run src/services/evidenceVerificationService.test.js # evidence integrity & CV advisory tests (#752)
 npx vitest run tests/public-projects.test.js                 # public project serverless API & abuse tests (#752)
 npx vitest run src/pages/PublicProjectsWorkspace.test.jsx      # public project workspace UI & a11y tests (#752)
+npx vitest run src/services/routePlanning/service.test.js       # waste collection route planning service & optimization tests (#755)
+npx vitest run src/services/routePlanning/migrations.test.js    # route planning schema migration & rollback tests (#755)
+npx vitest run tests/route-planning-security.test.js            # route planning anti-PII, injection & tamper tests (#755)
+npx vitest run src/pages/RoutePlanningWorkspace.test.jsx        # route planning workspace UI & accessibility tests (#755)
 ```
+
+Architecture, data model, vehicle capacity optimization, segregation audit seals, and privacy safeguards for municipal waste collection route planning are documented in [docs/route-planning-architecture.md](docs/route-planning-architecture.md) (#755).
 
 Architecture, data model, state machines, CV discrepancy policy, and rollback strategy for public projects are documented in [docs/geospatial-public-projects.md](docs/geospatial-public-projects.md).
 
