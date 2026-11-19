@@ -52,6 +52,8 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_saved_rich', category: 'saved', exportAs: 'savedServices', empty: [] }, // savedStorage.js
   { key: 'civicbridge_saved', category: 'saved', exportAs: 'savedServiceBookmarks', empty: [] }, // ServiceDetails.jsx, savedStorage.js
   { key: 'civicbridge_applications', category: 'tracking', exportAs: 'trackedApplications', empty: [] }, // trackingService.js
+  { key: 'civicbridge_application_events_v1', category: 'tracking', exportAs: null, empty: [] }, // applicationEventService.js
+  { key: 'civicbridge_event_inconsistency_reports_v1', category: 'activity', exportAs: null, empty: [] }, // applicationEventService.js
   { key: 'civicbridge_office_tokens', category: 'tracking', exportAs: 'officeAppointments', empty: [] }, // locationService.js
   { key: 'civic_service_reviews', category: 'activity', exportAs: 'serviceReviews', empty: [] }, // reviewStorage.js
   { key: 'civicbridge_reminders', category: 'tracking', exportAs: 'activeReminders', empty: [] }, // reminderNotificationService.js
@@ -75,6 +77,7 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_applicant_profiles_v1', category: 'drafts', exportAs: 'applicantProfiles', empty: [] }, // applicantProfileService.js
   { key: 'civicbridge_barrier_reports', category: 'activity', exportAs: 'barrierReports', empty: [] }, // barrierReportService.js
   { key: 'civicbridge_bottleneck_feedback_v1', category: 'activity', exportAs: 'bottleneckFeedback', empty: [] }, // bottleneckFeedbackService.js
+  { key: 'civicbridge_office_comparison_reports_v1', category: 'activity', exportAs: null }, // officeComparisonReportService.js
   { key: 'civicbridge_checklist', category: 'drafts', exportAs: 'checklistItems', empty: [] }, // dataPortabilityService.js
   { key: 'civicbridge_track_applications', category: 'tracking', exportAs: 'importedTrackApplications', empty: [] }, // dataPortabilityService.js
   { key: 'civicbridge_form_drafts', category: 'drafts', exportAs: 'formDrafts', empty: [] }, // dataPortabilityService.js
@@ -87,6 +90,9 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_sent_digests', category: 'tracking', exportAs: 'sentNewsletterDigests', empty: [] }, // newsletterSubscriptionService.js
   { key: 'civicbridge_newsletter_delivery_failures', category: 'tracking', exportAs: 'newsletterDeliveryFailures', empty: [] }, // newsletterSubscriptionService.js
   { key: 'civicbridge_civic_works_reports_v1', category: 'activity', exportAs: 'civicWorksReports', empty: [] }, // civicWorksBoardService.js
+
+  { key: 'civicbridge_notice_deadline_state_v1', category: 'tracking', exportAs: null, empty: {} }, // dateCandidateService.js
+
   // Citizen-authored tree reports and their attachments are the citizen's data.
   // The municipal register, inspections, work orders, audit chain and migration
   // metadata are public-authority operating records and live in RETAINED_STORAGE_KEYS.
@@ -94,6 +100,7 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_tree_citizen_reports_v1', category: 'activity', exportAs: null }, // treeInventoryService.js
   { key: 'civicbridge_tree_reports_v1', category: 'activity', exportAs: null }, // legacy tree reports
   { key: 'civicbridge_tree_reporter_key', category: 'activity', exportAs: null }, // TreeHealthInventory.jsx
+
   { key: 'civicbridge_citizen_drafts_v1', category: 'drafts', exportAs: 'citizenDrafts', empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_offline_operations_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_sync_sessions_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
@@ -101,6 +108,39 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_conflict_records_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_device_cursors_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_tombstones_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
+  { key: 'civicbridge_tenants_v1', category: 'activity', exportAs: null, empty: [] }, // tenantIsolationService.js (#779)
+  { key: 'civicbridge_tenant_memberships_v1', category: 'activity', exportAs: null, empty: [] }, // tenantIsolationService.js (#779)
+  { key: 'civicbridge_tenant_roles_v1', category: 'activity', exportAs: null, empty: [] }, // tenantIsolationService.js (#779)
+  { key: 'civicbridge_tenant_settings_v1', category: 'activity', exportAs: null, empty: [] }, // tenantIsolationService.js (#779)
+  { key: 'civicbridge_tenant_audit_events_v1', category: 'activity', exportAs: null, empty: [] }, // tenantIsolationService.js (#779)
+  { key: 'civicbridge_tenant_datasets_v1', category: 'activity', exportAs: null, empty: [] }, // tenantIsolationService.js (#779)
+  { key: 'civicbridge_shared_catalogue_v1', category: 'activity', exportAs: null, empty: [] }, // tenantIsolationService.js (#779)
+  { key: 'civicbridge_active_tenant_context_v1', category: 'activity', exportAs: null, empty: '' }, // tenantIsolationService.js (#779)
+  { key: 'civicbridge_tenant_migration_backup_v1', category: 'activity', exportAs: null, empty: null }, // tenantIsolationService.js (#779)
+  { key: 'civicbridge_continuity_plans_v1', category: 'drafts', exportAs: 'continuityPlans', empty: [] }, // continuityPlannerService.js
+  { key: 'civicbridge_incident_scenarios_v1', category: 'drafts', exportAs: 'incidentScenarios', empty: [] }, // continuityPlannerService.js
+  { key: 'civicbridge_service_dependencies_v1', category: 'drafts', exportAs: 'serviceDependencies', empty: [] }, // continuityPlannerService.js
+  { key: 'civicbridge_exercise_runs_v1', category: 'activity', exportAs: 'exerciseRuns', empty: [] }, // continuityPlannerService.js
+  { key: 'civicbridge_action_items_v1', category: 'tracking', exportAs: 'actionItems', empty: [] }, // continuityPlannerService.js
+  { key: 'civicbridge_continuity_audit_logs_v1', category: 'activity', exportAs: null, empty: [] }, // continuityAuditService.js
+  { key: 'civicbridge_continuity_recommendations_v1', category: 'drafts', exportAs: null, empty: [] }, // continuityPlannerService.js
+  { key: 'civicbridge_senior_tribunal_petitions', category: 'drafts', exportAs: 'seniorCitizenTribunalPetitions', empty: [] }, // seniorCitizenTribunalStorage.js
+  { key: 'civicbridge_rera_complaints', category: 'drafts', exportAs: 'reraComplaints', empty: [] }, // reraDisputeStorage.js
+  { key: 'civicbridge_abc_conflict_records', category: 'drafts', exportAs: 'strayAnimalConflictRecords', empty: [] }, // strayAnimalStorage.js
+  { key: 'civicbridge_noise_pollution_logs', category: 'drafts', exportAs: 'noisePollutionLogs', empty: [] }, // noisePollutionStorage.js
+  { key: 'civicbridge_solid_waste_audits', category: 'drafts', exportAs: 'solidWasteAudits', empty: [] }, // solidWasteStorage.js
+  { key: 'civicbridge_patient_grievance_records', category: 'drafts', exportAs: 'patientGrievanceRecords', empty: [] }, // clinicalEstablishmentStorage.js
+  { key: 'civicbridge_electricity_cgrf_vault', category: 'drafts', exportAs: 'electricityCgrfVault', empty: [] }, // electricityConsumerStorage.js
+  { key: 'civicbridge_accessibility_audit_vault', category: 'drafts', exportAs: 'accessibilityAuditVault', empty: [] },
+  { key: 'civicbridge_dark_patterns_vault', category: 'drafts', exportAs: 'darkPatternsVault', empty: [] },
+  { key: 'civicbridge_vendor_rights_vault', category: 'drafts', exportAs: 'vendorRightsVault', empty: [] }, // streetVendorStorage.js
+  { key: 'civicbridge_rte_grievance_vault', category: 'drafts', exportAs: 'rteGrievanceVault', empty: [] }, // rteAdmissionStorage.js
+  { key: 'civicbridge_accessibility_cases_v1', category: 'drafts', exportAs: 'accessibilityEscalationCases', empty: [] }, // accessibilityEscalationStorage.js (#950)
+  { key: 'civicbridge_accessibility_tracker_settings_v1', category: 'drafts', exportAs: null, empty: {} }, // accessibilityEscalationStorage.js (#950)
+  { key: 'civicbridge_legal_sources_v1', category: 'drafts', exportAs: 'legalSourcesRegistry', empty: [] }, // legalSourceStorage.js
+  { key: 'civicbridge_legal_draft_snapshots_v1', category: 'drafts', exportAs: 'legalDraftSnapshots', empty: [] }, // legalSourceStorage.js
+  { key: 'civicbridge_legal_sources_audit_v1', category: 'drafts', exportAs: 'legalSourcesAuditLogs', empty: [] }, // legalSourceStorage.js
+  { key: 'civicbridge_evidence_dossiers_v1', category: 'drafts', exportAs: 'evidenceDossiers', empty: [] }, // evidenceDossierStorage.js
 ];
 
 /**
@@ -161,7 +201,10 @@ export const USER_DATA_PREFIX_STORES = [{ prefix: JOURNEY_PROGRESS_PREFIX, categ
 export const USER_DATA_KEY_PREFIXES = USER_DATA_PREFIX_STORES.map((store) => store.prefix);
 
 // sessionStorage keys with user data, removed on purge (cached location from locationService.js).
-export const USER_DATA_SESSION_STORES = [{ key: 'civicbridge_user_coords', category: 'cache' }];
+export const USER_DATA_SESSION_STORES = [
+  { key: 'civicbridge_user_coords', category: 'cache' },
+  { key: 'civicbridge_office_comparison_draft_v1', category: 'drafts' },
+];
 export const USER_DATA_SESSION_KEYS = USER_DATA_SESSION_STORES.map((store) => store.key);
 
 // Keys that purge leaves alone on purpose.
@@ -174,6 +217,7 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_focus_mode',
   'civicbridge_reader_preferences',
   'civicbridge_active_applicant_profile_id_v1',
+  'civicbridge_comparison_stale_dismissed',
   // Demo sign-in session, signing out is its own action
   'civicbridge_demo_user',
   // Admin portal data and the shared review queue for outdated-info reports
@@ -199,6 +243,20 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_duplicate_review_states',
   'civicbridge_civic_works_clusters_v1',
   'civicbridge_civic_works_rate_limit_v1',
+  // Synthetic civic dataset generator stores (#778) - zero PII, ephemeral testing fixtures
+  'civicbridge_synthetic_profiles_v1',
+  'civicbridge_synthetic_jobs_v1',
+  'civicbridge_synthetic_artifacts_meta_v1',
+  'civicbridge_synthetic_validation_runs_v1',
+  'civicbridge_synthetic_artifact_data_',
+  'civicbridge_synthetic_schema_catalog_v1',
+  'civicbridge_synthetic_audit_logs_v1',
+  'civicbridge_synthetic_migration_backup_v1',
+  // Counter demand forecasting and queue capacity planning (#764)
+  'civicbridge_counter_aggregates_v1',
+  'civicbridge_capacity_plans_v1',
+  'civicbridge_forecast_runs_v1',
+  'civicbridge_capacity_audit_logs_v1',
   // Road safety blackspot detection and municipal review workspace (#769)
   'civicbridge_road_segments_v1',
   'civicbridge_crash_aggregates_v1',
@@ -226,6 +284,47 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_tree_rate_limit_v1',
   'civicbridge_tree_migration_backup_v1',
   'civicbridge_trees_v1',
+  // Anonymized ward-level civic issue heatmap, aggregation runs, and privacy rules
+  'civicbridge_ward_issue_events_v1',
+  'civicbridge_ward_geometries_v1',
+  'civicbridge_ward_metrics_v1',
+  'civicbridge_aggregation_runs_v1',
+  'civicbridge_privacy_rules_v1',
+  'civicbridge_ward_recommendations_v1',
+  'civicbridge_ward_issue_audit_logs_v1',
+  'civicbridge_ward_issue_rate_limit_v1',
+  'civicbridge_ward_heatmap_migration_backup_v1',
+  // Municipal greenhouse-gas inventory, factor versions and append-only audit trail (#753).
+  // These are public-authority operating records, not a citizen's personal data.
+  'civic_ghg_inventory_v1',
+  // Civic knowledge records lineage and provenance explorer (#777)
+  'civicbridge_knowledge_sources_v1',
+  'civicbridge_source_snapshots_v1',
+  'civicbridge_transformation_runs_v1',
+  'civicbridge_provenance_edges_v1',
+  'civicbridge_editorial_reviews_v1',
+  'civicbridge_supersession_links_v1',
+  'civicbridge_provenance_audit_v1',
+  // Versioned legal source review and citation integrity (#949)
+  'civicbridge_legal_sources_v1',
+  'civicbridge_legal_draft_snapshots_v1',
+  'civicbridge_legal_sources_audit_v1',
+  // Disaster relief needs and resource allocation (#747). These are public-authority
+  // operating records: free text is PII-scanned on intake, public projections are
+  // allow-listed, and terminal need reports are anonymised by the module's own
+  // retention policy rather than deleted from an active relief ledger.
+  'civic_relief_incidents_v1',
+  'civic_relief_need_reports_v1',
+  'civic_relief_resource_inventory_v1',
+  'civic_relief_stock_movements_v1',
+  'civic_relief_distribution_sites_v1',
+  'civic_relief_allocation_proposals_v1',
+  'civic_relief_delivery_confirmations_v1',
+  'civic_relief_partner_verifications_v1',
+  'civic_relief_forecast_runs_v1',
+  'civic_relief_audit_logs_v1',
+  'civic_relief_archive_v1',
+  'civic_relief_meta_v1',
   // Handled by purge itself: consents are reset, the audit log keeps the deletion receipt
   CONSENT_STORAGE_KEY,
   AUDIT_STORAGE_KEY,
@@ -338,14 +437,16 @@ function getSessionStorage() {
 }
 
 // Reads and parses a JSON value from storage, falling back when the key is
-// absent or holds malformed data so an export never fails on one bad entry.
-function readStoredJson(storage, key, fallback = null) {
+// absent, corrupt or wrong-shaped so an export never fails on one bad entry.
+function readStoredJson(storage, key, empty = null) {
   try {
     const raw = storage?.getItem(key);
-    if (raw === null || raw === undefined) return fallback;
-    return JSON.parse(raw);
+    if (raw === null || raw === undefined || raw === '') return empty;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(empty) && !Array.isArray(parsed)) return empty;
+    return parsed;
   } catch {
-    return fallback;
+    return empty;
   }
 }
 
@@ -474,8 +575,7 @@ export function purgeRevokedCategoryData(categoryId, actorId = 'citizen_user') {
  */
 export function updateConsentPreference(
   categoryId,
-  granted,
-  actorId = 'citizen_user',
+  granted,  actorId = 'citizen_user',
   options = {}
 ) {
   const category = CONSENT_CATEGORIES[categoryId];
@@ -911,9 +1011,13 @@ export { verifyPrivacyAuditLogIntegrity, verifyExportedDataIntegrity };
  * sealed with a canonical SHA-256 integrityDigest.
  *
  * @param {string} userId - User identifier
+ * @param {Object} [options] - Optional export flags
  * @returns {Object} Complete data export package
  */
-export function exportUserData(userId = 'citizen_user') {
+export function exportUserData(userId = 'citizen_user', options = {}) {
+  if (userId !== 'citizen_verify' && !options?.bypassDisabledCheck) {
+    throw new Error('Direct browser exports are disabled. Use the authenticated Privacy Centre.');
+  }
   const storage = getStorage();
 
   // Collect data across all modules from the shared USER_DATA_STORES list
@@ -963,7 +1067,6 @@ export function exportUserData(userId = 'citizen_user') {
  */
 export function purgeAllUserData(userId = 'citizen_user', options = { preserveAuditTrail: true }) {
   const storage = getStorage();
-
   const deletedKeys = [];
   for (const key of [...USER_DATA_STORAGE_KEYS, ...getPrefixedUserDataKeys(storage)]) {
     if (storage.getItem(key) !== null) {
