@@ -26,6 +26,9 @@ import {
   Droplets,
   KeyRound,
   Store,
+
+  Gift,
+
   Database,
   Building2,
   Trees,
@@ -42,6 +45,7 @@ import {
   Zap,
   GraduationCap,
   FolderLock,
+
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -996,22 +1000,29 @@ if (normalizedTarget === '/water-quality') {
                 icon: Store
               })}
 
-              {renderNavLink({
+{renderNavLink({
                 to: '/community-facilities',
                 label: 'Community Facilities',
                 icon: Home
               })}
 
               {renderNavLink({
+                to: '/neighbourhood-resource-exchange',
+                label: t('nav.neighbourhoodResource', 'Neighbourhood Resource Exchange'),
+                icon: Gift,
+              })}
+
+              {renderNavLink({
                 to: '/public-toilets',
                 label: 'Public Toilets',
-                icon: MapPin
+                icon: MapPin,
               })}
 
               {renderNavLink({
                 to: '/library-directory',
                 label: 'Public Libraries',
                 icon: BookOpen
+
               })}
 
               {renderNavLink({
