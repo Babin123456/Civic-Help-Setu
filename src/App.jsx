@@ -76,6 +76,7 @@ const OfficeComparisonDetail = lazy(() => import('./pages/OfficeComparisonDetail
 const PublicToiletDirectory = lazy(() => import('./pages/PublicToiletDirectory'));
 const AccessibleRouteBarrierWorkspace = lazy(() => import('./pages/AccessibleRouteBarrierWorkspace'));
 const StreetlightOutageWorkspace = lazy(() => import('./pages/StreetlightOutageWorkspace'));
+const ReliefOperationsWorkspace = lazy(() => import('./pages/ReliefOperationsWorkspace'));
 const GhgInventoryWorkspace = lazy(() => import('./pages/GhgInventoryWorkspace'));
 const WaterQualityRegister = lazy(() => import('./pages/WaterQualityRegister'));
 const PublicProjectsWorkspace = lazy(() => import('./pages/PublicProjectsWorkspace'));
@@ -274,6 +275,9 @@ function AppRoot() {
                       <Route path="/streetlights" element={<StreetlightOutageWorkspace />} />
                       <Route path="/streetlight-outages" element={<StreetlightOutageWorkspace />} />
                       <Route path="/services/streetlight-outages" element={<StreetlightOutageWorkspace />} />
+                      <Route path="/relief-operations" element={<ReliefOperationsWorkspace />} />
+                      <Route path="/disaster-relief" element={<ReliefOperationsWorkspace />} />
+                      <Route path="/services/relief-operations" element={<ReliefOperationsWorkspace />} />
                       <Route path="/ghg-inventory" element={<GhgInventoryWorkspace />} />
                       <Route path="/emissions-inventory" element={<GhgInventoryWorkspace />} />
                       <Route path="/services/ghg-inventory" element={<GhgInventoryWorkspace />} />

@@ -112,6 +112,21 @@ Architecture, data model, roles, triage boundaries, CSV format, migrations and o
 Water quality standards (IS 10500:2012), data models, cryptographic seals, and audit runbooks are documented in [docs/water-quality-register.md](docs/water-quality-register.md).
 Architecture, data model, k-anonymity privacy safeguards, explainable recommendations, and test suites for the Anonymized Ward-Level Civic Issue Heatmap are documented in [docs/ANONYMIZED_WARD_ISSUE_HEATMAP.md](docs/ANONYMIZED_WARD_ISSUE_HEATMAP.md) (#763).
 
+Relief operations (#747) — need intake, verification, deterministic forecasting,
+transactional stock reservations, human approval, dispatch, delivery
+confirmation, audit and public projections:
+```bash
+npx vitest run src/services/reliefOperationsService.test.js       # workflow, RBAC, transactions, duplicates, PII
+npx vitest run src/services/reliefForecastEngine.test.js          # clustering, forecast, fallback, medical boundary
+npx vitest run src/services/reliefOperationsMigrations.test.js    # empty DB, legacy data, rollback, retention
+npx vitest run src/pages/ReliefOperationsWorkspace.test.jsx       # page and component/accessibility tests
+npx vitest run tests/relief-operations-api.test.js                # public API validation, abuse and privacy
+```
+
+Architecture, data model, state machines, role/capability matrix, forecast
+boundaries, threat model, retention, rollback and the manual acceptance script
+are documented in [docs/RELIEF_OPERATIONS.md](docs/RELIEF_OPERATIONS.md).
+
 ## Security checks
 Every PR runs a secret scan, a dependency audit and a lint for unsafe HTML/JS patterns. Locally:
 ```bash

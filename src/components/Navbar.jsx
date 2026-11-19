@@ -1205,6 +1205,13 @@ if (normalizedTarget === '/water-quality') {
               })}
 
               {renderNavLink({
+                to: '/relief-operations',
+                activeTarget: '/relief-operations',
+                label: t('nav.reliefOperations', 'Disaster Relief Operations'),
+                icon: HeartHandshake
+              })}
+
+              {renderNavLink({
                 to: '/ghg-inventory',
                 activeTarget: '/ghg-inventory',
                 label: t('nav.ghgInventory', 'GHG Inventory'),
