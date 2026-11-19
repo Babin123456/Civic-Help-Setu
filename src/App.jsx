@@ -367,23 +367,3 @@ function App() {
 }
 
 export default App;
-                  </>
-                </ConfirmationDialogProvider>
-              </NetworkProvider>
-            </LanguageProvider>
-          </AuthProvider>
-        </ToastProvider>
-      </AccessibilityProvider>
-    </ThemeProvider>
-  );
-}
-
-// A data router is required for useBlocker (unsaved-changes warning).
-// A single splat route keeps all existing <Routes> behaviour unchanged.
-const router = createBrowserRouter([{ path: '*', element: <AppRoot />, errorElement: <RouteErrorFallback /> }]);
-
-function App() {
-  return <RouterProvider router={router} />;
-}
-
-export default App;
