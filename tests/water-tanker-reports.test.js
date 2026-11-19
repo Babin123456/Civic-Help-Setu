@@ -3,7 +3,7 @@ import handler, {
   validateWaterTankerReportPayload,
   generateWaterTankerSeal,
   WATER_TANKER_REPORT_QUEUE,
-} from '../api/water-tanker-reports.js';
+} from '../api/_lib/handlers/water-tanker-reports.js';
 
 describe('api/water-tanker-reports', () => {
   beforeEach(() => {

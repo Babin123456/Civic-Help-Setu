@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import handler, { validateCorrectionPayload, generateCorrectionSeal } from './community-facility-corrections.js';
+import handler, { validateCorrectionPayload, generateCorrectionSeal } from '../api/_lib/handlers/community-facility-corrections.js';
 
 function createMockRes() {
   const res = {
