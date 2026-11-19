@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
+
 import route, { sanitizeAndRedactText } from '../api/fire-compliance-feedback.js';
+
+import route, { sanitizeAndRedactText } from '../api/_lib/handlers/fire-compliance-feedback.js';
+
 
 describe('api/fire-compliance-feedback endpoint', () => {
   it('redacts Aadhaar, PAN, phone numbers and emails from submitted notes', () => {

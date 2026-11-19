@@ -19,7 +19,7 @@ export const FIELD_DEFINITIONS = {
     key: 'fullName',
     label: 'Full Name',
     patterns: [
-      /(?:name|nam|applicant(?:\s+name)?|holder)\s*[:\-]\s*([a-zA-Z\s.]{3,35}?)(?=\r?\n|$)/i,
+      /(?:name|nam|applicant(?:\s+name)?|holder)\s*[:-]\s*([a-zA-Z\s.]{3,35}?)(?=\r?\n|$)/i,
       /(?:shri|smt|mr|ms|mrs)\.?\s+([a-zA-Z\s]{3,30}?)(?=\r?\n|$)/i,
     ],
   },
@@ -27,15 +27,15 @@ export const FIELD_DEFINITIONS = {
     key: 'dob',
     label: 'Date of Birth',
     patterns: [
-      /(?:dob|date\s+of\s+birth|birth\s+date)\s*[:\-]?\s*(\d{2}[\/\-\.]\d{2}[\/\-\.]\d{4})/i,
-      /(\d{2}[\/\-\.]\d{2}[\/\-\.]\d{4})/,
+      /(?:dob|date\s+of\s+birth|birth\s+date)\s*[:-]?\s*(\d{2}[/\-.]\d{2}[/\-.]\d{4})/i,
+      /(\d{2}[/\-.]\d{2}[/\-.]\d{4})/,
     ],
   },
   GENDER: {
     key: 'gender',
     label: 'Gender',
     patterns: [
-      /(?:gender|sex)\s*[:\-]?\s*(male|female|transgender|other)/i,
+      /(?:gender|sex)\s*[:-]?\s*(male|female|transgender|other)/i,
       /\b(male|female|transgender)\b/i,
     ],
   },
@@ -43,7 +43,7 @@ export const FIELD_DEFINITIONS = {
     key: 'documentNumber',
     label: 'Document / Certificate ID',
     patterns: [
-      /(?:aadhaar|uid|pan|voter|epic|certificate|ref(?:\s+no)?)\s*[:\-]?\s*([a-zA-Z0-9\-\/]{6,20})/i,
+      /(?:aadhaar|uid|pan|voter|epic|certificate|ref(?:\s+no)?)\s*[:-]?\s*([a-zA-Z0-9\-/]{6,20})/i,
       /([A-Z]{5}\d{4}[A-Z])/i, // PAN
       /(\d{4}\s\d{4}\s\d{4})/, // Aadhaar formatted
     ],
@@ -59,7 +59,7 @@ export const FIELD_DEFINITIONS = {
     key: 'pincode',
     label: 'Postal Pincode',
     patterns: [
-      /(?:pin|pincode|postal\s+code)\s*[:\-]?\s*(\d{6})/i,
+      /(?:pin|pincode|postal\s+code)\s*[:-]?\s*(\d{6})/i,
       /\b(\d{6})\b/,
     ],
   },

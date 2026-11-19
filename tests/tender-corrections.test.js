@@ -2,7 +2,11 @@ import { describe, it, expect } from 'vitest';
 import handler, {
   validateTenderCorrectionPayload,
   generateTenderCorrectionSeal,
+
 } from '../api/tender-corrections.js';
+
+} from '../api/_lib/handlers/tender-corrections.js';
+
 
 function createMockRes() {
   const res = {
