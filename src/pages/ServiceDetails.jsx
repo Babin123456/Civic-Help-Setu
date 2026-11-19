@@ -22,6 +22,7 @@ import DeadlineCalendar from '../components/notices/DeadlineCalendar';
 import LowBandwidthShareModal from '../components/services/LowBandwidthShareModal';
 import SourceConflictCautionBanner from '../components/services/SourceConflictCautionBanner';
 import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
+import PaymentReceipt from '../components/payment-receipt/PaymentReceipt';
 import ApplicationReadinessScorecard from '../components/services/ApplicationReadinessScorecard';
 import ApplicabilityPanel from '../components/services/ApplicabilityPanel';
 import BenefitEntitlementCalculator from '../components/services/BenefitEntitlementCalculator';
@@ -346,7 +347,6 @@ const ServiceDetails = ({ previewService = null }) => {
               <ServiceAvailabilityNotice serviceId={service.id} serviceName={service.name} />
 
               <DeadlineCalendar serviceId={service.id} />
-
             </div>
 
             <div
@@ -810,6 +810,12 @@ const ServiceDetails = ({ previewService = null }) => {
           <FeeTransparencyCard
             serviceId={service.id}
             serviceName={service.name}
+          />
+
+          {/* Civic Payment-Receipt Organizer (#647) */}
+          <PaymentReceipt
+            serviceId={service.id}
+            journeyId={`journey-${service.id}`}
           />
 
           {/* Statutory Fee Waiver & Concession Eligibility Checker */}
