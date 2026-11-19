@@ -59,6 +59,8 @@ import RoadSafetyDashboard from './pages/RoadSafetyDashboard';
 import LibraryDirectory from './pages/LibraryDirectory';
 import WaterTankerTracker from './pages/WaterTankerTracker';
 import AddressChangePlanner from './pages/AddressChangePlanner';
+import UpFloodRoutePlanner from './components/flood/UpFloodRoutePlanner';
+import TextRouteDirectory from './components/flood/TextRouteDirectory';
 import RentalTransitionWorkspace from './pages/RentalTransitionWorkspace';
 import CitizenDraftSyncWorkspace from './pages/CitizenDraftSyncWorkspace';
 import WardBudgetWorkspace from './pages/WardBudgetWorkspace';
@@ -223,6 +225,10 @@ function AppRoot() {
                       <Route path="/water-tanker" element={<WaterTankerTracker />} />
                       <Route path="/water-tankers" element={<WaterTankerTracker />} />
 
+                      <Route path="/flood-planner" element={<UpFloodRoutePlanner />} />
+                      <Route path="/flood-directory" element={<TextRouteDirectory />} />
+
+
                       {/* Counter journey simulator — public catalogue, evaluable for any citizen */}
                       <Route path="/counter-journey" element={
                         <CounterJourney />
@@ -238,6 +244,7 @@ function AppRoot() {
                       <Route path="/services/water-quality-register" element={<WaterQualityRegister />} />
                       <Route path="/water-quality" element={<WaterQualityRegister />} />
                       <Route path="/water-quality-register" element={<WaterQualityRegister />} />
+
                       <Route path="/rental-checklist" element={<RentalTransitionWorkspace />} />
                       <Route path="/rental-transition" element={<RentalTransitionWorkspace />} />
                       <Route path="/rental-records" element={<RentalTransitionWorkspace />} />
