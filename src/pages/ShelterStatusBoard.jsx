@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useNetwork } from '../contexts/NetworkContext';
@@ -1586,7 +1586,7 @@ export default function ShelterStatusBoard() {
                   /> available
                 </div>
                 <div style={{ marginTop: '4px', color: '#64748b', fontSize: '0.6875rem' }}>
-                  Occupancy rate: <span id="occupancy-rate-display">0</span>%
+                  Occupancy rate: <span id="occupancy-rate-display">{formData.capacityTotal > 0 ? Math.round(((formData.capacityTotal - formData.capacityAvailable) / formData.capacityTotal) * 100) : 100}</span>%
                 </div>
               </div>
 
@@ -1669,18 +1669,3 @@ export default function ShelterStatusBoard() {
     </div>
   );
 }
-
-/**
- * Helper: compute and display occupancy rate when capacity inputs change.
- */
-function useOccupancyRateDisplay() {
-  const [formDataLocal] = useState(formData);
-  useEffect(() => {
-    const total = formDataLocal.capacityTotal || 0;
-    const available = formDataLocal.capacityAvailable || 0;
-    const rate = total > 0 ? Math.round(((total - available) / total) * 100) : 100;
-    const displayEl = document.getElementById('occupancy-rate-display');
-    if (displayEl) displayEl.textContent = rate;
-  }, [formDataLocal]);
-}
-useOccupancyRateDisplay();
