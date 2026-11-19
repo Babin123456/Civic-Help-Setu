@@ -56,6 +56,8 @@ import RoadSafetyDashboard from './pages/RoadSafetyDashboard';
 import LibraryDirectory from './pages/LibraryDirectory';
 import WaterTankerTracker from './pages/WaterTankerTracker';
 import AddressChangePlanner from './pages/AddressChangePlanner';
+import UpFloodRoutePlanner from './components/flood/UpFloodRoutePlanner';
+import TextRouteDirectory from './components/flood/TextRouteDirectory';
 import RentalTransitionWorkspace from './pages/RentalTransitionWorkspace';
 import CitizenDraftSyncWorkspace from './pages/CitizenDraftSyncWorkspace';
 import WardBudgetWorkspace from './pages/WardBudgetWorkspace';
@@ -124,6 +126,8 @@ function AppRoot() {
                       <Route path="/facility-directory" element={<CommunityFacilityDirectory />} />
                       <Route path="/water-tanker" element={<WaterTankerTracker />} />
                       <Route path="/water-tankers" element={<WaterTankerTracker />} />
+                      <Route path="/flood-planner" element={<UpFloodRoutePlanner />} />
+                      <Route path="/flood-directory" element={<TextRouteDirectory />} />
                       <Route path="/rental-checklist" element={<RentalTransitionWorkspace />} />
                       <Route path="/rental-transition" element={<RentalTransitionWorkspace />} />
                       <Route path="/rental-records" element={<RentalTransitionWorkspace />} />
