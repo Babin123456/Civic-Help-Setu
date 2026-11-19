@@ -46,6 +46,10 @@ export const PERMISSIONS = {
   'ownership.read': { roles: ['admin'], resource: 'civicbridge_service_ownership_v1', description: 'Read who is assigned to review each service guide, with private notes' },
   'ownership.manage': { roles: ['admin'], resource: 'civicbridge_service_ownership_v1', description: 'Assign, reassign or clear the reviewer of a service guide' },
   'civicWorks.moderate': { roles: ['admin'], resource: 'civicbridge_civic_works_reports_v1', description: 'Moderate ward-level civic work reports, cluster duplicates, record official acknowledgements and verify completion evidence' },
+
+  'civicDataApi.use': { roles: ['admin', 'citizen'], resource: 'civicbridge_api_clients_v1', description: 'Create and use scoped developer sandbox credentials' },
+  'civicDataApi.admin': { roles: ['admin'], resource: 'civicbridge_access_audits_v1', description: 'Approve production API clients, inspect usage anomalies and read API audit logs' },
+
   'synthetic.generate': { roles: ['admin', 'citizen'], resource: 'civicbridge_synthetic_profiles_v1', description: 'Generate reproducible synthetic civic datasets' },
   'synthetic.manage': { roles: ['admin'], resource: 'civicbridge_synthetic_profiles_v1', description: 'Configure schema catalog and synthetic profiles' },
   'synthetic.audit': { roles: ['admin', 'citizen'], resource: 'civicbridge_synthetic_validation_runs_v1', description: 'Audit PII detection and validation runs' },
@@ -68,6 +72,7 @@ export const PERMISSIONS = {
   'flood.admin': { roles: ['admin'], resource: 'civicbridge_flood_forecast_runs_v1', description: 'Configure flood intelligence parameters, trigger runs, and archive data' },
   'legalSources.manage': { roles: ['admin'], resource: 'civicbridge_legal_sources_v1', description: 'Create, edit, or supersede legal sources' },
   'legalSources.review': { roles: ['admin'], resource: 'civicbridge_legal_sources_v1', description: 'Review, approve, publish or roll back legal source versions' },
+
 };
 
 export class PermissionDeniedError extends Error {
