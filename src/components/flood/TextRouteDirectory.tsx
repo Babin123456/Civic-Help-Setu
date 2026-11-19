@@ -46,10 +46,7 @@ export default function TextRouteDirectory() {
         </p>
       </header>
 
-      <pre
-        className="bg-background p-4 rounded border border-border overflow-x-auto text-sm"
-        {directoryContent}
-      />
+      <pre className="bg-background p-4 rounded border border-border overflow-x-auto text-sm">{directoryContent}</pre>
 
       <footer className="mt-4 pt-4 border-t border-border text-center text-xs text-muted-foreground">
         • Never calculate a route through a reported flooded segment
