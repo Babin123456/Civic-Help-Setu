@@ -801,7 +801,8 @@ export class WaterBillVisualizerService {
     };
   }
 }
-=======
+
+/**
  * Implements an interactive water bill visualizer with deterministic tariff calculations,
  * slab boundary analysis, period comparison, and discrepancy detection.
  */
