@@ -86,6 +86,7 @@ const ReraDisputeWorkspace = lazy(() => import('./pages/ReraDisputeWorkspace'));
 const StrayAnimalAbcWorkspace = lazy(() => import('./pages/StrayAnimalAbcWorkspace'));
 const NoisePollutionWorkspace = lazy(() => import('./pages/NoisePollutionWorkspace'));
 const SolidWasteAuditWorkspace = lazy(() => import('./pages/SolidWasteAuditWorkspace'));
+const RoutePlanningWorkspace = lazy(() => import('./pages/RoutePlanningWorkspace'));
 const OpenContractingWorkspace = lazy(() => import('./pages/OpenContractingWorkspace'));
 const ClinicalEstablishmentWorkspace = lazy(() => import('./pages/ClinicalEstablishmentWorkspace'));
 const ElectricityConsumerWorkspace = lazy(() => import('./pages/ElectricityConsumerWorkspace'));
@@ -236,6 +237,8 @@ function AppRoot() {
                       <Route path="/solid-waste-workspace" element={<SolidWasteAuditWorkspace />} />
                       <Route path="/bulk-waste-audit" element={<SolidWasteAuditWorkspace />} />
                       <Route path="/ngt-compensation" element={<SolidWasteAuditWorkspace />} />
+                      <Route path="/route-planning" element={<RoutePlanningWorkspace />} />
+                      <Route path="/planning" element={<RoutePlanningWorkspace />} />
                       <Route path="/clinical-establishment-workspace" element={<ClinicalEstablishmentWorkspace />} />
                       <Route path="/patient-rights-charter" element={<ClinicalEstablishmentWorkspace />} />
                       <Route path="/hospital-billing-audit" element={<ClinicalEstablishmentWorkspace />} />
