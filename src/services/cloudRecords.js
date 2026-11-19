@@ -75,6 +75,7 @@ export const DEVICE_ONLY_STORES = [
   { key: 'civicbridge_conflict_records_v1', reason: 'Local conflict records stay on device until resolved.' },
   { key: 'civicbridge_device_cursors_v1', reason: 'Device sync cursors stay on the device.' },
   { key: 'civicbridge_tombstones_v1', reason: 'Deletion tombstones stay on the device.' },
+  { key: 'civicbridge_notice_deadline_state_v1', reason: 'Citizen deadline confirmations, edits and notes stay on this device until a cloud collection exists.' },
 ];
 
 const byKey = new Map(CLOUD_STORES.map((store) => [store.key, store]));

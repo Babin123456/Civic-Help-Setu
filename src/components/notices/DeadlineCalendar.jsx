@@ -26,7 +26,7 @@ import {
   rejectDateCandidate,
   resetDateCandidate,
   updateDateCandidate,
-} from '../../services/noticeDeadlineService';
+} from '../../services/dateCandidateService';
 
 const STATE_LABEL = {
   [CONFIRMATION_STATES.PENDING]: 'Suggested',
@@ -122,7 +122,7 @@ const MONTH_NAMES = [
   'December',
 ];
 
-const NoticeDeadlineCalendar = ({
+const DeadlineCalendar = ({
   noticeId,
   serviceId,
   notice: noticeProp,
@@ -889,4 +889,4 @@ const MonthlyView = ({ deadlines, onToggleSource }) => {
   );
 };
 
-export default NoticeDeadlineCalendar;
+export default DeadlineCalendar;

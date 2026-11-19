@@ -98,6 +98,7 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_civic_works_reports_v1` | `civicWorksBoardService.js` | Ward civic works reports and moderation state | Reviews, votes and reports |
 | `civicbridge_civic_works_clusters_v1` | `civicWorksBoardService.js` | Clustered duplicate ward reports | Reviews, votes and reports |
 | `civicbridge_civic_works_rate_limit_v1` | `civicWorksBoardService.js` | Ward report submission rate limit tracking | Reviews, votes and reports |
+| `civicbridge_notice_deadline_state_v1` | `dateCandidateService.js` | Citizen confirmations, edits and dismissals for public notice deadlines | Tracking records |
 | `civicbridge_journey_handoffs_v1` | `journeyHandoffService.js` | Journey handoff bundles and shared checklist links | Drafts and in-progress work |
 | `civicbridge_readiness_scorecards` | `readinessScorecardService.js` | Citizen application readiness scores and missing document audits | Drafts and in-progress work |
 | `civicbridge_offline_cache` | `offlineCacheService.js` | Copies of saved guides and application stages for offline use | Offline copies and location |

@@ -18,7 +18,7 @@ import DataFreshnessTrustBadge from '../components/services/DataFreshnessTrustBa
 import JourneyHandoffModal from '../components/journey/JourneyHandoffModal';
 import NoticeBadge from '../components/notices/NoticeBadge';
 import ServiceAvailabilityNotice from '../components/services/ServiceAvailabilityNotice';
-import NoticeDeadlineCalendar from '../components/notices/NoticeDeadlineCalendar';
+import DeadlineCalendar from '../components/notices/DeadlineCalendar';
 import LowBandwidthShareModal from '../components/services/LowBandwidthShareModal';
 import SourceConflictCautionBanner from '../components/services/SourceConflictCautionBanner';
 import FeeTransparencyCard from '../components/services/FeeTransparencyCard';
@@ -342,7 +342,7 @@ const ServiceDetails = ({ previewService = null }) => {
               </div>
               <ServiceAvailabilityNotice serviceId={service.id} serviceName={service.name} />
 
-              <NoticeDeadlineCalendar serviceId={service.id} />
+              <DeadlineCalendar serviceId={service.id} />
 
             </div>
 

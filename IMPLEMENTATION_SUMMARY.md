@@ -10,7 +10,7 @@ Full design and reviewer guide: [`docs/notice-deadline-calendar.md`](docs/notice
 
 ## Core Files
 
-### 1. `src/services/noticeDeadlineService.js`
+### 1. `src/services/dateCandidateService.js`
 - Deterministic, timezone-safe date math (`addDaysToDate`, `toDateOnly`,
   `parseDateOnly`) with IST-aware expiry.
 - Category rule sets (`getDateRulesForCategory`): publication, objection (+30),
@@ -27,7 +27,7 @@ Full design and reviewer guide: [`docs/notice-deadline-calendar.md`](docs/notice
 - Validation for candidates and citizen edits.
 - Low-confidence candidates (`< 0.60`) are flagged `requiresReview`.
 
-### 2. `src/components/notices/NoticeDeadlineCalendar.jsx`
+### 2. `src/components/notices/DeadlineCalendar.jsx`
 - Timeline view with four lanes: Response & Submission, Hearing, Payment, Appeal.
 - Monthly calendar view with per-day deadline badges.
 - Printable list/table with action, date, status, confidence, source and actions.
@@ -40,7 +40,7 @@ Full design and reviewer guide: [`docs/notice-deadline-calendar.md`](docs/notice
   table caption and column scopes).
 
 ### 3. `src/pages/ServiceDetails.jsx`
-- Renders `NoticeDeadlineCalendar` with `serviceId`, so it resolves approved
+- Renders `DeadlineCalendar` with `serviceId`, so it resolves approved
   notices linked to that service and renders nothing when there is none.
 
 ## Acceptance Criteria
@@ -58,9 +58,9 @@ Full design and reviewer guide: [`docs/notice-deadline-calendar.md`](docs/notice
 | Documentation and synthetic reviewer data | ✅ |
 
 ## Tests
-- `src/services/noticeDeadlineService.test.js` — 38 tests.
-- `src/services/noticeDeadlineIntegration.test.js` — 7 tests.
-- `src/components/notices/NoticeDeadlineCalendar.test.jsx` — 12 tests.
+- `src/services/dateCandidateService.test.js` — 38 tests.
+- `src/services/dateCandidateIntegration.test.js` — 7 tests.
+- `src/components/notices/DeadlineCalendar.test.jsx` — 12 tests.
 
 ## Design Conventions Followed
 - Tailwind/CSS variables, glass-panel surfaces, existing button variants.
