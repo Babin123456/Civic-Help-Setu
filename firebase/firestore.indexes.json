@@ -50,8 +50,26 @@
         { "fieldPath": "checkType", "mode": "ASC" },
         { "fieldPath": "status", "mode": "ASC" },
         { "fieldPath": "createdAt", "mode": "DESC" }
-
+      ]
+    },
     {
+      "collectionGroup": "change_events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "serviceId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "changedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "user_subscriptions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "serviceId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
       "collectionGroup": "publicProjects",
       "queryScope": "COLLECTION",
       "fields": [

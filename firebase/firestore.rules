@@ -485,6 +485,43 @@ service cloud.firestore {
       return maybeText('lat', 30) && maybeText('lng', 30);
     }
 
+    // ---------- civic service change feed collections ----------
+
+    // Immutable service version records
+    match /service_versions/{versionId} {
+      allow read: if true;
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // Versioned civic service change events
+    match /change_events/{eventId} {
+      allow read: if isAdmin() || (stored().status == 'approved');
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // User subscriptions to service change alerts
+    match /user_subscriptions/{subId} {
+      allow read: if isAdmin() || (isMember() && stored().userId == request.auth.uid);
+      allow create: if isMember() && incoming().userId == request.auth.uid;
+      allow update, delete: if isMember() && stored().userId == request.auth.uid;
+    }
+
+    // Delivery attempts (idempotent notification records)
+    match /delivery_attempts/{attemptId} {
+      allow read: if isAdmin() || (isMember() && stored().recipientId == request.auth.uid);
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // Review approvals (human-in-the-loop review audit records)
+    match /review_approvals/{approvalId} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update, delete: if false;
+    }
+
     // ---------- everything else ----------
     match /{document=**} {
       allow read, write: if false;
