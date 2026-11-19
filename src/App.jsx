@@ -48,6 +48,7 @@ import AadhaarGuidePage from './pages/AadhaarGuidePage';
 import SmallBusinessLicencePage from './pages/SmallBusinessLicencePage';
 import FireSafetyGuidePage from './pages/FireSafetyGuidePage';
 import TreePermissionGuidePage from './pages/TreePermissionGuidePage';
+import NationalCivicDocumentHub from './pages/NationalCivicDocumentHub';
 import CivicWorksBoard from './pages/CivicWorksBoard';
 import TreeHealthInventory from './pages/TreeHealthInventory';
 import CrematoriumDirectory from './pages/CrematoriumDirectory';
@@ -125,6 +126,7 @@ const ReraDisputeWorkspace = lazy(() => import('./pages/ReraDisputeWorkspace'));
 const StrayAnimalAbcWorkspace = lazy(() => import('./pages/StrayAnimalAbcWorkspace'));
 const NoisePollutionWorkspace = lazy(() => import('./pages/NoisePollutionWorkspace'));
 const SolidWasteAuditWorkspace = lazy(() => import('./pages/SolidWasteAuditWorkspace'));
+const RoutePlanningWorkspace = lazy(() => import('./pages/RoutePlanningWorkspace'));
 const OpenContractingWorkspace = lazy(() => import('./pages/OpenContractingWorkspace'));
 const ClinicalEstablishmentWorkspace = lazy(() => import('./pages/ClinicalEstablishmentWorkspace'));
 const ElectricityConsumerWorkspace = lazy(() => import('./pages/ElectricityConsumerWorkspace'));
@@ -180,8 +182,13 @@ function AppRoot() {
                       <Route path="/services" element={<Suspense fallback={<ServicesFallback />}><Services /></Suspense>} />
                       <Route path="/services/aadhaar-guide" element={<AadhaarGuidePage />} />
                       <Route path="/aadhaar-guide" element={<AadhaarGuidePage />} />
+
+                      <Route path="/national-civic-document-hub" element={<NationalCivicDocumentHub />} />
+                      <Route path="/national-civic-document-hub/" element={<NationalCivicDocumentHub />} />
+
                       <Route path="/services/property-tax-no-dues" element={<PropertyTaxNoDuesGuidePage />} />
                       <Route path="/property-tax-no-dues" element={<PropertyTaxNoDuesGuidePage />} />
+
                       <Route path="/services/business-licence-checklist" element={<SmallBusinessLicencePage />} />
                       <Route path="/business-licence-checklist" element={<SmallBusinessLicencePage />} />
                       <Route path="/services/fire-noc-guide" element={<FireSafetyGuidePage />} />
@@ -281,6 +288,8 @@ function AppRoot() {
                       <Route path="/solid-waste-workspace" element={<SolidWasteAuditWorkspace />} />
                       <Route path="/bulk-waste-audit" element={<SolidWasteAuditWorkspace />} />
                       <Route path="/ngt-compensation" element={<SolidWasteAuditWorkspace />} />
+                      <Route path="/route-planning" element={<RoutePlanningWorkspace />} />
+                      <Route path="/planning" element={<RoutePlanningWorkspace />} />
                       <Route path="/clinical-establishment-workspace" element={<ClinicalEstablishmentWorkspace />} />
                       <Route path="/patient-rights-charter" element={<ClinicalEstablishmentWorkspace />} />
                       <Route path="/hospital-billing-audit" element={<ClinicalEstablishmentWorkspace />} />
