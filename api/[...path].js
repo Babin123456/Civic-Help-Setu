@@ -25,8 +25,17 @@ import openContractingAnalytics from "./_lib/handlers/open-contracting-analytics
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+
+import { GET as graphGET, POST as graphPOST } from "./graph/route.js";
+import {
+  GET as reviewQueueGET,
+  POST as reviewPOST,
+  POST as approvePOST,
+  POST as rejectPOST,
+} from "./graph/review/route.js";
+
 import accessibilityInspector from "./_lib/handlers/accessibility-inspector.js";
-=======
+
 import publicToilets from "./_lib/handlers/public-toilets.js";
 import pedestrianBarriers from "./_lib/handlers/pedestrian-barriers.js";
 import waterQualityRegister from "./_lib/handlers/water-quality-register.js";
@@ -34,6 +43,7 @@ import publicProjects from "./_lib/handlers/public-projects.js";
 import wardIssueHeatmap from "./_lib/handlers/ward-issue-heatmap.js";
 import tenantAdministration from "./_lib/handlers/tenant-administration.js";
 import ghgInventory from "./_lib/handlers/ghg-inventory.js";
+
 
 const handlers = {
   "address-change-corrections": addressChange,
@@ -68,6 +78,23 @@ const handlers = {
   "ghg-inventory": ghgInventory,
 };
 
+// Terminology graph routes
+const graphRoutes = {
+  "graph": graphGET,
+  "graph/": graphGET,
+  "graph/review": reviewQueueGET,
+  "graph/review/": reviewQueueGET,
+};
+
+const graphPostRoutes = {
+  "graph": graphPOST,
+  "graph/": graphPOST,
+  "graph/review": reviewPOST,
+  "graph/review/": reviewPOST,
+  "graph/review/approve": approvePOST,
+  "graph/review/reject": rejectPOST,
+};
+
 function getRoute(req) {
   const routeParam = req.query?.path;
   const route = Array.isArray(routeParam)
@@ -81,6 +108,16 @@ function getRoute(req) {
 
 export default async function handler(req, res) {
   const route = getRoute(req);
+
+  // Handle terminology graph routes
+  if (graphRoutes[route]) {
+    return await graphRoutes[route](req, res);
+  }
+
+  if (graphPostRoutes[route]) {
+    return await graphPostRoutes[route](req, res);
+  }
+
   const routeHandler = handlers[route];
 
   if (!routeHandler) {
