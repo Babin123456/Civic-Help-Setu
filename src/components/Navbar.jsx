@@ -26,8 +26,27 @@ import {
   Droplets,
   KeyRound,
   Store,
+
   Trees,
   ReceiptText
+
+  Database,
+  Building2,
+  Trees,
+  Lightbulb,
+  Leaf,
+  ShieldAlert,
+  GitFork,
+  Scale,
+  BarChart2,
+  HeartHandshake,
+  Volume2,
+  Recycle,
+  HeartPulse,
+  Zap,
+  GraduationCap,
+  FolderLock,
+
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -121,11 +140,44 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
         );
       }
 
+if (normalizedTarget === '/continuity-planner') {
+        return (
+          normalizedPath === '/continuity-planner' ||
+          normalizedPath.startsWith('/continuity-planner/') ||
+          normalizedPath === '/incident-drills'
+        );
+      }
+
+      if (normalizedTarget === '/counter-demand') {
+        return (
+          normalizedPath === '/counter-demand' ||
+          normalizedPath === '/counter-demand-forecasting' ||
+          normalizedPath === '/queue-staffing'
+        );
+      }
+
       if (normalizedTarget === '/ward-budget') {
         return (
           normalizedPath === '/ward-budget' ||
           normalizedPath === '/services/ward-budget-proposal' ||
           normalizedPath.startsWith('/ward-budget/')
+        );
+      }
+
+if (normalizedTarget === '/water-quality') {
+        return (
+          normalizedPath === '/water-quality' ||
+          normalizedPath === '/water-quality-register' ||
+          normalizedPath === '/services/water-quality-register' ||
+          normalizedPath.startsWith('/water-quality/')
+        );
+      }
+
+      if (normalizedTarget === '/open-contracting') {
+        return (
+          normalizedPath === '/open-contracting' ||
+          normalizedPath === '/procurement-analytics' ||
+          normalizedPath.startsWith('/open-contracting/')
         );
       }
 
@@ -137,10 +189,33 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
         );
       }
 
+      if (normalizedTarget === '/pedestrian-barrier-map') {
+        return (
+          normalizedPath === '/pedestrian-barrier-map' ||
+          normalizedPath === '/accessible-routes' ||
+          normalizedPath.startsWith('/pedestrian-barrier-map/')
+        );
+      }
+
+      if (normalizedTarget === '/provenance') {
+        return (
+          normalizedPath === '/provenance' ||
+          normalizedPath.startsWith('/provenance/') ||
+          normalizedPath === '/lineage-explorer'
+        );
+      }
+
       if (normalizedTarget === '/admin') {
         return (
           normalizedPath === '/admin' ||
           normalizedPath.startsWith('/admin/')
+        );
+      }
+
+      if (normalizedTarget === '/synthetic-datasets') {
+        return (
+          normalizedPath === '/synthetic-datasets' ||
+          normalizedPath === '/dataset-generator'
         );
       }
 
@@ -380,107 +455,122 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
             flexShrink: 0
           }}
         >
-          {/* NETWORK STATUS */}
-          <button
-            type="button"
-            onClick={() => setShowOfflineModal(true)}
-            aria-label={
-              isOnline
-                ? 'Online. View offline cache status'
-                : 'Offline mode active. View cache status'
-            }
-            title={
-              isOnline
-                ? 'Network Online - View Offline Cache'
-                : 'Offline Mode Active'
-            }
-            style={{
-              padding: '0.4rem 0.65rem',
-              background: isOnline
-                ? 'var(--glass-bg)'
-                : 'rgba(239, 68, 68, 0.15)',
-              border: `1px solid ${
+          <div 
+              className="desktop-nav-items" 
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem' 
+              }}
+            >
+            {/* NETWORK STATUS */}
+            <button
+              type="button"
+              onClick={() => setShowOfflineModal(true)}
+              aria-label={
                 isOnline
-                  ? 'var(--border-main)'
-                  : 'rgba(239, 68, 68, 0.35)'
-              }`,
-              borderRadius: '99px',
-              color: isOnline
-                ? 'var(--text-secondary)'
-                : '#ef4444',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              fontSize: '0.75rem',
-              fontWeight: '600'
-            }}
-          >
-            {isOnline ? (
-              <>
-                <span
-                  style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    background: '#10b981'
-                  }}
-                />
-                <span>Online</span>
-              </>
-            ) : (
-              <>
-                <WifiOff size={13} />
-                <span>Offline</span>
-              </>
-            )}
-          </button>
+                  ? 'Online. View offline cache status'
+                  : 'Offline mode active. View cache status'
+              }
+              title={
+                isOnline
+                  ? 'Network Online - View Offline Cache'
+                  : 'Offline Mode Active'
+              }
+              style={{
+                minHeight: '44px',     
+                minWidth: '44px', 
+                padding: '0.4rem 0.65rem',
+                background: isOnline
+                  ? 'var(--glass-bg)'
+                  : 'rgba(239, 68, 68, 0.15)',
+                border: `1px solid ${
+                  isOnline
+                    ? 'var(--border-main)'
+                    : 'rgba(239, 68, 68, 0.35)'
+                }`,
+                borderRadius: '99px',
+                color: isOnline
+                  ? 'var(--text-secondary)'
+                  : '#ef4444',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                fontSize: '0.75rem',
+                fontWeight: '600'
+              }}
+            >
+              {isOnline ? (
+                <>
+                  <span
+                    style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      background: '#10b981'
+                    }}
+                  />
+                  <span>Online</span>
+                </>
+              ) : (
+                <>
+                  <WifiOff size={13} />
+                  <span>Offline</span>
+                </>
+              )}
+            </button>
 
-          {/* EMERGENCY SOS */}
-          <button
-            type="button"
-            onClick={() => setShowSosModal(true)}
-            aria-label="Open emergency helplines"
-            title="Rapid Emergency Helplines"
-            style={{
-              padding: '0.4rem 0.65rem',
-              borderRadius: '999px',
-              border: '1px solid #ef4444',
-              background: 'rgba(239, 68, 68, 0.12)',
-              color: '#ef4444',
-              fontSize: '0.78rem',
-              fontWeight: '700',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.35rem'
-            }}
-          >
-            <PhoneCall size={14} />
-            <span>SOS</span>
-          </button>
+            {/* EMERGENCY SOS */}
+            <button
+              type="button"
+              onClick={() => setShowSosModal(true)}
+              aria-label="Open emergency helplines"
+              title="Rapid Emergency Helplines"
+              style={{
+                minHeight: '44px',     
+                minWidth: '44px', 
+                padding: '0.4rem 0.65rem',
+                borderRadius: '999px',
+                border: '1px solid #ef4444',
+                background: 'rgba(239, 68, 68, 0.12)',
+                color: '#ef4444',
+                fontSize: '0.78rem',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem'
+              }}
+            >
+              <PhoneCall size={14} />
+              <span>SOS</span>
+            </button>
 
-          {/* VOICE NAVIGATION */}
-          <button
-            type="button"
-            onClick={() => setShowVoiceNavModal(true)}
-            className="top-navbar-theme-btn"
-            title="Multilingual Voice Navigation"
-            aria-label="Open multilingual voice navigation"
-            style={{
-              padding: '0.45rem',
-              background: 'rgba(14, 165, 233, 0.1)',
-              borderRadius: '50%',
-              color: '#0284c7',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <Mic size={18} />
-          </button>
+            {/* VOICE NAVIGATION */}
+            <button
+              type="button"
+              onClick={() => setShowVoiceNavModal(true)}
+              className="top-navbar-theme-btn"
+              title="Multilingual Voice Navigation"
+              aria-label="Open multilingual voice navigation"
+              style={{
+                minHeight: '44px',     
+                minWidth: '44px', 
+                padding: '0.45rem',
+                background: 'rgba(14, 165, 233, 0.1)',
+                borderRadius: '50%',
+                color: '#0284c7',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <Mic size={18} />
+            </button>
+          </div>
 
           {/* THEME TOGGLE */}
           <button
@@ -498,6 +588,8 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 : 'Switch to dark theme'
             }
             style={{
+              minHeight: '44px',     
+              minWidth: '44px', 
               padding: '0.45rem',
               background: 'var(--glass-bg-hover)',
               borderRadius: '50%',
@@ -530,6 +622,8 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
             aria-expanded={isOpen}
             aria-controls="mobile-navigation-drawer"
             style={{
+              minHeight: '44px',     
+              minWidth: '44px', 
               padding: '0.45rem',
               background: 'var(--glass-bg-hover)',
               borderRadius: '50%',
@@ -650,39 +744,136 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 </div>
               </div>
             )}
+            <div 
+              className="mobile-only-tools" 
+              style={{ 
+                flexDirection: 'column', 
+                gap: '0.6rem', 
+                width: '100%'
+              }}
+            >
+              <div 
+                style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(2, 1fr)', 
+                  gap: '0.5rem', 
+                  alignItems: 'center' 
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => { setShowSosModal(true); setIsOpen(false); }}
+                  style={{
+                    minHeight: '44px',
+                    padding: '0.4rem 0.5rem',
+                    borderRadius: '99px',
+                    border: '1px solid #ef4444',
+                    background: 'rgba(239, 68, 68, 0.12)',
+                    color: '#ef4444',
+                    fontSize: '0.75rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.3rem',
+                  }}
+                >
+                  <PhoneCall size={13} />
+                  <span>SOS</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setShowOfflineModal(true); setIsOpen(false); }}
+                  style={{
+                    minHeight: '44px',
+                    padding: '0.4rem 0.5rem',
+                    borderRadius: '99px',
+                    border: `1px solid ${isOnline ? 'var(--border-main)' : 'rgba(239, 68, 68, 0.35)'}`,
+                    background: isOnline ? 'var(--glass-bg)' : 'rgba(239, 68, 68, 0.15)',
+                    color: isOnline ? 'var(--text-secondary)' : '#ef4444',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.3rem'
+                  }}
+                >
+                  {isOnline ? (
+                    <span 
+                      style={{ 
+                        width: '7px', 
+                        height: '7px', 
+                        borderRadius: '50%', 
+                        background: '#10b981', 
+                        display: 'inline-block' 
+                      }} 
+                    />
+                  ) : (
+                    <WifiOff size={13} style={{ color: '#ef4444' }} />
+                  )}
+                  <span>{isOnline ? 'Online' : 'Offline'}</span>
+                </button>
+              </div>
+            </div>
 
             {/* SEARCH AND LANGUAGE */}
             <div
               style={{
                 display: 'flex',
-                flexDirection: 'column',
+                alignItems: 'center',
                 gap: '0.85rem',
                 width: '100%'
               }}
             >
-              <VoiceSearchInput
-                onTranscript={(transcript) => {
-                  setIsOpen(false);
-                  navigate(
-                    `/services?q=${encodeURIComponent(transcript)}`
-                  );
+              <div 
+                style={{ 
+                  flex: 1, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center' 
                 }}
-                onServiceMatched={(match) => {
-                  if (match?.targetServiceId) {
-                    setIsOpen(false);
-                    navigate(
-                      `/services/${match.targetServiceId}`
-                    );
-                  }
-                }}
-              />
+              >
+                <div 
+                  style={{ 
+                    width: '100%', 
+                    display: 'flex', 
+                    justifyContent: 'center' 
+                  }}
+                >
+              
+                  <VoiceSearchInput
+                    onTranscript={(transcript) => {
+                      setIsOpen(false);
+                      navigate(
+                        `/services?q=${encodeURIComponent(transcript)}`
+                      );
+                    }}
+                    onServiceMatched={(match) => {
+                      if (match?.targetServiceId) {
+                        setIsOpen(false);
+                        navigate(
+                          `/services/${match.targetServiceId}`
+                        );
+                      }
+                    }}
+                  />
+                </div>
+              </div>
 
               <div
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '1rem'
+                  flex: 1, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'space-between', 
+                  background: 'var(--glass-bg)', 
+                  padding: '0.25rem 0.3rem', 
+                  borderRadius: '99px', 
+                  border: '1px solid var(--border-main)' 
                 }}
               >
                 <span
@@ -799,6 +990,12 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
               })}
 
               {renderNavLink({
+                to: '/water-quality',
+                label: 'Water Quality Register',
+                icon: Droplets
+              })}
+
+              {renderNavLink({
                 to: '/pds-shops',
                 label: 'Fair Price Shops (PDS)',
                 icon: Store
@@ -808,6 +1005,12 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 to: '/community-facilities',
                 label: 'Community Facilities',
                 icon: Home
+              })}
+
+              {renderNavLink({
+                to: '/public-toilets',
+                label: 'Public Toilets',
+                icon: MapPin
               })}
 
               {renderNavLink({
@@ -847,10 +1050,119 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 icon: FileText
               })}
 
+             {renderNavLink({
+                to: '/provenance',
+                label: 'Data Lineage',
+                icon: GitFork
+              })}
+
+              {renderNavLink({
+                to: '/counter-demand',
+                label: t('nav.counterDemand', 'Counter Demand & Staffing'),
+                icon: BarChart2
+              })}
+
               {renderNavLink({
                 to: '/surveys',
                 label: 'Civic Surveys',
                 icon: FileText
+              })}
+
+              {renderNavLink({
+                to: '/continuity-planner',
+                activeTarget: '/continuity-planner',
+                label: t('nav.continuityPlanner', 'Continuity & Drills'),
+                icon: ShieldAlert
+              })}
+
+              {renderNavLink({
+                to: '/senior-citizen-tribunal',
+                label: 'Senior Citizen Tribunal',
+                icon: Scale
+              })}
+
+              {renderNavLink({
+                to: '/rera-dispute-workspace',
+                label: 'RERA Homebuyer Rights',
+                icon: Building2
+              })}
+
+              {renderNavLink({
+                to: '/stray-animal-workspace',
+                label: 'Stray Animal & Rabies PEP',
+                icon: HeartHandshake
+              })}
+
+              {renderNavLink({
+                to: '/noise-pollution-workspace',
+                label: 'Noise Pollution & Curfew',
+                icon: Volume2
+              })}
+
+              {renderNavLink({
+                to: '/solid-waste-workspace',
+                label: 'Solid Waste & NGT',
+                icon: Recycle
+              })}
+
+              {renderNavLink({
+                to: '/route-planning',
+                label: 'Route Planning & Audit',
+                icon: Route
+              })}
+
+              {renderNavLink({
+                to: '/clinical-establishment-workspace',
+                label: 'Clinical Establishment & Patient Rights',
+                icon: HeartPulse
+              })}
+
+              {renderNavLink({
+                to: '/electricity-consumer-workspace',
+                label: 'Electricity & Consumer Rights',
+                icon: Zap
+              })}
+              {renderNavLink({ to: '/accessibility-audit-workspace', label: 'Universal Accessibility Audit', icon: Scale })}
+              {renderNavLink({ to: '/accessibility-tracker', label: 'Accessibility Complaint Tracker', icon: Scale })}
+              {renderNavLink({ to: '/dark-patterns-workspace', label: 'Dark Patterns & Consumer Redressal', icon: Scale })}
+              {renderNavLink({
+                to: '/street-vendor-workspace',
+                label: 'Street Vendor Rights & TVC',
+                icon: Store
+              })}
+
+              {renderNavLink({
+                to: '/rte-quota-workspace',
+                label: 'RTE Quota & Child Rights',
+                icon: GraduationCap
+              })}
+
+              {renderNavLink({
+                to: '/evidence-dossier',
+                label: 'Evidence Dossier & Integrity',
+                icon: FolderLock
+              })}
+              {renderNavLink({
+                to: '/legal-sources',
+                label: 'Legal Source Review',
+                icon: Scale
+              })}
+              {renderNavLink({
+                to: '/tenants',
+                label: 'Authority Workspaces',
+                icon: Building2
+              })}
+
+              {renderNavLink({
+                to: '/synthetic-datasets',
+                label: 'Synthetic Dataset Generator',
+                icon: Database
+              })}
+
+              {renderNavLink({
+                to: '/civic-data-api',
+                label: 'Civic Data API',
+                icon: KeyRound
               })}
 
               {renderNavLink({
@@ -866,15 +1178,40 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
               })}
 
               {renderNavLink({
+                to: '/public-projects',
+                activeTarget: '/public-projects',
+                label: 'Public Project Timeline',
+                icon: Building2
+              })}
+
+              {renderNavLink({
+                to: '/volunteer',
+                label: t('nav.volunteer', 'Volunteer Coordination'),
+                icon: KeyRound
+              })}
+
+              {renderNavLink({
                 to: '/ward-budget',
                 label: t('nav.wardBudget', 'Ward Budget & Deliberation'),
                 icon: Users
               })}
 
               {renderNavLink({
+                to: '/open-contracting',
+                label: t('nav.openContracting', 'Procurement Red Flags'),
+                icon: ShieldAlert
+              })}
+
+              {renderNavLink({
                 to: '/road-safety',
                 label: t('nav.roadSafety', 'Road Safety Blackspots'),
                 icon: AlertTriangle
+              })}
+
+              {renderNavLink({
+                to: '/pedestrian-barrier-map',
+                label: t('nav.pedestrianBarriers', 'Pedestrian Barrier Map'),
+                icon: Navigation
               })}
 
               {renderNavLink({
@@ -885,9 +1222,36 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
               })}
 
               {renderNavLink({
+                to: '/streetlights',
+                activeTarget: '/streetlights',
+                label: t('nav.streetlights', 'Streetlight Outages'),
+                icon: Lightbulb
+              })}
+
+              {renderNavLink({
+                to: '/relief-operations',
+                activeTarget: '/relief-operations',
+                label: t('nav.reliefOperations', 'Disaster Relief Operations'),
+                icon: HeartHandshake
+              })}
+
+              {renderNavLink({
+                to: '/ghg-inventory',
+                activeTarget: '/ghg-inventory',
+                label: t('nav.ghgInventory', 'GHG Inventory'),
+                icon: Leaf
+              })}
+
+              {renderNavLink({
                 to: '/assistant',
                 label: t('nav.assistant', 'AI Assistant'),
                 icon: Bot
+              })}
+
+              {renderNavLink({
+                to: '/translation-workspace',
+                label: t('nav.translationWorkspace', 'Translation Workspace'),
+                icon: KeyRound
               })}
             </div>
 
@@ -935,6 +1299,12 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 })}
 
                 {renderNavLink({
+                  to: '/tenants',
+                  label: 'Authority Workspaces',
+                  icon: Building2
+                })}
+
+                {renderNavLink({
                   to: '/profile',
                   label: t('nav.profile', 'My Profile'),
                   icon: UserCircle
@@ -971,7 +1341,9 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                   fontWeight: '700',
                   borderRadius: '0.65rem',
                   textDecoration: 'none',
-                  width: '100%'
+                  width: '100%',
+                  background: 'var(--text-primary)', 
+                  color: 'var(--bg-main)'
                 }}
               >
                 <User size={18} />

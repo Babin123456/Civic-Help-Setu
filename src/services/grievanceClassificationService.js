@@ -4,6 +4,7 @@
  * Classifies civic complaints and grievances into authoritative municipal and state
  * departments, explaining administrative jurisdiction, specifying evidence to gather,
  * and mapping statutory SLA resolution timelines and escalation ladders.
+ * Enhanced for #1007: includes confidence scoring, source tracking, and unsupported claim detection.
  */
 
 export const GRIEVANCE_CATEGORIES = {
@@ -234,8 +235,22 @@ export const SAMPLE_GRIEVANCES = [
 ];
 
 /**
+ * Supported claim types that the classifier can validate against
+ * Used for unsupported-claim detection
+ */
+const SUPPORTED_CLAIM_TYPES = {
+  SERVICE_DELAY: 'service delay',
+  DENIAL: 'denial of service',
+  INFRASTRUCTURE_DEFICIENCY: 'infrastructure deficiency',
+  BILLING_DISPUTE: 'billing dispute',
+  RECORD_CORRECTION: 'record correction',
+  GENERIC_GRIEVANCE: 'generic civic grievance',
+};
+
+/**
  * Classifies a civic grievance description and recommends the responsible department.
- *
+ * Enhanced for #1007: includes confidence scoring, source tracking, and unsupported claim detection.
+ * 
  * @param {string} grievanceText - Citizen's description of the problem
  * @param {Object} [options] - Optional jurisdiction or location filters
  * @returns {Object} Structured classification, department recommendation, SLA, and checklist
@@ -250,6 +265,10 @@ export function classifyGrievance(grievanceText = '', options = {}) {
       recommendation: null,
     };
   }
+
+  // === UNSUPPORTED CLAIM DETECTION ===
+  // Check for claim types that the system cannot adequately route
+  const unsupportedClaims = detectUnsupportedClaims(safeText);
 
   // Score each rule based on keyword matches
   const matchResults = [];
@@ -283,6 +302,7 @@ export function classifyGrievance(grievanceText = '', options = {}) {
       isValid: true,
       category: GRIEVANCE_CATEGORIES.AMBIGUOUS_MULTI_DEPARTMENT,
       confidence: 30,
+      source: 'General Administration (fallback - no specific keywords matched)',
       department: 'Centralized Public Grievance Redressal System (CPGRAMS) / District Collectorate',
       jurisdictionLevel: 'District Magistrate / General Administration',
       whyThisDepartment:
@@ -304,6 +324,7 @@ export function classifyGrievance(grievanceText = '', options = {}) {
         { name: 'Central CPGRAMS Portal', url: 'https://pgportal.gov.in' },
       ],
       isAmbiguous: true,
+      unsupportedClaims,
     };
   }
 
@@ -315,10 +336,11 @@ export function classifyGrievance(grievanceText = '', options = {}) {
   const topRule = topMatch.rule;
   const confidence = Math.min(95, Math.max(50, topMatch.score * 4));
 
-  return {
+  const result = {
     isValid: true,
     category: topRule.category,
     confidence,
+    source: 'Department Routing Rules (keyword-based matching)',
     department: topRule.department,
     jurisdictionLevel: topRule.jurisdictionLevel,
     whyThisDepartment: topRule.whyThisDepartment,
@@ -333,5 +355,98 @@ export function classifyGrievance(grievanceText = '', options = {}) {
     secondaryNotice: isMultiDepartment
       ? `This issue also touches upon ${secondMatch.rule.department} (${secondMatch.matchedKeywords.join(', ')}). You may need to copy this grievance to both authorities.`
       : null,
+    unsupportedClaims,
   };
+
+  // Attach unsupported claims info if any were detected
+  if (unsupportedClaims.length > 0) {
+    result.unsupportedClaimsDetails = unsupportedClaims;
+    result.noteOnUnsupportedClaims = `The following claim type(s) could not be automatically routed and may require manual department selection: ${unsupportedClaims.join(', ')}.`;
+  }
+
+  return result;
+}
+
+/**
+ * Detects unsupported claim types in the grievance text.
+ * Claims that don't match any known department routing rules
+ * or have ambiguous/unsupported terminology.
+ * 
+ * @param {string} safeLowerText - Lowercased, trimmed grievance text
+ * @returns {Array<string>} List of detected unsupported claim types
+ */
+function detectUnsupportedClaims(safeLowerText) {
+  const unsupported = [];
+
+  // Check for claim types that have no matching keywords in any rule
+  const claimIndicators = {
+    [SUPPORTED_CLAIM_TYPES.SERVICE_DELAY]: ['delay', 'pending', 'not provided', 'awaiting', 'overdue'],
+    [SUPPORTED_CLAIM_TYPES.DENIAL]: ['denied', 'rejected', 'refused', 'not eligible', 'turned down'],
+    [SUPPORTED_CLAIM_TYPES.INFRASTRUCTURE_DEFICIENCY]: ['broken', 'damaged', 'not working', 'not functioning', 'defect'],
+    [SUPPORTED_CLAIM_TYPES.BILLING_DISPUTE]: ['billing', 'charge', 'fee', 'payment', 'tariff', 'invoice'],
+    [SUPPORTED_CLAIM_TYPES.RECORD_CORRECTION]: ['correction', 'error', 'mistake', 'wrong', 'incorrect', 'amend'],
+  };
+
+  // Track which claim types were found via keywords
+  let foundSupportedClaimType = null;
+
+  Object.entries(claimIndicators).forEach(([claimType, keywords]) => {
+    const lowerMatched = keywords.filter((kw) => safeLowerText.includes(kw));
+    if (lowerMatched.length > 0) {
+      foundSupportedClaimType = claimType;
+    }
+  });
+
+  // If the text contains claim-type language but doesn't match any specific department rules,
+  // mark as potentially unsupported
+  if (foundSupportedClaimType) {
+    // Check if any department rule matched at all
+    const hasDepartmentMatch = DEPARTMENT_ROUTING_RULES.some((rule) =>
+      rule.keywords.some((kw) => safeLowerText.includes(kw))
+    );
+
+    if (!hasDepartmentMatch) {
+      // The user made a claim-type statement but no department keywords matched
+      unsupported.push(foundSupportedClaimType);
+    }
+  }
+
+  // Check for explicitly unsupported terminology
+  const unsupportedKeywords = [
+    'court order',
+    'supreme court',
+    'high court',
+    'legal action',
+    ' litigation ',
+    ' lawsuit ',
+    ' police complaint ',
+    ' criminal case ',
+    ' fraud ',
+    ' corruption ',
+
+  ];
+
+  unsupportedKeywords.forEach((kw) => {
+    if (safeLowerText.includes(kw)) {
+      // Only add if not already captured by a supported claim type
+      // A claim type is "supported" if its keywords match the text AND
+      // the text also matches department routing keywords
+      const hasSupportedClaimWithRouting = Object.values(SUPPORTED_CLAIM_TYPES).some(
+        (claimType) => {
+          const claimMatched = claimType.split(' ').some((kw) => safeLowerText.includes(kw));
+          if (!claimMatched) return false;
+          // Check if department routing rules also match this text
+          const hasDepartmentMatch = DEPARTMENT_ROUTING_RULES.some((rule) =>
+            rule.keywords.some((dkw) => safeLowerText.includes(dkw))
+          );
+          return hasDepartmentMatch;
+        }
+      );
+      if (!unsupported.includes(kw) && !hasSupportedClaimWithRouting) {
+        unsupported.push(kw);
+      }
+    }
+  });
+
+  return unsupported;
 }

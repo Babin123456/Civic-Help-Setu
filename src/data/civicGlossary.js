@@ -314,6 +314,32 @@ export const CIVIC_GLOSSARY = [
 ];
 
 /**
+ * Resolves a glossary entry by its ID or exact term/abbreviation match.
+ * @param {string} identifier
+ * @returns {Object|null}
+ */
+export function getGlossaryEntryById(identifier) {
+  if (!identifier || typeof identifier !== 'string') return null;
+  const clean = identifier.trim().toLowerCase();
+
+  // 1. Direct ID match
+  const byId = CIVIC_GLOSSARY.find((item) => item.id.toLowerCase() === clean);
+  if (byId) return byId;
+
+  // 2. Exact term match
+  const byTerm = CIVIC_GLOSSARY.find((item) => item.term.toLowerCase() === clean);
+  if (byTerm) return byTerm;
+
+  // 3. Exact abbreviation match
+  const byAbbr = CIVIC_GLOSSARY.find((item) =>
+    Array.isArray(item.abbreviations) && item.abbreviations.some((a) => a.toLowerCase() === clean)
+  );
+  if (byAbbr) return byAbbr;
+
+  return null;
+};
+
+/**
  * Finds all jargon terms appearing within arbitrary text.
  * @param {string} text
  * @returns {Array} Matching glossary items

@@ -37,6 +37,8 @@ describe('NearbyOffices page integration (#581)', () => {
     expect(html).toContain('Search by locality instead');
     expect(html).toContain('Accessibility Needs Planner');
     expect(html).toContain('Visit Dossier Checklist');
+    expect(html).toContain('Compare offices side by side');
+    expect(html).toContain('href="/comparison"');
   });
 
   it('renders structured empty state when search filters return no results', () => {
