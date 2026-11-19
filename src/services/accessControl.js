@@ -46,6 +46,8 @@ export const PERMISSIONS = {
   'ownership.read': { roles: ['admin'], resource: 'civicbridge_service_ownership_v1', description: 'Read who is assigned to review each service guide, with private notes' },
   'ownership.manage': { roles: ['admin'], resource: 'civicbridge_service_ownership_v1', description: 'Assign, reassign or clear the reviewer of a service guide' },
   'civicWorks.moderate': { roles: ['admin'], resource: 'civicbridge_civic_works_reports_v1', description: 'Moderate ward-level civic work reports, cluster duplicates, record official acknowledgements and verify completion evidence' },
+  'civicDataApi.use': { roles: ['admin', 'citizen'], resource: 'civicbridge_api_clients_v1', description: 'Create and use scoped developer sandbox credentials' },
+  'civicDataApi.admin': { roles: ['admin'], resource: 'civicbridge_access_audits_v1', description: 'Approve production API clients, inspect usage anomalies and read API audit logs' },
 };
 
 export class PermissionDeniedError extends Error {

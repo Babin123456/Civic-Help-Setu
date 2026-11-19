@@ -801,6 +801,12 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
               })}
 
               {renderNavLink({
+                to: '/civic-data-api',
+                label: 'Civic Data API',
+                icon: KeyRound
+              })}
+
+              {renderNavLink({
                 to: '/track',
                 label: t('nav.track', 'Track Status'),
                 icon: Settings
