@@ -54,6 +54,8 @@ export const CLOUD_STORES = [
 /** Stores that deliberately never leave the device, or are handled elsewhere, each with the reason. */
 export const DEVICE_ONLY_STORES = [
   { key: 'civicbridge_vault_pin', reason: 'The vault PIN is a secret and stays on the device.' },
+  { key: 'civicbridge_application_events_v1', reason: 'The append-only event log stays on this device until an immutable cloud event collection exists; generic record sync must not overwrite it.' },
+  { key: 'civicbridge_event_inconsistency_reports_v1', reason: 'Citizen inconsistency reports stay on this device until a moderation review queue exists.' },
   { key: 'civicbridge_offline_cache', reason: 'A copy of saved guides and applications for offline use.' },
   { key: 'civicbridge_offline_last_sync', reason: 'Cache bookkeeping.' },
   { key: 'civicbridge_cached_shelters', reason: 'A cache of public relief data.' },

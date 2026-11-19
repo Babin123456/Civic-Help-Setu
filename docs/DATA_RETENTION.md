@@ -77,6 +77,8 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_eligibility_assessments` | `assessmentStorage.js` | Answers and results of eligibility checks | Drafts and in-progress work |
 | `civicbridge_applicant_profiles_v1` | `applicantProfileService.js` | Household and family member applicant profiles for scoped assessments | Drafts and in-progress work |
 | `civicbridge_applications` | `trackingService.js` | Applications the person tracks: reference id, service, status, stages | Tracking records |
+| `civicbridge_application_events_v1` | `applicationEventService.js` | Append-only timeline events with source type, source and ingestion timestamps, status, actor, payload version, and citizen notes kept separate from official records | Tracking records |
+| `civicbridge_event_inconsistency_reports_v1` | `applicationEventService.js` | Citizen reports that flagged conflicting, duplicate, or out-of-order timeline evidence for review | Reviews, votes and reports |
 | `civicbridge_office_tokens` | `locationService.js` | Office visit tokens and appointments | Tracking records |
 | `civic_grievance_tickets` | `grievanceService.js` | Grievance tickets raised from the app | Tracking records |
 | `civicbridge_reminders` | `reminderNotificationService.js` | Renewal, submission and document expiry reminders | Tracking records |
