@@ -1222,6 +1222,12 @@ if (normalizedTarget === '/water-quality') {
                 label: t('nav.assistant', 'AI Assistant'),
                 icon: Bot
               })}
+
+              {renderNavLink({
+                to: '/translation-workspace',
+                label: t('nav.translationWorkspace', 'Translation Workspace'),
+                icon: KeyRound
+              })}
             </div>
 
             {/* PERSONAL ACCOUNT */}
