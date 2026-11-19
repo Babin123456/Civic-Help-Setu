@@ -647,7 +647,7 @@ export default function ShelterStatusBoard() {
             borderRadius: '8px',
             margin: '24px 0'
           }}>
-            <Search size={48} style={{ marginBottom: '12px', opacity: 0.5 } />{' '}
+            <Search size={48} style={{ marginBottom: '12px', opacity: 0.5 }} />{' '}
             <h3 style={{ margin: '16px 0 8px', fontSize: '1.125rem', color: '#475569' }}>No shelters found</h3>
             <p style={{ margin: 0, fontSize: '0.875rem' }}>
               No shelters match the current filters. Try adjusting the status, jurisdiction, or search criteria.
