@@ -4,7 +4,7 @@
  * Essential account-security messages are always sent regardless of preferences.
  */
 
-import { logDiagnostic } from '../utils/diagnostics';
+import { logDiagnostic } from '../utils/diagnostics.js';
 
 const STORAGE_KEY = 'civicbridge_notification_preferences';
 
