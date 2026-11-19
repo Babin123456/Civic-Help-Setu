@@ -4,21 +4,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNetwork } from '../contexts/NetworkContext';
 import { useToast } from '../contexts/ToastContext';
 import {
-  ShelterSite,
-  FacilityService,
-  CapacitySnapshot,
-  OperatorAccount,
-  StatusEvent,
-  VerificationCheck,
   SHELTER_STATES,
   ALLOWED_TRANSITIONS,
-  validateStateTransition,
-  validateShelterSite,
-  validateFacilityService,
-  validateCapacitySnapshot,
-  validateOperatorAccount,
-  validateStatusEvent,
-  validateVerificationCheck,
+  isValidTransition,
+  validateShelterSiteData,
   generateIdempotencyKey,
   canOperatorUpdateShelter,
   canOperatorUpdateFacilityService,
@@ -352,7 +341,7 @@ export default function ShelterStatusBoard() {
   }
 
   function handleSaveShelter() {
-    const validationErrors = validateShelterSite(formData);
+    const validationErrors = validateShelterSiteData(formData);
     if (validationErrors.length > 0) {
       addToast(`Validation errors: ${validationErrors.join(', ')}`, 'error');
       return;
@@ -390,9 +379,9 @@ export default function ShelterStatusBoard() {
   function handleStateTransition(newState) {
     if (!selectedShelter) return;
 
-    const transitionValid = validateStateTransition(selectedShelter.status, newState);
+    const transitionValid = isValidTransition(selectedShelter.status, newState);
     if (!transitionValid.valid) {
-      addToast(transitionValid.message, 'error');
+      addToast(transitionValid.message || 'This shelter status transition is not allowed.', 'error');
       return;
     }
 
