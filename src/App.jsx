@@ -263,8 +263,6 @@ function AppRoot() {
                       <Route path="/verify-evidence" element={<EvidenceDossierWorkspace />} />
                       <Route path="/evidence-manifest" element={<EvidenceDossierWorkspace />} />
                       <Route path="/track" element={<Track />} />
-                      <Route path="/appointment-heatmap" element={<ServiceAppointmentHeatmapPage />} />
-                      <Route path="/appointment-heatmap/:office/:service" element={<ServiceAppointmentHeatmapPage />} />
                       <Route path="/civic-works" element={<CivicWorksBoard />} />
                       <Route path="/public-projects" element={<PublicProjectsWorkspace />} />
                       <Route path="/projects" element={<PublicProjectsWorkspace />} />
