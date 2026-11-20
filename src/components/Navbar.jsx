@@ -26,16 +26,13 @@ import {
   Droplets,
   KeyRound,
   Store,
-
   Trees,
-  School
-
-
+  School,
+  ReceiptText,
   Gift,
-
   Database,
   Building2,
-  Trees,
+  Route,
   Lightbulb,
   Leaf,
   ShieldAlert,
@@ -49,8 +46,6 @@ import {
   Zap,
   GraduationCap,
   FolderLock,
-
-
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -144,7 +139,7 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
         );
       }
 
-if (normalizedTarget === '/continuity-planner') {
+      if (normalizedTarget === '/continuity-planner') {
         return (
           normalizedPath === '/continuity-planner' ||
           normalizedPath.startsWith('/continuity-planner/') ||
@@ -168,7 +163,7 @@ if (normalizedTarget === '/continuity-planner') {
         );
       }
 
-if (normalizedTarget === '/water-quality') {
+      if (normalizedTarget === '/water-quality') {
         return (
           normalizedPath === '/water-quality' ||
           normalizedPath === '/water-quality-register' ||
@@ -193,13 +188,14 @@ if (normalizedTarget === '/water-quality') {
         );
       }
 
-
       if (normalizedTarget === '/school-zone-safety') {
         return (
           normalizedPath === '/school-zone-safety' ||
           normalizedPath === '/school-safety' ||
           normalizedPath === '/up-school-safety' ||
           normalizedPath.startsWith('/school-zone-safety/')
+        );
+      }
 
       if (normalizedTarget === '/pedestrian-barrier-map') {
         return (
@@ -214,7 +210,6 @@ if (normalizedTarget === '/water-quality') {
           normalizedPath === '/provenance' ||
           normalizedPath.startsWith('/provenance/') ||
           normalizedPath === '/lineage-explorer'
-
         );
       }
 
@@ -468,14 +463,14 @@ if (normalizedTarget === '/water-quality') {
             flexShrink: 0
           }}
         >
-          <div 
-              className="desktop-nav-items" 
-              style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '0.5rem' 
-              }}
-            >
+          <div
+            className="desktop-nav-items"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
             {/* NETWORK STATUS */}
             <button
               type="button"
@@ -491,8 +486,8 @@ if (normalizedTarget === '/water-quality') {
                   : 'Offline Mode Active'
               }
               style={{
-                minHeight: '44px',     
-                minWidth: '44px', 
+                minHeight: '44px',
+                minWidth: '44px',
                 padding: '0.4rem 0.65rem',
                 background: isOnline
                   ? 'var(--glass-bg)'
@@ -541,8 +536,8 @@ if (normalizedTarget === '/water-quality') {
               aria-label="Open emergency helplines"
               title="Rapid Emergency Helplines"
               style={{
-                minHeight: '44px',     
-                minWidth: '44px', 
+                minHeight: '44px',
+                minWidth: '44px',
                 padding: '0.4rem 0.65rem',
                 borderRadius: '999px',
                 border: '1px solid #ef4444',
@@ -568,8 +563,8 @@ if (normalizedTarget === '/water-quality') {
               title="Multilingual Voice Navigation"
               aria-label="Open multilingual voice navigation"
               style={{
-                minHeight: '44px',     
-                minWidth: '44px', 
+                minHeight: '44px',
+                minWidth: '44px',
                 padding: '0.45rem',
                 background: 'rgba(14, 165, 233, 0.1)',
                 borderRadius: '50%',
@@ -601,8 +596,8 @@ if (normalizedTarget === '/water-quality') {
                 : 'Switch to dark theme'
             }
             style={{
-              minHeight: '44px',     
-              minWidth: '44px', 
+              minHeight: '44px',
+              minWidth: '44px',
               padding: '0.45rem',
               background: 'var(--glass-bg-hover)',
               borderRadius: '50%',
@@ -635,8 +630,8 @@ if (normalizedTarget === '/water-quality') {
             aria-expanded={isOpen}
             aria-controls="mobile-navigation-drawer"
             style={{
-              minHeight: '44px',     
-              minWidth: '44px', 
+              minHeight: '44px',
+              minWidth: '44px',
               padding: '0.45rem',
               background: 'var(--glass-bg-hover)',
               borderRadius: '50%',
@@ -757,20 +752,21 @@ if (normalizedTarget === '/water-quality') {
                 </div>
               </div>
             )}
-            <div 
-              className="mobile-only-tools" 
-              style={{ 
-                flexDirection: 'column', 
-                gap: '0.6rem', 
+
+            <div
+              className="mobile-only-tools"
+              style={{
+                flexDirection: 'column',
+                gap: '0.6rem',
                 width: '100%'
               }}
             >
-              <div 
-                style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(2, 1fr)', 
-                  gap: '0.5rem', 
-                  alignItems: 'center' 
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '0.5rem',
+                  alignItems: 'center'
                 }}
               >
                 <button
@@ -816,14 +812,14 @@ if (normalizedTarget === '/water-quality') {
                   }}
                 >
                   {isOnline ? (
-                    <span 
-                      style={{ 
-                        width: '7px', 
-                        height: '7px', 
-                        borderRadius: '50%', 
-                        background: '#10b981', 
-                        display: 'inline-block' 
-                      }} 
+                    <span
+                      style={{
+                        width: '7px',
+                        height: '7px',
+                        borderRadius: '50%',
+                        background: '#10b981',
+                        display: 'inline-block'
+                      }}
                     />
                   ) : (
                     <WifiOff size={13} style={{ color: '#ef4444' }} />
@@ -842,22 +838,21 @@ if (normalizedTarget === '/water-quality') {
                 width: '100%'
               }}
             >
-              <div 
-                style={{ 
-                  flex: 1, 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center' 
+              <div
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
-                <div 
-                  style={{ 
-                    width: '100%', 
-                    display: 'flex', 
-                    justifyContent: 'center' 
+                <div
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'center'
                   }}
                 >
-              
                   <VoiceSearchInput
                     onTranscript={(transcript) => {
                       setIsOpen(false);
@@ -879,14 +874,14 @@ if (normalizedTarget === '/water-quality') {
 
               <div
                 style={{
-                  flex: 1, 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'space-between', 
-                  background: 'var(--glass-bg)', 
-                  padding: '0.25rem 0.3rem', 
-                  borderRadius: '99px', 
-                  border: '1px solid var(--border-main)' 
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: 'var(--glass-bg)',
+                  padding: '0.25rem 0.3rem',
+                  borderRadius: '99px',
+                  border: '1px solid var(--border-main)'
                 }}
               >
                 <span
@@ -1003,6 +998,12 @@ if (normalizedTarget === '/water-quality') {
               })}
 
               {renderNavLink({
+                to: '/up-heatwave-relief',
+                label: t('nav.heatwaveRelief', 'UP Heatwave & Cooling Map'),
+                icon: Sun
+              })}
+
+              {renderNavLink({
                 to: '/water-quality',
                 label: 'Water Quality Register',
                 icon: Droplets
@@ -1014,7 +1015,7 @@ if (normalizedTarget === '/water-quality') {
                 icon: Store
               })}
 
-{renderNavLink({
+              {renderNavLink({
                 to: '/community-facilities',
                 label: 'Community Facilities',
                 icon: Home
@@ -1036,13 +1037,19 @@ if (normalizedTarget === '/water-quality') {
                 to: '/library-directory',
                 label: 'Public Libraries',
                 icon: BookOpen
-
               })}
 
               {renderNavLink({
                 to: '/tenders',
                 label: t('nav.tenders', 'Tender Readiness'),
                 icon: FileText
+              })}
+
+              {renderNavLink({
+                to: '/fee-evidence',
+                activeTarget: '/fee-evidence',
+                label: 'Fee Evidence Assistant',
+                icon: ReceiptText
               })}
 
               {renderNavLink({
@@ -1063,7 +1070,7 @@ if (normalizedTarget === '/water-quality') {
                 icon: FileText
               })}
 
-             {renderNavLink({
+              {renderNavLink({
                 to: '/provenance',
                 label: 'Data Lineage',
                 icon: GitFork
@@ -1222,15 +1229,15 @@ if (normalizedTarget === '/water-quality') {
               })}
 
               {renderNavLink({
-
                 to: '/school-zone-safety',
                 label: t('nav.schoolZoneSafety', 'School Zone Safety'),
                 icon: School
+              })}
 
+              {renderNavLink({
                 to: '/pedestrian-barrier-map',
                 label: t('nav.pedestrianBarriers', 'Pedestrian Barrier Map'),
                 icon: Navigation
-
               })}
 
               {renderNavLink({
@@ -1312,6 +1319,12 @@ if (normalizedTarget === '/water-quality') {
                 })}
 
                 {renderNavLink({
+                  to: '/change-feed',
+                  label: t('nav.changeFeed', 'Change Feed'),
+                  icon: ShieldAlert
+                })}
+
+                {renderNavLink({
                   to: '/citizen-drafts',
                   label: 'Drafts & Offline Sync',
                   icon: FileText
@@ -1361,7 +1374,7 @@ if (normalizedTarget === '/water-quality') {
                   borderRadius: '0.65rem',
                   textDecoration: 'none',
                   width: '100%',
-                  background: 'var(--text-primary)', 
+                  background: 'var(--text-primary)',
                   color: 'var(--bg-main)'
                 }}
               >
