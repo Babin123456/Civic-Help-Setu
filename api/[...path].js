@@ -46,6 +46,7 @@ import publicProjects from "./_lib/handlers/public-projects.js";
 import wardIssueHeatmap from "./_lib/handlers/ward-issue-heatmap.js";
 import tenantAdministration from "./_lib/handlers/tenant-administration.js";
 import ghgInventory from "./_lib/handlers/ghg-inventory.js";
+import microVolunteer from "./_lib/handlers/micro-volunteer.js";
 import reliefOperations from "./_lib/handlers/relief-operations.js";
 
 
@@ -83,6 +84,8 @@ const handlers = {
   "public-projects": publicProjects,
   "tenant-administration": tenantAdministration,
   "ghg-inventory": ghgInventory,
+  "micro-volunteer": microVolunteer,
+  "micro-volunteer-board": microVolunteer,
   "relief-operations": reliefOperations,
 };
 

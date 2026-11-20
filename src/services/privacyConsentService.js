@@ -90,6 +90,7 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_sent_digests', category: 'tracking', exportAs: 'sentNewsletterDigests', empty: [] }, // newsletterSubscriptionService.js
   { key: 'civicbridge_newsletter_delivery_failures', category: 'tracking', exportAs: 'newsletterDeliveryFailures', empty: [] }, // newsletterSubscriptionService.js
   { key: 'civicbridge_civic_works_reports_v1', category: 'activity', exportAs: 'civicWorksReports', empty: [] }, // civicWorksBoardService.js
+  { key: 'civic_micro_volunteer_board_v1', category: 'activity', exportAs: 'microVolunteerBoard', empty: null }, // microVolunteerMigrations.js (#759)
 
   { key: 'civicbridge_notice_deadline_state_v1', category: 'tracking', exportAs: null, empty: {} }, // dateCandidateService.js
 
