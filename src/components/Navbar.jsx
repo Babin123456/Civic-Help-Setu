@@ -991,13 +991,6 @@ if (normalizedTarget === '/water-quality') {
               })}
 
               {renderNavLink({
-
-                to: '/up-heatwave-relief',
-                label: t('nav.heatwaveRelief', 'UP Heatwave & Cooling Map'),
-                icon: Sun
-              })}
-
-              {renderNavLink({
                 to: '/up-heatwave-relief',
                 label: t('nav.heatwaveRelief', 'UP Heatwave & Cooling Map'),
                 icon: Sun
