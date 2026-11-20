@@ -32,6 +32,7 @@ const CounterJourney = lazy(() => import('./pages/CounterJourney'));
 const NationalCivicDocumentHub = lazy(() => import('./pages/NationalCivicDocumentHub'));
 const UpFloodRoutePlanner = lazy(() => import('./components/flood/UpFloodRoutePlanner'));
 const TextRouteDirectory = lazy(() => import('./components/flood/TextRouteDirectory'));
+const UpFloodResponseBoard = lazy(() => import('./pages/UpFloodResponseBoard'));
 const WaterBillVisualizerPage = lazy(() => import('./pages/WaterBillVisualizerPage'));
 const ServiceDetails = lazy(() => import('./pages/ServiceDetails'));
 const Acronyms = lazy(() => import('./pages/Acronyms'));
@@ -193,6 +194,9 @@ function AppRoot() {
 
                             <Route path="/flood-planner" element={<UpFloodRoutePlanner />} />
                             <Route path="/flood-directory" element={<TextRouteDirectory />} />
+                            <Route path="/flood-board" element={<UpFloodResponseBoard />} />
+                            <Route path="/up-floods" element={<UpFloodResponseBoard />} />
+                            <Route path="/waterlogging" element={<UpFloodResponseBoard />} />
 
                             {/* Counter journey simulator — public catalogue, evaluable for any citizen */}
                             <Route path="/counter-journey" element={<CounterJourney />} />
