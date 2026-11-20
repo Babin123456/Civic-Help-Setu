@@ -242,6 +242,8 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_catalogue_completeness_dismissals',
   'civicbridge_public_notices_digest_v1',
   'civicbridge_service_availability_notices_v1',
+  'civicbridge_change_events',
+  'civicbridge_review_approvals',
   'civicbridge_source_conflicts',
   'civicbridge_conflict_audit_logs',
   'civicbridge_catalogue_enrichment_queue_v1',

@@ -1301,6 +1301,12 @@ if (normalizedTarget === '/water-quality') {
                 })}
 
                 {renderNavLink({
+                  to: '/change-feed',
+                  label: t('nav.changeFeed', 'Change Feed'),
+                  icon: ShieldAlert
+                })}
+
+                {renderNavLink({
                   to: '/citizen-drafts',
                   label: 'Drafts & Offline Sync',
                   icon: FileText

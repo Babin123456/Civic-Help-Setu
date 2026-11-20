@@ -104,6 +104,7 @@ const AccessibilityComplaintTrackerWorkspace = lazy(() => import('./pages/Access
 const LegalSourceReviewWorkspace = lazy(() => import('./pages/LegalSourceReviewWorkspace'));
 const RteAdmissionWorkspace = lazy(() => import('./pages/RteAdmissionWorkspace'));
 const EvidenceDossierWorkspace = lazy(() => import('./pages/EvidenceDossierWorkspace'));
+const ChangeFeedPage = lazy(() => import('./pages/ChangeFeedPage'));
 const FeeEvidenceAssistant = lazy(() => import('./pages/FeeEvidenceAssistant'));
 const Services = lazy(() => import('./pages/Services'));
 
@@ -165,6 +166,8 @@ function AppRoot() {
                               <Route path="/services/catalogue-visual-qa" element={<CatalogueVisualQaWorkspace />} />
                               <Route path="/catalogue-visual-qa" element={<CatalogueVisualQaWorkspace />} />
                               <Route path="/visual-qa" element={<CatalogueVisualQaWorkspace />} />
+                              <Route path="/services/change-feed" element={<ChangeFeedPage />} />
+                              <Route path="/change-feed" element={<ChangeFeedPage />} />
                               <Route path="/services/ward-budget-proposal" element={<WardBudgetWorkspace />} />
                               <Route path="/ward-budget" element={<WardBudgetWorkspace />} />
                               <Route path="/ward-budget/:id" element={<WardBudgetWorkspace />} />
