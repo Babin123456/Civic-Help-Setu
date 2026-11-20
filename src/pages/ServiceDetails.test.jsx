@@ -130,4 +130,12 @@ describe('ServiceDetails', () => {
     expect(html).toContain('Trace Data Lineage');
     expect(html).toContain(`/provenance?service=${encodeURIComponent(service.id)}`);
   });
+
+  it('renders the dedicated multi-authority jurisdiction hand-off card (#815)', () => {
+    const service = MOCK_SERVICES[0];
+    const html = render(`/services/${service.id}`);
+    expect(html).toContain('Multi-Authority Jurisdiction Hand-off Map');
+    expect(html).toContain(`/services/${service.id}/jurisdiction-map`);
+    expect(html).toContain(`/jurisdiction-handoff?service=${service.id}`);
+  });
 });
