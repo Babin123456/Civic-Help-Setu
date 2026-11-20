@@ -27,11 +27,13 @@ import {
   KeyRound,
   Store,
 
+  Trees,
+  ReceiptText,
   Gift,
 
   Database,
   Building2,
-  Trees,
+  Route,
   Lightbulb,
   Leaf,
   ShieldAlert,
@@ -1029,6 +1031,13 @@ if (normalizedTarget === '/water-quality') {
                 to: '/tenders',
                 label: t('nav.tenders', 'Tender Readiness'),
                 icon: FileText
+              })}
+
+              {renderNavLink({
+                to: '/fee-evidence',
+                activeTarget: '/fee-evidence',
+                label: 'Fee Evidence Assistant',
+                icon: ReceiptText
               })}
 
               {renderNavLink({

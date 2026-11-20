@@ -105,6 +105,7 @@ const LegalSourceReviewWorkspace = lazy(() => import('./pages/LegalSourceReviewW
 const RteAdmissionWorkspace = lazy(() => import('./pages/RteAdmissionWorkspace'));
 const EvidenceDossierWorkspace = lazy(() => import('./pages/EvidenceDossierWorkspace'));
 const ChangeFeedPage = lazy(() => import('./pages/ChangeFeedPage'));
+const FeeEvidenceAssistant = lazy(() => import('./pages/FeeEvidenceAssistant'));
 const Services = lazy(() => import('./pages/Services'));
 
 const ServicesFallback = () => (
@@ -126,8 +127,8 @@ function AppRoot() {
                 <ConfirmationDialogProvider>
                   <>
                     <div className="app-layout" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '100vw', overflowX: 'clip' }}>
+                      <OfflineBanner />
 
-                    <OfflineBanner />
                       <SkipToContent />
                       <Navbar />
                       <main id="main-content" style={{ flex: 1, minWidth: 0, width: '100%' }} tabIndex="-1">
