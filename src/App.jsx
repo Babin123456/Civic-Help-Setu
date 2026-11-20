@@ -59,6 +59,7 @@ const SmallBusinessLicencePage = lazy(() => import('./pages/SmallBusinessLicence
 const FireSafetyGuidePage = lazy(() => import('./pages/FireSafetyGuidePage'));
 const TreePermissionGuidePage = lazy(() => import('./pages/TreePermissionGuidePage'));
 const CivicWorksBoard = lazy(() => import('./pages/CivicWorksBoard'));
+const MicroVolunteerTaskBoard = lazy(() => import('./pages/MicroVolunteerTaskBoard'));
 const TreeHealthInventory = lazy(() => import('./pages/TreeHealthInventory'));
 const CrematoriumDirectory = lazy(() => import('./pages/CrematoriumDirectory'));
 const FairPriceShopBoard = lazy(() => import('./pages/FairPriceShopBoard'));
@@ -285,6 +286,9 @@ function AppRoot() {
                               <Route path="/evidence-manifest" element={<EvidenceDossierWorkspace />} />
                               <Route path="/track" element={<Track />} />
                               <Route path="/civic-works" element={<CivicWorksBoard />} />
+                              <Route path="/micro-volunteer-board" element={<MicroVolunteerTaskBoard />} />
+                              <Route path="/micro-volunteer" element={<MicroVolunteerTaskBoard />} />
+                              <Route path="/services/micro-volunteer-board" element={<MicroVolunteerTaskBoard />} />
                               <Route path="/public-projects" element={<PublicProjectsWorkspace />} />
                               <Route path="/projects" element={<PublicProjectsWorkspace />} />
                               <Route path="/public-projects/:id" element={<PublicProjectsWorkspace />} />

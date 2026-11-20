@@ -522,6 +522,61 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ---------- civic micro-volunteer task board (#759) ----------
+
+    // Reference categories for low-risk micro-tasks: public read, admin-only write
+    match /task_categories/{categoryId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Micro-volunteer tasks: public read, staff create/update, no hard deletion (archive only)
+    match /micro_tasks/{taskId} {
+      allow read: if true;
+      allow create: if isMember()
+        && text('title', 120)
+        && text('instructions', 2000)
+        && text('categoryId', 60)
+        && text('jurisdictionId', 60)
+        && incoming().status in ['draft', 'open', 'assigned', 'awaiting_review', 'completed', 'reopened', 'archived'];
+      allow update: if isMember()
+        && incoming().status in ['draft', 'open', 'assigned', 'awaiting_review', 'completed', 'reopened', 'archived'];
+      allow delete: if false;
+    }
+
+    // Task claims: citizen can claim and view own, reviewers/admins can view and manage
+    match /task_claims/{claimId} {
+      allow read: if isAdmin() || (isMember() && (stored().citizenId == request.auth.uid || stored().userId == request.auth.uid));
+      allow create: if isMember()
+        && hasKeys(['taskId', 'citizenId', 'status', 'createdAt'])
+        && (incoming().citizenId == request.auth.uid || isAdmin())
+        && incoming().status in ['active', 'submitted', 'approved', 'changes_requested', 'rejected', 'withdrawn', 'expired'];
+      allow update: if isMember()
+        && (stored().citizenId == request.auth.uid || isAdmin())
+        && incoming().status in ['active', 'submitted', 'approved', 'changes_requested', 'rejected', 'withdrawn', 'expired'];
+      allow delete: if false;
+    }
+
+    // Completion submissions: evidence notes, link, file metadata only (no blobs or PII)
+    match /completion_submissions/{submissionId} {
+      allow read: if isAdmin() || (isMember() && (stored().citizenId == request.auth.uid || stored().userId == request.auth.uid));
+      allow create: if isMember()
+        && hasKeys(['taskId', 'claimId', 'citizenId', 'status', 'createdAt'])
+        && (incoming().citizenId == request.auth.uid || isAdmin())
+        && incoming().status in ['submitted', 'under_review', 'approved', 'changes_requested', 'rejected', 'reopened', 'withdrawn'];
+      allow update: if isAdmin() || (isMember() && stored().citizenId == request.auth.uid);
+      allow delete: if false;
+    }
+
+    // Moderation events: append-only audit trail
+    match /moderation_events/{eventId} {
+      allow read: if isAdmin();
+      allow create: if isMember()
+        && hasKeys(['taskId', 'action', 'actorRole', 'createdAt'])
+        && text('action', 60);
+      allow update, delete: if false;
+    }
+
     // ---------- everything else ----------
     match /{document=**} {
       allow read, write: if false;

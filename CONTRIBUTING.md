@@ -133,6 +133,21 @@ Architecture, data model, state machines, role/capability matrix, forecast
 boundaries, threat model, retention, rollback and the manual acceptance script
 are documented in [docs/RELIEF_OPERATIONS.md](docs/RELIEF_OPERATIONS.md).
 
+Civic Micro-Volunteer Task Board (#759) — claim, submit evidence, human
+moderation, reopen, deterministic explainable suggestions, retention and audit:
+```bash
+npx vitest run src/data/microVolunteerContract.test.js       # states, validation, deterministic matching
+npx vitest run src/services/microVolunteerService.test.js    # lifecycle, claim races, RBAC, privacy, abuse
+npx vitest run src/services/microVolunteerMigrations.test.js # empty/legacy migration, indexes, retention, rollback
+npx vitest run src/pages/MicroVolunteerTaskBoard.test.jsx    # page roles, states and accessibility semantics
+npx vitest run tests/micro-volunteer-api.test.js             # API auth, idempotency, injection, rate limits
+```
+
+Architecture, collections, state machines, role matrix, deterministic ruleset,
+retention, migrations, rollback, environment variables, operational limits and
+the manual fallback are documented in
+[docs/micro-volunteer-task-board.md](docs/micro-volunteer-task-board.md).
+
 ## Security checks
 Every PR runs a secret scan, a dependency audit and a lint for unsafe HTML/JS patterns. Locally:
 ```bash

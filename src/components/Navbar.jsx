@@ -47,6 +47,7 @@ import {
   Zap,
   GraduationCap,
   FolderLock,
+  ClipboardList,
 
 } from 'lucide-react';
 
@@ -1183,6 +1184,13 @@ if (normalizedTarget === '/water-quality') {
                 to: '/civic-works',
                 label: t('nav.civicWorks', 'Ward Public Works'),
                 icon: Users
+              })}
+
+              {renderNavLink({
+                to: '/micro-volunteer-board',
+                activeTarget: '/micro-volunteer',
+                label: t('nav.microVolunteer', 'Micro-Volunteer Board'),
+                icon: ClipboardList
               })}
 
               {renderNavLink({
