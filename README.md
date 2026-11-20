@@ -178,10 +178,14 @@ The platform includes the following major application areas:
 | Open Source     | Explore community contributions           |
 | Privacy Policy  | Review privacy-related information        |
 | Admin           | Access authorized administrative features |
+
+| Form Explainer  | Multilingual UP form field guidance & error-prevention assistant ([#1001](docs/multilingual-government-form-field-explainer.md)) |
+
 | Catalogue Visual QA | Reviewer-only responsive service-card layout checks with synthetic fixtures and private review snapshots |
 | Synthetic Datasets | Generate privacy-safe civic datasets (`/synthetic-datasets`) |
 | Authority Workspaces | Multi-authority sovereign administration, isolated staff, datasets, and audit logs |
 | Greenhouse-Gas Inventory | Department activity data, versioned factors, approvals and public emissions totals (`/ghg-inventory`) |
+
 
 The availability of individual features depends on the application's current implementation and configuration.
 
