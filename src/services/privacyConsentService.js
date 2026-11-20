@@ -101,6 +101,10 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_tree_reports_v1', category: 'activity', exportAs: null }, // legacy tree reports
   { key: 'civicbridge_tree_reporter_key', category: 'activity', exportAs: null }, // TreeHealthInventory.jsx
 
+  // Heatwave relief community observations and offline drafts (#983)
+  { key: 'civicbridge_up_heat_observations_v1', category: 'activity', exportAs: null }, // upHeatwaveReliefService.js
+  { key: 'civicbridge_up_heat_draft_queue_v1', category: 'drafts', exportAs: null }, // upHeatwaveReliefService.js
+
   { key: 'civicbridge_citizen_drafts_v1', category: 'drafts', exportAs: 'citizenDrafts', empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_offline_operations_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_sync_sessions_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
@@ -108,6 +112,10 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_conflict_records_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_device_cursors_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_tombstones_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
+
+  { key: 'civicbridge_npsc_fee_history_v1', category: 'saved', exportAs: 'serviceFeeHistory', empty: [] }, // nationalPublicServiceCentreService.js
+  { key: 'civicbridge_npsc_fee_observations_v1', category: 'activity', exportAs: 'serviceFeeObservations', empty: [] }, // nationalPublicServiceCentreService.js
+
   { key: 'civicbridge_tenants_v1', category: 'activity', exportAs: null, empty: [] }, // tenantIsolationService.js (#779)
   { key: 'civicbridge_tenant_memberships_v1', category: 'activity', exportAs: null, empty: [] }, // tenantIsolationService.js (#779)
   { key: 'civicbridge_tenant_roles_v1', category: 'activity', exportAs: null, empty: [] }, // tenantIsolationService.js (#779)
@@ -141,6 +149,7 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_legal_draft_snapshots_v1', category: 'drafts', exportAs: 'legalDraftSnapshots', empty: [] }, // legalSourceStorage.js
   { key: 'civicbridge_legal_sources_audit_v1', category: 'drafts', exportAs: 'legalSourcesAuditLogs', empty: [] }, // legalSourceStorage.js
   { key: 'civicbridge_evidence_dossiers_v1', category: 'drafts', exportAs: 'evidenceDossiers', empty: [] }, // evidenceDossierStorage.js
+
 ];
 
 /**
@@ -237,6 +246,8 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_catalogue_completeness_dismissals',
   'civicbridge_public_notices_digest_v1',
   'civicbridge_service_availability_notices_v1',
+  'civicbridge_change_events',
+  'civicbridge_review_approvals',
   'civicbridge_source_conflicts',
   'civicbridge_conflict_audit_logs',
   'civicbridge_catalogue_enrichment_queue_v1',
@@ -284,6 +295,11 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_tree_rate_limit_v1',
   'civicbridge_tree_migration_backup_v1',
   'civicbridge_trees_v1',
+
+  // Municipal heatwave cooling-relief register and rate-limit guard (#983)
+  'civicbridge_up_heat_relief_facilities_v1',
+  'civicbridge_up_heat_rate_limits_v1',
+
   // Anonymized ward-level civic issue heatmap, aggregation runs, and privacy rules
   'civicbridge_ward_issue_events_v1',
   'civicbridge_ward_geometries_v1',
@@ -325,6 +341,7 @@ export const RETAINED_STORAGE_KEYS = [
   'civic_relief_audit_logs_v1',
   'civic_relief_archive_v1',
   'civic_relief_meta_v1',
+
   // Handled by purge itself: consents are reset, the audit log keeps the deletion receipt
   CONSENT_STORAGE_KEY,
   AUDIT_STORAGE_KEY,

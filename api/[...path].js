@@ -26,6 +26,8 @@ import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
 import floodIncidentReports from "./_lib/handlers/flood-incident-reports.js";
+import schoolZoneAudits from "./_lib/handlers/school-zone-audits.js";
+import heatReliefObservations from "./_lib/handlers/heat-relief-observations.js";
 
 import { GET as graphGET, POST as graphPOST } from "./graph/route.js";
 import {
@@ -59,11 +61,9 @@ const handlers = {
   "email/preferences": emailPreferences,
   "email/verify": emailVerify,
   "fire-compliance-feedback": fireCompliance,
-
   "flood-incident-reports": floodIncidentReports,
-
+  "heat-relief-observations": heatReliefObservations,
   "knowledge-provenance": knowledgeProvenance,
-
   "library-corrections": libraryCorrections,
   "office-comparison": officeComparison,
   "open-contracting-analytics": openContractingAnalytics,
@@ -79,6 +79,7 @@ const handlers = {
   "water-quality-register": waterQualityRegister,
   "ward-issue-heatmap": wardIssueHeatmap,
   "water-tanker-reports": waterTankerReports,
+  "school-zone-audits": schoolZoneAudits,
   "public-projects": publicProjects,
   "tenant-administration": tenantAdministration,
   "ghg-inventory": ghgInventory,

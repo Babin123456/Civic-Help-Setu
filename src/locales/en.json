@@ -8,12 +8,14 @@
     "assistant": "AI Assistant",
     "vault": "Doc Vault",
     "saved": "Saved Guides",
+    "changeFeed": "Change Feed",
     "profile": "My Profile",
     "admin": "Admin Portal",
     "tenders": "Tender Readiness",
     "civicWorks": "Ward Public Works",
     "volunteer": "Volunteer Coordination",
     "roadSafety": "Road Safety Blackspots",
+    "schoolZoneSafety": "School Zone Safety",
     "rentalChecklist": "Rental Checklist",
 
     "neighbourhoodResource": "Neighbourhood Resource Exchange",
@@ -21,6 +23,9 @@
     "addressChange": "Address Change Planner",
     "counterDemand": "Counter Demand & Staffing",
     "treeHealth": "Tree Health Inventory",
+
+    "heatwaveRelief": "UP Heatwave & Cooling Map",
+
     "streetlights": "Streetlight Outages",
 
     "signIn": "Sign In",
