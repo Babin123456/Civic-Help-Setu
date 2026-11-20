@@ -77,6 +77,7 @@ const CounterDemandForecastingWorkspace = lazy(() => import('./pages/CounterDema
 const WardBudgetWorkspace = lazy(() => import('./pages/WardBudgetWorkspace'));
 const LineageExplorerWorkspace = lazy(() => import('./pages/LineageExplorerWorkspace'));
 const CivicSurveyWorkspace = lazy(() => import('./pages/CivicSurveyWorkspace'));
+const UpJanSunwaiWorkspace = lazy(() => import('./pages/UpJanSunwaiWorkspace'));
 const UpHeatwaveReliefMap = lazy(() => import('./pages/UpHeatwaveReliefMap'));
 const ComparisonWorkspace = lazy(() => import('./pages/ComparisonWorkspace'));
 const OfficeComparisonDetail = lazy(() => import('./pages/OfficeComparisonDetail'));
@@ -239,6 +240,10 @@ function AppRoot() {
                             <Route path="/surveys" element={<CivicSurveyWorkspace />} />
                             <Route path="/survey-builder" element={<CivicSurveyWorkspace />} />
                             <Route path="/civic-surveys" element={<CivicSurveyWorkspace />} />
+                            <Route path="/up-jan-sunwai" element={<UpJanSunwaiWorkspace />} />
+                            <Route path="/jan-sunwai" element={<UpJanSunwaiWorkspace />} />
+                            <Route path="/jan-sunwai-workspace" element={<UpJanSunwaiWorkspace />} />
+                            <Route path="/public-hearings" element={<UpJanSunwaiWorkspace />} />
                             <Route path="/up-heatwave-relief" element={<UpHeatwaveReliefMap />} />
                             <Route path="/heatwave-relief" element={<UpHeatwaveReliefMap />} />
                             <Route path="/cooling-relief" element={<UpHeatwaveReliefMap />} />
