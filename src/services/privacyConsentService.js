@@ -112,6 +112,10 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_conflict_records_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_device_cursors_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_tombstones_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
+
+  { key: 'civicbridge_npsc_fee_history_v1', category: 'saved', exportAs: 'serviceFeeHistory', empty: [] }, // nationalPublicServiceCentreService.js
+  { key: 'civicbridge_npsc_fee_observations_v1', category: 'activity', exportAs: 'serviceFeeObservations', empty: [] }, // nationalPublicServiceCentreService.js
+
   { key: 'civicbridge_tenants_v1', category: 'activity', exportAs: null, empty: [] }, // tenantIsolationService.js (#779)
   { key: 'civicbridge_tenant_memberships_v1', category: 'activity', exportAs: null, empty: [] }, // tenantIsolationService.js (#779)
   { key: 'civicbridge_tenant_roles_v1', category: 'activity', exportAs: null, empty: [] }, // tenantIsolationService.js (#779)
@@ -145,6 +149,7 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_legal_draft_snapshots_v1', category: 'drafts', exportAs: 'legalDraftSnapshots', empty: [] }, // legalSourceStorage.js
   { key: 'civicbridge_legal_sources_audit_v1', category: 'drafts', exportAs: 'legalSourcesAuditLogs', empty: [] }, // legalSourceStorage.js
   { key: 'civicbridge_evidence_dossiers_v1', category: 'drafts', exportAs: 'evidenceDossiers', empty: [] }, // evidenceDossierStorage.js
+
 ];
 
 /**
@@ -241,6 +246,8 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_catalogue_completeness_dismissals',
   'civicbridge_public_notices_digest_v1',
   'civicbridge_service_availability_notices_v1',
+  'civicbridge_change_events',
+  'civicbridge_review_approvals',
   'civicbridge_source_conflicts',
   'civicbridge_conflict_audit_logs',
   'civicbridge_catalogue_enrichment_queue_v1',

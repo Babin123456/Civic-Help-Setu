@@ -27,11 +27,13 @@ import {
   KeyRound,
   Store,
 
+  Trees,
+  ReceiptText,
   Gift,
 
   Database,
   Building2,
-  Trees,
+  Route,
   Lightbulb,
   Leaf,
   ShieldAlert,
@@ -1044,6 +1046,13 @@ if (normalizedTarget === '/water-quality') {
               })}
 
               {renderNavLink({
+                to: '/fee-evidence',
+                activeTarget: '/fee-evidence',
+                label: 'Fee Evidence Assistant',
+                icon: ReceiptText
+              })}
+
+              {renderNavLink({
                 to: '/rental-checklist',
                 label: t('nav.rentalChecklist', 'Rental Checklist'),
                 icon: KeyRound
@@ -1301,6 +1310,12 @@ if (normalizedTarget === '/water-quality') {
                   to: '/saved',
                   label: t('nav.saved', 'Saved Guides'),
                   icon: Bookmark
+                })}
+
+                {renderNavLink({
+                  to: '/change-feed',
+                  label: t('nav.changeFeed', 'Change Feed'),
+                  icon: ShieldAlert
                 })}
 
                 {renderNavLink({

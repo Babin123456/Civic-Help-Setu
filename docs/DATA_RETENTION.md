@@ -127,7 +127,12 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_tree_reports_v1` | `treeInventoryMigrations.js` | Legacy citizen tree reports read once during migration | Reviews, votes and reports |
 | `civicbridge_tree_reporter_key` | `TreeHealthInventory.jsx` | Random local key used only to rate-limit and deduplicate citizen tree reports | Reviews, votes and reports |
 | `civicbridge_civic_works_reports_v1` | `civicWorksBoardService.js` | Ward civic works reports and moderation state | Reviews, votes and reports |
+
+| `civicbridge_npsc_fee_history_v1` | `nationalPublicServiceCentreService.js` | Locally recorded fee versions, sources, verification dates, and audit trails for receipt comparisons | Saved items |
+| `civicbridge_npsc_fee_observations_v1` | `nationalPublicServiceCentreService.js` | Community fee observations and their moderation state | Reviews, votes and reports |
+
 | `civicbridge_office_comparison_reports_v1` | `officeComparisonReportService.js` | Outdated office-record reports queued on this device when the review endpoint is unavailable: office id, reason, short note and optional official source. No identity or contact fields | Reviews, votes and reports |
+
 | `civicbridge_civic_works_clusters_v1` | `civicWorksBoardService.js` | Clustered duplicate ward reports | Reviews, votes and reports |
 | `civicbridge_civic_works_rate_limit_v1` | `civicWorksBoardService.js` | Ward report submission rate limit tracking | Reviews, votes and reports |
 
@@ -195,7 +200,7 @@ After clearing, the sample reviews, sample audit reports and the sample vault do
 | `civicbridge_reader_preferences` | User reading mode preferences (font size, contrast, spacing) | Display preference |
 | `civicbridge_catalogue_enrichment_queue_v1` | Proposed AI service enrichments pending admin review | Admin review queue |
 | `civicbridge_dismissed_recommendations`, `civicbridge_catalogue_completeness_dismissals` | Dismissed recommendation IDs and admin catalogue completeness quality check dismissals | UI dismissals and admin review state |
-| `civicbridge_custom_services`, `civicbridge_audit_logs`, `civicbridge_rbac_users`, `civicbridge_service_submissions` | Admin portal data | Not citizen data |
+| `civicbridge_custom_services`, `civicbridge_audit_logs`, `civicbridge_rbac_users`, `civicbridge_service_submissions`, `civicbridge_change_events`, `civicbridge_review_approvals` | Admin portal data and versioned civic service change events | Not citizen data |
 | `civicbridge_barrier_audit_logs`, `civicbridge_freshness_trust_reviews_v1`, `civicbridge_link_health_v1`, `civicbridge_public_notices_digest_v1`, `civicbridge_source_conflicts`, `civicbridge_conflict_audit_logs`, `civicbridge_duplicate_review_states` | Admin barrier moderation, freshness reviews, official link check results, public gazette digest cache, and source conflict audit queues | Admin portal moderation and public digest cache |
 | `civicbridge_barrier_audit_logs`, `civicbridge_freshness_trust_reviews_v1`, `civicbridge_public_notices_digest_v1`, `civicbridge_service_availability_notices_v1`, `civicbridge_source_conflicts`, `civicbridge_conflict_audit_logs` | Admin barrier moderation, freshness reviews, public gazette digest cache, and source conflict audit queues | Admin portal moderation and public digest cache |
 | `civicbridge_barrier_audit_logs`, `civicbridge_freshness_trust_reviews_v1`, `civicbridge_service_ownership_v1`, `civicbridge_public_notices_digest_v1`, `civicbridge_source_conflicts`, `civicbridge_conflict_audit_logs` | Admin barrier moderation, freshness reviews, service reviewer assignments, public gazette digest cache, and source conflict audit queues | Admin portal moderation and public digest cache |
