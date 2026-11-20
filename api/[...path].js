@@ -25,6 +25,7 @@ import openContractingAnalytics from "./_lib/handlers/open-contracting-analytics
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import schoolZoneAudits from "./_lib/handlers/school-zone-audits.js";
 import heatReliefObservations from "./_lib/handlers/heat-relief-observations.js";
 
 import { GET as graphGET, POST as graphPOST } from "./graph/route.js";
@@ -79,6 +80,9 @@ const handlers = {
   "water-quality-register": waterQualityRegister,
   "ward-issue-heatmap": wardIssueHeatmap,
   "water-tanker-reports": waterTankerReports,
+
+  "school-zone-audits": schoolZoneAudits,
+
   "public-projects": publicProjects,
   "tenant-administration": tenantAdministration,
   "ghg-inventory": ghgInventory,
@@ -100,6 +104,7 @@ const graphPostRoutes = {
   "graph/review/": reviewPOST,
   "graph/review/approve": approvePOST,
   "graph/review/reject": rejectPOST,
+
 };
 
 function getRoute(req) {

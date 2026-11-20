@@ -63,6 +63,7 @@ const FairPriceShopBoard = lazy(() => import('./pages/FairPriceShopBoard'));
 const TenderReadinessWorkspace = lazy(() => import('./pages/TenderReadinessWorkspace'));
 const CommunityFacilityDirectory = lazy(() => import('./pages/CommunityFacilityDirectory'));
 const RoadSafetyDashboard = lazy(() => import('./pages/RoadSafetyDashboard'));
+const UpSchoolZoneSafetyAudit = lazy(() => import('./pages/UpSchoolZoneSafetyAudit'));
 const LibraryDirectory = lazy(() => import('./pages/LibraryDirectory'));
 const WaterTankerTracker = lazy(() => import('./pages/WaterTankerTracker'));
 const AddressChangePlanner = lazy(() => import('./pages/AddressChangePlanner'));
@@ -290,6 +291,9 @@ function AppRoot() {
                             <Route path="/public-projects/:id" element={<PublicProjectsWorkspace />} />
                             <Route path="/road-safety" element={<RoadSafetyDashboard />} />
                             <Route path="/blackspots" element={<RoadSafetyDashboard />} />
+                            <Route path="/school-zone-safety" element={<UpSchoolZoneSafetyAudit />} />
+                            <Route path="/school-safety" element={<UpSchoolZoneSafetyAudit />} />
+                            <Route path="/up-school-safety" element={<UpSchoolZoneSafetyAudit />} />
                             <Route path="/tree-health" element={<TreeHealthInventory />} />
                             <Route path="/tree-inventory" element={<TreeHealthInventory />} />
                             <Route path="/streetlights" element={<StreetlightOutageWorkspace />} />
