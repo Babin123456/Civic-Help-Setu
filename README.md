@@ -114,6 +114,11 @@ A responsive design with theme support, built to provide a consistent experience
 
 Clear navigation, readable content, consistent interaction patterns, and a user-centered approach to public-service information.
 
+
+### 🧾 14. Public Service Centre Fee Evidence Assistant
+
+Compare charges on an assisted-service-centre receipt with verified, versioned fee schedules. Government, portal, authorised-centre, and optional service charges are shown separately; receipt identifiers are redacted by default and unknown components are marked unverified. The assistant never collects payment credentials or initiates transactions. See [the fee evidence guide](docs/public-service-centre-fee-evidence-assistant.md).
+
 ### 🧪 14. Privacy-Safe Synthetic Civic Dataset Generator
 
 Generate reproducible, schema-aware service guides, citizen applications, and grievance records with zero production PII, complete referential integrity, and one-click local development database loading (#778).
@@ -132,6 +137,7 @@ A reviewer-only workspace for responsive service-card layout checks. Render the 
 ### 🌱 17. Municipal Greenhouse-Gas Inventory & Emissions Reporting
 
 A role-scoped workspace for local-authority climate reporting. Departments submit activity data with units, periods, source-document metadata and correction notes; the service calculates explainable `tCO2e` with immutable versioned emission factors, separates measured, estimated and excluded values, and keeps every calculation reproducible. Reviewers approve submissions before totals are published, missing-data estimates require a human decision, and the public view exposes only approved aggregates. See [architecture, methodology and rollback documentation](docs/municipal-greenhouse-gas-inventory.md).
+
 
 ---
 

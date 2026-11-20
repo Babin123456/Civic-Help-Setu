@@ -79,6 +79,15 @@ export const DEVICE_ONLY_STORES = [
   { key: 'civicbridge_tombstones_v1', reason: 'Deletion tombstones stay on the device.' },
 
   { key: 'civicbridge_notice_deadline_state_v1', reason: 'Citizen deadline confirmations, edits and notes stay on this device until a cloud collection exists.' },
+
+  { key: 'civicbridge_hazard_reports_v1', reason: 'Citizen road hazard reports are local submissions kept on device before moderation.' },
+  { key: 'civicbridge_road_safety_rate_limit_v1', reason: 'Road safety rate-limiting timestamps are local bookkeeping and are never cloud-synced.' },
+  { key: 'civicbridge_review_cases_v1', reason: 'Road safety review cases and inspection logs stay on device.' },
+  { key: 'civicbridge_intervention_records_v1', reason: 'Road safety countermeasure records stay on device.' },
+
+  { key: 'civicbridge_npsc_fee_history_v1', reason: 'Locally recorded fee versions and audit trails stay on device until a verified backend is available.' },
+  { key: 'civicbridge_npsc_fee_observations_v1', reason: 'Community fee observations remain a local moderation queue and are not cloud-synced.' },
+
   { key: 'civicbridge_office_comparison_reports_v1', reason: 'Outdated office-record reports are non-sensitive community submissions kept on device until the review endpoint accepts them.' },
   { key: 'civicbridge_tenants_v1', reason: 'Tenant authority profiles are administrative workspace configurations.' },
   { key: 'civicbridge_tenant_memberships_v1', reason: 'Tenant staff memberships are authority-scoped RBAC records.' },
