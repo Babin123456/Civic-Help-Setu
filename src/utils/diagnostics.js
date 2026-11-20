@@ -59,9 +59,18 @@ export const ROUTE_PATTERNS = [
   '/fair-price-shops',
   '/tenders',
   '/tender-readiness',
+
+  '/services/ward-budget-proposal',
+  '/ward-budget',
+  '/ward-budget/:id',
+  '/fee-evidence',
+  '/fee-evidence-assistant',
+  '/service-centre-fees',
+
   '/open-contracting',
   '/procurement-analytics',
   '/open-contracting/:id',
+
   '/community-facilities',
   '/facility-directory',
   '/water-tanker',
