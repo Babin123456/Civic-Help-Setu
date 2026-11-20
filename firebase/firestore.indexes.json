@@ -1,7 +1,6 @@
 {
   "indexes": [
 
-    // shelter_sites indexes
     {
       "collectionGroup": "shelter_sites",
       "fields": [
@@ -14,7 +13,6 @@
         { "fieldPath": "createdAt", "mode": "DESC" }
       ]
     },
-    // capacity_snapshots indexes
     {
       "collectionGroup": "capacity_snapshots",
       "fields": [
@@ -23,7 +21,6 @@
         { "fieldPath": "createdAt", "mode": "DESC" }
       ]
     },
-    // facility_services indexes
     {
       "collectionGroup": "facility_services",
       "fields": [
@@ -33,7 +30,6 @@
         { "fieldPath": "createdAt", "mode": "DESC" }
       ]
     },
-    // status_events indexes
     {
       "collectionGroup": "status_events",
       "fields": [
@@ -42,7 +38,6 @@
         { "fieldPath": "createdAt", "mode": "DESC" }
       ]
     },
-    // verification_checks indexes
     {
       "collectionGroup": "verification_checks",
       "fields": [
