@@ -59,6 +59,7 @@ import FeeEvidenceAssistant from './pages/FeeEvidenceAssistant';
 
 
 import ShelterStatusBoard from './pages/ShelterStatusBoard';
+const ResourceExchangePage = lazy(() => import('./components/resource-exchange/ResourceExchangePage'));
 
 
 const Home = lazy(() => import('./pages/Home'));
@@ -332,6 +333,7 @@ function AppRoot() {
                               <Route path="/open-contracting/:id" element={<OpenContractingWorkspace />} />
                               <Route path="/community-facilities" element={<CommunityFacilityDirectory />} />
                               <Route path="/facility-directory" element={<CommunityFacilityDirectory />} />
+                              <Route path="/neighbourhood-resource-exchange" element={<ResourceExchangePage />} />
                               <Route path="/water-tanker" element={<WaterTankerTracker />} />
                               <Route path="/water-tankers" element={<WaterTankerTracker />} />
 
