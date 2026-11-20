@@ -101,6 +101,10 @@ export const USER_DATA_STORES = [
   { key: 'civicbridge_tree_reports_v1', category: 'activity', exportAs: null }, // legacy tree reports
   { key: 'civicbridge_tree_reporter_key', category: 'activity', exportAs: null }, // TreeHealthInventory.jsx
 
+  // Heatwave relief community observations and offline drafts (#983)
+  { key: 'civicbridge_up_heat_observations_v1', category: 'activity', exportAs: null }, // upHeatwaveReliefService.js
+  { key: 'civicbridge_up_heat_draft_queue_v1', category: 'drafts', exportAs: null }, // upHeatwaveReliefService.js
+
   { key: 'civicbridge_citizen_drafts_v1', category: 'drafts', exportAs: 'citizenDrafts', empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_offline_operations_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
   { key: 'civicbridge_sync_sessions_v1', category: 'drafts', exportAs: null, empty: {} }, // citizenDraftSyncEngine.js
@@ -291,6 +295,11 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_tree_rate_limit_v1',
   'civicbridge_tree_migration_backup_v1',
   'civicbridge_trees_v1',
+
+  // Municipal heatwave cooling-relief register and rate-limit guard (#983)
+  'civicbridge_up_heat_relief_facilities_v1',
+  'civicbridge_up_heat_rate_limits_v1',
+
   // Anonymized ward-level civic issue heatmap, aggregation runs, and privacy rules
   'civicbridge_ward_issue_events_v1',
   'civicbridge_ward_geometries_v1',
@@ -332,6 +341,7 @@ export const RETAINED_STORAGE_KEYS = [
   'civic_relief_audit_logs_v1',
   'civic_relief_archive_v1',
   'civic_relief_meta_v1',
+
   // Handled by purge itself: consents are reset, the audit log keeps the deletion receipt
   CONSENT_STORAGE_KEY,
   AUDIT_STORAGE_KEY,

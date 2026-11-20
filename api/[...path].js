@@ -25,6 +25,7 @@ import openContractingAnalytics from "./_lib/handlers/open-contracting-analytics
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import heatReliefObservations from "./_lib/handlers/heat-relief-observations.js";
 
 import { GET as graphGET, POST as graphPOST } from "./graph/route.js";
 import {
@@ -58,7 +59,11 @@ const handlers = {
   "email/preferences": emailPreferences,
   "email/verify": emailVerify,
   "fire-compliance-feedback": fireCompliance,
+
+  "heat-relief-observations": heatReliefObservations,
+
   "knowledge-provenance": knowledgeProvenance,
+
   "library-corrections": libraryCorrections,
   "office-comparison": officeComparison,
   "open-contracting-analytics": openContractingAnalytics,
