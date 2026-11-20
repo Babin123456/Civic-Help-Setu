@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { AlertOctagon, ArrowLeft, Bookmark, Calculator, Check, Link2, Printer, Share2, Zap, Users, Eye, CheckSquare, FileText, Sparkles, RotateCcw, Edit2, ShieldCheck, Mail, Leaf, Navigation, GitFork, ShieldAlert } from 'lucide-react';
+import { AlertOctagon, ArrowLeft, Bookmark, Calculator, Check, Link2, Printer, Share2, Zap, Users, Eye, CheckSquare, FileText, Sparkles, RotateCcw, Edit2, ShieldCheck, Mail, Leaf, Navigation, GitFork, ShieldAlert, Layers } from 'lucide-react';
 import { getServiceById } from '../services/serviceCatalog';
 import RetiredServiceNotice from '../components/common/RetiredServiceNotice';
 import ServiceQrHandout from '../components/services/ServiceQrHandout';
@@ -1258,6 +1258,47 @@ const ServiceDetails = ({ previewService = null }) => {
               </div>
             </div>
           )}
+
+          {/* Multi-Authority Jurisdiction Hand-off Map (#815) */}
+          <div
+            style={{
+              padding: '1.25rem',
+              marginBottom: '1.25rem',
+              border: '1px solid var(--accent-main, #38bdf8)',
+              background: 'var(--bg-card)',
+              borderRadius: '1rem',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div style={{ maxWidth: '650px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                  <Layers size={18} color="var(--accent-main, #38bdf8)" />
+                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
+                    Multi-Authority Jurisdiction Hand-off Map
+                  </h3>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  View which Ward, Municipal, District, State, or Central authority handles each stage of this service in your locality.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <Link
+                  to={`/services/${service.id}/jurisdiction-map`}
+                  className="btn btn-primary"
+                  style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                >
+                  Open Hand-off Map
+                </Link>
+                <Link
+                  to={`/jurisdiction-handoff?service=${service.id}`}
+                  className="btn btn-secondary"
+                  style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                >
+                  Authority Navigator
+                </Link>
+              </div>
+            </div>
+          </div>
 
           {/* Anonymized Ward-Level Civic Issue Heatmap */}
           {service.id === 'ward-issue-heatmap' && (

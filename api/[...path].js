@@ -48,6 +48,7 @@ import tenantAdministration from "./_lib/handlers/tenant-administration.js";
 import ghgInventory from "./_lib/handlers/ghg-inventory.js";
 import microVolunteer from "./_lib/handlers/micro-volunteer.js";
 import reliefOperations from "./_lib/handlers/relief-operations.js";
+import jurisdictionHandoff from "./_lib/handlers/jurisdiction-handoff.js";
 
 
 const handlers = {
@@ -87,6 +88,7 @@ const handlers = {
   "micro-volunteer": microVolunteer,
   "micro-volunteer-board": microVolunteer,
   "relief-operations": reliefOperations,
+  "jurisdiction-handoff": jurisdictionHandoff,
 };
 
 // Terminology graph routes

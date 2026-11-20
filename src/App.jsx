@@ -110,6 +110,7 @@ const RteAdmissionWorkspace = lazy(() => import('./pages/RteAdmissionWorkspace')
 const EvidenceDossierWorkspace = lazy(() => import('./pages/EvidenceDossierWorkspace'));
 const ChangeFeedPage = lazy(() => import('./pages/ChangeFeedPage'));
 const FeeEvidenceAssistant = lazy(() => import('./pages/FeeEvidenceAssistant'));
+const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHandoffWorkspace'));
 const Services = lazy(() => import('./pages/Services'));
 
 const ServicesFallback = () => (
@@ -168,6 +169,10 @@ function AppRoot() {
                             <Route path="/services/catalogue-visual-qa" element={<CatalogueVisualQaWorkspace />} />
                             <Route path="/catalogue-visual-qa" element={<CatalogueVisualQaWorkspace />} />
                             <Route path="/visual-qa" element={<CatalogueVisualQaWorkspace />} />
+                            <Route path="/services/jurisdiction-handoff" element={<JurisdictionHandoffWorkspace />} />
+                            <Route path="/jurisdiction-handoff" element={<JurisdictionHandoffWorkspace />} />
+                            <Route path="/services/:id/jurisdiction-map" element={<JurisdictionHandoffWorkspace />} />
+                            <Route path="/jurisdiction-map" element={<JurisdictionHandoffWorkspace />} />
                             <Route path="/services/change-feed" element={<ChangeFeedPage />} />
                             <Route path="/change-feed" element={<ChangeFeedPage />} />
                             <Route path="/services/ward-budget-proposal" element={<WardBudgetWorkspace />} />
