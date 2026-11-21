@@ -1,13 +1,19 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import handler, {
+import {
+  createPublicToiletHandler,
   validateToiletSubmissionPayload,
   generateToiletReceiptSeal,
-  TOILET_SUBMISSION_QUEUE,
 } from './public-toilets.js';
+import { FirestoreToiletStore } from '../publicToiletStore.js';
+import { ToiletFirestoreFixture } from '../../../tests/helpers/toiletFirestore.js';
+
+let handler;
+let db;
 
 describe('Public Toilet Serverless API Handler (#758)', () => {
   beforeEach(() => {
-    TOILET_SUBMISSION_QUEUE.length = 0;
+    db = new ToiletFirestoreFixture();
+    handler = createPublicToiletHandler({ getStore: async () => new FirestoreToiletStore(db) });
   });
 
   const createMockRes = () => {
@@ -75,7 +81,7 @@ describe('Public Toilet Serverless API Handler (#758)', () => {
   it('successfully processes valid incident report and returns 201 with receipt seal', async () => {
     const req = {
       method: 'POST',
-      headers: { 'x-forwarded-for': '127.0.0.1' },
+      headers: { 'x-forwarded-for': '127.0.0.1', 'idempotency-key': 'valid-test-key-123456' },
       body: {
         facilityId: 'pt-blr-ward150-001',
         reportType: 'maintenance_issue',
@@ -88,9 +94,9 @@ describe('Public Toilet Serverless API Handler (#758)', () => {
     await handler(req, res);
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toBe(true);
-    expect(res.body.receiptSeal).toMatch(/^PT-SEAL-/);
-    expect(TOILET_SUBMISSION_QUEUE.length).toBe(1);
-    expect(TOILET_SUBMISSION_QUEUE[0].facilityId).toBe('pt-blr-ward150-001');
+    expect(res.body.receiptSeal).toMatch(/^PT-[a-f0-9-]{36}$/);
+    expect(db.records.size).toBe(1);
+    expect([...db.records.values()][0].facilityId).toBe('pt-blr-ward150-001');
   });
 });
 

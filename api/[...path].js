@@ -31,11 +31,11 @@ import heatReliefObservations from "./_lib/handlers/heat-relief-observations.js"
 
 import { GET as graphGET, POST as graphPOST } from "./graph/route.js";
 import {
-  GET as reviewQueueGET,
+  GET_REVIEW_QUEUE as reviewQueueGET,
   POST as reviewPOST,
-  POST as approvePOST,
-  POST as rejectPOST,
-} from "./graph/review/route.js";
+  POST_APPROVE as approvePOST,
+  POST_REJECT as rejectPOST,
+} from "./graph/route.js";
 
 import accessibilityInspector from "./_lib/handlers/accessibility-inspector.js";
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   CheckCircle2,
   XCircle,
@@ -7,61 +7,75 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function PublicToiletReviewQueue() {
+  const { user, getSessionToken } = useAuth();
+  return <PublicToiletQueue key={`${user?.id || 'guest'}:${user?.role || 'none'}`} getSessionToken={getSessionToken} />;
+}
+
+function PublicToiletQueue({ getSessionToken }) {
   const { toast } = useToast();
-  const [items, setItems] = useState([
-    {
-      id: 'sub_seed_pt_01',
-      facilityId: 'pt-blr-ward150-001',
-      facilityName: 'Koramangala 5th Block Community Sanitation Complex',
-      reportType: 'maintenance_issue',
-      category: 'plumbing_leak',
-      description: 'Flush valve leaking in cabin 2, water continuously running.',
-      receiptSeal: 'PT-SEAL-8B12-4F91',
-      submittedAt: '2026-11-16T08:30:00Z',
-      status: 'pending_review',
-    },
-    {
-      id: 'sub_seed_pt_02',
-      facilityId: 'pt-del-ward045-003',
-      facilityName: 'Connaught Place Central Park She-Toilet Complex',
-      reportType: 'citizen_feedback',
-      category: 'hygiene_cleanliness',
-      description: 'Sanitary napkin dispenser empty, liquid hand soap refilled and clean.',
-      receiptSeal: 'PT-SEAL-2C44-91EA',
-      submittedAt: '2026-11-16T10:15:00Z',
-      status: 'pending_review',
-    },
-  ]);
+  const [items, setItems] = useState([]);
+  const [nextCursor, setNextCursor] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const generation = useRef(0);
+
+  const loadPage = useCallback(async (epoch, cursor = null) => {
+    try {
+      const token = await getSessionToken?.();
+      if (generation.current !== epoch) return;
+      setLoading(true);
+      setError('');
+      if (!token) throw new Error('Sign in as an administrator to load the moderation queue.');
+      if (generation.current !== epoch) return;
+      const query = new URLSearchParams({ view: 'moderation', limit: '20' });
+      if (cursor) query.set('cursor', cursor);
+      const response = await fetch('/api/public-toilets?' + query, { headers: { Authorization: 'Bearer ' + token } });
+      if (!response.ok) throw new Error('The moderation queue is unavailable. Please retry.');
+      const data = await response.json();
+      if (generation.current !== epoch) return;
+      setItems(previous => cursor
+        ? [...previous, ...data.items.filter(item => !previous.some(old => old.id === item.id))]
+        : data.items);
+      setNextCursor(data.nextCursor);
+    } catch (failure) {
+      if (generation.current === epoch) setError(failure.message);
+    } finally {
+      if (generation.current === epoch) setLoading(false);
+    }
+  }, [getSessionToken]);
 
   useEffect(() => {
-    fetch('/api/public-toilets')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data && Array.isArray(data.items) && data.items.length > 0) {
-          setItems((prev) => {
-            const existingIds = new Set(prev.map((i) => i.id));
-            const newItems = data.items.filter((i) => !existingIds.has(i.id));
-            return [...newItems, ...prev];
-          });
-        }
-      })
-      .catch(() => {
-        // Fallback to initial seeds
-      });
-  }, []);
+    const reference = generation;
+    const epoch = ++reference.current;
+    loadPage(epoch);
+    return () => { reference.current = epoch + 1; };
+  }, [loadPage]);
 
-  const handleApprove = (id) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: 'approved_forwarded' } : item))
-    );
-    toast?.success?.('Incident report approved and forwarded to ward sanitation team.');
+  const review = async (id, decision) => {
+    const epoch = generation.current;
+    try {
+      const token = await getSessionToken?.();
+      if (!token) throw new Error('Administrator sign-in is required.');
+      const response = await fetch('/api/public-toilets', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ id, decision }),
+      });
+      if (!response.ok) throw new Error('Review was not saved. Reload the queue and retry.');
+      if (generation.current !== epoch) return;
+      setItems(previous => previous.map(item => item.id === id ? { ...item, status: decision } : item));
+      toast?.success?.('Review saved.');
+    } catch (failure) {
+      if (generation.current === epoch) setError(failure.message);
+    }
   };
+  const handleApprove = id => review(id, 'approved');
 
   const handleDismiss = (id) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-    toast?.success?.('Submission cleared from moderation queue.');
+    return review(id, 'dismissed');
   };
 
   return (
@@ -83,7 +97,7 @@ export default function PublicToiletReviewQueue() {
               Public Toilet Moderation &amp; Maintenance Review Queue
             </h3>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Moderation of citizen sanitation tickets, hygiene feedback, and cryptographic receipts
+              Moderation of citizen sanitation tickets, hygiene feedback, and tracking receipts
             </span>
           </div>
         </div>
@@ -97,14 +111,16 @@ export default function PublicToiletReviewQueue() {
             fontWeight: 600,
           }}
         >
-          {items.length} Pending Actions
+          {items.length} Reports Loaded
         </span>
       </div>
 
-      {items.length === 0 ? (
+      {error && <p role="alert">{error} <button type="button" onClick={() => loadPage(generation.current)}>Retry</button></p>}
+      {loading && <p role="status">Loading reports…</p>}
+      {!error && !loading && items.length === 0 ? (
         <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
           <ShieldCheck size={32} style={{ margin: '0 auto 0.5rem auto', color: 'var(--success-main, #22c55e)' }} />
-          All public toilet incident reports and feedback submissions are moderated.
+          No public toilet reports on this page.
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
@@ -139,7 +155,7 @@ export default function PublicToiletReviewQueue() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                   <Clock size={12} />
-                  <span>{new Date(item.submittedAt).toLocaleString()}</span>
+                  <span>{new Date(item.timestamp).toLocaleString()}</span>
                 </div>
               </div>
 
@@ -153,23 +169,24 @@ export default function PublicToiletReviewQueue() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.4rem' }}>
-                  {item.status !== 'approved_forwarded' ? (
+                  {item.status === 'queued_for_moderation' ? (
                     <button
                       type="button"
                       onClick={() => handleApprove(item.id)}
                       className="btn btn-primary"
                       style={{ fontSize: '0.75rem', padding: '0.25rem 0.55rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
                     >
-                      <CheckCircle2 size={13} /> Approve &amp; Dispatch
+                      <CheckCircle2 size={13} /> Approve
                     </button>
                   ) : (
                     <span style={{ fontSize: '0.75rem', color: 'var(--success-main)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                      <CheckCircle2 size={13} /> Dispatched to Ward
+                      <CheckCircle2 size={13} /> {item.status}
                     </span>
                   )}
                   <button
                     type="button"
                     onClick={() => handleDismiss(item.id)}
+                    disabled={item.status !== 'queued_for_moderation'}
                     className="btn btn-outline"
                     style={{ fontSize: '0.75rem', padding: '0.25rem 0.55rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
                   >
@@ -181,6 +198,7 @@ export default function PublicToiletReviewQueue() {
           ))}
         </div>
       )}
+      {nextCursor && <button type="button" disabled={loading} onClick={() => loadPage(generation.current, nextCursor)}>Load more reports</button>}
     </div>
   );
 }

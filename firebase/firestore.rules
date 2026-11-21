@@ -577,6 +577,11 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Server API only: verified Clerk moderators use Admin SDK transactions.
+    match /publicToiletSubmissions/{submissionId} {
+      allow read, write: if false;
+    }
+
     // ---------- everything else ----------
     match /{document=**} {
       allow read, write: if false;

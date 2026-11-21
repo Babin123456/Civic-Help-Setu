@@ -1,14 +1,20 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import apiRouter from '../api/[...path].js';
-import handler, {
+import {
+  createPublicToiletHandler,
   validateToiletSubmissionPayload,
   generateToiletReceiptSeal,
-  TOILET_SUBMISSION_QUEUE,
 } from '../api/_lib/handlers/public-toilets.js';
+import { FirestoreToiletStore } from '../api/_lib/publicToiletStore.js';
+import { ToiletFirestoreFixture } from './helpers/toiletFirestore.js';
+
+let handler;
+let db;
 
 describe('tests/public-toilets API endpoint (#758)', () => {
   beforeEach(() => {
-    TOILET_SUBMISSION_QUEUE.length = 0;
+    db = new ToiletFirestoreFixture();
+    handler = createPublicToiletHandler({ getStore: async () => new FirestoreToiletStore(db) });
   });
 
   const createMockRes = () => {
@@ -89,7 +95,7 @@ describe('tests/public-toilets API endpoint (#758)', () => {
   it('successfully handles valid POST submission and returns receipt seal', async () => {
     const req = {
       method: 'POST',
-      headers: { 'x-forwarded-for': '127.0.0.1' },
+      headers: { 'x-forwarded-for': '127.0.0.1', 'idempotency-key': 'valid-test-key-123456' },
       body: {
         facilityId: 'pt-blr-ward150-001',
         reportType: 'citizen_feedback',
@@ -102,7 +108,7 @@ describe('tests/public-toilets API endpoint (#758)', () => {
     await handler(req, res);
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toBe(true);
-    expect(res.body.receiptSeal).toMatch(/^PT-SEAL-/);
-    expect(TOILET_SUBMISSION_QUEUE.length).toBe(1);
+    expect(res.body.receiptSeal).toMatch(/^PT-[a-f0-9-]{36}$/);
+    expect(db.records.size).toBe(1);
   });
 });
