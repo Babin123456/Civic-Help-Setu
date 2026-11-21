@@ -15,8 +15,8 @@
  * - Pagination/aggregation used for large datasets rather than loading entire catalogues.
  */
 
-import { scanAccessibility, summarizeScan, RULE_IDS, SEVERITY, SEVERITY_COLORS } from '../../src/services/accessibilityInspector/accessibilityInspectorService.js';
-import { createScanRun, updateScanRun, getCurrentScan, getAllScanRuns, removeScanRun, addRemediationNote, getRemediationNote, SCAN_STATUS } from '../../src/services/accessibilityInspector/accessibilityInspectorStorage.js';
+import { scanAccessibility, summarizeScan, RULE_IDS, SEVERITY, SEVERITY_COLORS } from '../../../src/services/accessibilityInspector/accessibilityInspectorService.js';
+import { createScanRun, updateScanRun, getCurrentScan, getAllScanRuns, removeScanRun, addRemediationNote, getRemediationNote, SCAN_STATUS } from '../../../src/services/accessibilityInspector/accessibilityInspectorStorage.js';
 
 // ---------------------------------------------------------------------------
 // PII redaction: strip any accidental sensitive data from payloads

@@ -23,7 +23,7 @@ Public service information changes frequently. If you notice outdated or incorre
 7. Issue that pull request!
 
 ## Testing
-The [pull request quality workflow](.github/workflows/pr-quality.yml) runs on every pull request to `main` and every push to `main`. It uses Node.js 22.12.0 and the committed npm lockfile. Run the same checks locally before opening a pull request:
+The [pull request quality workflow](.github/workflows/pr-quality.yml) runs on every pull request to `main` and every push to `main`. It uses Node.js 22 (22.19.0 or newer, as required by the locked dependencies) and the committed npm lockfile. Run the same checks locally before opening a pull request:
 
 ```bash
 npm ci

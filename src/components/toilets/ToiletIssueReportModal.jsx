@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, CheckCircle2 } from 'lucide-react';
 import { TICKET_CATEGORIES, TICKET_SEVERITY, containsPII } from '../../data/publicToiletContract';
 import { reportMaintenanceIssue, submitFeedback } from '../../services/publicToiletService';
-import { generateToiletReceiptSeal } from '../../../api/_lib/handlers/public-toilets';
 import { useToast } from '../../context/ToastContext';
 
 const CATEGORY_DISPLAY_NAMES = {
@@ -29,6 +28,7 @@ export default function ToiletIssueReportModal({ facility, onClose, onSuccess })
   const [errorMessage, setErrorMessage] = useState('');
   const [receiptResult, setReceiptResult] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const submission = useRef(null);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -40,7 +40,7 @@ export default function ToiletIssueReportModal({ facility, onClose, onSuccess })
 
   if (!facility) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
 
@@ -61,8 +61,27 @@ export default function ToiletIssueReportModal({ facility, onClose, onSuccess })
 
     setSubmitting(true);
     try {
-      const timestamp = new Date().toISOString();
-      const seal = generateToiletReceiptSeal(facility.id, timestamp);
+      const payload = {
+        facilityId: facility.id,
+        reportType: reportMode === 'ticket' ? 'maintenance_issue' : 'citizen_feedback',
+        category, description,
+        ...(reportMode === 'feedback' ? { rating, cleanlinessLevel } : { severity }),
+      };
+      const fingerprint = JSON.stringify(payload);
+      if (submission.current?.fingerprint !== fingerprint) {
+        submission.current = { fingerprint, key: crypto.randomUUID() };
+      }
+      const response = await fetch('/api/public-toilets', {
+        method: 'POST', headers: {
+          'Content-Type': 'application/json', 'Idempotency-Key': submission.current.key,
+        }, body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.receiptSeal || !result.submittedAt) {
+        throw new Error('The report could not be saved. Please retry; your report has not been confirmed.');
+      }
+      // The server receipt is authoritative. Local directory state is a best-effort mirror.
+      try {
 
       if (reportMode === 'ticket') {
         reportMaintenanceIssue(
@@ -80,13 +99,14 @@ export default function ToiletIssueReportModal({ facility, onClose, onSuccess })
           rating,
           cleanlinessLevel,
           comment: description,
-          idempotencyKey: `idem-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          idempotencyKey: submission.current.key,
         });
       }
 
+      } catch { /* A local mirror failure must not invalidate the durable receipt. */ }
       setReceiptResult({
-        seal,
-        timestamp,
+        seal: result.receiptSeal,
+        timestamp: result.submittedAt,
         mode: reportMode,
       });
 
@@ -164,7 +184,7 @@ export default function ToiletIssueReportModal({ facility, onClose, onSuccess })
               Submission Recorded & Queued
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.25rem' }}>
-              Your observation has been registered into the municipal sanitation pipeline.
+              Your report has been saved for administrator review.
             </p>
             <div
               style={{
@@ -176,7 +196,7 @@ export default function ToiletIssueReportModal({ facility, onClose, onSuccess })
               }}
             >
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Cryptographic Tracking Receipt Seal
+                Tracking Receipt
               </div>
               <code style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary-main)', display: 'block', margin: '0.35rem 0' }}>
                 {receiptResult.seal}

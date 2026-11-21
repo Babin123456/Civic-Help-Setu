@@ -4,20 +4,16 @@
  * citizen feedback, and operator status updates (#758).
  *
  * Invariants:
- *  - Rate limiting & single-flight deduplication via abuseGuard.
+ *  - Rate limiting via abuseGuard; durable transactional idempotency.
  *  - Honeypot anti-bot validation.
  *  - Zero PII: Rejects submissions containing Aadhaar, PAN, phone numbers, or passwords.
- *  - Generates verifiable cryptographic receipt seal for citizen tracking.
+ *  - Returns a server-issued receipt only after durable persistence.
  *  - Queued for audit and moderation before persisting to verified public directory records.
  */
 
-import { createRateLimiter, createSingleFlight } from '../abuseGuard.js';
-
-const rateLimiter = createRateLimiter({ limit: 15, windowMs: 60 * 1000 });
-const singleFlight = createSingleFlight();
-
-// In-memory moderation queue for serverless runtime
-export const TOILET_SUBMISSION_QUEUE = [];
+import { createRateLimiter } from '../abuseGuard.js';
+import { getProductionToiletStore } from '../publicToiletStore.js';
+import { authorizeToiletModerator } from '../toiletModerator.js';
 
 const AADHAAR_REGEX = /\b\d{4}\s?\d{4}\s?\d{4}\b/;
 const PAN_REGEX = /\b[A-Z]{5}[0-9]{4}[A-Z]\b/i;
@@ -34,6 +30,7 @@ const sanitizeText = (val, maxLen = 1000) => {
     .slice(0, maxLen);
 };
 
+/** Legacy display checksum only; durable receipts are issued by the store. */
 export const generateToiletReceiptSeal = (facilityId, timestamp) => {
   const seed = `${facilityId}|${timestamp}|CIVIC_TOILET_SEAL`;
   let hash = 0x811c9dc5;
@@ -49,7 +46,7 @@ export const generateToiletReceiptSeal = (facilityId, timestamp) => {
 
 export function validateToiletSubmissionPayload(body) {
   const errors = [];
-  if (!body || typeof body !== 'object') {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
     return ['Request body must be a valid JSON object.'];
   }
 
@@ -95,20 +92,48 @@ export function validateToiletSubmissionPayload(body) {
   return errors;
 }
 
-export default async function handler(req, res) {
+export function createPublicToiletHandler({
+  getStore = getProductionToiletStore,
+  authorizeModerator = authorizeToiletModerator,
+} = {}) {
+const rateLimiter = createRateLimiter({ limit: 15, windowMs: 60 * 1000 });
+return async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
+  if ((req.method === 'GET' && req.query?.view === 'moderation') || req.method === 'PATCH') {
+    let actor;
+    try { actor = await authorizeModerator(req); }
+    catch { return res.status(503).json({ error: 'moderation_access_unavailable' }); }
+    if (actor.status) return res.status(actor.status).json({ error: 'moderation_access_denied' });
+    if (!actor.userId) return res.status(403).json({ error: 'moderation_access_denied' });
+    try {
+      const store = await getStore();
+      if (req.method === 'PATCH') {
+        const { id, decision } = req.body || {};
+        if (typeof id !== 'string' || !['approved', 'dismissed'].includes(decision)) {
+          return res.status(400).json({ error: 'invalid_review' });
+        }
+        return res.status(200).json(await store.review(id, decision, actor.userId));
+      }
+      const limit = req.query?.limit === undefined ? 20 : Number(req.query.limit);
+      if (!Number.isInteger(limit) || limit < 1 || limit > 50) return res.status(400).json({ error: 'invalid_limit' });
+      return res.status(200).json(await store.list({ limit, cursor: req.query?.cursor }));
+    } catch (error) {
+      const status = { invalid_cursor: 400, invalid_id: 400, not_found: 404, review_conflict: 409 }[error.code] || 503;
+      return res.status(status).json({ error: status === 503 ? 'storage_unavailable' : error.code });
+    }
+  }
   if (req.method === 'GET') {
     return res.status(200).json({
       status: 'healthy',
       service: 'public-toilet-service',
       schemaVersion: 1,
-      pendingCount: TOILET_SUBMISSION_QUEUE.length,
-      items: TOILET_SUBMISSION_QUEUE,
-      endpoints: ['POST /api/public-toilets'],
+      endpoints: ['POST /api/public-toilets', 'GET /api/public-toilets?view=moderation'],
     });
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed. Use GET or POST.' });
+    res.setHeader('Allow', 'GET, POST, PATCH');
+    return res.status(405).json({ error: 'Method not allowed.' });
   }
 
   // IP extraction for rate limiting
@@ -126,7 +151,6 @@ export default async function handler(req, res) {
     });
   }
 
-  return singleFlight.run(clientIp, async () => {
     try {
       const payload = req.body || {};
       const validationErrors = validateToiletSubmissionPayload(payload);
@@ -137,35 +161,45 @@ export default async function handler(req, res) {
           details: validationErrors,
         });
       }
+      const key = req.headers?.['idempotency-key'] || payload.idempotencyKey;
+      if (typeof key !== 'string' || !/^[A-Za-z0-9_-]{16,128}$/.test(key)) {
+        return res.status(400).json({ error: 'valid_idempotency_key_required' });
+      }
+      if (payload.rating !== undefined && (!Number.isInteger(payload.rating) || payload.rating < 1 || payload.rating > 5)) {
+        return res.status(400).json({ error: 'invalid_rating' });
+      }
 
-      const timestamp = new Date().toISOString();
+      if (payload.severity !== undefined && !['low', 'medium', 'high', 'critical'].includes(payload.severity)) {
+        return res.status(400).json({ error: 'invalid_severity' });
+      }
+      if (payload.cleanlinessLevel !== undefined && !['spotless', 'clean', 'moderate', 'dirty', 'unusable'].includes(payload.cleanlinessLevel)) {
+        return res.status(400).json({ error: 'invalid_cleanliness_level' });
+      }
       const facilityId = sanitizeText(payload.facilityId, 100);
-      const receiptSeal = generateToiletReceiptSeal(facilityId, timestamp);
 
       const submissionEntry = {
-        id: `pts-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
         facilityId,
         reportType: sanitizeText(payload.reportType, 50),
         description: sanitizeText(payload.description || payload.comment || '', 1000),
         category: sanitizeText(payload.category || 'hygiene_cleanliness', 50),
-        rating: Number(payload.rating) || undefined,
-        receiptSeal,
-        timestamp,
-        status: 'queued_for_moderation',
+        ...(payload.rating !== undefined ? { rating: payload.rating } : {}),
+        ...(payload.severity !== undefined ? { severity: payload.severity } : {}),
+        ...(payload.cleanlinessLevel !== undefined ? { cleanlinessLevel: payload.cleanlinessLevel } : {}),
       };
-
-      TOILET_SUBMISSION_QUEUE.push(submissionEntry);
+      const record = await (await getStore()).create(submissionEntry, key);
 
       return res.status(201).json({
         success: true,
-        receiptSeal,
+        receiptSeal: record.receiptSeal,
         message: 'Report submitted successfully and queued for verification.',
-        submittedAt: timestamp,
+        submittedAt: record.timestamp,
       });
-    } catch {
-      return res.status(500).json({
-        error: 'An unexpected internal error occurred while processing the report.',
+    } catch (error) {
+      return res.status(error.code === 'idempotency_conflict' ? 409 : 503).json({
+        error: error.code === 'idempotency_conflict' ? 'idempotency_conflict' : 'storage_unavailable',
       });
     }
-  });
+};
 }
+
+export default createPublicToiletHandler();

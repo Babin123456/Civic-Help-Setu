@@ -1,6 +1,6 @@
-import { getTerminologyGraph } from '../../../../src/data/terminologyGraph.js';
-import { RELATIONSHIP_TYPES, EDGE_REVIEW_STATUS } from '../../../../src/data/terminologyGraph.js';
-import { getAllServices, getServiceById } from '../../../../src/services/serviceCatalog.js';
+import { getTerminologyGraph } from '../../src/data/terminologyGraph.js';
+import { RELATIONSHIP_TYPES, EDGE_REVIEW_STATUS } from '../../src/data/terminologyGraph.js';
+import { getAllServices, getServiceById } from '../../src/services/serviceCatalog.js';
 
 // GET /api/graph - Get the terminology relationship graph data
 export const GET = async (request) => {
