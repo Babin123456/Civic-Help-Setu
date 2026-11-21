@@ -57,6 +57,7 @@ const PropertyTaxNoDuesGuidePage = lazy(() => import('./pages/PropertyTaxNoDuesG
 const SmallBusinessLicencePage = lazy(() => import('./pages/SmallBusinessLicencePage'));
 const FireSafetyGuidePage = lazy(() => import('./pages/FireSafetyGuidePage'));
 const TreePermissionGuidePage = lazy(() => import('./pages/TreePermissionGuidePage'));
+const TransgenderCertificateWelfarePage = lazy(() => import('./pages/TransgenderCertificateWelfarePage'));
 const CivicWorksBoard = lazy(() => import('./pages/CivicWorksBoard'));
 const MicroVolunteerTaskBoard = lazy(() => import('./pages/MicroVolunteerTaskBoard'));
 const TreeHealthInventory = lazy(() => import('./pages/TreeHealthInventory'));
@@ -161,6 +162,10 @@ function AppRoot() {
                             <Route path="/business-licence-checklist" element={<SmallBusinessLicencePage />} />
                             <Route path="/services/fire-noc-guide" element={<FireSafetyGuidePage />} />
                             <Route path="/fire-noc-guide" element={<FireSafetyGuidePage />} />
+                            <Route path="/services/transgender-certificate-welcome" element={<TransgenderCertificateWelfarePage />} />
+                            <Route path="/transgender-certificate-welcome" element={<TransgenderCertificateWelfarePage />} />
+                            <Route path="/services/transgender-certificate-welfare" element={<TransgenderCertificateWelfarePage />} />
+                            <Route path="/transgender-certificate-welfare" element={<TransgenderCertificateWelfarePage />} />
                             <Route path="/services/tree-permission-guide" element={<TreePermissionGuidePage />} />
                             <Route path="/tree-permission-guide" element={<TreePermissionGuidePage />} />
                             <Route path="/services/ward-issue-heatmap" element={<WardIssueHeatmapWorkspace />} />
