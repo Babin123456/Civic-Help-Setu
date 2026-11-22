@@ -48,6 +48,7 @@ import PropertyTaxNoDuesGuide from '../components/services/PropertyTaxNoDuesGuid
 import SmallBusinessLicenceCentre from '../components/services/SmallBusinessLicenceCentre';
 import FireSafetyComplianceGuide from '../components/services/FireSafetyComplianceGuide';
 import TreePermissionGuide from '../components/services/TreePermissionGuide';
+import TransgenderCertificateWelfareGuide from '../components/services/TransgenderCertificateWelfareGuide';
 
 import ServicePrintPacketModal from '../components/services/ServicePrintPacketModal';
 import ShareByEmailModal from '../components/services/ShareByEmailModal';
@@ -114,6 +115,7 @@ const ServiceDetails = ({ previewService = null }) => {
   const [showDedicatedBusinessLicenceCentre, setShowDedicatedBusinessLicenceCentre] = useState(false);
   const [showDedicatedFireGuide, setShowDedicatedFireGuide] = useState(false);
   const [showDedicatedTreeGuide, setShowDedicatedTreeGuide] = useState(false);
+  const [showDedicatedTransgenderGuide, setShowDedicatedTransgenderGuide] = useState(false);
   const service = previewService ?? getServiceById(id);
   const [, setSavedTick] = useState(0);
   const [customChecklistState, setCustomChecklistState] = useState(null);
@@ -1044,6 +1046,50 @@ const ServiceDetails = ({ previewService = null }) => {
             </div>
           )}
 
+          {service.id === 'transgender-certificate-welfare' && (
+            <div
+              className="card"
+              style={{
+                marginBottom: '1.5rem',
+                border: '1.5px solid var(--accent-main, #38bdf8)',
+                background: 'var(--bg-card)',
+                borderRadius: '1rem',
+                padding: '1.25rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ maxWidth: '650px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <ShieldCheck size={18} color="#38bdf8" />
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
+                      Dedicated Transgender Certificate &amp; Welfare Application Navigator
+                    </h3>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Privacy-first statutory guide to official certificate routes, Section 7 gender affirmation revisions, 30-day DM turnaround, verified support resources, and zero identity document collection.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => setShowDedicatedTransgenderGuide((v) => !v)}
+                    style={{ fontSize: '0.85rem' }}
+                  >
+                    {showDedicatedTransgenderGuide ? 'Switch to Standard Guide' : 'Open Interactive Navigator'}
+                  </button>
+                  <Link
+                    to="/services/transgender-certificate-welfare"
+                    className="btn btn-secondary"
+                    style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                  >
+                    Dedicated Page
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
           {service.id === 'counter-demand-forecasting' && (
             <div
               className="card"
@@ -1363,6 +1409,10 @@ const ServiceDetails = ({ previewService = null }) => {
             <TreePermissionGuide
               initialJurisdiction="DELHI_NCT"
               onBack={() => setShowDedicatedTreeGuide(false)}
+            />
+          ) : service.id === 'transgender-certificate-welfare' && showDedicatedTransgenderGuide ? (
+            <TransgenderCertificateWelfareGuide
+              onBack={() => setShowDedicatedTransgenderGuide(false)}
             />
           ) : (
             <>

@@ -1667,6 +1667,65 @@ export const MOCK_SERVICES = [
       { label: 'Chennai GCC Helpline', phone: '1913', url: 'https://chennaicorporation.gov.in' }
     ],
     lastVerified: '2026-11-18'
+  },
+  {
+    id: 'transgender-certificate-welfare',
+    name: 'Transgender Identity Certificate & Welfare Navigator',
+    shortDescription: 'Privacy-first guide to official certificate application routes, medical affirmation revisions, welfare schemes, and verified support resources under the Transgender Persons Act, 2019 (#1104).',
+    description: 'Statutory guide to official transgender identity certificate application routes under Section 5 and gender affirmation revisions under Section 7 of the Transgender Persons (Protection of Rights) Act, 2019. Covers the National Portal (transgender.dosje.gov.in), 30-day DM turnaround, zero-fee mandate, SMILE scheme, Ayushman Bharat TG Plus, Garima Greh, and state-aware verified support resources with zero identity document collection and client-side privacy.',
+    department: 'Ministry of Social Justice and Empowerment / State Transgender Welfare Boards',
+    category: 'Certificates',
+    type: 'Online / Citizen Guide',
+    difficulty: 'Easy',
+    feeType: 'free',
+    speedDays: 30,
+    popularityScore: 98,
+    path: '/services/transgender-certificate-welfare',
+    eligibility: [
+      'Any transgender person residing in India',
+      'At least one year of continuous residence within the jurisdiction of the District Magistrate',
+      'Self-perceived gender identity declared via Form 2 affidavit (no medical exam permitted)'
+    ],
+    documents: [
+      'Self-declaration Affidavit in Form 2 on non-judicial stamp paper',
+      'Recent colour passport-size photograph',
+      'Proof of residence of at least 1 year (utility bill, voter ID, ration card, rent agreement)',
+      'For revised certificate (Section 7): Form 3 Certificate from Medical Superintendent / CMO'
+    ],
+    steps: [
+      { title: 'Register on National Portal', description: 'Create an account on transgender.dosje.gov.in without mandatory Aadhaar linkage.' },
+      { title: 'Submit Form 1 & Form 2 Affidavit', description: 'Upload self-perceived identity affidavit and address proof.' },
+      { title: 'District Magistrate Review', description: 'Statutory 30-day timeline for issuance; physical examination is legally prohibited.' },
+      { title: 'Digital Download & Revision Access', description: 'Download the Certificate of Identity and barcoded card; apply for revisions post-medical affirmation under Section 7.' }
+    ],
+    validityNote: 'Certificate of Identity is valid across all Union and State Government departments nationwide with lifetime validity, subject to statutory revision under Section 7 upon medical intervention.',
+    fees: 'Nil (Completely free of cost as mandated under Central Rules)',
+    processingTime: '30 statutory days from receipt of application under Rule 6(1)',
+    officialSources: [
+      {
+        name: 'National Portal for Transgender Persons (MoSJE)',
+        url: 'https://transgender.dosje.gov.in',
+        verified: true,
+        lastVerified: '2026-11-20'
+      },
+      {
+        name: 'Ministry of Social Justice and Empowerment',
+        url: 'https://socialjustice.gov.in',
+        verified: true,
+        lastVerified: '2026-11-20'
+      }
+    ],
+    warnings: [
+      'Under Section 5 of the Transgender Persons Act, 2019, requiring an applicant to undergo any physical or medical examination for an initial Certificate of Identity is strictly illegal.',
+      'Never share your barcoded Certificate of Identity or QR code on unverified websites or public social media.',
+      'Official applications are completely free on transgender.dosje.gov.in; do not pay middlemen or unofficial agents.'
+    ],
+    contacts: [
+      { label: 'National Tele-Counselling Helpline', phone: '14567', url: 'https://transgender.dosje.gov.in' },
+      { label: 'Emergency Helpline for Women & TG', phone: '181', url: 'https://wcd.nic.in' },
+      { label: 'National Legal Services Authority (NALSA)', phone: '15100', url: 'https://nalsa.gov.in' }
+    ],
+    lastVerified: '2026-11-20'
   }
 ];
 

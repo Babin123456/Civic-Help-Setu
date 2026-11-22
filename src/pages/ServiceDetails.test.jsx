@@ -124,6 +124,14 @@ describe('ServiceDetails', () => {
     expect(html).toContain('/services/ward-issue-heatmap');
   });
 
+  it('renders the dedicated Transgender Certificate & Welfare Navigator entry card (#1104)', () => {
+    const html = render('/services/transgender-certificate-welfare');
+    expect(html).toContain('Transgender Identity Certificate &amp; Welfare Navigator');
+    expect(html).toContain('Dedicated Transgender Certificate &amp; Welfare Application Navigator');
+    expect(html).toContain('Open Interactive Navigator');
+    expect(html).toContain('/services/transgender-certificate-welfare');
+  });
+
   it('renders the dedicated provenance and data lineage action link (#777)', () => {
     const service = MOCK_SERVICES[0];
     const html = render(`/services/${service.id}`);
