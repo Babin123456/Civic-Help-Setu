@@ -76,6 +76,7 @@ const CitizenDraftSyncWorkspace = lazy(() => import('./pages/CitizenDraftSyncWor
 const CivicDataApi = lazy(() => import('./pages/CivicDataApi'));
 const SyntheticDatasetWorkspace = lazy(() => import('./pages/SyntheticDatasetWorkspace'));
 const CounterDemandForecastingWorkspace = lazy(() => import('./pages/CounterDemandForecastingWorkspace'));
+const GrievanceSlaForecastingWorkspace = lazy(() => import('./pages/GrievanceSlaForecastingWorkspace'));
 const WardBudgetWorkspace = lazy(() => import('./pages/WardBudgetWorkspace'));
 const LineageExplorerWorkspace = lazy(() => import('./pages/LineageExplorerWorkspace'));
 const CivicSurveyWorkspace = lazy(() => import('./pages/CivicSurveyWorkspace'));
@@ -248,6 +249,9 @@ function AppRoot() {
                             <Route path="/counter-demand" element={<CounterDemandForecastingWorkspace />} />
                             <Route path="/counter-demand-forecasting" element={<CounterDemandForecastingWorkspace />} />
                             <Route path="/queue-staffing" element={<CounterDemandForecastingWorkspace />} />
+                            <Route path="/grievance-sla" element={<GrievanceSlaForecastingWorkspace />} />
+                            <Route path="/grievance-sla-forecasting" element={<GrievanceSlaForecastingWorkspace />} />
+                            <Route path="/bottleneck-analytics" element={<GrievanceSlaForecastingWorkspace />} />
                             <Route path="/surveys" element={<CivicSurveyWorkspace />} />
                             <Route path="/survey-builder" element={<CivicSurveyWorkspace />} />
                             <Route path="/civic-surveys" element={<CivicSurveyWorkspace />} />
