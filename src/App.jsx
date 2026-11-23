@@ -113,6 +113,7 @@ const ChangeFeedPage = lazy(() => import('./pages/ChangeFeedPage'));
 const FeeEvidenceAssistant = lazy(() => import('./pages/FeeEvidenceAssistant'));
 const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHandoffWorkspace'));
 const Services = lazy(() => import('./pages/Services'));
+const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
 
 const ServicesFallback = () => (
   <div className="section">
@@ -366,6 +367,11 @@ function AppRoot() {
                             <Route path="/admin/import" element={
                               <ProtectedRoute requiredRole="admin">
                                 <Admin />
+                              </ProtectedRoute>
+                            } />
+                            <Route path="/abuse-control-plane" element={
+                              <ProtectedRoute requiredRole="admin">
+                                <AbuseDashboardPage />
                               </ProtectedRoute>
                             } />
 
