@@ -138,6 +138,10 @@ A reviewer-only workspace for responsive service-card layout checks. Render the 
 
 A role-scoped workspace for local-authority climate reporting. Departments submit activity data with units, periods, source-document metadata and correction notes; the service calculates explainable `tCO2e` with immutable versioned emission factors, separates measured, estimated and excluded values, and keeps every calculation reproducible. Reviewers approve submissions before totals are published, missing-data estimates require a human decision, and the public view exposes only approved aggregates. See [architecture, methodology and rollback documentation](docs/municipal-greenhouse-gas-inventory.md).
 
+### 🧪 18. Secure Agent Sandbox for Untrusted Civic Document Processing
+
+Runs untrusted civic document parsers / agent tools in isolated workers with CPU, memory and time limits; network disabled by default; restricted filesystem access; output validation; dependency and threat scanning. Results are illustrative and untrusted, and must be reviewed by a human before any civic action. Available at `/agent-sandbox`. See [architecture, data-flow, threat model and deployment documentation](docs/secure-agent-sandbox.md).
+
 
 ---
 
@@ -185,6 +189,7 @@ The platform includes the following major application areas:
 | Synthetic Datasets | Generate privacy-safe civic datasets (`/synthetic-datasets`) |
 | Authority Workspaces | Multi-authority sovereign administration, isolated staff, datasets, and audit logs |
 | Greenhouse-Gas Inventory | Department activity data, versioned factors, approvals and public emissions totals (`/ghg-inventory`) |
+| Agent Sandbox | Isolated workers for untrusted civic document parsers with CPU/memory/time limits, no network by default, output validation and threat scanning (`/agent-sandbox`) |
 
 
 The availability of individual features depends on the application's current implementation and configuration.

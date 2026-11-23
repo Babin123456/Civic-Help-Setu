@@ -112,6 +112,7 @@ const EvidenceDossierWorkspace = lazy(() => import('./pages/EvidenceDossierWorks
 const ChangeFeedPage = lazy(() => import('./pages/ChangeFeedPage'));
 const FeeEvidenceAssistant = lazy(() => import('./pages/FeeEvidenceAssistant'));
 const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHandoffWorkspace'));
+const AgentSandboxWorkspace = lazy(() => import('./pages/AgentSandboxWorkspace'));
 const Services = lazy(() => import('./pages/Services'));
 
 const ServicesFallback = () => (
@@ -178,6 +179,9 @@ function AppRoot() {
                             <Route path="/jurisdiction-handoff" element={<JurisdictionHandoffWorkspace />} />
                             <Route path="/services/:id/jurisdiction-map" element={<JurisdictionHandoffWorkspace />} />
                             <Route path="/jurisdiction-map" element={<JurisdictionHandoffWorkspace />} />
+
+                            {/* Secure agent sandbox for untrusted civic document processing */}
+                            <Route path="/agent-sandbox" element={<AgentSandboxWorkspace />} />
                             <Route path="/services/change-feed" element={<ChangeFeedPage />} />
                             <Route path="/change-feed" element={<ChangeFeedPage />} />
                             <Route path="/services/ward-budget-proposal" element={<WardBudgetWorkspace />} />
