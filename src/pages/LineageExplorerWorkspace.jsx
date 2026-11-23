@@ -18,6 +18,7 @@ import LineageTableView from '../components/lineage/LineageTableView';
 import LineageNodeDetailModal from '../components/lineage/LineageNodeDetailModal';
 import EditorialReviewModal from '../components/lineage/EditorialReviewModal';
 import SupersessionModal from '../components/lineage/SupersessionModal';
+import CivicReleaseProvenanceLedgerPanel from '../components/admin/CivicReleaseProvenanceLedgerPanel';
 import {
   LineageEmptyState,
   LineageOfflineBanner,
@@ -41,7 +42,7 @@ const LineageExplorerWorkspace = () => {
   const initialTarget = paramId || queryServiceId || 'tree-pruning-permission';
   const [selectedServiceId, setSelectedServiceId] = useState(initialTarget);
   const [selectedFactField, setSelectedFactField] = useState('all');
-  const [viewMode, setViewMode] = useState('graph'); // 'graph' | 'table'
+  const [viewMode, setViewMode] = useState('graph'); // 'graph' | 'table' | 'ledger'
   const [refreshKey, setRefreshKey] = useState(0);
 
   // Sync selectedServiceId if route param or search query changes
@@ -274,6 +275,17 @@ const LineageExplorerWorkspace = () => {
               <TableIcon size={14} />
               Accessible Table
             </button>
+            <button
+              type="button"
+              className={`btn ${viewMode === 'ledger' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setViewMode('ledger')}
+              style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+              aria-pressed={viewMode === 'ledger'}
+              aria-label="Tamper-Evident Release Signatures and Ledger View"
+            >
+              <ShieldCheck size={14} />
+              Release Signatures &amp; Ledger
+            </button>
           </div>
         </div>
 
@@ -331,31 +343,35 @@ const LineageExplorerWorkspace = () => {
           />
         )}
 
-        {!error && safeDag.nodes.length > 0 && (
-          <div
-            className="card"
-            style={{
-              padding: '1.25rem',
-              borderRadius: '10px',
-              border: '1px solid var(--border-light)',
-              background: 'var(--bg-card)',
-            }}
-          >
-            {viewMode === 'graph' ? (
-              <LineageGraphView
-                nodes={safeDag.nodes}
-                edges={safeDag.edges}
-                reviews={safeDag.reviews}
-                onSelectNode={handleSelectNode}
-              />
-            ) : (
-              <LineageTableView
-                nodes={safeDag.nodes}
-                edges={safeDag.edges}
-                onSelectNode={handleSelectNode}
-              />
-            )}
-          </div>
+        {viewMode === 'ledger' ? (
+          <CivicReleaseProvenanceLedgerPanel />
+        ) : (
+          !error && safeDag.nodes.length > 0 && (
+            <div
+              className="card"
+              style={{
+                padding: '1.25rem',
+                borderRadius: '10px',
+                border: '1px solid var(--border-light)',
+                background: 'var(--bg-card)',
+              }}
+            >
+              {viewMode === 'graph' ? (
+                <LineageGraphView
+                  nodes={safeDag.nodes}
+                  edges={safeDag.edges}
+                  reviews={safeDag.reviews}
+                  onSelectNode={handleSelectNode}
+                />
+              ) : (
+                <LineageTableView
+                  nodes={safeDag.nodes}
+                  edges={safeDag.edges}
+                  onSelectNode={handleSelectNode}
+                />
+              )}
+            </div>
+          )
         )}
 
         {/* Modals */}

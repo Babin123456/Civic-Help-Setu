@@ -46,6 +46,7 @@ import RoadHazardReviewQueue from '../components/admin/RoadHazardReviewQueue';
 import PedestrianBarrierReviewQueue from '../components/admin/PedestrianBarrierReviewQueue';
 import AddressChangeCorrectionQueue from '../components/admin/AddressChangeCorrectionQueue';
 import ProvenanceReviewQueue from '../components/admin/ProvenanceReviewQueue';
+import CivicReleaseProvenanceLedgerPanel from '../components/admin/CivicReleaseProvenanceLedgerPanel';
 import CounterDemandReviewQueue from '../components/admin/CounterDemandReviewQueue';
 import SurveyAuditQueue from '../components/admin/SurveyAuditQueue';
 import PublicToiletReviewQueue from '../components/admin/PublicToiletReviewQueue';
@@ -768,6 +769,7 @@ const Admin = () => {
               { id: 'pedestrian-barriers', label: 'Pedestrian Route Barriers', badge: null },
               { id: 'public-projects', label: 'Public Project Timeline', badge: null },
               { id: 'provenance-reviews', label: 'Knowledge Provenance', badge: null },
+              { id: 'release-ledger', label: 'Release Signatures & Ledger', badge: null },
               { id: 'counter-demand', label: 'Counter Demand & Staffing', badge: null },
               { id: 'audit', label: 'Audit Trail Logs', badge: null },
             ].map((tab) => {
@@ -1866,6 +1868,13 @@ const Admin = () => {
             {activeTab === 'provenance-reviews' && (
               <div>
                 <ProvenanceReviewQueue />
+              </div>
+            )}
+
+            {/* Civic Release Provenance Signatures & Release Ledger (#1178) */}
+            {activeTab === 'release-ledger' && (
+              <div>
+                <CivicReleaseProvenanceLedgerPanel />
               </div>
             )}
 
