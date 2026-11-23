@@ -141,6 +141,9 @@ A role-scoped workspace for local-authority climate reporting. Departments submi
 ### 🧪 18. Secure Agent Sandbox for Untrusted Civic Document Processing
 
 Runs untrusted civic document parsers / agent tools in isolated workers with CPU, memory and time limits; network disabled by default; restricted filesystem access; output validation; dependency and threat scanning. Results are illustrative and untrusted, and must be reviewed by a human before any civic action. Available at `/agent-sandbox`. See [architecture, data-flow, threat model and deployment documentation](docs/secure-agent-sandbox.md).
+### 🧪 18. Agent-Based Civic Policy Scenario Simulator
+
+A policy-team workspace for exploring how process changes could affect service demand, travel burden and document requirements before rollout. Uses synthetic personas and deterministic rules (never an AI model for simulation maths), reports sensitivity and uncertainty, validates against aggregate public statistics, and prohibits individual prediction or unsupported causal claims. Available at `/policy-simulation`. See [architecture, data-flow, threat model and deployment documentation](docs/civic-policy-scenario-simulator.md).
 
 
 ---
@@ -190,6 +193,7 @@ The platform includes the following major application areas:
 | Authority Workspaces | Multi-authority sovereign administration, isolated staff, datasets, and audit logs |
 | Greenhouse-Gas Inventory | Department activity data, versioned factors, approvals and public emissions totals (`/ghg-inventory`) |
 | Agent Sandbox | Isolated workers for untrusted civic document parsers with CPU/memory/time limits, no network by default, output validation and threat scanning (`/agent-sandbox`) |
+| Policy Scenario Simulator | Agent-based simulation of how policy changes affect demand, travel burden and document requirements (`/policy-simulation`) |
 
 
 The availability of individual features depends on the application's current implementation and configuration.

@@ -76,6 +76,7 @@ const CitizenDraftSyncWorkspace = lazy(() => import('./pages/CitizenDraftSyncWor
 const CivicDataApi = lazy(() => import('./pages/CivicDataApi'));
 const SyntheticDatasetWorkspace = lazy(() => import('./pages/SyntheticDatasetWorkspace'));
 const CounterDemandForecastingWorkspace = lazy(() => import('./pages/CounterDemandForecastingWorkspace'));
+const GrievanceSlaForecastingWorkspace = lazy(() => import('./pages/GrievanceSlaForecastingWorkspace'));
 const WardBudgetWorkspace = lazy(() => import('./pages/WardBudgetWorkspace'));
 const LineageExplorerWorkspace = lazy(() => import('./pages/LineageExplorerWorkspace'));
 const CivicSurveyWorkspace = lazy(() => import('./pages/CivicSurveyWorkspace'));
@@ -113,7 +114,9 @@ const ChangeFeedPage = lazy(() => import('./pages/ChangeFeedPage'));
 const FeeEvidenceAssistant = lazy(() => import('./pages/FeeEvidenceAssistant'));
 const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHandoffWorkspace'));
 const AgentSandboxWorkspace = lazy(() => import('./pages/AgentSandboxWorkspace'));
+const PolicySimulationWorkspace = lazy(() => import('./pages/PolicySimulationWorkspace'));
 const Services = lazy(() => import('./pages/Services'));
+const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
 
 const ServicesFallback = () => (
   <div className="section">
@@ -221,6 +224,10 @@ function AppRoot() {
                             {/* Focus on one service's counter journey */}
                             <Route path="/services/:serviceId/counter-journey" element={<CounterJourney />} />
 
+                            {/* Agent-based civic policy scenario simulator */}
+                            <Route path="/policy-simulation" element={<PolicySimulationWorkspace />} />
+                            <Route path="/services/:serviceId/policy-simulation" element={<PolicySimulationWorkspace />} />
+
                             <Route path="/water-bill-visualizer" element={<WaterBillVisualizerPage />} />
 
                             <Route path="/services/water-quality-register" element={<WaterQualityRegister />} />
@@ -252,6 +259,9 @@ function AppRoot() {
                             <Route path="/counter-demand" element={<CounterDemandForecastingWorkspace />} />
                             <Route path="/counter-demand-forecasting" element={<CounterDemandForecastingWorkspace />} />
                             <Route path="/queue-staffing" element={<CounterDemandForecastingWorkspace />} />
+                            <Route path="/grievance-sla" element={<GrievanceSlaForecastingWorkspace />} />
+                            <Route path="/grievance-sla-forecasting" element={<GrievanceSlaForecastingWorkspace />} />
+                            <Route path="/bottleneck-analytics" element={<GrievanceSlaForecastingWorkspace />} />
                             <Route path="/surveys" element={<CivicSurveyWorkspace />} />
                             <Route path="/survey-builder" element={<CivicSurveyWorkspace />} />
                             <Route path="/civic-surveys" element={<CivicSurveyWorkspace />} />
@@ -370,6 +380,11 @@ function AppRoot() {
                             <Route path="/admin/import" element={
                               <ProtectedRoute requiredRole="admin">
                                 <Admin />
+                              </ProtectedRoute>
+                            } />
+                            <Route path="/abuse-control-plane" element={
+                              <ProtectedRoute requiredRole="admin">
+                                <AbuseDashboardPage />
                               </ProtectedRoute>
                             } />
 

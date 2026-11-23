@@ -39,6 +39,7 @@ describe('LineageExplorerWorkspace (#777)', () => {
     const html = render('/provenance');
     expect(html).toContain('Graph View');
     expect(html).toContain('Accessible Table');
+    expect(html).toContain('Release Signatures &amp; Ledger');
     expect(html).toContain('Fact Dimension');
     expect(html).toContain('Supersessions');
   });
