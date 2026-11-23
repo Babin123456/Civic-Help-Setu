@@ -49,9 +49,11 @@ import ghgInventory from "./_lib/handlers/ghg-inventory.js";
 import microVolunteer from "./_lib/handlers/micro-volunteer.js";
 import reliefOperations from "./_lib/handlers/relief-operations.js";
 import jurisdictionHandoff from "./_lib/handlers/jurisdiction-handoff.js";
+import agentIncidentResponse from "./_lib/handlers/agent-incident-response.js";
 
 
 const handlers = {
+  "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
   "business-licence-feedback": businessLicence,
   "catalogue-visual-qa": catalogueVisualQa,
