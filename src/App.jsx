@@ -112,6 +112,7 @@ const EvidenceDossierWorkspace = lazy(() => import('./pages/EvidenceDossierWorks
 const ChangeFeedPage = lazy(() => import('./pages/ChangeFeedPage'));
 const FeeEvidenceAssistant = lazy(() => import('./pages/FeeEvidenceAssistant'));
 const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHandoffWorkspace'));
+const PolicySimulationWorkspace = lazy(() => import('./pages/PolicySimulationWorkspace'));
 const Services = lazy(() => import('./pages/Services'));
 const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
 
@@ -217,6 +218,10 @@ function AppRoot() {
 
                             {/* Focus on one service's counter journey */}
                             <Route path="/services/:serviceId/counter-journey" element={<CounterJourney />} />
+
+                            {/* Agent-based civic policy scenario simulator */}
+                            <Route path="/policy-simulation" element={<PolicySimulationWorkspace />} />
+                            <Route path="/services/:serviceId/policy-simulation" element={<PolicySimulationWorkspace />} />
 
                             <Route path="/water-bill-visualizer" element={<WaterBillVisualizerPage />} />
 
