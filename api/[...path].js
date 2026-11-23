@@ -49,7 +49,7 @@ import ghgInventory from "./_lib/handlers/ghg-inventory.js";
 import microVolunteer from "./_lib/handlers/micro-volunteer.js";
 import reliefOperations from "./_lib/handlers/relief-operations.js";
 import jurisdictionHandoff from "./_lib/handlers/jurisdiction-handoff.js";
-import agentIncidentResponse from "./_lib/handlers/agent-incident-response.js";
+
 
 
 const handlers = {
@@ -68,6 +68,7 @@ const handlers = {
   "flood-incident-reports": floodIncidentReports,
   "heat-relief-observations": heatReliefObservations,
   "knowledge-provenance": knowledgeProvenance,
+  "civic-release-ledger": civicReleaseLedger,
   "library-corrections": libraryCorrections,
   "office-comparison": officeComparison,
   "open-contracting-analytics": openContractingAnalytics,
@@ -91,6 +92,8 @@ const handlers = {
   "micro-volunteer-board": microVolunteer,
   "relief-operations": reliefOperations,
   "jurisdiction-handoff": jurisdictionHandoff,
+  "agent-sandbox": agentSandbox,
+  "policy-simulation": policySimulation,
 };
 
 // Terminology graph routes
