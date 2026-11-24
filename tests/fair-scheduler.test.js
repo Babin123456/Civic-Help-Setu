@@ -5,7 +5,9 @@ import {
   POLICY_VERSION,
   createMemoryStorageAdapter,
   createSchedulerStorageAdapter,
+  createFirestoreSchedulerStorageAdapter,
   createFairScheduler,
+  createFairSchedulerHandler,
   isAdminRole,
 } from '../api/_lib/fairScheduler.js';
 
@@ -404,6 +406,262 @@ describe('Fair Scheduling Engine (#1268)', () => {
 
       const res = await scheduler.reserveSlot({ citizenId: 'c_deg', serviceId: 's_deg', windowId: 'w_deg' });
       expect(res.ok).toBe(true);
+    });
+  });
+
+  describe('Firestore Storage Adapter & Graceful Fallback', () => {
+    it('reads, writes, and removes records using a synthetic Firestore client', async () => {
+      const store = new Map();
+      const mockDb = {
+        collection: (colName) => ({
+          doc: (docId) => ({
+            async get() {
+              const data = store.get(`${colName}/${docId}`);
+              return {
+                exists: Boolean(data),
+                data: () => data,
+              };
+            },
+            async set(val) {
+              store.set(`${colName}/${docId}`, val);
+              return true;
+            },
+            async delete() {
+              store.delete(`${colName}/${docId}`);
+              return true;
+            },
+          }),
+        }),
+      };
+
+      const adapter = createFirestoreSchedulerStorageAdapter({ db: mockDb });
+      await adapter.write('test_sched_key', { quota: 50 });
+      const readVal = await adapter.read('test_sched_key');
+      expect(readVal).toEqual({ quota: 50 });
+
+      await adapter.remove('test_sched_key');
+      expect(await adapter.read('test_sched_key')).toBeNull();
+    });
+
+    it('falls back to memory adapter when Firestore is unconfigured or returns null', async () => {
+      const fallback = createMemoryStorageAdapter();
+      const adapter = createFirestoreSchedulerStorageAdapter({
+        getDb: async () => null,
+        fallback,
+      });
+
+      await adapter.write('unconf_key', { saved: true });
+      expect(await adapter.read('unconf_key')).toEqual({ saved: true });
+      await adapter.remove('unconf_key');
+      expect(await adapter.read('unconf_key')).toBeNull();
+    });
+
+    it('falls back safely to memory adapter when Firestore operations throw', async () => {
+      const failingDb = {
+        collection: () => ({
+          doc: () => ({
+            async get() { throw new Error('Firestore connection timeout'); },
+            async set() { throw new Error('Firestore write quota exceeded'); },
+            async delete() { throw new Error('Firestore delete error'); },
+          }),
+        }),
+      };
+
+      const fallback = createMemoryStorageAdapter();
+      const adapter = createFirestoreSchedulerStorageAdapter({
+        db: failingDb,
+        fallback,
+      });
+
+      await adapter.write('fail_key', { resilient: true });
+      expect(await adapter.read('fail_key')).toEqual({ resilient: true });
+      await adapter.remove('fail_key');
+      expect(await adapter.read('fail_key')).toBeNull();
+    });
+  });
+
+  describe('End-to-End Restart Persistence over Shared Storage', () => {
+    it('persists reservations and waitlists across scheduler restarts', async () => {
+      const sharedStorage = createMemoryStorageAdapter();
+
+      // Instance 1: reserves a slot and waitlists another
+      const scheduler1 = createFairScheduler({ storage: sharedStorage, now: mockNow });
+      const res1 = await scheduler1.reserveSlot({
+        citizenId: 'cit_holder',
+        serviceId: 'srv_passport',
+        windowId: 'win_10am',
+        slotCapacity: 1,
+      });
+      await scheduler1.reserveSlot({
+        citizenId: 'cit_waitlist',
+        serviceId: 'srv_passport',
+        windowId: 'win_10am',
+        slotCapacity: 1,
+      });
+
+      // Restart: create brand new scheduler instance over the same storage
+      const scheduler2 = createFairScheduler({ storage: sharedStorage, now: mockNow });
+      const metrics = await scheduler2.getMetrics();
+      expect(metrics.reserved).toBe(1);
+      expect(metrics.waitlisted).toBe(1);
+
+      // Cancel holder on instance 2 -> promotes waitlisted booking
+      const cancelRes = await scheduler2.cancelReservation({
+        bookingId: res1.booking.bookingId,
+      });
+      expect(cancelRes.ok).toBe(true);
+      expect(cancelRes.promotedBooking.citizenId).toBe('cit_waitlist');
+      expect(cancelRes.promotedBooking.status).toBe(BOOKING_STATUS.RESERVED);
+    });
+  });
+
+  describe('Fair Scheduler HTTP Handler & Access Control', () => {
+    const makeHandler = (overrides = {}) => {
+      const scheduler = createFairScheduler({ now: mockNow });
+      const verifySession = async (token) => {
+        if (token === 'admin-token') return { userId: 'admin_usr', role: 'admin' };
+        if (token === 'reviewer-token') return { userId: 'rev_usr', role: 'reviewer' };
+        if (token === 'citizen-token') return { userId: 'cit_usr', role: 'citizen' };
+        throw new Error('invalid');
+      };
+      return createFairSchedulerHandler({
+        scheduler,
+        verifySession,
+        ...overrides,
+      });
+    };
+
+    it('rejects unsupported HTTP methods with 405 Method Not Allowed', async () => {
+      const handler = makeHandler();
+      const res = await handler({ method: 'PUT' });
+      expect(res.status).toBe(405);
+      expect(res.body.error).toBe('method_not_allowed');
+    });
+
+    it('serves public queue projection without authentication and sanitizes PII/accommodations', async () => {
+      const scheduler = createFairScheduler({ now: mockNow });
+      await scheduler.reserveSlot({
+        citizenId: 'secret_citizen_123',
+        serviceId: 'srv_license',
+        windowId: 'win_morning',
+        accommodationRequirement: 'sensory_quiet_counter',
+      });
+
+      const handler = createFairSchedulerHandler({ scheduler });
+      const res = await handler({
+        method: 'GET',
+        query: { action: 'projection', serviceId: 'srv_license', windowId: 'win_morning' },
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body.ok).toBe(true);
+      expect(res.body.projection).toHaveLength(1);
+      const item = res.body.projection[0];
+      expect(item).toHaveProperty('tokenId');
+      expect(item).toHaveProperty('windowId', 'win_morning');
+      expect(item).toHaveProperty('status', BOOKING_STATUS.RESERVED);
+      // Strict privacy checks
+      expect(item).not.toHaveProperty('citizenId');
+      expect(item).not.toHaveProperty('accommodationRequirement');
+      expect(item).not.toHaveProperty('hasAccommodation');
+    });
+
+    it('gates metrics endpoint to administrative roles', async () => {
+      const handler = makeHandler();
+
+      // Missing token
+      const noAuth = await handler({ method: 'GET', query: { action: 'metrics' } });
+      expect(noAuth.status).toBe(401);
+
+      // Citizen forbidden
+      const citizenRes = await handler({
+        method: 'GET',
+        headers: { authorization: 'Bearer citizen-token' },
+        query: { action: 'metrics' },
+      });
+      expect(citizenRes.status).toBe(403);
+
+      // Admin allowed
+      const adminRes = await handler({
+        method: 'GET',
+        headers: { authorization: 'Bearer admin-token' },
+        query: { action: 'metrics' },
+      });
+      expect(adminRes.status).toBe(200);
+      expect(adminRes.body.ok).toBe(true);
+      expect(adminRes.body.metrics).toHaveProperty('total');
+    });
+
+    it('processes reservation, check-in, and cancellation via POST actions', async () => {
+      const handler = makeHandler();
+
+      // Reserve slot
+      const reserveRes = await handler({
+        method: 'POST',
+        headers: { authorization: 'Bearer citizen-token' },
+        body: {
+          action: 'reserve',
+          serviceId: 'srv_rto',
+          windowId: 'win_10',
+          slotCapacity: 1,
+        },
+      });
+      expect(reserveRes.status).toBe(201);
+      const bookingId = reserveRes.body.booking.bookingId;
+
+      // Check-in
+      const checkinRes = await handler({
+        method: 'POST',
+        headers: { authorization: 'Bearer citizen-token' },
+        body: { action: 'checkin', bookingId },
+      });
+      expect(checkinRes.status).toBe(200);
+      expect(checkinRes.body.booking.status).toBe(BOOKING_STATUS.CHECKED_IN);
+
+      // Cancel
+      const cancelRes = await handler({
+        method: 'POST',
+        headers: { authorization: 'Bearer citizen-token' },
+        body: { action: 'cancel', bookingId },
+      });
+      expect(cancelRes.status).toBe(200);
+      expect(cancelRes.body.booking.status).toBe(BOOKING_STATUS.CANCELLED);
+    });
+
+    it('enforces admin-only access for no-show registration and overrides', async () => {
+      const handler = makeHandler();
+      const reserveRes = await handler({
+        method: 'POST',
+        headers: { authorization: 'Bearer citizen-token' },
+        body: { action: 'reserve', serviceId: 'srv_welfare', windowId: 'win_20' },
+      });
+      const bookingId = reserveRes.body.booking.bookingId;
+
+      // Citizen trying admin override -> 403
+      const citOverride = await handler({
+        method: 'POST',
+        headers: { authorization: 'Bearer citizen-token' },
+        body: { action: 'override', bookingId, newPriority: PRIORITY_CLASSES.P0, reason: 'Self-escalation' },
+      });
+      expect(citOverride.status).toBe(403);
+
+      // Reviewer applying override with reason -> 200
+      const revOverride = await handler({
+        method: 'POST',
+        headers: { authorization: 'Bearer reviewer-token' },
+        body: { action: 'override', bookingId, newPriority: PRIORITY_CLASSES.P1, reason: 'Official priority documentation' },
+      });
+      expect(revOverride.status).toBe(200);
+      expect(revOverride.body.booking.priorityClass).toBe(PRIORITY_CLASSES.P1);
+      expect(revOverride.body.auditEntry).toHaveProperty('action', 'SCHEDULER_OVERRIDE_APPLIED');
+
+      // Citizen trying no-show -> 403
+      const citNoShow = await handler({
+        method: 'POST',
+        headers: { authorization: 'Bearer citizen-token' },
+        body: { action: 'noshow', bookingId },
+      });
+      expect(citNoShow.status).toBe(403);
     });
   });
 });

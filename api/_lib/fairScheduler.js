@@ -1,4 +1,5 @@
 import { logDiagnostic } from '../../src/utils/diagnostics.js';
+import { getFirestoreAdmin } from './firebaseAdmin.js';
 
 export const POLICY_VERSION = 'fair_scheduling_v1';
 
@@ -52,6 +53,71 @@ export const createSchedulerStorageAdapter = ({ read, write, remove }) => {
 };
 
 /**
+ * Creates a Firestore-backed scheduler storage adapter with automatic fallback
+ * to an in-memory adapter when credentials/Firestore are unavailable.
+ */
+export const createFirestoreSchedulerStorageAdapter = ({
+  db = null,
+  getDb = getFirestoreAdmin,
+  collectionName = 'civicFairScheduler',
+  fallback = createMemoryStorageAdapter(),
+} = {}) => {
+  const resolveDb = async () => {
+    if (db) return db;
+    if (typeof getDb === 'function') {
+      try {
+        return await getDb();
+      } catch (err) {
+        logDiagnostic('Failed resolving Firestore instance for fair scheduler', err);
+        return null;
+      }
+    }
+    return null;
+  };
+
+  return {
+    async read(key) {
+      const firestore = await resolveDb();
+      if (!firestore) return fallback.read(key);
+      try {
+        const snap = await firestore.collection(collectionName).doc(key).get();
+        if (!snap.exists) return null;
+        const payload = snap.data();
+        return payload?.data !== undefined ? payload.data : payload;
+      } catch (err) {
+        logDiagnostic('Firestore scheduler read error', err);
+        return fallback.read(key);
+      }
+    },
+    async write(key, val) {
+      const firestore = await resolveDb();
+      if (!firestore) return fallback.write(key, val);
+      try {
+        await firestore.collection(collectionName).doc(key).set({
+          data: JSON.parse(JSON.stringify(val)),
+          updatedAt: new Date().toISOString(),
+        });
+        return true;
+      } catch (err) {
+        logDiagnostic('Firestore scheduler write error', err);
+        return fallback.write(key, val);
+      }
+    },
+    async remove(key) {
+      const firestore = await resolveDb();
+      if (!firestore) return fallback.remove(key);
+      try {
+        await firestore.collection(collectionName).doc(key).delete();
+        return true;
+      } catch (err) {
+        logDiagnostic('Firestore scheduler remove error', err);
+        return fallback.remove(key);
+      }
+    },
+  };
+};
+
+/**
  * Fair Scheduling & Allocation Engine for Token & Appointment Demand Peaks.
  */
 export const createFairScheduler = ({
@@ -63,6 +129,11 @@ export const createFairScheduler = ({
   audit = () => {},
   now = () => Date.now(),
 } = {}) => {
+  const resolvedStorage =
+    storage === 'firestore' || (typeof globalThis.process !== 'undefined' && globalThis.process.env?.USE_FIRESTORE_SCHEDULER === 'true')
+      ? createFirestoreSchedulerStorageAdapter()
+      : storage;
+
   let queue = Promise.resolve();
   const withLock = (fn) => {
     const next = queue.then(fn, fn);
@@ -72,7 +143,7 @@ export const createFairScheduler = ({
 
   const getStore = async () => {
     try {
-      const data = await storage.read(storageKey);
+      const data = await resolvedStorage.read(storageKey);
       return data && typeof data === 'object' && !Array.isArray(data)
         ? data
         : { bookings: {}, auditLog: [], overridesCount: 0 };
@@ -84,7 +155,7 @@ export const createFairScheduler = ({
 
   const saveStore = async (store) => {
     try {
-      await storage.write(storageKey, store);
+      await resolvedStorage.write(storageKey, store);
       return true;
     } catch (err) {
       logDiagnostic('Failed saving scheduler store', err);
@@ -488,7 +559,156 @@ export const createFairScheduler = ({
      * Reset / clear store.
      */
     async reset() {
-      await storage.remove(storageKey);
+      await resolvedStorage.remove(storageKey);
     },
+  };
+};
+
+const json = (status, body, extra = {}) => ({
+  status,
+  headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...extra },
+  body,
+});
+
+const bearerToken = (headers = {}) => {
+  const key = Object.keys(headers).find((name) => name.toLowerCase() === 'authorization');
+  const value = key ? headers[key] : '';
+  const match = typeof value === 'string' ? /^Bearer ([A-Za-z0-9._~+/=-]{1,4096})$/.exec(value.trim()) : null;
+  return match ? match[1] : null;
+};
+
+/**
+ * Creates an HTTP handler for fair scheduling operations.
+ */
+export const createFairSchedulerHandler = ({
+  scheduler = createFairScheduler(),
+  verifySession = async (token) => ({ userId: token, role: 'citizen' }),
+  ipLimiter = null,
+} = {}) => {
+  return async function handle({ method, headers = {}, body = {}, query = {} } = {}) {
+    if (!['GET', 'POST'].includes(method)) {
+      return json(405, { error: 'method_not_allowed' }, { Allow: 'GET, POST' });
+    }
+
+    if (ipLimiter) {
+      const address =
+        (headers['x-vercel-forwarded-for'] || headers['x-forwarded-for'] || '')
+          .split(',')[0]
+          .trim() || 'unknown';
+      const verdict = ipLimiter.take(address);
+      if (!verdict.allowed) {
+        return json(429, { error: 'rate_limited', retryAfterSeconds: verdict.retryAfterSeconds }, {
+          'Retry-After': String(verdict.retryAfterSeconds),
+        });
+      }
+    }
+
+    // GET requests: public queue projection or admin metrics
+    if (method === 'GET') {
+      const action = query.action || query.view;
+
+      if (action === 'projection') {
+        const projection = await scheduler.getPublicQueueProjection({
+          serviceId: query.serviceId,
+          windowId: query.windowId,
+        });
+        return json(200, { ok: true, projection });
+      }
+
+      if (action === 'metrics' || query.metrics === 'true') {
+        const token = bearerToken(headers);
+        if (!token) return json(401, { error: 'missing_token' });
+        let session;
+        try {
+          session = await verifySession(token);
+        } catch {
+          return json(401, { error: 'invalid_token' });
+        }
+        if (!isAdminRole(session?.role)) {
+          return json(403, { error: 'forbidden', message: 'Metrics access is restricted to administrative roles.' });
+        }
+        const metrics = await scheduler.getMetrics();
+        return json(200, { ok: true, metrics });
+      }
+
+      return json(400, { error: 'missing_action', message: '`action` parameter (projection | metrics) is required.' });
+    }
+
+    // POST requests: citizen reservations, cancellations, check-ins, or admin overrides
+    const token = bearerToken(headers);
+    if (!token) return json(401, { error: 'missing_token' });
+
+    let session;
+    try {
+      session = await verifySession(token);
+    } catch {
+      return json(401, { error: 'invalid_token' });
+    }
+
+    const userId = session?.userId;
+    const role = session?.role || 'citizen';
+    if (!userId) return json(401, { error: 'invalid_token' });
+
+    const action = query.action || body?.action;
+    if (!action) {
+      return json(400, { error: 'missing_action', message: '`action` parameter is required.' });
+    }
+
+    if (action === 'reserve') {
+      const result = await scheduler.reserveSlot({
+        citizenId: body?.citizenId || userId,
+        serviceId: body?.serviceId,
+        windowId: body?.windowId,
+        requestedPriority: body?.requestedPriority,
+        hasStatutoryDeadline: Boolean(body?.hasStatutoryDeadline),
+        accommodationRequirement: body?.accommodationRequirement,
+        slotCapacity: body?.slotCapacity ? Number(body.slotCapacity) : 1,
+        idempotencyKey: body?.idempotencyKey,
+      });
+      return json(result.status || (result.ok ? 200 : 400), result);
+    }
+
+    if (action === 'cancel') {
+      const result = await scheduler.cancelReservation({
+        bookingId: body?.bookingId,
+        citizenId: userId,
+        actorRole: role,
+      });
+      return json(result.status || (result.ok ? 200 : 400), result);
+    }
+
+    if (action === 'checkin') {
+      const result = await scheduler.checkIn({
+        bookingId: body?.bookingId,
+      });
+      return json(result.status || (result.ok ? 200 : 400), result);
+    }
+
+    if (action === 'noshow') {
+      if (!isAdminRole(role)) {
+        return json(403, { error: 'forbidden', message: 'No-show registration is restricted to staff or administrators.' });
+      }
+      const result = await scheduler.recordNoShow({
+        bookingId: body?.bookingId,
+        slotStartTimeMs: body?.slotStartTimeMs ? Number(body.slotStartTimeMs) : undefined,
+      });
+      return json(result.status || (result.ok ? 200 : 400), result);
+    }
+
+    if (action === 'override') {
+      if (!isAdminRole(role)) {
+        return json(403, { error: 'forbidden', message: 'Administrative role required for override.' });
+      }
+      const result = await scheduler.applyAdminOverride({
+        bookingId: body?.bookingId,
+        newStatus: body?.newStatus,
+        newPriority: body?.newPriority,
+        reason: body?.reason,
+        actorRole: role,
+      });
+      return json(result.status || (result.ok ? 200 : 400), result);
+    }
+
+    return json(400, { error: 'unknown_action', message: `POST action "${action}" is not supported.` });
   };
 };
