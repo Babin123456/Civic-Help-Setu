@@ -19,7 +19,7 @@
   "dependencies": {
     "@clerk/backend": "^3.31.4",
     "@clerk/clerk-react": "^5.61.10",
-    "@clerk/react": "^6.18.8",
+    "@clerk/react": "^6.19.4",
     "@clerk/themes": "^2.4.57",
     "firebase-admin": "^14.5.1",
     "lucide-react": "^1.77.0",
