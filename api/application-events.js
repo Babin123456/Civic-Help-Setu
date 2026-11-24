@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /* global process */
 import {
   applicationEventRepository,
@@ -30,7 +31,7 @@ async function build() {
   });
 }
 
-export default async function route(req, res) {
+async function route(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   try {
     handler ??= await build();
@@ -54,3 +55,5 @@ export default async function route(req, res) {
   }
   res.status(result.status).json(result.body);
 }
+
+export default withApiErrorContract(route);
