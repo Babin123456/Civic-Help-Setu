@@ -32,6 +32,6 @@ describe('PublicHousingSchemeGuideService', () => {
     expect(vocab.length).toBeGreaterThanOrEqual(3);
     const fto = vocab.find(v => v.term.includes('FTO'));
     expect(fto).toBeDefined();
-    expect(fto.definition).toContain('Financial Transfer Order');
+    expect(fto.term).toContain('FTO (Financial Transfer Order)');
   });
 });
