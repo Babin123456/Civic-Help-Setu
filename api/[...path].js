@@ -52,15 +52,18 @@ import reliefOperations from "./_lib/handlers/relief-operations.js";
 import jurisdictionHandoff from "./_lib/handlers/jurisdiction-handoff.js";
 
 import agentSandbox from "./_lib/handlers/agent-sandbox.js";
+import agentIncidentResponse from "./_lib/handlers/agent-incident-response.js";
 import policySimulation from "./_lib/handlers/policy-simulation.js";
 import serviceChangeSandbox from "./_lib/handlers/service-change-sandbox.js";
 import civicReleaseLedger from "./_lib/handlers/civic-release-ledger.js";
 import civicEvidenceLocker from "./_lib/handlers/civic-evidence-locker.js";
 import journeyBenchmark from "./_lib/handlers/journey-benchmark.js";
 import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
+import { createMeshReadinessHandler } from "./_lib/handlers/mesh-readiness.js";
+import { createMeshReadinessLayer } from "./_lib/mesh/middleware.js";
 
 
-const handlers = {
+const baseHandlers = {
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
   "business-licence-feedback": businessLicence,
@@ -138,47 +141,52 @@ function getRoute(req) {
   return decodeURIComponent(route).replace(/^\/+|\/+$/g, "");
 }
 
-export default async function handler(req, res) {
-  const route = getRoute(req);
-
-  // Handle terminology graph routes
-  if (graphRoutes[route]) {
-    return await graphRoutes[route](req, res);
-  }
-
-  if (graphPostRoutes[route]) {
-    return await graphPostRoutes[route](req, res);
-  }
-
-  const routeHandler = handlers[route];
-
-  if (!routeHandler) {
-    return res.status(404).json({ error: "API route not found" });
-  }
-
-  try {
-    const result = await routeHandler(req, res);
-
-    // Normalize legacy handlers that return { status, headers, body } rather
-    // than writing directly to the Vercel response object.
-    if (
-      result &&
-      typeof result.status === "number" &&
-      Object.prototype.hasOwnProperty.call(result, "body") &&
-      !res.writableEnded
-    ) {
-      for (const [name, value] of Object.entries(result.headers || {})) {
-        res.setHeader(name, value);
-      }
-      return res.status(result.status).json(result.body);
+function normalizeLegacyResult(result, res) {
+  // Normalize legacy handlers that return { status, headers, body } rather
+  // than writing directly to the Vercel response object.
+  if (
+    result &&
+    typeof result.status === "number" &&
+    Object.prototype.hasOwnProperty.call(result, "body") &&
+    !res.writableEnded
+  ) {
+    for (const [name, value] of Object.entries(result.headers || {})) {
+      res.setHeader(name, value);
     }
-
-    return result;
-  } catch (error) {
-    console.error(`API dispatcher error for "${route}":`, error);
-    if (!res.writableEnded) {
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-    return undefined;
+    return res.status(result.status).json(result.body);
   }
+  return result;
 }
+
+export function createApiDispatcher({
+  meshLayer = createMeshReadinessLayer(),
+  extraHandlers = {},
+} = {}) {
+  const handlers = {
+    ...baseHandlers,
+    "mesh-readiness": createMeshReadinessHandler({ meshLayer }),
+    ...extraHandlers,
+  };
+
+  return async function handler(req, res) {
+    const route = getRoute(req);
+    const routeHandler = graphRoutes[route] || graphPostRoutes[route] || handlers[route];
+
+    if (!routeHandler) {
+      return res.status(404).json({ error: "API route not found" });
+    }
+
+    try {
+      const result = await meshLayer.executeRoute(req, res, route, routeHandler);
+      return normalizeLegacyResult(result, res);
+    } catch (error) {
+      console.error(`API dispatcher error for "${route}":`, error);
+      if (!res.writableEnded) {
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+      return undefined;
+    }
+  };
+}
+
+export default createApiDispatcher();
