@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /**
  * Single Vercel serverless entry point for all Civic Help Setu API routes.
  * Keeping handlers under api/_lib prevents Vercel from deploying each file
@@ -21,6 +22,7 @@ import rentalChecklist from "./_lib/handlers/rental-checklist-corrections.js";
 import sendEmail from "./_lib/handlers/send-email.js";
 import shareByEmail from "./_lib/handlers/share-by-email.js";
 import tenderCorrections from "./_lib/handlers/tender-corrections.js";
+import transitConcessions from "./_lib/handlers/transit-concessions.js";
 import openContractingAnalytics from "./_lib/handlers/open-contracting-analytics.js";
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
@@ -49,13 +51,21 @@ import ghgInventory from "./_lib/handlers/ghg-inventory.js";
 import microVolunteer from "./_lib/handlers/micro-volunteer.js";
 import reliefOperations from "./_lib/handlers/relief-operations.js";
 import jurisdictionHandoff from "./_lib/handlers/jurisdiction-handoff.js";
+
 import agentSandbox from "./_lib/handlers/agent-sandbox.js";
 import policySimulation from "./_lib/handlers/policy-simulation.js";
+import serviceChangeSandbox from "./_lib/handlers/service-change-sandbox.js";
 import civicReleaseLedger from "./_lib/handlers/civic-release-ledger.js";
 import civicChaosEngineering from "./_lib/handlers/civic-chaos-engineering.js";
+import complaintQualityCoach from "./_lib/handlers/complaint-quality-coach.js";
+import civicEvidenceLocker from "./_lib/handlers/civic-evidence-locker.js";
+import journeyBenchmark from "./_lib/handlers/journey-benchmark.js";
+import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
+import caseCollaboration from "./_lib/handlers/case-collaboration.js";
 
 
 const handlers = {
+  "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
   "business-licence-feedback": businessLicence,
   "catalogue-visual-qa": catalogueVisualQa,
@@ -82,6 +92,7 @@ const handlers = {
   "send-email": sendEmail,
   "share-by-email": shareByEmail,
   "tender-corrections": tenderCorrections,
+  "transit-concessions": transitConcessions,
   "ward-budget-proposals": wardBudgetProposals,
   "water-quality-register": waterQualityRegister,
   "ward-issue-heatmap": wardIssueHeatmap,
@@ -97,6 +108,13 @@ const handlers = {
   "agent-sandbox": agentSandbox,
   "policy-simulation": policySimulation,
   "civic-chaos-engineering": civicChaosEngineering,
+  "complaint-quality-coach": complaintQualityCoach,
+  "civic-evidence-locker": civicEvidenceLocker,
+  "service-change-sandbox": serviceChangeSandbox,
+  "journey-benchmark": journeyBenchmark,
+  "civic-knowledge-graph": civicKnowledgeGraph,
+  "knowledge-graph": civicKnowledgeGraph,
+  "case-collaboration": caseCollaboration,
 };
 
 // Terminology graph routes
@@ -127,7 +145,7 @@ function getRoute(req) {
   return decodeURIComponent(route).replace(/^\/+|\/+$/g, "");
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   const route = getRoute(req);
 
   // Handle terminology graph routes
@@ -145,29 +163,23 @@ export default async function handler(req, res) {
     return res.status(404).json({ error: "API route not found" });
   }
 
-  try {
-    const result = await routeHandler(req, res);
+  const result = await routeHandler(req, res);
 
-    // Normalize legacy handlers that return { status, headers, body } rather
-    // than writing directly to the Vercel response object.
-    if (
-      result &&
-      typeof result.status === "number" &&
-      Object.prototype.hasOwnProperty.call(result, "body") &&
-      !res.writableEnded
-    ) {
-      for (const [name, value] of Object.entries(result.headers || {})) {
-        res.setHeader(name, value);
-      }
-      return res.status(result.status).json(result.body);
+  // Normalize legacy handlers that return { status, headers, body } rather
+  // than writing directly to the Vercel response object.
+  if (
+    result &&
+    typeof result.status === "number" &&
+    Object.prototype.hasOwnProperty.call(result, "body") &&
+    !res.writableEnded
+  ) {
+    for (const [name, value] of Object.entries(result.headers || {})) {
+      res.setHeader(name, value);
     }
-
-    return result;
-  } catch (error) {
-    console.error(`API dispatcher error for "${route}":`, error);
-    if (!res.writableEnded) {
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-    return undefined;
+    return res.status(result.status).json(result.body);
   }
+
+  return result;
 }
+
+export default withApiErrorContract(handler);

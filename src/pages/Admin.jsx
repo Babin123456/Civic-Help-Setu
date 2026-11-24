@@ -51,6 +51,7 @@ import CivicChaosResiliencePanel from '../components/admin/CivicChaosResilienceP
 import CounterDemandReviewQueue from '../components/admin/CounterDemandReviewQueue';
 import SurveyAuditQueue from '../components/admin/SurveyAuditQueue';
 import PublicToiletReviewQueue from '../components/admin/PublicToiletReviewQueue';
+import TransitConcessionReviewQueue from '../components/admin/TransitConcessionReviewQueue';
 import OpenContractingAuditQueue from '../components/admin/OpenContractingAuditQueue';
 import AuditLogViewer from '../components/admin/AuditLogViewer';
 import ServiceImportPanel from '../components/admin/ServiceImportPanel';
@@ -1013,6 +1014,7 @@ const Admin = () => {
                 )}
 
                 <ServiceOwnershipModal
+                  auditLogs={auditLogs}
                   isOpen={ownershipModal.isOpen}
                   onClose={() => setOwnershipModal({ isOpen: false, service: null })}
                   service={ownershipModal.service}
@@ -1201,6 +1203,7 @@ const Admin = () => {
                 <div style={{ marginTop: '2rem' }}>
                   <LibraryCorrectionQueue />
                 </div>
+                <TransitConcessionReviewQueue />
                 <div style={{ marginTop: '2rem' }}>
                   <AddressChangeCorrectionQueue />
                 </div>

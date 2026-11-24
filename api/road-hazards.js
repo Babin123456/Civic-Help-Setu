@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /**
  * api/road-hazards.js
  * Server-side endpoint for validating citizen road hazard reports, defect disclosures,
@@ -110,7 +111,7 @@ export function validateRoadHazardReportPayload(body) {
   return errors;
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'GET') {
@@ -174,3 +175,5 @@ export default async function handler(req, res) {
     });
   });
 }
+
+export default withApiErrorContract(handler);

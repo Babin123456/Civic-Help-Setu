@@ -441,7 +441,7 @@ describe('visual QA API client helpers (#841)', () => {
           }),
         }
       )
-    ).rejects.toMatchObject({ code: 'ERR_INVALID_QUERY', status: 400, fields: [{ field: 'seed' }] });
+    ).rejects.toMatchObject({ code: 'INVALID_REQUEST', status: 400, fields: [], retryable: false, recoveryAction: 'edit_request' });
 
     await expect(
       requestServerScan(
@@ -456,7 +456,7 @@ describe('visual QA API client helpers (#841)', () => {
           }),
         }
       )
-    ).rejects.toMatchObject({ code: 'ERR_MALFORMED_RESPONSE' });
+    ).rejects.toMatchObject({ code: 'INTERNAL_ERROR' });
 
     await expect(
       requestServerScan(

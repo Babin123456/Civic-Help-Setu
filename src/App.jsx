@@ -68,6 +68,7 @@ const CommunityFacilityDirectory = lazy(() => import('./pages/CommunityFacilityD
 const RoadSafetyDashboard = lazy(() => import('./pages/RoadSafetyDashboard'));
 const UpSchoolZoneSafetyAudit = lazy(() => import('./pages/UpSchoolZoneSafetyAudit'));
 const LibraryDirectory = lazy(() => import('./pages/LibraryDirectory'));
+const TransitConcessionsDirectory = lazy(() => import('./pages/TransitConcessionsDirectory'));
 const WaterTankerTracker = lazy(() => import('./pages/WaterTankerTracker'));
 const AddressChangePlanner = lazy(() => import('./pages/AddressChangePlanner'));
 const FormFieldExplainerAssistant = lazy(() => import('./pages/FormFieldExplainerAssistant'));
@@ -114,8 +115,14 @@ const ChangeFeedPage = lazy(() => import('./pages/ChangeFeedPage'));
 const FeeEvidenceAssistant = lazy(() => import('./pages/FeeEvidenceAssistant'));
 const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHandoffWorkspace'));
 const AgentSandboxWorkspace = lazy(() => import('./pages/AgentSandboxWorkspace'));
+const KnowledgeGraphQueryWorkspace = lazy(() => import('./pages/KnowledgeGraphQueryWorkspace'));
 const PolicySimulationWorkspace = lazy(() => import('./pages/PolicySimulationWorkspace'));
 const ChaosResilienceWorkspace = lazy(() => import('./pages/ChaosResilienceWorkspace'));
+const ComplaintQualityCoachWorkspace = lazy(() => import('./pages/ComplaintQualityCoachWorkspace'));
+const ServiceChangeSandboxWorkspace = lazy(() => import('./pages/ServiceChangeSandboxWorkspace'));
+const DigitalEvidenceLockerWorkspace = lazy(() => import('./pages/DigitalEvidenceLockerWorkspace'));
+const CaseCollaborationWorkspace = lazy(() => import('./components/caseCollaboration/CaseCollaborationWorkspace'));
+const JourneyBenchmarkPage = lazy(() => import('./pages/JourneyBenchmarkPage'));
 const Services = lazy(() => import('./pages/Services'));
 const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
 
@@ -186,6 +193,12 @@ function AppRoot() {
 
                             {/* Secure agent sandbox for untrusted civic document processing */}
                             <Route path="/agent-sandbox" element={<AgentSandboxWorkspace />} />
+
+                            {/* Public service journey benchmark and open evaluation dataset */}
+                            <Route path="/journey-benchmark" element={<JourneyBenchmarkPage />} />
+                            <Route path="/benchmark" element={<JourneyBenchmarkPage />} />
+                            <Route path="/knowledge-graph" element={<KnowledgeGraphQueryWorkspace />} />
+                            <Route path="/knowledge-graph-query" element={<KnowledgeGraphQueryWorkspace />} />
                             <Route path="/services/change-feed" element={<ChangeFeedPage />} />
                             <Route path="/change-feed" element={<ChangeFeedPage />} />
                             <Route path="/services/ward-budget-proposal" element={<WardBudgetWorkspace />} />
@@ -231,6 +244,14 @@ function AppRoot() {
                             <Route path="/chaos-engineering" element={<ChaosResilienceWorkspace />} />
                             <Route path="/resilience" element={<ChaosResilienceWorkspace />} />
 
+                            {/* Agentic Civic Complaint Quality and Completeness Coach (#1190) */}
+                            <Route path="/complaint-coach" element={<ComplaintQualityCoachWorkspace />} />
+                            <Route path="/services/:serviceId/complaint-coach" element={<ComplaintQualityCoachWorkspace />} />
+                            {/* Civic case collaboration space with granular, revocable sharing */}
+                            <Route path="/case-collaboration" element={<CaseCollaborationWorkspace />} />
+                            {/* Civic service change sandbox with shadow traffic evaluation */}
+                            <Route path="/service-change-sandbox" element={<ServiceChangeSandboxWorkspace />} />
+
                             <Route path="/water-bill-visualizer" element={<WaterBillVisualizerPage />} />
 
                             <Route path="/services/water-quality-register" element={<WaterQualityRegister />} />
@@ -241,6 +262,8 @@ function AppRoot() {
                             <Route path="/rental-transition" element={<RentalTransitionWorkspace />} />
                             <Route path="/rental-records" element={<RentalTransitionWorkspace />} />
                             <Route path="/library-directory" element={<LibraryDirectory />} />
+                            <Route path="/transit-concessions" element={<TransitConcessionsDirectory />} />
+                            <Route path="/services/transit-concessions" element={<TransitConcessionsDirectory />} />
                             <Route path="/libraries" element={<LibraryDirectory />} />
                             <Route path="/address-change-planner" element={<AddressChangePlanner />} />
                             <Route path="/address-change" element={<AddressChangePlanner />} />
@@ -325,6 +348,10 @@ function AppRoot() {
                             <Route path="/evidence-dossier" element={<EvidenceDossierWorkspace />} />
                             <Route path="/verify-evidence" element={<EvidenceDossierWorkspace />} />
                             <Route path="/evidence-manifest" element={<EvidenceDossierWorkspace />} />
+
+                            <Route path="/digital-evidence-locker" element={<DigitalEvidenceLockerWorkspace />} />
+                            <Route path="/evidence-locker" element={<DigitalEvidenceLockerWorkspace />} />
+                            <Route path="/encrypted-locker" element={<DigitalEvidenceLockerWorkspace />} />
                             <Route path="/track" element={<Track />} />
                             <Route path="/civic-works" element={<CivicWorksBoard />} />
                             <Route path="/micro-volunteer-board" element={<MicroVolunteerTaskBoard />} />
