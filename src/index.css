@@ -1082,7 +1082,13 @@ html[data-high-contrast="true"] .nav-drawer-indicator {
 .cl-box { color: var(--text-tertiary); margin-top: 0.125rem; display: inline-flex; }
 .cl-item.is-done .cl-box { color: var(--accent-main); }
 .cl-input:focus-visible + .cl-box { outline: 2px solid var(--accent-main); outline-offset: 3px; border-radius: 4px; }
-.cl-text { flex: 1; color: var(--text-primary); line-height: 1.5; }
+.cl-text { flex: 1; min-width: 0; overflow-wrap: anywhere; color: var(--text-primary); line-height: 1.5; }
+.cl-item:focus-within { outline: 2px solid var(--accent-main); outline-offset: 2px; }
+.cl-item--required { border-left: 5px solid #ef4444; }
+.cl-item--conditional { border-left: 5px dashed #f59e0b; }
+.cl-item--optional { border-left: 5px dotted #38bdf8; }
+.cl-item--unverified { border-left: 2px dashed var(--border-main); }
+.cl-empty { margin: 0; padding: 1rem 1.25rem; border: 1px dashed var(--border-main); border-radius: 1rem; color: var(--text-secondary); line-height: 1.5; }
 .cl-item.is-done .cl-text { color: var(--text-secondary); text-decoration: line-through; }
 .cl-state { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); white-space: nowrap; margin-top: 0.2rem; }
 .cl-input:disabled ~ .cl-text, .cl-input:disabled ~ .cl-state { opacity: 0.6; }
@@ -1323,6 +1329,7 @@ html:not([data-theme="light"]) .cmd__result-row--cleared svg { color: #4ade80; }
 .req-badge--conditional { border-color: #f59e0b; background: rgba(245, 158, 11, 0.08); }
 .req-badge--optional { border-color: #38bdf8; background: rgba(56, 189, 248, 0.08); }
 .req-badge--unverified { border-style: dashed; }
+.req-mark { margin-right: 0.35rem; }
 .req-explain { color: var(--text-secondary); line-height: 1.4; }
 .req-explain a { color: var(--accent-main); }
 /* ---- Service applicability by jurisdiction (#260) ---- */
