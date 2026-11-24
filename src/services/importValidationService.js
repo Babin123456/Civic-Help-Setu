@@ -10,15 +10,15 @@ import {
 import { importBatchService } from './importBatchService';
 import { requirePermission, actorLabel } from './accessControl';
 import {
-  MAX_IMPORT_BYTES,
-  MAX_IMPORT_ROWS,
   CSV_COLUMNS,
   slugify,
   normalizeName,
 } from './serviceImportService';
 import { importAdminServices } from './adminService';
 
-export { MAX_IMPORT_BYTES, MAX_IMPORT_ROWS };
+export const MAX_IMPORT_BYTES = 5 * 1024 * 1024; // 5 MB (Slice 2 limit)
+export const MAX_IMPORT_ROWS = 5000;             // 5,000 rows (Slice 2 limit)
+export const DEFAULT_CHUNK_SIZE = 100;           // 100 rows per chunk
 
 /** Neutralize CSV formula injection by prepending ' to cells starting with =, +, -, @, \t, or \r */
 export function sanitizeCsvCell(value) {
@@ -449,7 +449,7 @@ export function buildImportPreview(text, { fileName = '', existingServices = [] 
   return report;
 }
 
-/** Execute import: valid records are accepted and saved, invalid/duplicate are quarantined into dead-letter queue */
+/** Execute import in chunked slices with per-chunk checkpoint persistence */
 export function executeImport(previewReport, batchId, fieldMappings = [], options = {}) {
   requirePermission('services.import');
 
@@ -460,110 +460,162 @@ export function executeImport(previewReport, batchId, fieldMappings = [], option
   const invalidRecords = previewReport.invalid || [];
   const duplicateRecords = previewReport.duplicates || [];
 
-  importBatchService.createRollbackSnapshot({
-    batchId,
-    snapshotType: ROLLBACK_SNAPSHOT_TYPE.POST_VALIDATION,
-    title: 'Pre-import snapshot',
-    description: `Snapshot taken before importing ${validRecords.length} records`,
-    rowCount: validRecords.length,
-    fieldMappings,
-  });
+  const allRecords = [
+    ...validRecords.map((r) => ({ ...r, recordType: 'valid' })),
+    ...invalidRecords.map((r) => ({ ...r, recordType: 'invalid' })),
+    ...duplicateRecords.map((r) => ({ ...r, recordType: 'duplicate' })),
+  ].sort((a, b) => a.row - b.row);
 
-  const servicesToSave = validRecords.map(({ service }) => service);
-  if (servicesToSave.length > 0) {
-    const saveResult = importAdminServices(servicesToSave, actorLabel());
-    if (!saveResult.ok) {
-      return { ok: false, error: saveResult.error || 'Failed to save services to storage', batch };
-    }
+  const chunkSize = options.chunkSize || DEFAULT_CHUNK_SIZE;
+  const existingCheckpoint = options.resume !== false ? importBatchService.getCheckpoint(batchId) : null;
+  const startIdx = existingCheckpoint?.processedRecordIndex || 0;
+
+  if (startIdx === 0) {
+    importBatchService.createRollbackSnapshot({
+      batchId,
+      snapshotType: ROLLBACK_SNAPSHOT_TYPE.POST_VALIDATION,
+      title: 'Pre-import snapshot',
+      description: `Snapshot taken before importing ${validRecords.length} records`,
+      rowCount: validRecords.length,
+      fieldMappings,
+    });
   }
 
   const now = new Date().toISOString();
   const attemptCount = options.attemptCount || 1;
   const sourceFileName = batch.sourceFile || previewReport.fileName || 'untitled';
 
-  invalidRecords.forEach((item) => {
-    const details = item.errorDetails?.length
-      ? item.errorDetails
-      : (item.errors || []).map((msg) => ({ code: VALIDATION_ERROR_CODE.INVALID_VALUE, field: 'unknown', message: msg }));
+  let currentIdx = startIdx;
+  let chunkCount = Math.floor(startIdx / chunkSize);
 
-    details.forEach((err) => {
+  while (currentIdx < allRecords.length) {
+    const chunk = allRecords.slice(currentIdx, currentIdx + chunkSize);
+    const validInChunk = chunk.filter((r) => r.recordType === 'valid').map((r) => r.service);
+
+    if (validInChunk.length > 0) {
+      const saveResult = importAdminServices(validInChunk, actorLabel());
+      if (!saveResult.ok) {
+        return { ok: false, error: saveResult.error || 'Failed to save services to storage', batch };
+      }
+    }
+
+    const invalidInChunk = chunk.filter((r) => r.recordType === 'invalid');
+    invalidInChunk.forEach((item) => {
+      const details = item.errorDetails?.length
+        ? item.errorDetails
+        : (item.errors || []).map((msg) => ({ code: VALIDATION_ERROR_CODE.INVALID_VALUE, field: 'unknown', message: msg }));
+
+      details.forEach((err) => {
+        importBatchService.addValidationError({
+          rowId: `row_${batchId}_${item.row}`,
+          rowNumber: item.row,
+          field: err.field,
+          code: err.code,
+          message: err.message,
+        });
+      });
+    });
+
+    const duplicateInChunk = chunk.filter((r) => r.recordType === 'duplicate');
+    duplicateInChunk.forEach((item) => {
       importBatchService.addValidationError({
         rowId: `row_${batchId}_${item.row}`,
         rowNumber: item.row,
-        field: err.field,
-        code: err.code,
-        message: err.message,
+        field: item.field || (item.reason?.includes('name') ? 'name' : 'id'),
+        code: item.code || (item.reason?.includes('name') ? VALIDATION_ERROR_CODE.DUPLICATE_NAME : VALIDATION_ERROR_CODE.DUPLICATE_ID),
+        message: item.reason,
       });
     });
-  });
 
-  duplicateRecords.forEach((item) => {
-    importBatchService.addValidationError({
-      rowId: `row_${batchId}_${item.row}`,
-      rowNumber: item.row,
-      field: item.field || (item.reason?.includes('name') ? 'name' : 'id'),
-      code: item.code || (item.reason?.includes('name') ? VALIDATION_ERROR_CODE.DUPLICATE_NAME : VALIDATION_ERROR_CODE.DUPLICATE_ID),
-      message: item.reason,
-    });
-  });
+    const newDlqItems = [
+      ...invalidInChunk.map((item) => ({
+        id: `dlq_${batchId}_${item.row}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        batchId,
+        sourceFile: sourceFileName,
+        rowIndex: item.row,
+        rowNumber: item.row,
+        rawData: item.raw || {},
+        reasonCodes: item.errorDetails?.map((d) => d.code) || [VALIDATION_ERROR_CODE.INVALID_VALUE],
+        errors: item.errors || [],
+        fields: item.errorDetails?.map((d) => d.field) || ['unknown'],
+        reason: item.errors?.[0] || 'Validation failed',
+        attemptCount,
+        timestamp: now,
+        status: 'invalid',
+      })),
+      ...duplicateInChunk.map((item) => ({
+        id: `dlq_${batchId}_${item.row}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        batchId,
+        sourceFile: sourceFileName,
+        rowIndex: item.row,
+        rowNumber: item.row,
+        rawData: item.raw || {},
+        reasonCodes: [item.code || VALIDATION_ERROR_CODE.DUPLICATE_ID],
+        errors: [item.reason],
+        fields: [item.field || 'id'],
+        reason: item.reason,
+        attemptCount,
+        timestamp: now,
+        status: 'duplicate',
+      })),
+    ];
 
-  const deadLetterItems = [
-    ...invalidRecords.map((item) => ({
-      id: `dlq_${batchId}_${item.row}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    batch.validRows = (batch.validRows || 0) + validInChunk.length;
+    batch.invalidRows = (batch.invalidRows || 0) + invalidInChunk.length;
+    batch.duplicateRows = (batch.duplicateRows || 0) + duplicateInChunk.length;
+    batch.totalRows = previewReport.total || allRecords.length;
+    batch.deadLetterQueue = [...(batch.deadLetterQueue || []), ...newDlqItems];
+    batch.fieldMappings = fieldMappings;
+
+    currentIdx += chunk.length;
+    chunkCount++;
+    const isFinished = currentIdx >= allRecords.length;
+
+    const checkpoint = {
       batchId,
-      sourceFile: sourceFileName,
-      rowIndex: item.row,
-      rowNumber: item.row,
-      rawData: item.raw || {},
-      reasonCodes: item.errorDetails?.map((d) => d.code) || [VALIDATION_ERROR_CODE.INVALID_VALUE],
-      errors: item.errors || [],
-      fields: item.errorDetails?.map((d) => d.field) || ['unknown'],
-      reason: item.errors?.[0] || 'Validation failed',
-      attemptCount,
-      timestamp: now,
-      status: 'invalid',
-    })),
-    ...duplicateRecords.map((item) => ({
-      id: `dlq_${batchId}_${item.row}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-      batchId,
-      sourceFile: sourceFileName,
-      rowIndex: item.row,
-      rowNumber: item.row,
-      rawData: item.raw || {},
-      reasonCodes: [item.code || VALIDATION_ERROR_CODE.DUPLICATE_ID],
-      errors: [item.reason],
-      fields: [item.field || 'id'],
-      reason: item.reason,
-      attemptCount,
-      timestamp: now,
-      status: 'duplicate',
-    })),
-  ];
+      processedRowIndex: chunk[chunk.length - 1]?.row ?? currentIdx,
+      processedRecordIndex: currentIdx,
+      totalRecords: allRecords.length,
+      nextChunkIndex: isFinished ? -1 : chunkCount,
+      status: isFinished ? IMPORT_BATCH_STATUS.VALIDATED : IMPORT_BATCH_STATUS.VALIDATING,
+      validRows: batch.validRows,
+      invalidRows: batch.invalidRows,
+      duplicateRows: batch.duplicateRows,
+      updatedAt: new Date().toISOString(),
+    };
+    importBatchService.saveCheckpoint(batchId, checkpoint);
+
+    if (options.interruptAfterChunk !== undefined && chunkCount >= options.interruptAfterChunk && !isFinished) {
+      batch.status = IMPORT_BATCH_STATUS.VALIDATING;
+      importBatchService.updateBatch(batch);
+      return { ok: true, paused: true, checkpoint, batch };
+    }
+  }
 
   batch.status = IMPORT_BATCH_STATUS.VALIDATED;
-  batch.validRows = validRecords.length;
-  batch.invalidRows = invalidRecords.length;
-  batch.duplicateRows = duplicateRecords.length;
-  batch.totalRows = previewReport.total || (validRecords.length + invalidRecords.length + duplicateRecords.length);
-  batch.updatedAt = now;
-  batch.fieldMappings = fieldMappings;
-  batch.deadLetterQueue = deadLetterItems;
+  batch.updatedAt = new Date().toISOString();
   importBatchService.updateBatch(batch);
+  importBatchService.clearCheckpoint(batchId);
 
   importBatchService.recordApprovalEvent({
     action: 'validated',
     batchId,
-    notes: `${validRecords.length} valid records imported, ${invalidRecords.length} invalid, ${duplicateRecords.length} duplicates quarantined`,
+    notes: `${batch.validRows} valid records imported, ${batch.invalidRows} invalid, ${batch.duplicateRows} duplicates quarantined`,
     actor: actorLabel(),
   });
 
   return {
     ok: true,
-    imported: validRecords.length,
-    invalid: invalidRecords.length,
-    duplicates: duplicateRecords.length,
+    imported: batch.validRows,
+    invalid: batch.invalidRows,
+    duplicates: batch.duplicateRows,
     batch,
   };
+}
+
+/** Resume an interrupted or paused batch from its last saved checkpoint */
+export function resumeImport(batchId, previewReport, options = {}) {
+  return executeImport(previewReport, batchId, options.fieldMappings || [], { ...options, resume: true });
 }
 
 /** Approve an import batch for publication */
@@ -590,9 +642,13 @@ export default {
   buildImportPreview,
   validateImportRecord,
   executeImport,
+  resumeImport,
   approveImportBatch,
   sanitizeCsvCell,
   formatCsvCell,
   generateFailedRowsCsv,
   csvTemplate,
+  MAX_IMPORT_BYTES,
+  MAX_IMPORT_ROWS,
+  DEFAULT_CHUNK_SIZE,
 };

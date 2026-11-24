@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   RefreshCw,
   History,
+  Play,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -69,8 +70,13 @@ const renderValidationStatusBadge = (status) => {
   );
 };
 
-const BatchCard = ({ batch, onSelect, onDownloadFailedRows, onRetryBatch }) => {
+const BatchCard = ({ batch, onSelect, onDownloadFailedRows, onRetryBatch, onResumeBatch }) => {
   const quarantinedCount = batch.deadLetterQueue?.length || 0;
+  const isResumable = Boolean(
+    batch.checkpoint &&
+    batch.status !== IMPORT_BATCH_STATUS.APPROVED &&
+    batch.status !== IMPORT_BATCH_STATUS.ROLLED_BACK
+  );
 
   return (
     <div
@@ -87,8 +93,13 @@ const BatchCard = ({ batch, onSelect, onDownloadFailedRows, onRetryBatch }) => {
           <p className="text-xs text-gray-400">{getRowStatusText(batch)}</p>
         </div>
         <div className="flex flex-col items-end gap-2">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-wrap justify-end">
             {renderStatusBadge(batch.status)}
+            {batch.checkpoint && (
+              <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800">
+                Row {batch.checkpoint.processedRowIndex}
+              </span>
+            )}
             {quarantinedCount > 0 && (
               <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800">
                 {quarantinedCount} quarantined
@@ -96,6 +107,19 @@ const BatchCard = ({ batch, onSelect, onDownloadFailedRows, onRetryBatch }) => {
             )}
           </div>
           <div className="flex items-center gap-2 mt-1">
+            {isResumable && (
+              <button
+                type="button"
+                className="btn btn-ghost text-xs text-green-600 hover:text-green-800 p-1 flex items-center gap-1"
+                title="Resume Interrupted Import"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onResumeBatch(batch);
+                }}
+              >
+                <Play size={13} /> Resume
+              </button>
+            )}
             {quarantinedCount > 0 && (
               <>
                 <button
@@ -201,10 +225,10 @@ const ImportConsole = () => {
         return;
       }
 
-      if (preview.total > 500) {
+      if (preview.total > MAX_IMPORT_ROWS) {
         setUploadStatus('failed');
-        setUploadError(`File has ${preview.total} records; limit is 500 per import`);
-        toast?.error?.(`File has ${preview.total} records; limit is 500 per import`);
+        setUploadError(`File has ${preview.total} records; limit is ${MAX_IMPORT_ROWS} per import`);
+        toast?.error?.(`File has ${preview.total} records; limit is ${MAX_IMPORT_ROWS} per import`);
         return;
       }
 
@@ -212,6 +236,7 @@ const ImportConsole = () => {
         title: `Import: ${file.name}`,
         sourceFile: file.name,
         sourceFormat: format,
+        previewReport: preview,
       });
 
       if (batchResult.ok) {
@@ -253,6 +278,35 @@ const ImportConsole = () => {
       });
     } else {
       toast?.error?.(result.error || 'Import failed');
+    }
+  };
+
+  const handleResumeBatch = (batch) => {
+    if (!batch) return;
+    const report = previewReport || batch.previewReport;
+    if (!report) {
+      toast?.info?.('Upload the source file to resume this batch from its checkpoint');
+      setShowUpload(true);
+      return;
+    }
+
+    setImportInProgress(true);
+    const result = importValidationService.resumeImport(batch.id, report);
+    setImportInProgress(false);
+
+    if (result.ok) {
+      toast?.success?.(
+        result.paused
+          ? `Import paused at row ${result.checkpoint?.processedRowIndex}`
+          : `Import completed: ${result.imported} imported, ${result.invalid} invalid, ${result.duplicates} quarantined.`
+      );
+      importBatchService.listBatches().then((bList) => {
+        setBatches(bList);
+        const updated = bList.find((b) => b.id === batch.id);
+        setSelectedBatch(updated || result.batch);
+      });
+    } else {
+      toast?.error?.(result.error || 'Failed to resume batch');
     }
   };
 
@@ -457,6 +511,7 @@ const ImportConsole = () => {
                   onSelect={setSelectedBatch}
                   onDownloadFailedRows={handleDownloadFailedRows}
                   onRetryBatch={handleRetryBatch}
+                  onResumeBatch={handleResumeBatch}
                 />
               ))}
             </div>
@@ -587,6 +642,27 @@ const ImportConsole = () => {
                   </span>
                 )}
               </div>
+
+              {selectedBatch.checkpoint && (
+                <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+                  <div>
+                    <h5 className="text-sm font-medium text-blue-900">
+                      Checkpoint: Row {selectedBatch.checkpoint.processedRowIndex} of {selectedBatch.totalRows || selectedBatch.checkpoint.totalRecords}
+                    </h5>
+                    <p className="text-xs text-blue-700">
+                      This batch has a saved checkpoint and can be resumed without duplicating rows.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-primary text-xs flex items-center gap-1"
+                    onClick={() => handleResumeBatch(selectedBatch)}
+                    disabled={importInProgress}
+                  >
+                    <Play size={13} /> Resume
+                  </button>
+                </div>
+              )}
 
               {selectedBatch.deadLetterQueue && selectedBatch.deadLetterQueue.length > 0 && (
                 <div className="mt-4 border border-red-200 rounded-lg p-4 bg-red-50/40">

@@ -12,13 +12,106 @@ import { validateImportRecord } from './importValidationService';
 import { logDiagnostic } from '../utils/diagnostics';
 
 const BATCHES_KEY = 'civicbridge_import_batches';
+const CHECKPOINTS_KEY = 'civicbridge_import_checkpoints';
 const ROWS_KEY = 'civicbridge_import_rows';
 const FIELD_MAPPINGS_KEY = 'civicbridge_field_mappings';
 const VALIDATION_ERRORS_KEY = 'civicbridge_validation_errors';
 const APPROVAL_EVENTS_KEY = 'civicbridge_approval_events';
 const ROLLBACK_SNAPSHOTS_KEY = 'civicbridge_rollback_snapshots';
 
-/** Wrap an array so it can be used either synchronously or with .then() / await */
+const IDB_NAME = 'civicbridge_import_db';
+const IDB_VERSION = 1;
+const IDB_STORES = ['batches', 'checkpoints', 'deadLetterQueue'];
+
+/** Safe access to browser indexedDB */
+export const getIndexedDB = () => {
+  try {
+    return typeof indexedDB !== 'undefined' ? indexedDB : null;
+  } catch {
+    return null;
+  }
+};
+
+/** Open IndexedDB with automatic schema migration, resolving null if unavailable */
+export const openIDB = () => {
+  const idb = getIndexedDB();
+  if (!idb) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    try {
+      const req = idb.open(IDB_NAME, IDB_VERSION);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        IDB_STORES.forEach((name) => {
+          if (!db.objectStoreNames.contains(name)) {
+            db.createObjectStore(name, { keyPath: 'id' });
+          }
+        });
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = (err) => {
+        logDiagnostic('IndexedDB open failed', err);
+        resolve(null);
+      };
+    } catch (err) {
+      logDiagnostic('IndexedDB open error', err);
+      resolve(null);
+    }
+  });
+};
+
+/** Put item into IndexedDB store with fallback */
+export const idbPut = async (storeName, item) => {
+  try {
+    const db = await openIDB();
+    if (!db || !item?.id) return false;
+    return new Promise((resolve) => {
+      const tx = db.transaction(storeName, 'readwrite');
+      tx.objectStore(storeName).put(item);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = (err) => {
+        logDiagnostic(`IndexedDB put failed for ${storeName}`, err);
+        resolve(false);
+      };
+    });
+  } catch (err) {
+    logDiagnostic(`IndexedDB put exception for ${storeName}`, err);
+    return false;
+  }
+};
+
+/** Get item from IndexedDB store */
+export const idbGet = async (storeName, id) => {
+  try {
+    const db = await openIDB();
+    if (!db) return null;
+    return new Promise((resolve) => {
+      const tx = db.transaction(storeName, 'readonly');
+      const req = tx.objectStore(storeName).get(id);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+  } catch {
+    return null;
+  }
+};
+
+/** Delete item from IndexedDB store */
+export const idbDelete = async (storeName, id) => {
+  try {
+    const db = await openIDB();
+    if (!db) return false;
+    return new Promise((resolve) => {
+      const tx = db.transaction(storeName, 'readwrite');
+      tx.objectStore(storeName).delete(id);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    });
+  } catch {
+    return false;
+  }
+};
+
+/** Wrap an array/object so it can be used either synchronously or with .then() / await */
 const asPromiseArray = (arr) => {
   const result = [...arr];
   result.then = (onFulfilled, onRejected) => Promise.resolve(result).then(onFulfilled, onRejected);
@@ -40,6 +133,7 @@ export const ImportBatch = ({
   fieldMappings = [],
   validationErrors = [],
   deadLetterQueue = [],
+  checkpoint = null,
   retryAttempts = 0,
   approvalEvent = null,
   createdAt = new Date().toISOString(),
@@ -62,6 +156,7 @@ export const ImportBatch = ({
   fieldMappings,
   validationErrors,
   deadLetterQueue,
+  checkpoint,
   retryAttempts,
   approvalEvent,
   createdAt,
@@ -143,13 +238,20 @@ const writeStorageList = (key, list, label) => {
 };
 
 const readBatches = () => readStorageList(BATCHES_KEY, 'Failed to read import batches');
+const readCheckpoints = () => readStorageList(CHECKPOINTS_KEY, 'Failed to read import checkpoints');
 const readRows = () => readStorageList(ROWS_KEY);
 const readFieldMappings = () => readStorageList(FIELD_MAPPINGS_KEY);
 const readValidationErrors = () => readStorageList(VALIDATION_ERRORS_KEY);
 const readApprovalEvents = () => readStorageList(APPROVAL_EVENTS_KEY);
 const readRollbackSnapshots = () => readStorageList(ROLLBACK_SNAPSHOTS_KEY);
 
-const writeBatches = (batches) => writeStorageList(BATCHES_KEY, batches, 'Failed to write import batches');
+const writeBatches = (batches) => {
+  const ok = writeStorageList(BATCHES_KEY, batches, 'Failed to write import batches');
+  batches.forEach((b) => idbPut('batches', b).catch(() => {}));
+  return ok;
+};
+
+const writeCheckpoints = (checkpoints) => writeStorageList(CHECKPOINTS_KEY, checkpoints, 'Failed to write import checkpoints');
 const writeRows = (rows) => writeStorageList(ROWS_KEY, rows, 'Failed to write import rows');
 const writeFieldMappings = (mappings) => writeStorageList(FIELD_MAPPINGS_KEY, mappings, 'Failed to write field mappings');
 const writeValidationErrors = (errors) => writeStorageList(VALIDATION_ERRORS_KEY, errors, 'Failed to write validation errors');
@@ -158,6 +260,7 @@ const writeRollbackSnapshots = (snapshots) => writeStorageList(ROLLBACK_SNAPSHOT
 
 /** State transition validation */
 const canTransition = (fromStatus, toStatus) => {
+  if (fromStatus === toStatus) return true;
   const allowed = IMPORT_BATCH_TRANSITIONS[fromStatus];
   return Boolean(allowed && (allowed.includes(toStatus) || allowed.includes(toStatus.toUpperCase())));
 };
@@ -221,6 +324,61 @@ export const importBatchService = {
       importBatchService.recordApprovalEvent(options.approvalEvent);
     }
     return writeBatches(batches) ? { ok: true, batch } : { ok: false, error: 'Failed to update batch status in storage' };
+  },
+
+  /** Save a progress checkpoint for resumable execution */
+  saveCheckpoint: (batchId, checkpointData) => {
+    const checkpoints = readCheckpoints();
+    const idx = checkpoints.findIndex((c) => c.id === batchId);
+    const checkpoint = {
+      id: batchId,
+      batchId,
+      ...checkpointData,
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (idx >= 0) checkpoints[idx] = checkpoint;
+    else checkpoints.push(checkpoint);
+    writeCheckpoints(checkpoints);
+    idbPut('checkpoints', checkpoint).catch(() => {});
+
+    // Sync to batch record
+    const batches = readBatches();
+    const batch = batches.find((b) => b.id === batchId);
+    if (batch) {
+      batch.checkpoint = checkpoint;
+      if (checkpointData.status) batch.status = checkpointData.status;
+      if (checkpointData.validRows !== undefined) batch.validRows = checkpointData.validRows;
+      if (checkpointData.invalidRows !== undefined) batch.invalidRows = checkpointData.invalidRows;
+      if (checkpointData.duplicateRows !== undefined) batch.duplicateRows = checkpointData.duplicateRows;
+      batch.updatedAt = checkpoint.updatedAt;
+      writeBatches(batches);
+    }
+
+    return { ok: true, checkpoint };
+  },
+
+  /** Retrieve the latest checkpoint for a batch */
+  getCheckpoint: (batchId) => {
+    const batch = importBatchService.getBatch(batchId);
+    if (batch?.checkpoint) return batch.checkpoint;
+    const checkpoints = readCheckpoints();
+    return checkpoints.find((c) => c.id === batchId || c.batchId === batchId) || null;
+  },
+
+  /** Clear checkpoint once batch validation finishes or is dismissed */
+  clearCheckpoint: (batchId) => {
+    const checkpoints = readCheckpoints().filter((c) => c.id !== batchId && c.batchId !== batchId);
+    writeCheckpoints(checkpoints);
+    idbDelete('checkpoints', batchId).catch(() => {});
+
+    const batches = readBatches();
+    const batch = batches.find((b) => b.id === batchId);
+    if (batch && batch.checkpoint) {
+      batch.checkpoint = null;
+      writeBatches(batches);
+    }
+    return { ok: true };
   },
 
   /** Add a row to a batch */

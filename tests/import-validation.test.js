@@ -6,13 +6,21 @@ import {
   buildImportPreview,
   validateImportRecord,
   executeImport,
+  resumeImport,
   sanitizeCsvCell,
   formatCsvCell,
   generateFailedRowsCsv,
+  MAX_IMPORT_BYTES,
+  MAX_IMPORT_ROWS,
 } from '../src/services/importValidationService';
-import { importBatchService } from '../src/services/importBatchService';
+import {
+  importBatchService,
+  idbPut,
+  idbGet,
+  idbDelete,
+} from '../src/services/importBatchService';
 import { setCurrentActor } from '../src/services/accessControl';
-import { VALIDATION_ERROR_CODE } from '../src/data/importContract';
+import { VALIDATION_ERROR_CODE, IMPORT_BATCH_STATUS } from '../src/data/importContract';
 import { CUSTOM_SERVICES_KEY } from '../src/services/serviceCatalog';
 
 const makeStorage = () => {
@@ -205,8 +213,8 @@ describe('Import Validation Service', () => {
       const empty = buildImportPreview('', { fileName: 'test.csv' });
       expect(empty.fileErrors).toContain('The file is empty');
 
-      const large = buildImportPreview('a'.repeat(2 * 1024 * 1024 + 1), { fileName: 'test.csv' });
-      expect(large.fileErrors).toContain('The file is larger than 1024 KB');
+      const large = buildImportPreview('a'.repeat(MAX_IMPORT_BYTES + 1), { fileName: 'test.csv' });
+      expect(large.fileErrors).toContain(`The file is larger than ${MAX_IMPORT_BYTES / 1024} KB`);
     });
   });
 
@@ -232,7 +240,6 @@ describe('Import Validation Service', () => {
       const batch = importBatchService.getBatch(batchId);
       expect(batch.deadLetterQueue).toHaveLength(2);
 
-      // Verify invalid row in dead-letter queue
       const invalidDlq = batch.deadLetterQueue.find((q) => q.status === 'invalid');
       expect(invalidDlq).toBeDefined();
       expect(invalidDlq.rowIndex).toBe(3);
@@ -243,7 +250,6 @@ describe('Import Validation Service', () => {
       expect(invalidDlq.batchId).toBe(batchId);
       expect(invalidDlq.sourceFile).toBe('test.csv');
 
-      // Verify duplicate row in dead-letter queue
       const duplicateDlq = batch.deadLetterQueue.find((q) => q.status === 'duplicate');
       expect(duplicateDlq).toBeDefined();
       expect(duplicateDlq.rowIndex).toBe(4);
@@ -274,7 +280,6 @@ describe('Import Validation Service', () => {
       const batch = importBatchService.createBatch({ sourceFile: 'test.csv' }).batch;
       executeImport(preview, batch.id);
 
-      // Verify original record is untouched in custom services storage
       const saved = JSON.parse(storage.getItem(CUSTOM_SERVICES_KEY));
       expect(saved).toHaveLength(1);
       expect(saved[0].name).toBe('Trade License');
@@ -321,7 +326,6 @@ describe('Import Validation Service', () => {
       const csv = generateFailedRowsCsv(deadLetterQueue);
       expect(csv).toContain('id,name,shortDescription');
       expect(csv).toContain('failure_reason,failure_codes,failure_fields,row_number,attempt_count');
-      // Neutralized formula in name
       expect(csv).toContain('\'=SUM(A1:B2)');
       expect(csv).toContain('name formula detected');
       expect(csv).toContain(VALIDATION_ERROR_CODE.INVALID_VALUE);
@@ -333,7 +337,6 @@ describe('Import Validation Service', () => {
       const batchResult = importBatchService.createBatch({ sourceFile: 'services.csv' });
       const batchId = batchResult.batch.id;
 
-      // Seed batch with 1 valid row and 2 quarantined rows
       const validRow = {
         row: 2,
         service: {
@@ -374,7 +377,6 @@ describe('Import Validation Service', () => {
       expect(batchAfterImport.validRows).toBe(1);
       expect(batchAfterImport.deadLetterQueue).toHaveLength(2);
 
-      // Now retry: update row 3 to be fixed, but row 4 is still duplicate
       const retryResult = importBatchService.retryBatch(batchId, {
         updatedRowsMap: {
           3: {
@@ -395,12 +397,10 @@ describe('Import Validation Service', () => {
       expect(batchAfterRetry.validRows).toBe(2);
       expect(batchAfterRetry.deadLetterQueue).toHaveLength(1);
 
-      // Remaining quarantined item has attemptCount incremented
       const remaining = batchAfterRetry.deadLetterQueue[0];
       expect(remaining.rowIndex).toBe(4);
       expect(remaining.attemptCount).toBe(2);
 
-      // Verify idempotency: initial-valid was NOT imported again
       const allCustomServices = JSON.parse(storage.getItem(CUSTOM_SERVICES_KEY));
       const initialMatches = allCustomServices.filter((s) => s.id === 'initial-valid');
       expect(initialMatches).toHaveLength(1);
@@ -410,7 +410,6 @@ describe('Import Validation Service', () => {
       const batchResult = importBatchService.createBatch({ sourceFile: 'test.csv' });
       const batchId = batchResult.batch.id;
 
-      // Simulate a quarantined row that already exists in the catalog
       const existing = [{ id: 'already-there', name: 'Already There Service' }];
       storage.setItem(CUSTOM_SERVICES_KEY, JSON.stringify(existing));
 
@@ -442,12 +441,205 @@ describe('Import Validation Service', () => {
     });
   });
 
+  describe('chunked execution and resumable checkpoints (Slice 2)', () => {
+    it('persists progress checkpoints after each chunk during import', () => {
+      const batchResult = importBatchService.createBatch({ sourceFile: 'chunked.csv' });
+      const batchId = batchResult.batch.id;
+
+      const records = [1, 2, 3, 4, 5].map((i) => ({
+        row: i + 1,
+        service: {
+          id: `chunk-service-${i}`,
+          name: `Chunk Service ${i}`,
+          category: 'Certificates',
+          officialSources: [{ name: 'Portal', url: 'https://example.gov.in' }],
+        },
+      }));
+
+      const preview = {
+        fileName: 'chunked.csv',
+        valid: records,
+        invalid: [],
+        duplicates: [],
+        total: 5,
+      };
+
+      const result = executeImport(preview, batchId, [], { chunkSize: 2 });
+      expect(result.ok).toBe(true);
+      expect(result.imported).toBe(5);
+
+      const batch = importBatchService.getBatch(batchId);
+      expect(batch.status).toBe(IMPORT_BATCH_STATUS.VALIDATED);
+      expect(batch.validRows).toBe(5);
+    });
+
+    it('resumes interrupted batch from last checkpoint without re-importing already-committed rows', () => {
+      const batchResult = importBatchService.createBatch({ sourceFile: 'resumable.csv' });
+      const batchId = batchResult.batch.id;
+
+      const records = [1, 2, 3, 4].map((i) => ({
+        row: i + 1,
+        service: {
+          id: `resume-service-${i}`,
+          name: `Resume Service ${i}`,
+          category: 'Certificates',
+          officialSources: [{ name: 'Portal', url: 'https://example.gov.in' }],
+        },
+      }));
+
+      const preview = {
+        fileName: 'resumable.csv',
+        valid: records,
+        invalid: [],
+        duplicates: [],
+        total: 4,
+      };
+
+      // Execute with simulated interruption after chunk 1 (2 records committed)
+      const partialResult = executeImport(preview, batchId, [], { chunkSize: 2, interruptAfterChunk: 1 });
+      expect(partialResult.ok).toBe(true);
+      expect(partialResult.paused).toBe(true);
+      expect(partialResult.checkpoint.processedRecordIndex).toBe(2);
+
+      const batchMidway = importBatchService.getBatch(batchId);
+      expect(batchMidway.status).toBe(IMPORT_BATCH_STATUS.VALIDATING);
+      expect(batchMidway.validRows).toBe(2);
+
+      const initialSaved = JSON.parse(storage.getItem(CUSTOM_SERVICES_KEY));
+      expect(initialSaved).toHaveLength(2);
+
+      // Resume import from checkpoint
+      const resumeResult = resumeImport(batchId, preview, { chunkSize: 2 });
+      expect(resumeResult.ok).toBe(true);
+      expect(resumeResult.imported).toBe(4);
+
+      const batchDone = importBatchService.getBatch(batchId);
+      expect(batchDone.status).toBe(IMPORT_BATCH_STATUS.VALIDATED);
+      expect(batchDone.validRows).toBe(4);
+
+      // Verify strict idempotency: no duplicates committed
+      const allSaved = JSON.parse(storage.getItem(CUSTOM_SERVICES_KEY));
+      expect(allSaved).toHaveLength(4);
+      expect(allSaved.map((s) => s.id).sort()).toEqual([
+        'resume-service-1',
+        'resume-service-2',
+        'resume-service-3',
+        'resume-service-4',
+      ]);
+    });
+
+    it('supports saving, querying, and clearing checkpoints', () => {
+      const batchResult = importBatchService.createBatch({ sourceFile: 'checkpoints.csv' });
+      const batchId = batchResult.batch.id;
+
+      importBatchService.saveCheckpoint(batchId, {
+        processedRowIndex: 50,
+        processedRecordIndex: 50,
+        totalRecords: 100,
+        status: IMPORT_BATCH_STATUS.VALIDATING,
+        validRows: 48,
+        invalidRows: 2,
+        duplicateRows: 0,
+      });
+
+      const checkpoint = importBatchService.getCheckpoint(batchId);
+      expect(checkpoint).toBeDefined();
+      expect(checkpoint.processedRowIndex).toBe(50);
+      expect(checkpoint.validRows).toBe(48);
+
+      importBatchService.clearCheckpoint(batchId);
+      expect(importBatchService.getCheckpoint(batchId)).toBeNull();
+    });
+  });
+
+  describe('IndexedDB storage adapter & fallback (Slice 2)', () => {
+    it('gracefully handles missing indexedDB with fallback without throwing', async () => {
+      vi.stubGlobal('indexedDB', undefined);
+      const putResult = await idbPut('batches', { id: 'test-1' });
+      expect(putResult).toBe(false);
+
+      const getResult = await idbGet('batches', 'test-1');
+      expect(getResult).toBeNull();
+
+      const deleteResult = await idbDelete('batches', 'test-1');
+      expect(deleteResult).toBe(false);
+    });
+
+    it('interacts with mock indexedDB when available', async () => {
+      const dbStore = new Map();
+      const mockDB = {
+        transaction: vi.fn(() => ({
+          objectStore: vi.fn(() => ({
+            put: vi.fn((item) => dbStore.set(item.id, item)),
+            get: vi.fn((id) => {
+              const req = { result: dbStore.get(id) || null, onsuccess: null, onerror: null };
+              setTimeout(() => req.onsuccess?.(), 0);
+              return req;
+            }),
+            delete: vi.fn((id) => dbStore.delete(id)),
+          })),
+          oncomplete: null,
+          onerror: null,
+        })),
+      };
+
+      const mockIndexedDB = {
+        open: vi.fn(() => {
+          const req = {
+            result: mockDB,
+            onsuccess: null,
+            onerror: null,
+          };
+          setTimeout(() => req.onsuccess?.(), 0);
+          return req;
+        }),
+      };
+
+      vi.stubGlobal('indexedDB', mockIndexedDB);
+
+      const item = { id: 'test-idb-1', title: 'IDB Batch' };
+      const putPromise = idbPut('batches', item);
+      // Trigger tx oncomplete
+      setTimeout(() => {
+        mockDB.transaction.mock.results[0]?.value.oncomplete?.();
+      }, 5);
+
+      const putRes = await putPromise;
+      expect(putRes).toBe(true);
+    });
+  });
+
+  describe('raised limits handling (Slice 2)', () => {
+    it('enforces 5 MB and 5,000 rows limits', () => {
+      expect(MAX_IMPORT_BYTES).toBe(5 * 1024 * 1024);
+      expect(MAX_IMPORT_ROWS).toBe(5000);
+
+      // File under 5 MB is accepted
+      const moderateText = 'id,name,category,officialSourceUrl\n' + 'svc-1,Service 1,Certificates,https://example.com\n';
+      const preview = buildImportPreview(moderateText, { fileName: 'moderate.csv' });
+      expect(preview.fileErrors).toHaveLength(0);
+
+      // File over 5 MB is rejected
+      const hugeText = 'a'.repeat(MAX_IMPORT_BYTES + 1);
+      const hugePreview = buildImportPreview(hugeText, { fileName: 'huge.csv' });
+      expect(hugePreview.fileErrors).toContain(`The file is larger than ${MAX_IMPORT_BYTES / 1024} KB`);
+    });
+
+    it('rejects files with more than 5,000 records', () => {
+      const lines = ['id,name,category,officialSourceUrl'];
+      for (let i = 1; i <= 5001; i++) {
+        lines.push(`svc-${i},Service ${i},Certificates,https://example.com`);
+      }
+      const preview = buildImportPreview(lines.join('\n'), { fileName: 'overflow.csv' });
+      expect(preview.fileErrors).toContain('The file has 5001 records; the limit is 5000 per import');
+    });
+  });
+
   describe('corrupted and quota-exceeded storage fallback', () => {
     it('safely falls back without throwing when localStorage quota is exceeded', () => {
       const batchResult = importBatchService.createBatch({ sourceFile: 'test.csv' });
       const batchId = batchResult.batch.id;
 
-      // Make storage throw QuotaExceededError during executeImport
       storage.setItem.mockImplementation((key) => {
         if (key === CUSTOM_SERVICES_KEY) {
           throw new DOMException('quota exceeded', 'QuotaExceededError');
