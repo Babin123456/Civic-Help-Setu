@@ -55,6 +55,7 @@ import agentSandbox from "./_lib/handlers/agent-sandbox.js";
 import policySimulation from "./_lib/handlers/policy-simulation.js";
 import civicReleaseLedger from "./_lib/handlers/civic-release-ledger.js";
 import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
+import caseCollaboration from "./_lib/handlers/case-collaboration.js";
 
 
 const handlers = {
@@ -102,6 +103,7 @@ const handlers = {
   "policy-simulation": policySimulation,
   "civic-knowledge-graph": civicKnowledgeGraph,
   "knowledge-graph": civicKnowledgeGraph,
+  "case-collaboration": caseCollaboration,
 };
 
 // Terminology graph routes

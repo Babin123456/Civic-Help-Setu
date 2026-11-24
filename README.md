@@ -145,6 +145,16 @@ Runs untrusted civic document parsers / agent tools in isolated workers with CPU
 
 A policy-team workspace for exploring how process changes could affect service demand, travel burden and document requirements before rollout. Uses synthetic personas and deterministic rules (never an AI model for simulation maths), reports sensitivity and uncertainty, validates against aggregate public statistics, and prohibits individual prediction or unsupported causal claims. Available at `/policy-simulation`. See [architecture, data-flow, threat model and deployment documentation](docs/civic-policy-scenario-simulator.md).
 
+### 🧪 19. Civic Case Collaboration Space with Granular, Revocable Sharing
+
+A citizen workspace for sharing selected case documents with a trusted helper
+without exposing the entire account. Supports item-level sharing, expiry,
+revocation, view/download scopes, recipient authentication, watermarked
+exports, audit access, link-guessing prevention and blocked cached access after
+revocation. Results are illustrative and untrusted. Available at
+`/case-collaboration`. See [architecture, data-flow, threat model and
+deployment documentation](docs/civic-case-collaboration.md).
+
 
 ---
 
@@ -194,6 +204,7 @@ The platform includes the following major application areas:
 | Greenhouse-Gas Inventory | Department activity data, versioned factors, approvals and public emissions totals (`/ghg-inventory`) |
 | Agent Sandbox | Isolated workers for untrusted civic document parsers with CPU/memory/time limits, no network by default, output validation and threat scanning (`/agent-sandbox`) |
 | Policy Scenario Simulator | Agent-based simulation of how policy changes affect demand, travel burden and document requirements (`/policy-simulation`) |
+| Case Collaboration Space | Item-level, time-bound, revocable sharing of selected case documents with a trusted helper; view/download scopes, passcode gating, audit log and watermarking (`/case-collaboration`) |
 
 
 The availability of individual features depends on the application's current implementation and configuration.
