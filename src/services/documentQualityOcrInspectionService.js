@@ -58,7 +58,7 @@ export const DOCUMENT_MARKER_TEMPLATES = {
     expectedMarkers: ['Document Title or Header', 'Issuing Authority or Seal', 'Issue Date or Serial Number'],
     regexCheckers: [
       { name: 'Title / Header', regex: /[A-Za-z]{3,}/ },
-      { name: 'Date / Serial', regex: /\b\d{2,4}[-/\.]\d{1,2}[-/\.]\d{2,4}\b|\b[A-Z0-9]{4,}\b/ },
+      { name: 'Date / Serial', regex: /\b\d{2,4}[-/.]\d{1,2}[-/.]\d{2,4}\b|\b[A-Z0-9]{4,}\b/ },
     ],
   },
 };

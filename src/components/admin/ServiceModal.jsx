@@ -7,6 +7,7 @@ import UnsavedChangesDialog from '../common/UnsavedChangesDialog';
 import { INDIAN_STATES_AND_UTS, JURISDICTION_LEVELS, JURISDICTION_LEVEL_LABELS } from '../../data/jurisdictions';
 import { normalizeJurisdiction, validateJurisdiction, jurisdictionFromFormFields } from '../../services/jurisdictionService';
 import { CONTACT_TYPES, CONTACT_METHODS, validateContacts } from '../../services/contactDirectoryService';
+import { windowToRow, rowToWindow, validateWindows, normalizeWindow, windowWarnings } from '../../services/applicationWindowService';
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 const MODES = ['Online', 'Offline', 'Online / Offline'];

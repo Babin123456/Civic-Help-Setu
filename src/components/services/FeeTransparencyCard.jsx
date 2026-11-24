@@ -8,8 +8,12 @@ import {
   HelpCircle,
   CreditCard,
   Building,
-  RefreshCw,
   FileText,
+  History,
+  MapPin,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import {
   getServiceFeeBreakdown,
@@ -21,15 +25,20 @@ import {
 import { safeHttpUrl } from '../../utils/safeContent';
 
 /**
- * FeeTransparencyCard (#145)
+ * FeeTransparencyCard (#145, #647)
  *
  * Displays a structured, transparent breakdown of official statutory charges,
- * optional third-party facilitation fees, accepted payment channels,
- * and gazetted references. Distinctly separates mandatory government fees
- * from optional service provider costs and strictly disclaims fee collection.
+ * portal convenience fees, authorized service-centre caps, and optional add-on costs.
+ *
+ * Acceptance criteria coverage (#647):
+ * - Fee breakdowns show jurisdiction, effective date, source, and verification date.
+ * - Disputed/unknown charges are not presented as official.
+ * - Historical fee versions remain auditable via an expandable audit trail.
+ * - Distinctly separates government statutory fees from portal and service-centre charges.
  */
 const FeeTransparencyCard = ({ serviceId, serviceName }) => {
   const feeBreakdown = getServiceFeeBreakdown(serviceId);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
 
   // Initialize selected tier and selected optional charges
   const [selectedTierId, setSelectedTierId] = useState(() => {
@@ -74,6 +83,12 @@ const FeeTransparencyCard = ({ serviceId, serviceName }) => {
 
   const totals = calculateTotalExpenditure(feeBreakdown, selectedTierId, selectedOptionalIds);
 
+  const jurisdictionLabel =
+    feeBreakdown.jurisdiction?.state ||
+    (feeBreakdown.jurisdiction?.level === 'national'
+      ? 'National (All States & UTs)'
+      : feeBreakdown.jurisdiction?.authority || 'Central / State Jurisdiction');
+
   return (
     <div
       className="fee-transparency-card"
@@ -105,11 +120,11 @@ const FeeTransparencyCard = ({ serviceId, serviceName }) => {
               id="fee-transparency-heading"
               style={{ fontSize: '1.25rem', fontWeight: '700', margin: 0 }}
             >
-              Fee & Cost Transparency Breakdown
+              Fee &amp; Cost Transparency Breakdown
             </h3>
           </div>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary, #94a3b8)', margin: 0 }}>
-            Published statutory rates, optional facilitation caps, and payment channels
+            Published statutory rates, portal fees, authorized service-centre caps, and verified audit history
           </p>
         </div>
 
@@ -192,7 +207,124 @@ const FeeTransparencyCard = ({ serviceId, serviceName }) => {
         </div>
       </div>
 
-      {/* 2. Mandatory Non-Collection Legal Disclaimer Banner */}
+      {/* 2. Official Metadata Ribbon (#647: Jurisdiction, Effective Date, Verification Date, Version Audit) */}
+      {feeBreakdown.isVerified && (
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: '0.75rem',
+            padding: '0.65rem 0.85rem',
+            background: 'rgba(255, 255, 255, 0.02)',
+            borderRadius: '0.5rem',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
+            marginBottom: '1rem',
+            fontSize: '0.8rem',
+            color: 'var(--text-secondary, #94a3b8)',
+          }}
+        >
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+            <MapPin size={13} color="var(--accent-main, #38bdf8)" />
+            <span><strong>Jurisdiction:</strong> {jurisdictionLabel}</span>
+          </div>
+
+          <span style={{ opacity: 0.3 }}>|</span>
+
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+            <Calendar size={13} color="#22c55e" />
+            <span><strong>Effective:</strong> {feeBreakdown.effectiveDate || 'Gazetted'}</span>
+          </div>
+
+          <span style={{ opacity: 0.3 }}>|</span>
+
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+            <CheckCircle size={13} color="#38bdf8" />
+            <span><strong>Verified:</strong> {feeBreakdown.verificationDate || feeBreakdown.lastReviewedDate || 'Current'}</span>
+          </div>
+
+          {feeBreakdown.versionHistory && feeBreakdown.versionHistory.length > 0 && (
+            <>
+              <span style={{ opacity: 0.3 }}>|</span>
+              <button
+                type="button"
+                onClick={() => setShowVersionHistory(!showVersionHistory)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  background: showVersionHistory ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                  color: 'var(--accent-main, #38bdf8)',
+                  border: '1px solid rgba(56, 189, 248, 0.3)',
+                  padding: '0.2rem 0.5rem',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '0.75rem',
+                  fontWeight: '600',
+                }}
+                aria-expanded={showVersionHistory}
+              >
+                <History size={12} />
+                <span>v{feeBreakdown.version || 1} Audit History</span>
+                {showVersionHistory ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* 2b. Expandable Version History Drawer (#647: Historical fee versions remain auditable) */}
+      {showVersionHistory && feeBreakdown.versionHistory && (
+        <div
+          style={{
+            padding: '1rem',
+            background: 'rgba(0, 0, 0, 0.3)',
+            borderRadius: '0.5rem',
+            border: '1px solid rgba(56, 189, 248, 0.2)',
+            marginBottom: '1rem',
+            fontSize: '0.8rem',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.5rem', color: 'var(--accent-main, #38bdf8)', fontWeight: '700' }}>
+            <History size={14} /> Historical Fee Audit Log
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {feeBreakdown.versionHistory.map((v) => (
+              <div
+                key={v.version}
+                style={{
+                  padding: '0.5rem 0.75rem',
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  borderRadius: '0.35rem',
+                  borderLeft: '3px solid var(--accent-main, #38bdf8)',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: '700', color: 'var(--text-primary)' }}>Version {v.version}</span>
+                  <span style={{ color: 'var(--text-secondary, #94a3b8)', fontSize: '0.75rem' }}>
+                    Effective: {v.effectiveDate} | Verified: {v.verificationDate || '—'}
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #94a3b8)', marginTop: '2px' }}>
+                  <strong>Source:</strong> {v.source || 'Official Gazette'}
+                </div>
+                {v.feeChanges && (
+                  <div style={{ fontSize: '0.75rem', color: '#22c55e', marginTop: '2px' }}>
+                    <strong>Changes:</strong> {v.feeChanges}
+                  </div>
+                )}
+                {v.notes && (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #94a3b8)', marginTop: '2px' }}>
+                    <em>{v.notes}</em>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 3. Mandatory Non-Collection Legal Disclaimer Banner */}
       <div
         style={{
           display: 'flex',
@@ -219,7 +351,28 @@ const FeeTransparencyCard = ({ serviceId, serviceName }) => {
         </div>
       </div>
 
-      {/* 3. Review Warning Banner if Expired */}
+      {/* 3b. Disputed Charges Protection Notice (#647: Disputed/unknown charges not presented as official) */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.6rem',
+          padding: '0.6rem 0.85rem',
+          background: 'rgba(239, 68, 68, 0.08)',
+          border: '1px solid rgba(239, 68, 68, 0.25)',
+          borderRadius: '0.5rem',
+          marginBottom: '1.25rem',
+          fontSize: '0.8rem',
+          color: '#f87171',
+        }}
+      >
+        <AlertTriangle size={16} color="#ef4444" style={{ flexShrink: 0 }} />
+        <span>
+          <strong>Official Fee Protection:</strong> Disputed, unknown, or informal tout charges are never recognized as official statutory fees. Always insist on an official system-generated receipt.
+        </span>
+      </div>
+
+      {/* 4. Review Warning Banner if Expired */}
       {feeBreakdown.isExpired && feeBreakdown.reviewWarning && (
         <div
           style={{
@@ -247,7 +400,7 @@ const FeeTransparencyCard = ({ serviceId, serviceName }) => {
         </div>
       )}
 
-      {/* 4. Unverified Fee Safe Fallback */}
+      {/* 5. Unverified Fee Safe Fallback */}
       {!feeBreakdown.isVerified && (
         <div
           style={{
@@ -290,83 +443,99 @@ const FeeTransparencyCard = ({ serviceId, serviceName }) => {
         </div>
       )}
 
-      {/* 5. Verified Fee Content */}
+      {/* 6. Active Verified Fee Breakdown & Calculator */}
       {feeBreakdown.isVerified && (
         <div>
-          {/* Conditional Tier Selector if available */}
+          {/* Conditional Tier Selection */}
           {feeBreakdown.hasConditionalTiers && (
             <div style={{ marginBottom: '1.5rem' }}>
               <label
                 style={{
                   display: 'block',
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
+                  fontSize: '0.85rem',
+                  fontWeight: '700',
+                  color: 'var(--text-secondary, #94a3b8)',
                   marginBottom: '0.5rem',
-                  color: 'var(--text-primary)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
                 }}
               >
-                Select Applicable Category / Tier:
+                Select Applicable Service Tier:
               </label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {feeBreakdown.conditionalTiers.map((tier) => {
-                  const isSelected = tier.id === selectedTierId;
+                  const isSelected = (selectedTierId || feeBreakdown.conditionalTiers[0].id) === tier.id;
                   return (
-                    <button
+                    <div
                       key={tier.id}
-                      type="button"
                       onClick={() => handleTierSelect(tier.id)}
                       style={{
-                        padding: '0.85rem 1rem',
-                        textAlign: 'left',
-                        background: isSelected ? 'rgba(56, 189, 248, 0.12)' : 'var(--bg-main, rgba(255, 255, 255, 0.02))',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '0.75rem 1rem',
+                        borderRadius: '0.5rem',
                         border: isSelected
                           ? '2px solid var(--accent-main, #38bdf8)'
-                          : '1px solid var(--border-light, rgba(255, 255, 255, 0.1))',
-                        borderRadius: '0.75rem',
+                          : '1px solid var(--border-light, rgba(255, 255, 255, 0.08))',
+                        background: isSelected
+                          ? 'rgba(56, 189, 248, 0.08)'
+                          : 'rgba(255, 255, 255, 0.02)',
                         cursor: 'pointer',
-                        transition: 'all 0.2s',
+                        transition: 'all 0.15s ease',
                       }}
-                      aria-pressed={isSelected}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                        <span style={{ fontWeight: '700', fontSize: '0.95rem', color: isSelected ? 'var(--accent-main, #38bdf8)' : 'var(--text-primary)' }}>
-                          {tier.label}
-                        </span>
-                        <span style={{ fontWeight: '800', fontSize: '1rem', color: tier.amount === 0 ? '#22c55e' : 'var(--text-primary)' }}>
-                          {formatCurrency(tier.amount, tier.currency)}
-                        </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div
+                          style={{
+                            width: '16px',
+                            height: '16px',
+                            borderRadius: '50%',
+                            border: isSelected ? '5px solid var(--accent-main, #38bdf8)' : '2px solid #64748b',
+                            background: 'transparent',
+                          }}
+                        />
+                        <div>
+                          <div style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                            {tier.label}
+                          </div>
+                          <div style={{ fontSize: '0.775rem', color: 'var(--text-secondary, #94a3b8)' }}>
+                            {tier.applicability} {tier.processingTime ? `• Processing: ${tier.processingTime}` : ''}
+                          </div>
+                        </div>
                       </div>
-                      <p style={{ margin: '0 0 0.25rem', fontSize: '0.8rem', color: 'var(--text-secondary, #94a3b8)', lineHeight: '1.4' }}>
-                        {tier.applicability}
-                      </p>
-                      {tier.processingTime && (
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary, #64748b)' }}>
-                          ⏱ Turnaround: {tier.processingTime}
-                        </span>
-                      )}
-                    </button>
+                      <div
+                        style={{
+                          fontWeight: '700',
+                          fontSize: '1rem',
+                          color: tier.amount === 0 ? '#22c55e' : 'var(--text-primary)',
+                        }}
+                      >
+                        {formatCurrency(tier.amount, feeBreakdown.currency)}
+                      </div>
+                    </div>
                   );
                 })}
               </div>
             </div>
           )}
 
-          {/* Section: Official Statutory Fees */}
+          {/* Section: Category 1 - Official Government Charge */}
           <div
             style={{
               padding: '1rem',
-              background: 'rgba(56, 189, 248, 0.04)',
-              border: '1px solid rgba(56, 189, 248, 0.2)',
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid var(--border-light, rgba(255, 255, 255, 0.1))',
               borderRadius: '0.75rem',
-              marginBottom: '1.25rem',
+              marginBottom: '1rem',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span
                   style={{
                     padding: '0.2rem 0.5rem',
-                    background: 'rgba(56, 189, 248, 0.2)',
+                    background: 'rgba(56, 189, 248, 0.15)',
                     color: 'var(--accent-main, #38bdf8)',
                     borderRadius: '4px',
                     fontSize: '0.75rem',
@@ -447,7 +616,117 @@ const FeeTransparencyCard = ({ serviceId, serviceName }) => {
             )}
           </div>
 
-          {/* Section: Optional Facilitation & Kiosk Charges */}
+          {/* Section: Category 2 - Portal / Convenience Charges (#647) */}
+          {feeBreakdown.portalConvenienceCharges && feeBreakdown.portalConvenienceCharges.length > 0 && (
+            <div
+              style={{
+                padding: '1rem',
+                background: 'rgba(255, 255, 255, 0.02)',
+                border: '1px solid var(--border-light, rgba(255, 255, 255, 0.1))',
+                borderRadius: '0.75rem',
+                marginBottom: '1rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <span
+                  style={{
+                    padding: '0.2rem 0.5rem',
+                    background: 'rgba(168, 85, 247, 0.15)',
+                    color: '#c084fc',
+                    borderRadius: '4px',
+                    fontSize: '0.75rem',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  Portal &amp; Technology Charges
+                </span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary, #94a3b8)' }}>
+                  (Gateway / Processing)
+                </span>
+              </div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {feeBreakdown.portalConvenienceCharges.map((c) => (
+                  <li
+                    key={c.id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.4rem 0',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>{c.label}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #94a3b8)' }}>{c.applicability} ({c.provider})</div>
+                    </div>
+                    <span style={{ fontSize: '0.95rem', fontWeight: '700', color: c.amount === 0 ? '#22c55e' : 'var(--text-primary)' }}>
+                      {formatCurrency(c.amount, c.currency)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Section: Category 3 - Authorized Service-Centre Charges (#647) */}
+          {feeBreakdown.authorizedServiceCentreCharges && feeBreakdown.authorizedServiceCentreCharges.length > 0 && (
+            <div
+              style={{
+                padding: '1rem',
+                background: 'rgba(255, 255, 255, 0.02)',
+                border: '1px solid var(--border-light, rgba(255, 255, 255, 0.1))',
+                borderRadius: '0.75rem',
+                marginBottom: '1rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <span
+                  style={{
+                    padding: '0.2rem 0.5rem',
+                    background: 'rgba(14, 165, 233, 0.15)',
+                    color: '#38bdf8',
+                    borderRadius: '4px',
+                    fontSize: '0.75rem',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  Authorized Service-Centre Charges
+                </span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary, #94a3b8)' }}>
+                  (CSC / ASK Official Operator Caps)
+                </span>
+              </div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {feeBreakdown.authorizedServiceCentreCharges.map((c) => (
+                  <li
+                    key={c.id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.4rem 0',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>{c.label}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary, #94a3b8)' }}>{c.applicability}</div>
+                    </div>
+                    <span style={{ fontSize: '0.95rem', fontWeight: '700', color: c.amount === 0 ? '#22c55e' : 'var(--text-primary)' }}>
+                      Cap: {formatCurrency(c.maxPermissibleCap || c.amount, c.currency)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Section: Category 4 - Optional Third-Party Charges */}
           {feeBreakdown.hasOptionalCharges && (
             <div
               style={{
@@ -475,7 +754,7 @@ const FeeTransparencyCard = ({ serviceId, serviceName }) => {
                     Optional Third-Party Charges
                   </span>
                   <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary, #94a3b8)' }}>
-                    (CSC Kiosks / Convenience Services)
+                    (Voluntary Facilitation / Add-ons)
                   </span>
                 </div>
               </div>

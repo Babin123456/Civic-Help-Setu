@@ -1,0 +1,177 @@
+{
+  "registryVersion": 1,
+  "contracts": [
+    {
+      "id": "service",
+      "version": "1.0.0",
+      "owner": "GoldRay19",
+      "validator": "serviceRecord",
+      "fields": {
+        "id": {
+          "type": "slug",
+          "required": true
+        },
+        "name": {
+          "type": "text",
+          "required": true
+        },
+        "lastVerified": {
+          "type": "date",
+          "required": true
+        },
+        "officialSources": {
+          "type": "sources",
+          "required": true
+        },
+        "authorityId": {
+          "type": "slug",
+          "reference": "authority"
+        },
+        "documentIds": {
+          "type": "ids",
+          "reference": "document"
+        },
+        "deadlineIds": {
+          "type": "ids",
+          "reference": "deadline"
+        }
+      },
+      "producer": "service-import"
+    },
+    {
+      "id": "authority",
+      "version": "1.0.0",
+      "owner": "GoldRay19",
+      "validator": "metadata",
+      "fields": {
+        "id": {
+          "type": "slug",
+          "required": true
+        },
+        "name": {
+          "type": "text",
+          "required": true
+        },
+        "lastVerified": {
+          "type": "date",
+          "required": true
+        },
+        "officialSources": {
+          "type": "sources",
+          "required": true
+        },
+        "jurisdiction": {
+          "type": "jurisdiction",
+          "required": true
+        }
+      },
+      "producer": "public-metadata-preflight"
+    },
+    {
+      "id": "document",
+      "version": "1.0.0",
+      "owner": "GoldRay19",
+      "validator": "metadata",
+      "fields": {
+        "id": {
+          "type": "slug",
+          "required": true
+        },
+        "name": {
+          "type": "text",
+          "required": true
+        },
+        "lastVerified": {
+          "type": "date",
+          "required": true
+        },
+        "officialSources": {
+          "type": "sources",
+          "required": true
+        },
+        "authorityId": {
+          "type": "slug",
+          "required": true,
+          "reference": "authority"
+        },
+        "validityDays": {
+          "type": "integer",
+          "min": 1,
+          "max": 36500
+        }
+      },
+      "producer": "public-metadata-preflight"
+    },
+    {
+      "id": "deadline",
+      "version": "1.0.0",
+      "owner": "GoldRay19",
+      "validator": "metadata",
+      "fields": {
+        "id": {
+          "type": "slug",
+          "required": true
+        },
+        "name": {
+          "type": "text",
+          "required": true
+        },
+        "lastVerified": {
+          "type": "date",
+          "required": true
+        },
+        "officialSources": {
+          "type": "sources",
+          "required": true
+        },
+        "serviceId": {
+          "type": "slug",
+          "required": true,
+          "reference": "service"
+        },
+        "documentId": {
+          "type": "slug",
+          "reference": "document"
+        },
+        "dueDate": {
+          "type": "date",
+          "required": true
+        }
+      },
+      "producer": "public-metadata-preflight"
+    },
+    {
+      "id": "publicFacility",
+      "version": "1.0.0",
+      "owner": "GoldRay19",
+      "validator": "communityFacilityRecord",
+      "fields": {
+        "id": {
+          "type": "slug",
+          "required": true
+        },
+        "name": {
+          "type": "text",
+          "required": true
+        },
+        "authorityId": {
+          "type": "slug",
+          "required": true,
+          "reference": "authority"
+        },
+        "auditMetadata": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "producer": "public-metadata-preflight"
+    }
+  ],
+  "changes": [
+    {
+      "version": "1.0.0",
+      "owner": "civic-data-maintainers",
+      "reason": "Introduce a public-metadata registry reusing service and community facility validators; legacy imports stay supported."
+    }
+  ]
+}
