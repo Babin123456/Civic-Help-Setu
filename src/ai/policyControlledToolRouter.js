@@ -16,6 +16,8 @@
  * - State-changing operations require explicit citizen confirmation payload
  */
 
+import { civicAgentIncidentResponse, REGISTERED_AGENTS } from '../services/incidentResponse/civicAgentIncidentResponseService';
+
 export const TOOL_PERMISSION_TIERS = Object.freeze({
   READ_ONLY_CATALOGUE: 'READ_ONLY_CATALOGUE',
   CITIZEN_CONFIRMED_ACTION: 'CITIZEN_CONFIRMED_ACTION',
@@ -81,6 +83,19 @@ export class PolicyControlledToolRouter {
    */
   evaluateToolCall(proposedCall, context = {}) {
     const { toolName, args, citizenConfirmed = false } = proposedCall || {};
+
+    // 0. Incident response & Tool Revocation check
+    const incidentCheck = civicAgentIncidentResponse.checkExecutionPermission(
+      REGISTERED_AGENTS.TOOL_ROUTER,
+      { toolName }
+    );
+    if (!incidentCheck.permitted) {
+      return {
+        allowed: false,
+        reason: `Execution halted by Incident Response: ${incidentCheck.reason}`,
+        code: incidentCheck.code
+      };
+    }
 
     // 1. Unknown tool detection (Fail closed)
     if (!this.toolRegistry.has(toolName)) {

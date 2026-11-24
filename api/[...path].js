@@ -49,6 +49,7 @@ import ghgInventory from "./_lib/handlers/ghg-inventory.js";
 import microVolunteer from "./_lib/handlers/micro-volunteer.js";
 import reliefOperations from "./_lib/handlers/relief-operations.js";
 import jurisdictionHandoff from "./_lib/handlers/jurisdiction-handoff.js";
+
 import agentSandbox from "./_lib/handlers/agent-sandbox.js";
 import policySimulation from "./_lib/handlers/policy-simulation.js";
 import civicReleaseLedger from "./_lib/handlers/civic-release-ledger.js";
@@ -56,6 +57,7 @@ import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
 
 
 const handlers = {
+  "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
   "business-licence-feedback": businessLicence,
   "catalogue-visual-qa": catalogueVisualQa,
