@@ -117,6 +117,7 @@ const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHand
 const AgentSandboxWorkspace = lazy(() => import('./pages/AgentSandboxWorkspace'));
 const KnowledgeGraphQueryWorkspace = lazy(() => import('./pages/KnowledgeGraphQueryWorkspace'));
 const PolicySimulationWorkspace = lazy(() => import('./pages/PolicySimulationWorkspace'));
+const DigitalEvidenceLockerWorkspace = lazy(() => import('./pages/DigitalEvidenceLockerWorkspace'));
 const ServiceChangeSandboxWorkspace = lazy(() => import('./pages/ServiceChangeSandboxWorkspace'));
 const JourneyBenchmarkPage = lazy(() => import('./pages/JourneyBenchmarkPage'));
 const Services = lazy(() => import('./pages/Services'));
@@ -337,6 +338,10 @@ function AppRoot() {
                             <Route path="/evidence-dossier" element={<EvidenceDossierWorkspace />} />
                             <Route path="/verify-evidence" element={<EvidenceDossierWorkspace />} />
                             <Route path="/evidence-manifest" element={<EvidenceDossierWorkspace />} />
+
+                            <Route path="/digital-evidence-locker" element={<DigitalEvidenceLockerWorkspace />} />
+                            <Route path="/evidence-locker" element={<DigitalEvidenceLockerWorkspace />} />
+                            <Route path="/encrypted-locker" element={<DigitalEvidenceLockerWorkspace />} />
                             <Route path="/track" element={<Track />} />
                             <Route path="/civic-works" element={<CivicWorksBoard />} />
                             <Route path="/micro-volunteer-board" element={<MicroVolunteerTaskBoard />} />
