@@ -60,6 +60,6 @@ describe('SchoolFeeComplaintOrganizerService', () => {
     const upRegulator = service.getStateRegulator('IN-UP');
     expect(upRegulator).toBeDefined();
     expect(upRegulator.committeeName).toContain('District Fee Regulatory Committee');
-    expect(upRegulator.keyRules[0]).toContain('CPI + 5%');
+    expect(upRegulator.keyRules[0]).toContain('Consumer Price Index (CPI) + 5%');
   });
 });
