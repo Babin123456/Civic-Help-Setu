@@ -1,3 +1,4 @@
+import { validateCivicDataset } from './civicDataQualityService.js';
 import { requirePermission } from './accessControl';
 import { MOCK_SERVICES } from '../data/services';
 import { normalizeName } from './serviceImportService';
@@ -157,6 +158,15 @@ export const saveAdminService = (serviceData, actorName = 'SuperAdmin') => {
 // preview and the confirm (another tab or another admin).
 export const importAdminServices = (services, actorName = 'SuperAdmin') => {
   requirePermission('services.import');
+  // Recheck tagged records at the write boundary: previews are not authorization or validation tokens.
+  const tagged = Array.isArray(services) ? services.filter(service => service && Object.hasOwn(service, 'dataContract')) : [];
+  if (tagged.length) {
+    const result = validateCivicDataset({ registryVersion: 1, entities: tagged.map(service => {
+      const { dataContract, ...record } = service;
+      return { type: dataContract?.type, version: dataContract?.version, record };
+    }) });
+    if (!result.valid) return { ok: false, imported: 0, skipped: [], error: 'Versioned service data failed its contract. Rebuild the import preview; nothing was saved.' };
+  }
   let custom;
   try {
     const raw = localStorage.getItem(SERVICES_KEY);
