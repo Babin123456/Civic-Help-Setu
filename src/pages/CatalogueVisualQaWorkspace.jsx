@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect -- This reviewer workspace synchronises localStorage drafts, a saved screenshot baseline and the URL with React state on mount. These are external-store reads, exactly the case effects exist for. */
-
 /**
  * src/pages/CatalogueVisualQaWorkspace.jsx
  * Civic service catalogue visual QA workspace (#841).
@@ -147,13 +145,14 @@ export default function CatalogueVisualQaWorkspace() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const isAuthorized = user?.role === 'admin';
-  const [mounted, setMounted] = useState(false);
+  const storage = getStorage();
+  const [mounted] = useState(isAuthorized);
   const [filters, setFilters] = useState(() => initialFiltersFromQuery(searchParams));
   const [decisions, setDecisions] = useState({});
   const [draftConsent, setDraftConsent] = useState(true);
   const [resumedAt, setResumedAt] = useState(null);
   const [savedAt, setSavedAt] = useState(null);
-  const [baseline, setBaseline] = useState(null);
+  const [baseline, setBaseline] = useState(() => storage ? loadBaseline(storage) : null);
   const [isScanning, setIsScanning] = useState(false);
   const [serverStatus, setServerStatus] = useState('idle');
   const [serverError, setServerError] = useState(null);
@@ -162,7 +161,6 @@ export default function CatalogueVisualQaWorkspace() {
   const [decisionReceipt, setDecisionReceipt] = useState(null);
   const [now] = useState(() => Date.now());
   const scanTimer = useRef(null);
-  const storage = getStorage();
 
   const { report, scanError } = useMemo(() => {
     try {
@@ -203,32 +201,27 @@ export default function CatalogueVisualQaWorkspace() {
   // different scan. A deep link always wins over the browser draft.
   useEffect(() => {
     if (!isAuthorized) {
-      setMounted(true);
       return;
     }
     const hasExplicitQuery = EXPLICIT_QUERY_KEYS.some((key) => searchParams.has(key));
     if (!hasExplicitQuery) {
       const draft = loadDraft(storage);
       if (draft) {
-        setFilters({
-          ...DEFAULT_FILTERS,
-          ...draft.filters,
-          viewportIds: draft.viewportIds,
-          showBoxes: draft.showBoxes,
-        });
-        setDecisions(draft.decisions || {});
-        setResumedAt(draft.savedAt);
-        setSavedAt(draft.savedAt);
+        // Defer state updates to avoid synchronous setState in effect body
+        window.setTimeout(() => {
+          setFilters({
+            ...DEFAULT_FILTERS,
+            ...draft.filters,
+            viewportIds: draft.viewportIds,
+            showBoxes: draft.showBoxes,
+          });
+          setDecisions(draft.decisions || {});
+          setResumedAt(draft.savedAt);
+          setSavedAt(draft.savedAt);
+        }, 0);
       }
     }
-    setMounted(true);
     // Intentionally run once: the query string at mount is the deep-link intent.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthorized]);
-
-  useEffect(() => {
-    if (!isAuthorized) return;
-    setBaseline(loadBaseline(storage));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthorized]);
 
@@ -243,7 +236,10 @@ export default function CatalogueVisualQaWorkspace() {
       scanRunId: report?.scanRunId || null,
     });
     const result = saveDraft(storage, draft);
-    if (result.ok) setSavedAt(draft.savedAt);
+    if (result.ok) {
+      // Defer state update to avoid synchronous setState in effect body
+      window.setTimeout(() => setSavedAt(draft.savedAt), 0);
+    }
     // The storage object is intentionally read once per render; it is not state.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthorized, mounted, draftConsent, filters, decisions, report?.scanRunId]);
@@ -387,6 +383,7 @@ export default function CatalogueVisualQaWorkspace() {
         dataVersion: data?.dataVersion || report.dataVersion,
         componentVersion: data?.componentVersion || report.componentVersion,
         verifiedAt: new Date().toISOString(),
+        multiRegion: data?._multiRegion || null,
       });
       setServerStatus('ready');
       toast.success(

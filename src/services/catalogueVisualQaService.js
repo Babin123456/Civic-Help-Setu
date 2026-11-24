@@ -20,6 +20,11 @@
 import { SERVICE_CATEGORIES } from '../data/serviceCategories.js';
 import { SERVICE_SCHEMA_VERSION } from '../data/serviceContract.js';
 import { LANGUAGE_CODES, SOURCE_LANGUAGE, SUPPORTED_LANGUAGES } from '../utils/languagePreference.js';
+import {
+  captureRywTokenFromResponse,
+  attachRywTokenToHeaders,
+  parseStaleReadHeaders,
+} from '../utils/rywClient.js';
 
 export const VISUAL_QA_SCHEMA_VERSION = 'civic-catalogue-visual-qa/v1';
 export const VISUAL_QA_COMPONENT_VERSION = 'catalogue-service-card@1.0.0';
@@ -1568,12 +1573,13 @@ export async function requestSuggestionDecision(
     throw new VisualQaApiError('ERR_FETCH_UNAVAILABLE', 'Fetch is not available in this environment.');
   }
   try {
+    const outboundHeaders = attachRywTokenToHeaders(headers);
     const response = await fetchImpl('/api/catalogue-visual-qa', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        ...headers,
+        ...outboundHeaders,
       },
       body: JSON.stringify({
         action: 'confirm-suggestion',
@@ -1583,6 +1589,7 @@ export async function requestSuggestionDecision(
         reviewerNote: sanitizeReviewerNote(reviewerNote),
       }),
     });
+    captureRywTokenFromResponse(response);
     let body = null;
     try {
       body = await response.json();
@@ -1599,7 +1606,12 @@ export async function requestSuggestionDecision(
         { status: response.status, fields: error?.fields }
       );
     }
-    return body?.data ?? body;
+    const staleHeaders = parseStaleReadHeaders(response);
+    const result = body?.data ?? body;
+    if (result && typeof result === 'object' && staleHeaders?.servedBy) {
+      result._multiRegion = staleHeaders;
+    }
+    return result;
   } catch (error) {
     if (error instanceof VisualQaApiError) throw error;
     throw new VisualQaApiError('ERR_NETWORK', 'The visual QA service could not be reached.', { status: 0 });
@@ -1619,10 +1631,12 @@ export async function requestServerScan(filters, { fetchImpl = globalThis.fetch,
   const params = buildVisualQaQuery(normalized);
   params.set('action', 'scan');
   try {
+    const outboundHeaders = attachRywTokenToHeaders(headers);
     const response = await fetchImpl(`/api/catalogue-visual-qa?${params.toString()}`, {
       method: 'GET',
-      headers: { Accept: 'application/json', ...headers },
+      headers: { Accept: 'application/json', ...outboundHeaders },
     });
+    captureRywTokenFromResponse(response);
     let body = null;
     try {
       body = await response.json();
@@ -1639,7 +1653,12 @@ export async function requestServerScan(filters, { fetchImpl = globalThis.fetch,
         { status: response.status, fields: error?.fields }
       );
     }
-    return body?.data ?? body;
+    const staleHeaders = parseStaleReadHeaders(response);
+    const result = body?.data ?? body;
+    if (result && typeof result === 'object' && staleHeaders?.servedBy) {
+      result._multiRegion = staleHeaders;
+    }
+    return result;
   } catch (error) {
     if (error instanceof VisualQaApiError) throw error;
     throw new VisualQaApiError('ERR_NETWORK', 'The visual QA service could not be reached.', { status: 0 });

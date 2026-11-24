@@ -52,12 +52,14 @@ import reliefOperations from "./_lib/handlers/relief-operations.js";
 import jurisdictionHandoff from "./_lib/handlers/jurisdiction-handoff.js";
 
 import agentSandbox from "./_lib/handlers/agent-sandbox.js";
+import agentIncidentResponse from "./_lib/handlers/agent-incident-response.js";
 import policySimulation from "./_lib/handlers/policy-simulation.js";
 import serviceChangeSandbox from "./_lib/handlers/service-change-sandbox.js";
 import civicReleaseLedger from "./_lib/handlers/civic-release-ledger.js";
 import civicEvidenceLocker from "./_lib/handlers/civic-evidence-locker.js";
 import journeyBenchmark from "./_lib/handlers/journey-benchmark.js";
 import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
+import multiRegionStatus from "./_lib/handlers/multi-region-status.js";
 
 
 const handlers = {
@@ -108,6 +110,9 @@ const handlers = {
   "journey-benchmark": journeyBenchmark,
   "civic-knowledge-graph": civicKnowledgeGraph,
   "knowledge-graph": civicKnowledgeGraph,
+  "multi-region-health": multiRegionStatus,
+  "multi-region-status": multiRegionStatus,
+  "multi-region-metrics": multiRegionStatus,
 };
 
 // Terminology graph routes
