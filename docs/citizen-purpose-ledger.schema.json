@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CitizenPurposeLedgerContract",
+  "description": "Versioned contract for Citizen Purpose Ledger, retention policies, legal holds, and cryptographic receipts.",
+  "type": "object",
+  "definitions": {
+    "PurposeCategory": {
+      "type": "string",
+      "enum": [
+        "CIVIC_ELIGIBILITY_ASSESSMENT",
+        "APPOINTMENT_OFFICE_VISIT",
+        "GRIEVANCE_REDRESSAL",
+        "OFFLINE_RESILIENCE_CACHE",
+        "CONVERSATIONAL_ASSISTANCE",
+        "DOCUMENT_VERIFICATION_VAULT"
+      ]
+    },
+    "RetentionPolicy": {
+      "type": "object",
+      "required": ["purposeId", "category", "lawfulBasis", "retentionDays", "description", "actionOnExpiry"],
+      "properties": {
+        "purposeId": { "type": "string" },
+        "category": { "$ref": "#/definitions/PurposeCategory" },
+        "lawfulBasis": { "type": "string" },
+        "retentionDays": { "type": "integer", "minimum": 1, "maximum": 730 },
+        "description": { "type": "string" },
+        "actionOnExpiry": { "type": "string", "enum": ["PURGE", "ANONYMIZE"] },
+        "backupRetentionDays": { "type": "integer", "minimum": 1, "maximum": 90 }
+      }
+    },
+    "LegalHold": {
+      "type": "object",
+      "required": ["holdId", "purposeId", "statutoryReference", "reason", "appliedAt", "active"],
+      "properties": {
+        "holdId": { "type": "string" },
+        "purposeId": { "type": "string" },
+        "statutoryReference": { "type": "string" },
+        "reason": { "type": "string" },
+        "appliedAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": ["string", "null"], "format": "date-time" },
+        "active": { "type": "boolean" }
+      }
+    },
+    "Receipt": {
+      "type": "object",
+      "required": ["receiptId", "receiptType", "purposeId", "timestamp", "recordCount", "integrityDigest", "actionTaken"],
+      "properties": {
+        "receiptId": { "type": "string" },
+        "receiptType": { "type": "string", "enum": ["ACCESS_RECEIPT", "DELETION_RECEIPT", "LEGAL_HOLD_NOTICE"] },
+        "purposeId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "recordCount": { "type": "integer", "minimum": 0 },
+        "integrityDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "actionTaken": { "type": "string" },
+        "purgedStores": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -21,6 +21,7 @@ import rentalChecklist from "./_lib/handlers/rental-checklist-corrections.js";
 import sendEmail from "./_lib/handlers/send-email.js";
 import shareByEmail from "./_lib/handlers/share-by-email.js";
 import tenderCorrections from "./_lib/handlers/tender-corrections.js";
+import transitConcessions from "./_lib/handlers/transit-concessions.js";
 import openContractingAnalytics from "./_lib/handlers/open-contracting-analytics.js";
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
@@ -49,13 +50,18 @@ import ghgInventory from "./_lib/handlers/ghg-inventory.js";
 import microVolunteer from "./_lib/handlers/micro-volunteer.js";
 import reliefOperations from "./_lib/handlers/relief-operations.js";
 import jurisdictionHandoff from "./_lib/handlers/jurisdiction-handoff.js";
+
 import agentSandbox from "./_lib/handlers/agent-sandbox.js";
 import policySimulation from "./_lib/handlers/policy-simulation.js";
+import serviceChangeSandbox from "./_lib/handlers/service-change-sandbox.js";
 import civicReleaseLedger from "./_lib/handlers/civic-release-ledger.js";
 import civicEvidenceLocker from "./_lib/handlers/civic-evidence-locker.js";
+import journeyBenchmark from "./_lib/handlers/journey-benchmark.js";
+import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
 
 
 const handlers = {
+  "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
   "business-licence-feedback": businessLicence,
   "catalogue-visual-qa": catalogueVisualQa,
@@ -82,6 +88,7 @@ const handlers = {
   "send-email": sendEmail,
   "share-by-email": shareByEmail,
   "tender-corrections": tenderCorrections,
+  "transit-concessions": transitConcessions,
   "ward-budget-proposals": wardBudgetProposals,
   "water-quality-register": waterQualityRegister,
   "ward-issue-heatmap": wardIssueHeatmap,
@@ -97,6 +104,10 @@ const handlers = {
   "agent-sandbox": agentSandbox,
   "policy-simulation": policySimulation,
   "civic-evidence-locker": civicEvidenceLocker,
+  "service-change-sandbox": serviceChangeSandbox,
+  "journey-benchmark": journeyBenchmark,
+  "civic-knowledge-graph": civicKnowledgeGraph,
+  "knowledge-graph": civicKnowledgeGraph,
 };
 
 // Terminology graph routes
