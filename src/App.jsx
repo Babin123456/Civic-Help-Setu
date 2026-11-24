@@ -68,6 +68,7 @@ const CommunityFacilityDirectory = lazy(() => import('./pages/CommunityFacilityD
 const RoadSafetyDashboard = lazy(() => import('./pages/RoadSafetyDashboard'));
 const UpSchoolZoneSafetyAudit = lazy(() => import('./pages/UpSchoolZoneSafetyAudit'));
 const LibraryDirectory = lazy(() => import('./pages/LibraryDirectory'));
+const TransitConcessionsDirectory = lazy(() => import('./pages/TransitConcessionsDirectory'));
 const WaterTankerTracker = lazy(() => import('./pages/WaterTankerTracker'));
 const AddressChangePlanner = lazy(() => import('./pages/AddressChangePlanner'));
 const FormFieldExplainerAssistant = lazy(() => import('./pages/FormFieldExplainerAssistant'));
@@ -114,6 +115,7 @@ const ChangeFeedPage = lazy(() => import('./pages/ChangeFeedPage'));
 const FeeEvidenceAssistant = lazy(() => import('./pages/FeeEvidenceAssistant'));
 const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHandoffWorkspace'));
 const AgentSandboxWorkspace = lazy(() => import('./pages/AgentSandboxWorkspace'));
+const KnowledgeGraphQueryWorkspace = lazy(() => import('./pages/KnowledgeGraphQueryWorkspace'));
 const PolicySimulationWorkspace = lazy(() => import('./pages/PolicySimulationWorkspace'));
 const JourneyBenchmarkPage = lazy(() => import('./pages/JourneyBenchmarkPage'));
 const Services = lazy(() => import('./pages/Services'));
@@ -190,6 +192,8 @@ function AppRoot() {
                             {/* Public service journey benchmark and open evaluation dataset */}
                             <Route path="/journey-benchmark" element={<JourneyBenchmarkPage />} />
                             <Route path="/benchmark" element={<JourneyBenchmarkPage />} />
+                            <Route path="/knowledge-graph" element={<KnowledgeGraphQueryWorkspace />} />
+                            <Route path="/knowledge-graph-query" element={<KnowledgeGraphQueryWorkspace />} />
                             <Route path="/services/change-feed" element={<ChangeFeedPage />} />
                             <Route path="/change-feed" element={<ChangeFeedPage />} />
                             <Route path="/services/ward-budget-proposal" element={<WardBudgetWorkspace />} />
@@ -243,6 +247,8 @@ function AppRoot() {
                             <Route path="/rental-transition" element={<RentalTransitionWorkspace />} />
                             <Route path="/rental-records" element={<RentalTransitionWorkspace />} />
                             <Route path="/library-directory" element={<LibraryDirectory />} />
+                            <Route path="/transit-concessions" element={<TransitConcessionsDirectory />} />
+                            <Route path="/services/transit-concessions" element={<TransitConcessionsDirectory />} />
                             <Route path="/libraries" element={<LibraryDirectory />} />
                             <Route path="/address-change-planner" element={<AddressChangePlanner />} />
                             <Route path="/address-change" element={<AddressChangePlanner />} />
