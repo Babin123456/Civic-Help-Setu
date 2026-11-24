@@ -21,6 +21,7 @@ import rentalChecklist from "./_lib/handlers/rental-checklist-corrections.js";
 import sendEmail from "./_lib/handlers/send-email.js";
 import shareByEmail from "./_lib/handlers/share-by-email.js";
 import tenderCorrections from "./_lib/handlers/tender-corrections.js";
+import transitConcessions from "./_lib/handlers/transit-concessions.js";
 import openContractingAnalytics from "./_lib/handlers/open-contracting-analytics.js";
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
@@ -84,6 +85,7 @@ const handlers = {
   "send-email": sendEmail,
   "share-by-email": shareByEmail,
   "tender-corrections": tenderCorrections,
+  "transit-concessions": transitConcessions,
   "ward-budget-proposals": wardBudgetProposals,
   "water-quality-register": waterQualityRegister,
   "ward-issue-heatmap": wardIssueHeatmap,

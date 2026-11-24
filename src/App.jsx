@@ -68,6 +68,7 @@ const CommunityFacilityDirectory = lazy(() => import('./pages/CommunityFacilityD
 const RoadSafetyDashboard = lazy(() => import('./pages/RoadSafetyDashboard'));
 const UpSchoolZoneSafetyAudit = lazy(() => import('./pages/UpSchoolZoneSafetyAudit'));
 const LibraryDirectory = lazy(() => import('./pages/LibraryDirectory'));
+const TransitConcessionsDirectory = lazy(() => import('./pages/TransitConcessionsDirectory'));
 const WaterTankerTracker = lazy(() => import('./pages/WaterTankerTracker'));
 const AddressChangePlanner = lazy(() => import('./pages/AddressChangePlanner'));
 const FormFieldExplainerAssistant = lazy(() => import('./pages/FormFieldExplainerAssistant'));
@@ -241,6 +242,8 @@ function AppRoot() {
                             <Route path="/rental-transition" element={<RentalTransitionWorkspace />} />
                             <Route path="/rental-records" element={<RentalTransitionWorkspace />} />
                             <Route path="/library-directory" element={<LibraryDirectory />} />
+                            <Route path="/transit-concessions" element={<TransitConcessionsDirectory />} />
+                            <Route path="/services/transit-concessions" element={<TransitConcessionsDirectory />} />
                             <Route path="/libraries" element={<LibraryDirectory />} />
                             <Route path="/address-change-planner" element={<AddressChangePlanner />} />
                             <Route path="/address-change" element={<AddressChangePlanner />} />
