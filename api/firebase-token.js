@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /* global process */
 import { createFirebaseTokenHandler } from './_lib/firebaseToken.js';
 import { createRateLimiter } from './_lib/abuseGuard.js';
@@ -58,5 +59,4 @@ async function route(req, res) {
   res.status(result.status).json(result.body);
 }
 
-export default withRequestSecurity(route, { allowMissingOrigin: true });
-
+export default withApiErrorContract(withRequestSecurity(route, { allowMissingOrigin: true }));

@@ -162,3 +162,14 @@ Never commit real keys (frontend `VITE_` variables are public). What each check 
 - Use functional components and hooks.
 - Semantic HTML is required for accessibility.
 - CSS is handled via Vanilla CSS in `index.css`. Please use existing CSS variables for colors, typography, and spacing.
+
+## Public metadata contract changes
+
+Run `npm run contracts:check -- --base <full-base-commit-sha>` when changing civic
+schemas and `npm run contracts:validate -- <public-metadata.json>` to preflight a
+producer batch. The PR quality workflow checks versioned registry changes against
+its verified base commit. Keep ownership, compatibility and migration audit
+records alongside the schema. See [Civic data quality contracts](docs/CIVIC_DATA_QUALITY_CONTRACTS.md)
+for supported entities, the existing import integration, limits and rollback.
+
+Regional directory device-local review, history, limits and rollout: [docs/REGIONAL_SERVICE_DIRECTORY.md](docs/REGIONAL_SERVICE_DIRECTORY.md).

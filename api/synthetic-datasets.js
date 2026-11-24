@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /**
  * api/synthetic-datasets.js
  *
@@ -120,5 +121,4 @@ async function handler(req, res) {
   return res.status(405).json({ error: `Method ${req.method} not allowed` });
 }
 
-export default withRequestSecurity(handler, { allowMissingOrigin: true });
-
+export default withApiErrorContract(withRequestSecurity(handler, { allowMissingOrigin: true }));

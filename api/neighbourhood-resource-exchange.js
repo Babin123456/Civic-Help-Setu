@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /**
  * api/neighbourhood-resource-exchange.js
  * Server-side endpoint for the Neighbourhood Resource Exchange feature (#760).
@@ -430,5 +431,4 @@ async function handler(req, res) {
     }
   });
 }
-
-export default withRequestSecurity(handler, { allowMissingOrigin: true });
+export default withApiErrorContract(withRequestSecurity(handler, { allowMissingOrigin: true }));

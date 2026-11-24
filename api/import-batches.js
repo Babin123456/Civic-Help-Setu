@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /**
  * api/import-batches.js
  * Server-side endpoint for the staged civic dataset import console.
@@ -377,5 +378,4 @@ async function _handleRollback(body) {
 const logError = (err) => {
   console.error('[import-batches] Error:', err);
 };
-
-export default withRequestSecurity(handler, { allowMissingOrigin: true });
+export default withApiErrorContract(withRequestSecurity(handler, { allowMissingOrigin: true }));

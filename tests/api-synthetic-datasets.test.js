@@ -118,7 +118,9 @@ describe('api/synthetic-datasets (#778)', () => {
       await handler(req, res);
 
       expect(res.statusCode).toBe(422);
-      expect(res.body.code).toBe('ERR_SYNTH_PII_SUSPECT');
+      expect(res.body.code).toBe('SENSITIVE_DATA_REJECTED');
+      expect(res.body.recoveryAction).toBe('remove_private_data');
+      expect(JSON.stringify(res.body)).not.toContain('3456 7890 1234');
     });
 
     it('rejects unsupported HTTP methods', async () => {

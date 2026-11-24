@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /* global process */
 import {
   applicationEventRepository,
@@ -56,5 +57,4 @@ async function route(req, res) {
   res.status(result.status).json(result.body);
 }
 
-export default withRequestSecurity(route, { allowMissingOrigin: true });
-
+export default withApiErrorContract(withRequestSecurity(route, { allowMissingOrigin: true }));
