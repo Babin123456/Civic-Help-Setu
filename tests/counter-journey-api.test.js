@@ -60,7 +60,8 @@ describe('api/counter-journey handler', () => {
     it('returns 400 when action is missing', async () => {
       const req = makeReq({});
       const result = await handler(req, makeRes());
-      expect(result.body).toHaveProperty('error', 'missing_action');
+      expect(result.body).toHaveProperty('code', 'INVALID_REQUEST');
+      expect(result.body).toHaveProperty('errorVersion', 1);
     });
   });
 
@@ -75,13 +76,15 @@ describe('api/counter-journey handler', () => {
     it('returns 404 for unknown journeyId', async () => {
       const req = makeReq({ query: { action: 'journey', journeyId: 'unknown-journey' } });
       const result = await handler(req, makeRes());
-      expect(result.body).toHaveProperty('error', 'journey_not_found');
+      expect(result.body).toHaveProperty('code', 'NOT_FOUND');
+      expect(result.body).toHaveProperty('errorVersion', 1);
     });
 
     it('returns 400 when journeyId is missing', async () => {
       const req = makeReq({ query: { action: 'journey' } });
       const result = await handler(req, makeRes());
-      expect(result.body).toHaveProperty('error', 'missing_journeyId');
+      expect(result.body).toHaveProperty('code', 'INVALID_REQUEST');
+      expect(result.body).toHaveProperty('errorVersion', 1);
     });
   });
 
@@ -92,7 +95,8 @@ describe('api/counter-journey handler', () => {
         body: { action: 'evaluate', journeyId: 'income-certificate-delhi-south', availableDocumentIds: ['aadhaar'] },
       });
       const result = await handler(req, makeRes());
-      expect(result.body).toHaveProperty('error', 'unauthenticated');
+      expect(result.body).toHaveProperty('code', 'UNAUTHENTICATED');
+      expect(result.body).toHaveProperty('errorVersion', 1);
     });
 
     it('returns validation errors for bad request with auth', async () => {
@@ -102,7 +106,8 @@ describe('api/counter-journey handler', () => {
         body: { action: 'evaluate', journeyId: 'income-certificate-delhi-south', availableDocumentIds: ['nonexistent'] },
       });
       const result = await handler(req, makeRes());
-      expect(result.body).toHaveProperty('error', 'validation_failed');
+      expect(result.body).toHaveProperty('code', 'INVALID_REQUEST');
+      expect(result.body).toHaveProperty('errorVersion', 1);
     });
 
     it('evaluates a journey with all docs and returns full data with auth', async () => {
@@ -135,7 +140,8 @@ describe('api/counter-journey handler', () => {
         body: { action: 'checklist', journeyId: 'income-certificate-delhi-south' },
       });
       const result = await handler(req, makeRes());
-      expect(result.body).toHaveProperty('error', 'unauthenticated');
+      expect(result.body).toHaveProperty('code', 'UNAUTHENTICATED');
+      expect(result.body).toHaveProperty('errorVersion', 1);
     });
 
     it('returns checklist text with auth', async () => {
@@ -158,7 +164,8 @@ describe('api/counter-journey handler', () => {
         body: { action: 'admin:review', journeyId: 'income-certificate-delhi-south', reviewerNote: 'test' },
       });
       const result = await handler(req, makeRes());
-      expect(result.body).toHaveProperty('error', 'permission_denied');
+      expect(result.body).toHaveProperty('code', 'FORBIDDEN');
+      expect(result.body).toHaveProperty('errorVersion', 1);
     });
 
     it('returns success for admin', async () => {
@@ -178,7 +185,8 @@ describe('api/counter-journey handler', () => {
         body: { action: 'admin:review' },
       });
       const result = await handler(req, makeRes());
-      expect(result.body).toHaveProperty('error', 'missing_journeyId');
+      expect(result.body).toHaveProperty('code', 'INVALID_REQUEST');
+      expect(result.body).toHaveProperty('errorVersion', 1);
     });
   });
 
@@ -186,13 +194,15 @@ describe('api/counter-journey handler', () => {
     it('returns 405 for DELETE', async () => {
       const req = makeReq({ method: 'DELETE' });
       const result = await handler(req, makeRes());
-      expect(result.body).toHaveProperty('error', 'method_not_allowed');
+      expect(result.body).toHaveProperty('code', 'METHOD_NOT_ALLOWED');
+      expect(result.body).toHaveProperty('errorVersion', 1);
     });
 
     it('returns 405 for PUT', async () => {
       const req = makeReq({ method: 'PUT' });
       const result = await handler(req, makeRes());
-      expect(result.body).toHaveProperty('error', 'method_not_allowed');
+      expect(result.body).toHaveProperty('code', 'METHOD_NOT_ALLOWED');
+      expect(result.body).toHaveProperty('errorVersion', 1);
     });
   });
 
@@ -208,7 +218,8 @@ describe('api/counter-journey handler', () => {
       const req = makeReq({ query: { action: 'journey', journeyId: 'nonexistent' } });
       const result = await handler(req, makeRes());
       expect(result.body).toHaveProperty('ok', false);
-      expect(result.body).toHaveProperty('error', 'journey_not_found');
+      expect(result.body).toHaveProperty('code', 'NOT_FOUND');
+      expect(result.body).toHaveProperty('errorVersion', 1);
     });
   });
 });
