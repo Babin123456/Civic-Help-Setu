@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getAllServices } from '../services/serviceCatalog';
 import ServiceCard from '../components/ServiceCard';
+import RegionalDirectoryStatus from '../components/services/RegionalDirectoryStatus';
 import FilterToolbar from '../components/services/FilterToolbar';
 import QuickFilterPresets, { QUICK_PRESETS } from '../components/services/QuickFilterPresets';
 import DirectoryEmptyState from '../components/services/DirectoryEmptyState';
@@ -371,6 +372,8 @@ const Services = () => {
           onResetFilters={handleResetFilters}
           hasActiveFilters={hasActiveFilters}
         />
+
+        <RegionalDirectoryStatus services={filteredServices} />
 
         {/* Services Grid or Empty State */}
         {filteredServices.length > 0 ? (

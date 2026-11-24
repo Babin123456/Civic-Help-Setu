@@ -1012,6 +1012,7 @@ const Admin = () => {
                 )}
 
                 <ServiceOwnershipModal
+                  auditLogs={auditLogs}
                   isOpen={ownershipModal.isOpen}
                   onClose={() => setOwnershipModal({ isOpen: false, service: null })}
                   service={ownershipModal.service}

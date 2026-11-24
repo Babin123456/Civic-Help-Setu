@@ -171,3 +171,5 @@ producer batch. The PR quality workflow checks versioned registry changes agains
 its verified base commit. Keep ownership, compatibility and migration audit
 records alongside the schema. See [Civic data quality contracts](docs/CIVIC_DATA_QUALITY_CONTRACTS.md)
 for supported entities, the existing import integration, limits and rollback.
+
+Regional directory device-local review, history, limits and rollout: [docs/REGIONAL_SERVICE_DIRECTORY.md](docs/REGIONAL_SERVICE_DIRECTORY.md).
