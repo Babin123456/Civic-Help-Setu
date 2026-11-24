@@ -1,0 +1,53 @@
+{
+  "repository": "GoldRay19/Civic-Help-Setu",
+  "repositoryId": 1370320609,
+  "branch": "main",
+  "maxAgeHours": 168,
+  "lighthouse": {
+    "routes": [
+      "/",
+      "/services",
+      "/assistant",
+      "/open-source"
+    ],
+    "previewOrigin": "http://localhost:4173",
+    "runsPerRoute": 3,
+    "minAccessibility": 0.9,
+    "maxFcpMs": 3000
+  },
+  "producers": [
+    {
+      "kind": "quality",
+      "workflowId": 421213009,
+      "workflowPath": ".github/workflows/pr-quality.yml",
+      "artifactName": "civic-quality-evidence",
+      "configurationBlobs": {
+        ".github/workflows/pr-quality.yml": "e29190311b3ea6bcbd556d1f0415d5bf0d6939c6",
+        "package.json": "49e46b87a9b7a546d6f915df5be6488c3b18d619",
+        "package-lock.json": "0a23a6517dea68c64be2d91269cff082841e9642",
+        "scripts/platform-quality-evidence.mjs": "0344fe3af098bd924d1a01462b7650c4345ce74a",
+        "eslint.config.js": "5561a8fb7fbe9de51a7d8378ba2e80dedfce4097",
+        "vite.config.js": "2740886e392afb89850d55eef4961f80b3d80d51"
+      },
+      "checkSteps": {
+        "install": "Install locked dependencies",
+        "contracts": "Civic contract compatibility and change audit",
+        "lint": "Lint",
+        "test": "Test",
+        "build": "Build"
+      }
+    },
+    {
+      "kind": "lighthouse",
+      "workflowId": 421565031,
+      "workflowPath": ".github/workflows/lighthouse-ci.yml",
+      "artifactName": "lighthouse-reports",
+      "configurationBlobs": {
+        ".github/workflows/lighthouse-ci.yml": "a8c8021b7dfb66fc2322c5b6e9fb21d1b959d9a6",
+        "package.json": "49e46b87a9b7a546d6f915df5be6488c3b18d619",
+        "package-lock.json": "0a23a6517dea68c64be2d91269cff082841e9642",
+        ".lighthouserc.json": "2d0497b44f1dc2c1beb10fcf9f3e451826d226fd"
+      }
+    }
+  ]
+}
