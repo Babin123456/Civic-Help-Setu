@@ -59,6 +59,7 @@ import civicReleaseLedger from "./_lib/handlers/civic-release-ledger.js";
 import civicEvidenceLocker from "./_lib/handlers/civic-evidence-locker.js";
 import journeyBenchmark from "./_lib/handlers/journey-benchmark.js";
 import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
+import caseCollaboration from "./_lib/handlers/case-collaboration.js";
 
 
 const handlers = {
@@ -109,6 +110,7 @@ const handlers = {
   "journey-benchmark": journeyBenchmark,
   "civic-knowledge-graph": civicKnowledgeGraph,
   "knowledge-graph": civicKnowledgeGraph,
+  "case-collaboration": caseCollaboration,
 };
 
 // Terminology graph routes
