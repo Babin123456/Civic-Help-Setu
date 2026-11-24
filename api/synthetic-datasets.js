@@ -13,6 +13,7 @@
 
 import { createRateLimiter, createSingleFlight, clientKey } from './_lib/abuseGuard.js';
 import { validateGenerationPayload } from './_lib/syntheticSchemaContract.js';
+import { withRequestSecurity } from './_lib/requestSecurity.js';
 
 const rateLimiter = createRateLimiter({ limit: 12, windowMs: 60 * 1000 });
 const singleFlight = createSingleFlight();
@@ -36,7 +37,7 @@ function scanObjectForPII(obj) {
   return false;
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   // CORS & Methods
   if (req.method === 'OPTIONS') {
     res.setHeader('Allow', 'GET, POST, OPTIONS');
@@ -118,3 +119,6 @@ export default async function handler(req, res) {
   res.setHeader('Allow', 'GET, POST, OPTIONS');
   return res.status(405).json({ error: `Method ${req.method} not allowed` });
 }
+
+export default withRequestSecurity(handler, { allowMissingOrigin: true });
+

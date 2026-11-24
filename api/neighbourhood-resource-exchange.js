@@ -18,6 +18,7 @@
  */
 
 import { createRateLimiter, createSingleFlight } from './_lib/abuseGuard.js';
+import { withRequestSecurity } from './_lib/requestSecurity.js';
 import {
   createResourceListing,
   getResourceListing,
@@ -185,7 +186,7 @@ function isValidModerationFlagType(t) {
   return typeof t === 'string' && MODERATION_FLAGS_TYPES.includes(t);
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'GET') {
@@ -429,3 +430,5 @@ export default async function handler(req, res) {
     }
   });
 }
+
+export default withRequestSecurity(handler, { allowMissingOrigin: true });

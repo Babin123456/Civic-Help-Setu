@@ -4,6 +4,7 @@ import {
   createApplicationEventsHandler,
 } from './_lib/applicationEvents.js';
 import { createRateLimiter } from './_lib/abuseGuard.js';
+import { withRequestSecurity } from './_lib/requestSecurity.js';
 
 let handler = null;
 
@@ -30,7 +31,7 @@ async function build() {
   });
 }
 
-export default async function route(req, res) {
+async function route(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   try {
     handler ??= await build();
@@ -54,3 +55,6 @@ export default async function route(req, res) {
   }
   res.status(result.status).json(result.body);
 }
+
+export default withRequestSecurity(route, { allowMissingOrigin: true });
+
