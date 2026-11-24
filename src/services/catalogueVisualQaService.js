@@ -1,3 +1,4 @@
+import { describeApiFailure } from '../utils/civicErrorContract.js';
 /**
  * Civic service catalogue visual QA (issue #841).
  *
@@ -1551,11 +1552,15 @@ export const clearBaseline = (storage) => {
 // ---- client API helper -------------------------------------------------------
 
 export class VisualQaApiError extends Error {
-  constructor(code, message, { status = 0, fields = [] } = {}) {
+  constructor(code, message, { status = 0, fields = [], retryable = false, recoveryAction = 'contact_support', correlationId = null, retryAfterSeconds } = {}) {
     super(message || 'The visual QA service could not complete the request.');
     this.name = 'VisualQaApiError';
     this.code = code || 'ERR_VISUAL_QA_API';
     this.status = status;
+    this.retryable = retryable;
+    this.recoveryAction = recoveryAction;
+    this.correlationId = correlationId;
+    if (retryAfterSeconds !== undefined) this.retryAfterSeconds = retryAfterSeconds;
     this.fields = Array.isArray(fields) ? fields : [];
   }
 }
@@ -1587,22 +1592,18 @@ export async function requestSuggestionDecision(
     try {
       body = await response.json();
     } catch {
-      throw new VisualQaApiError('ERR_MALFORMED_RESPONSE', 'The server returned an unreadable response.', {
-        status: response.status,
-      });
+      const safe = describeApiFailure({ status: response.status });
+      throw new VisualQaApiError(safe.code, safe.message, safe);
     }
     if (!response.ok) {
-      const error = body?.error;
-      throw new VisualQaApiError(
-        typeof error?.code === 'string' ? error.code : 'ERR_VISUAL_QA_API',
-        typeof error?.message === 'string' ? error.message : 'The server refused the suggestion decision.',
-        { status: response.status, fields: error?.fields }
-      );
+      const safe = describeApiFailure({ status: response.status, body, correlationId: response.headers?.get?.('X-Correlation-ID') });
+      throw new VisualQaApiError(safe.code, safe.message, safe);
     }
     return body?.data ?? body;
   } catch (error) {
     if (error instanceof VisualQaApiError) throw error;
-    throw new VisualQaApiError('ERR_NETWORK', 'The visual QA service could not be reached.', { status: 0 });
+    const safe = describeApiFailure({ status: 0 });
+    throw new VisualQaApiError(safe.code, safe.message, safe);
   }
 }
 
@@ -1627,22 +1628,18 @@ export async function requestServerScan(filters, { fetchImpl = globalThis.fetch,
     try {
       body = await response.json();
     } catch {
-      throw new VisualQaApiError('ERR_MALFORMED_RESPONSE', 'The server returned an unreadable response.', {
-        status: response.status,
-      });
+      const safe = describeApiFailure({ status: response.status });
+      throw new VisualQaApiError(safe.code, safe.message, safe);
     }
     if (!response.ok) {
-      const error = body?.error;
-      throw new VisualQaApiError(
-        typeof error?.code === 'string' ? error.code : 'ERR_VISUAL_QA_API',
-        typeof error?.message === 'string' ? error.message : 'The server refused the visual QA request.',
-        { status: response.status, fields: error?.fields }
-      );
+      const safe = describeApiFailure({ status: response.status, body, correlationId: response.headers?.get?.('X-Correlation-ID') });
+      throw new VisualQaApiError(safe.code, safe.message, safe);
     }
     return body?.data ?? body;
   } catch (error) {
     if (error instanceof VisualQaApiError) throw error;
-    throw new VisualQaApiError('ERR_NETWORK', 'The visual QA service could not be reached.', { status: 0 });
+    const safe = describeApiFailure({ status: 0 });
+    throw new VisualQaApiError(safe.code, safe.message, safe);
   }
 }
 

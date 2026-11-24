@@ -1,4 +1,14 @@
 import { safeHttpUrl } from '../../src/utils/safeContent.js';
+import {
+  createEventOutbox,
+  createEventOutboxPublisher,
+  createMemoryStorageAdapter,
+  createFirestoreOutboxStorageAdapter,
+  createWebhookDeliverySink,
+  OUTBOX_STATUS,
+} from './eventOutbox.js';
+
+export { OUTBOX_STATUS, createFirestoreOutboxStorageAdapter, createWebhookDeliverySink };
 
 export const APPLICATION_EVENT_CATEGORIES = Object.freeze([
   'submission',
@@ -216,16 +226,59 @@ const matchesIdentity = (candidate, existing) => {
   return false;
 };
 
-export const createMemoryApplicationEventRepository = () => {
+export const createMemoryApplicationEventRepository = ({
+  storage = null,
+  storageKey = 'application_events',
+  outboxEnabled = typeof globalThis.process !== 'undefined' && globalThis.process.env?.OUTBOX_ENABLED === 'false' ? false : true,
+  outbox = null,
+  publisher = null,
+  deliveryUrl = null,
+} = {}) => {
   const events = new Map();
   const auditEntries = [];
   let auditSequence = 0;
 
-  return {
+  const resolvedStorage =
+    storage === 'firestore' || (typeof globalThis.process !== 'undefined' && globalThis.process.env?.USE_FIRESTORE_OUTBOX === 'true')
+      ? createFirestoreOutboxStorageAdapter()
+      : (storage || createMemoryStorageAdapter());
+
+  if (resolvedStorage && typeof resolvedStorage.read === 'function') {
+    Promise.resolve(resolvedStorage.read(storageKey))
+      .then((saved) => {
+        if (Array.isArray(saved)) {
+          saved.forEach((e) => events.set(e.eventId, e));
+        }
+      })
+      .catch(() => {});
+  }
+
+  const outboxInstance = outboxEnabled
+    ? (outbox || createEventOutbox({
+        storage: resolvedStorage,
+        storageKey: `${storageKey}_outbox`,
+        audit: (entry) => repository.audit(entry),
+      }))
+    : null;
+
+  const outboxPublisherInstance = outboxEnabled
+    ? (publisher || (outboxInstance ? createEventOutboxPublisher({
+        outbox: outboxInstance,
+        targetUrl: deliveryUrl,
+        audit: (entry) => repository.audit(entry),
+      }) : null))
+    : null;
+
+  const repository = {
+    outbox: outboxInstance,
+    outboxPublisher: outboxPublisherInstance,
+    outboxEnabled,
     reset() {
       events.clear();
       auditEntries.length = 0;
       auditSequence = 0;
+      if (outboxInstance?.reset) outboxInstance.reset().catch(() => {});
+      if (storage?.remove) storage.remove(storageKey).catch(() => {});
     },
     audit(entry) {
       auditSequence += 1;
@@ -264,16 +317,24 @@ export const createMemoryApplicationEventRepository = () => {
         dataVersion: buildDataVersion(all),
       };
     },
-    create(event) {
+    async create(event) {
       for (const existing of events.values()) {
         if (matchesIdentity(event, existing)) {
           return { status: 'duplicate', event: existing };
         }
       }
       events.set(event.eventId, event);
+      if (storage?.write) {
+        await storage.write(storageKey, [...events.values()]).catch(() => {});
+      }
+      if (outboxEnabled && outboxInstance) {
+        await outboxInstance.stageEvent(event).catch(() => {});
+      }
       return { status: 'created', event };
     },
   };
+
+  return repository;
 };
 
 export const applicationEventRepository = createMemoryApplicationEventRepository();
@@ -285,6 +346,7 @@ export const createApplicationEventsHandler = ({
   verifySession,
   repository,
   ipLimiter = null,
+  publisher = null,
 }) => {
   if (typeof verifySession !== 'function') {
     throw new TypeError('createApplicationEventsHandler needs verifySession');
@@ -326,6 +388,14 @@ export const createApplicationEventsHandler = ({
     if (!userId) return json(401, { error: 'invalid_token' });
 
     if (method === 'GET') {
+      if (query.metrics === 'true' || query.view === 'outbox') {
+        if (!isAdmin(role)) return json(403, { error: 'forbidden' });
+        const pub = publisher || repository?.outboxPublisher;
+        if (!pub) return json(400, { error: 'outbox_disabled' });
+        const metrics = await pub.getMetrics();
+        return json(200, { ok: true, metrics });
+      }
+
       const applicationId = safeString(query.applicationId, 120);
       if (!applicationId) {
         return json(400, { error: 'validation_failed', details: ['applicationId is required.'] });
@@ -364,6 +434,22 @@ export const createApplicationEventsHandler = ({
       });
     }
 
+    if (query.action === 'replay' || body?.action === 'replay') {
+      if (!isAdmin(role)) {
+        return json(403, { error: 'forbidden', details: ['Replay is restricted to administrative roles.'] });
+      }
+      const pub = publisher || repository?.outboxPublisher;
+      if (!pub) return json(400, { error: 'outbox_disabled' });
+      const replayResult = await pub.replay({
+        eventIds: body?.eventIds,
+        from: body?.from,
+        to: body?.to,
+        limit: body?.limit,
+        actorRole: role,
+      });
+      return json(replayResult.status || (replayResult.ok ? 200 : 400), replayResult);
+    }
+
     const errors = validateApplicationEventRequest(body);
     if (errors.length > 0) {
       return json(400, { error: 'validation_failed', details: errors });
@@ -384,7 +470,7 @@ export const createApplicationEventsHandler = ({
     }
 
     const event = normalizeRequestedEvent(body, userId, role);
-    const result = repository.create(event);
+    const result = await repository.create(event);
 
     if (result.status === 'duplicate') {
       return json(409, {

@@ -141,9 +141,26 @@ A role-scoped workspace for local-authority climate reporting. Departments submi
 ### 🧪 18. Secure Agent Sandbox for Untrusted Civic Document Processing
 
 Runs untrusted civic document parsers / agent tools in isolated workers with CPU, memory and time limits; network disabled by default; restricted filesystem access; output validation; dependency and threat scanning. Results are illustrative and untrusted, and must be reviewed by a human before any civic action. Available at `/agent-sandbox`. See [architecture, data-flow, threat model and deployment documentation](docs/secure-agent-sandbox.md).
-### 🧪 18. Agent-Based Civic Policy Scenario Simulator
+
+### 🧪 19. Agent-Based Civic Policy Scenario Simulator
 
 A policy-team workspace for exploring how process changes could affect service demand, travel burden and document requirements before rollout. Uses synthetic personas and deterministic rules (never an AI model for simulation maths), reports sensitivity and uncertainty, validates against aggregate public statistics, and prohibits individual prediction or unsupported causal claims. Available at `/policy-simulation`. See [architecture, data-flow, threat model and deployment documentation](docs/civic-policy-scenario-simulator.md).
+
+### 🧪 19. Civic Case Collaboration Space with Granular, Revocable Sharing
+
+A citizen workspace for sharing selected case documents with a trusted helper
+without exposing the entire account. Supports item-level sharing, expiry,
+revocation, view/download scopes, recipient authentication, watermarked
+exports, audit access, link-guessing prevention and blocked cached access after
+revocation. Results are illustrative and untrusted. Available at
+`/case-collaboration`. See [architecture, data-flow, threat model and
+deployment documentation](docs/civic-case-collaboration.md).
+### 🧪 20. Civic Service Change Sandbox with Shadow Traffic Evaluation
+
+A maintainer workspace for comparing a proposed service workflow against current behavior before publishing. Creates versioned staging snapshots, replays synthetic journeys, compares completion / validation / accessibility outcomes, blocks writes to production during shadow runs, and supports rollback and deterministic replay. Results are illustrative and untrusted. Available at `/service-change-sandbox`. See [architecture, data-flow, threat model and deployment documentation](docs/civic-service-change-sandbox.md).
+### 🧪 19. Public Service Journey Benchmark & Open Evaluation Dataset
+
+A standardized evaluation benchmark and open synthetic dataset for evaluating public service navigation, multilingual understanding (Hindi, Urdu, English), statutory citation grounding, and abstention safety against unverified claims or tout recommendations. Keeps deterministic rules outside LLM prompts and provides anti-contamination canary tokens. Available at `/journey-benchmark`. See [architecture, threat-model, and evaluation documentation](docs/public-service-journey-benchmark.md).
 
 
 ---
@@ -194,6 +211,9 @@ The platform includes the following major application areas:
 | Greenhouse-Gas Inventory | Department activity data, versioned factors, approvals and public emissions totals (`/ghg-inventory`) |
 | Agent Sandbox | Isolated workers for untrusted civic document parsers with CPU/memory/time limits, no network by default, output validation and threat scanning (`/agent-sandbox`) |
 | Policy Scenario Simulator | Agent-based simulation of how policy changes affect demand, travel burden and document requirements (`/policy-simulation`) |
+| Case Collaboration Space | Item-level, time-bound, revocable sharing of selected case documents with a trusted helper; view/download scopes, passcode gating, audit log and watermarking (`/case-collaboration`) |
+| Service Change Sandbox | Versioned staging snapshots and synthetic shadow-traffic comparison of completion, validation and accessibility outcomes (`/service-change-sandbox`) |
+| Journey Benchmark & Dataset | Standardized synthetic benchmark & evaluation dataset for civic navigation, vernacular comprehension and citation grounding (`/journey-benchmark`) |
 
 
 The availability of individual features depends on the application's current implementation and configuration.

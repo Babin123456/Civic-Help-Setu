@@ -87,8 +87,10 @@ describe('Abuse Control Plane API handler (#1174)', () => {
         route: '/api/report', limit: 0, windowMs: 60_000,
       }), res);
       expect(res.statusCode).toBe(400);
-      expect(res.body.error).toBe('validation_failed');
-      expect(Array.isArray(res.body.details)).toBe(true);
+      expect(res.body.errorVersion).toBe(1);
+      expect(res.body.code).toBe('INVALID_REQUEST');
+      expect(res.body.recoveryAction).toBe('edit_request');
+      expect(res.body.details).toBeUndefined();
     });
   });
 

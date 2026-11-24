@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /**
  * api/neighbourhood-resource-exchange.js
  * Server-side endpoint for the Neighbourhood Resource Exchange feature (#760).
@@ -185,7 +186,7 @@ function isValidModerationFlagType(t) {
   return typeof t === 'string' && MODERATION_FLAGS_TYPES.includes(t);
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'GET') {
@@ -429,3 +430,4 @@ export default async function handler(req, res) {
     }
   });
 }
+export default withApiErrorContract(handler);

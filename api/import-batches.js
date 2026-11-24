@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /**
  * api/import-batches.js
  * Server-side endpoint for the staged civic dataset import console.
@@ -58,7 +59,7 @@ const generateIdempotencyKey = (batchId, action, actor) => {
  * Routes based on HTTP method and action.
  * Exported as default for Vercel serverless function integration.
  */
-export default async function handler(req, res) {
+async function handler(req, res) {
   res.setHeader('content-type', 'application/json; charset=utf-8');
 
   // 1. Rate Limiting
@@ -376,3 +377,4 @@ async function _handleRollback(body) {
 const logError = (err) => {
   console.error('[import-batches] Error:', err);
 };
+export default withApiErrorContract(handler);
