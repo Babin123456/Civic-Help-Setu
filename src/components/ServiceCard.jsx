@@ -15,15 +15,34 @@ const getDifficultyBadge = (diff = '') => {
   return { bg: 'rgba(245, 158, 11, 0.15)', text: '#f59e0b', border: 'rgba(245, 158, 11, 0.3)' };
 };
 
-const ServiceCard = ({ service, isCompared = false, compareDisabled = false, onToggleCompare, showOverview = false }) => {
+const ServiceCard = ({
+  service,
+  isCompared = false,
+  compareDisabled = false,
+  onToggleCompare,
+  showOverview = false,
+  previewMode = false,
+}) => {
   if (!service) return null;
 
   const diffStyle = getDifficultyBadge(service.difficulty);
+  // The visual QA workspace measures the real card without offering a link to a
+  // synthetic fixture that has no service-details page. Production use is unchanged.
+  const CardElement = previewMode ? 'div' : Link;
+  const cardProps = previewMode
+    ? {
+        role: 'group',
+        'aria-label': `${service.name || 'Synthetic service'} card preview`,
+        className: 'card service-card service-card--preview',
+      }
+    : {
+        to: `/services/${service.id}`,
+        className: 'card service-card',
+      };
 
   const card = (
-    <Link
-      to={`/services/${service.id}`}
-      className="card service-card"
+    <CardElement
+      {...cardProps}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -199,7 +218,7 @@ const ServiceCard = ({ service, isCompared = false, compareDisabled = false, onT
           <ArrowRight size={14} aria-hidden="true" />
         </div>
       </div>
-    </Link>
+    </CardElement>
   );
 
   if (!onToggleCompare && !showOverview) return card;

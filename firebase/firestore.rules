@@ -332,6 +332,256 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // ---------- shelter status board ----------
+
+    // Shelter sites: readable by all, writable by verified operators within their jurisdiction
+    match /shelter_sites/{shelterSiteId} {
+      allow read: if true;
+      allow create, update: if isMember()
+        && onlyKeys(['data', 'schemaVersion', 'createdAt', 'updatedAt'])
+        && hasKeys(['data', 'schemaVersion', 'updatedAt'])
+        && incoming().schemaVersion is int
+        && incoming().schemaVersion >= 1
+        && incoming().schemaVersion <= 100
+        && serverTime('updatedAt')
+        && (!('createdAt' in incoming()) || incoming().createdAt is timestamp)
+        && noPrivilegedKeys(incoming().data)
+        && text('name', 200)
+        && text('jurisdiction', 100)
+        && maybeText('address', 500)
+        && maybeText('contact', 100)
+        && maybeText('altContact', 50)
+        && maybeText('email', 200)
+        && maybeText('website', 200)
+        && maybeEnum('status', ['OPEN', 'CLOSED', 'TEMPORARILY_CLOSED', 'MAINTENANCE'])
+        && maybeEnum('accessibility.wheelchairAccessible', [true, false])
+        && maybeEnum('accessibility.hearingImpaired', [true, false])
+        && maybeEnum('accessibility.visuallyImpaired', [true, false])
+        && maybeNumber('capacityTotal', 1, 10000)
+        && maybeNumber('capacityAvailable', 0, 10000)
+        && maybeNumber('occupancyRate', 0, 100)
+        && locationValid()
+        && maybeText('contactType', 50);
+    }
+
+    // Capacity snapshots: append-only history, readable by all, writable by operators/admins
+    match /capacity_snapshots/{snapshotId} {
+      allow read: if true;
+      allow create: if isMember()
+        && onlyKeys(['data', 'schemaVersion', 'createdAt', 'updatedAt'])
+        && hasKeys(['data', 'schemaVersion', 'updatedAt'])
+        && incoming().schemaVersion is int
+        && incoming().schemaVersion >= 1
+        && incoming().schemaVersion <= 100
+        && serverTime('updatedAt')
+        && (!('createdAt' in incoming()) || incoming().createdAt is timestamp)
+        && noPrivilegedKeys(incoming().data)
+        && hasKeys(['shelterSiteId', 'capacityAvailable', 'capacityTotal', 'occupancyRate', 'updateSource'])
+        && text('shelterSiteId', 100)
+        && number('capacityAvailable') >= 0
+        && number('capacityAvailable') <= number('capacityTotal')
+        && number('capacityTotal') >= 1
+        && number('capacityTotal') <= 10000
+        && number('occupancyRate') >= 0
+        && number('occupancyRate') <= 100
+        && text('updateSource', 100)
+        && maybeText('notes', 500);
+      allow update, delete: if false;
+    }
+
+    // Facility services: water, power, sanitation, medical, food at shelter sites
+    match /facility_services/{serviceId} {
+      allow read: if true;
+      allow create, update: if isMember()
+        && onlyKeys(['data', 'schemaVersion', 'createdAt', 'updatedAt'])
+        && hasKeys(['data', 'schemaVersion', 'updatedAt'])
+        && incoming().schemaVersion is int
+        && incoming().schemaVersion >= 1
+        && incoming().schemaVersion <= 100
+        && serverTime('updatedAt')
+        && (!('createdAt' in incoming()) || incoming().createdAt is timestamp)
+        && noPrivilegedKeys(incoming().data)
+        && text('shelterSiteId', 100)
+        && enum('serviceType', ['WATER', 'POWER', 'SANITATION', 'MEDICAL', 'FOOD'])
+        && enum('status', ['AVAILABLE', 'LIMITED', 'UNAVAILABLE'])
+        && maybeNumber('capacityTotal', 1, 10000)
+        && maybeNumber('capacityAvailable', 0, 10000)
+        && maybeNumber('lastVerified', 0, 2147483647)
+        && maybeText('notes', 500);
+    }
+
+    // Operator accounts: managed by admins, read by authorized roles
+    match /operator_accounts/{operatorId} {
+      allow read: if isAdmin() || (isMember() && stored().operatorId == request.auth.uid);
+      allow create: if isAdmin()
+        && onlyKeys(['data', 'schemaVersion', 'createdAt', 'updatedAt'])
+        && hasKeys(['data', 'schemaVersion', 'updatedAt'])
+        && incoming().schemaVersion is int
+        && incoming().schemaVersion >= 1
+        && incoming().schemaVersion <= 100
+        && serverTime('updatedAt')
+        && (!('createdAt' in incoming()) || incoming().createdAt is timestamp)
+        && noPrivilegedKeys(incoming().data)
+        && text('name', 200)
+        && maybeText('email', 200)
+        && maybeText('phone', 50)
+        && maybeEnum('role', ['OPERATOR', 'ADMIN'])
+        && maybeText('jurisdiction', 100)
+        && maybeText('verificationStatus', 50)
+        && maybeText('onboardingId', 100);
+      allow update: if isAdmin()
+        && changedOnly(['data', 'updatedAt'])
+        && incoming().updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    // Status events: append-only audit trail of state changes
+    match /status_events/{eventId} {
+      allow read: if isAdmin() || (isMember() && stored().operatorId == request.auth.uid);
+      allow create: if isMember()
+        && onlyKeys(['data', 'schemaVersion', 'createdAt', 'updatedAt'])
+        && hasKeys(['data', 'schemaVersion', 'createdAt', 'updatedAt'])
+        && incoming().schemaVersion is int
+        && incoming().schemaVersion >= 1
+        && incoming().schemaVersion <= 100
+        && serverTime('updatedAt')
+        && (!('createdAt' in incoming()) || incoming().createdAt is timestamp)
+        && noPrivilegedKeys(incoming().data)
+        && hasKeys(['shelterSiteId', 'eventType', 'oldState', 'newState', 'operatorId', 'timestamp', 'description'])
+        && text('shelterSiteId', 100)
+        && enum('eventType', ['CAPACITY_UPDATE', 'SERVICE_UPDATE', 'CLOSURE', 'REOPENING', 'VERIFICATION'])
+        && enum('oldState', ['OPEN', 'CLOSED', 'TEMPORARILY_CLOSED', 'MAINTENANCE'])
+        && enum('newState', ['OPEN', 'CLOSED', 'TEMPORARILY_CLOSED', 'MAINTENANCE'])
+        && maybeText('operatorId', 100)
+        && text('description', 500)
+        && maybeText('details', 1000);
+      allow update, delete: if false;
+    }
+
+    // Verification checks: validation records for shelter data
+    match /verification_checks/{checkId} {
+      allow read: if isAdmin() || (isMember() && stored().checkedBy == request.auth.uid);
+      allow create: if isMember()
+        && onlyKeys(['data', 'schemaVersion', 'createdAt', 'updatedAt'])
+        && hasKeys(['data', 'schemaVersion', 'createdAt', 'updatedAt'])
+        && incoming().schemaVersion is int
+        && incoming().schemaVersion >= 1
+        && incoming().schemaVersion <= 100
+        && serverTime('updatedAt')
+        && (!('createdAt' in incoming()) || incoming().createdAt is timestamp)
+        && noPrivilegedKeys(incoming().data)
+        && hasKeys(['shelterSiteId', 'checkType', 'checkedBy', 'status', 'timestamp'])
+        && text('shelterSiteId', 100)
+        && enum('checkType', ['CAPACITY', 'SERVICES', 'ACCESSIBILITY'])
+        && enum('status', ['PENDING', 'PASSED', 'FAILED'])
+        && maybeText('checkedBy', 100)
+        && text('notes', 500)
+      && maybeEnum('rating', [1, 2, 3, 4, 5])
+        && maybeText('reviewerId', 100);
+      allow update, delete: if false;
+    }
+
+    function locationValid() {
+      return maybeText('lat', 30) && maybeText('lng', 30);
+    }
+
+    // ---------- civic service change feed collections ----------
+
+    // Immutable service version records
+    match /service_versions/{versionId} {
+      allow read: if true;
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // Versioned civic service change events
+    match /change_events/{eventId} {
+      allow read: if isAdmin() || (stored().status == 'approved');
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // User subscriptions to service change alerts
+    match /user_subscriptions/{subId} {
+      allow read: if isAdmin() || (isMember() && stored().userId == request.auth.uid);
+      allow create: if isMember() && incoming().userId == request.auth.uid;
+      allow update, delete: if isMember() && stored().userId == request.auth.uid;
+    }
+
+    // Delivery attempts (idempotent notification records)
+    match /delivery_attempts/{attemptId} {
+      allow read: if isAdmin() || (isMember() && stored().recipientId == request.auth.uid);
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // Review approvals (human-in-the-loop review audit records)
+    match /review_approvals/{approvalId} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // ---------- civic micro-volunteer task board (#759) ----------
+
+    // Reference categories for low-risk micro-tasks: public read, admin-only write
+    match /task_categories/{categoryId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Micro-volunteer tasks: public read, staff create/update, no hard deletion (archive only)
+    match /micro_tasks/{taskId} {
+      allow read: if true;
+      allow create: if isMember()
+        && text('title', 120)
+        && text('instructions', 2000)
+        && text('categoryId', 60)
+        && text('jurisdictionId', 60)
+        && incoming().status in ['draft', 'open', 'assigned', 'awaiting_review', 'completed', 'reopened', 'archived'];
+      allow update: if isMember()
+        && incoming().status in ['draft', 'open', 'assigned', 'awaiting_review', 'completed', 'reopened', 'archived'];
+      allow delete: if false;
+    }
+
+    // Task claims: citizen can claim and view own, reviewers/admins can view and manage
+    match /task_claims/{claimId} {
+      allow read: if isAdmin() || (isMember() && (stored().citizenId == request.auth.uid || stored().userId == request.auth.uid));
+      allow create: if isMember()
+        && hasKeys(['taskId', 'citizenId', 'status', 'createdAt'])
+        && (incoming().citizenId == request.auth.uid || isAdmin())
+        && incoming().status in ['active', 'submitted', 'approved', 'changes_requested', 'rejected', 'withdrawn', 'expired'];
+      allow update: if isMember()
+        && (stored().citizenId == request.auth.uid || isAdmin())
+        && incoming().status in ['active', 'submitted', 'approved', 'changes_requested', 'rejected', 'withdrawn', 'expired'];
+      allow delete: if false;
+    }
+
+    // Completion submissions: evidence notes, link, file metadata only (no blobs or PII)
+    match /completion_submissions/{submissionId} {
+      allow read: if isAdmin() || (isMember() && (stored().citizenId == request.auth.uid || stored().userId == request.auth.uid));
+      allow create: if isMember()
+        && hasKeys(['taskId', 'claimId', 'citizenId', 'status', 'createdAt'])
+        && (incoming().citizenId == request.auth.uid || isAdmin())
+        && incoming().status in ['submitted', 'under_review', 'approved', 'changes_requested', 'rejected', 'reopened', 'withdrawn'];
+      allow update: if isAdmin() || (isMember() && stored().citizenId == request.auth.uid);
+      allow delete: if false;
+    }
+
+    // Moderation events: append-only audit trail
+    match /moderation_events/{eventId} {
+      allow read: if isAdmin();
+      allow create: if isMember()
+        && hasKeys(['taskId', 'action', 'actorRole', 'createdAt'])
+        && text('action', 60);
+      allow update, delete: if false;
+    }
+
+    // Server API only: verified Clerk moderators use Admin SDK transactions.
+    match /publicToiletSubmissions/{submissionId} {
+      allow read, write: if false;
+    }
+
     // ---------- everything else ----------
     match /{document=**} {
       allow read, write: if false;

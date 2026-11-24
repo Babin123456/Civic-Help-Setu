@@ -1,5 +1,170 @@
 {
-  "indexes": [],
+  "indexes": [
+
+    // shelter_sites indexes
+    {
+      "collectionGroup": "shelter_sites",
+      "fields": [
+        { "fieldPath": "status", "mode": "ASC" },
+        { "fieldPath": "jurisdiction", "mode": "ASC" },
+        { "fieldPath": "accessibility.wheelchairAccessible", "mode": "ASC" },
+        { "fieldPath": "accessibility.hearingImpaired", "mode": "ASC" },
+        { "fieldPath": "accessibility.visuallyImpaired", "mode": "ASC" },
+        { "fieldPath": "capacityTotal", "mode": "DESC" },
+        { "fieldPath": "createdAt", "mode": "DESC" }
+      ]
+    },
+    // capacity_snapshots indexes
+    {
+      "collectionGroup": "capacity_snapshots",
+      "fields": [
+        { "fieldPath": "shelterSiteId", "mode": "ASC" },
+        { "fieldPath": "occupancyRate", "mode": "DESC" },
+        { "fieldPath": "createdAt", "mode": "DESC" }
+      ]
+    },
+    // facility_services indexes
+    {
+      "collectionGroup": "facility_services",
+      "fields": [
+        { "fieldPath": "shelterSiteId", "mode": "ASC" },
+        { "fieldPath": "serviceType", "mode": "ASC" },
+        { "fieldPath": "status", "mode": "ASC" },
+        { "fieldPath": "createdAt", "mode": "DESC" }
+      ]
+    },
+    // status_events indexes
+    {
+      "collectionGroup": "status_events",
+      "fields": [
+        { "fieldPath": "shelterSiteId", "mode": "ASC" },
+        { "fieldPath": "eventType", "mode": "ASC" },
+        { "fieldPath": "createdAt", "mode": "DESC" }
+      ]
+    },
+    // verification_checks indexes
+    {
+      "collectionGroup": "verification_checks",
+      "fields": [
+        { "fieldPath": "shelterSiteId", "mode": "ASC" },
+        { "fieldPath": "checkType", "mode": "ASC" },
+        { "fieldPath": "status", "mode": "ASC" },
+        { "fieldPath": "createdAt", "mode": "DESC" }
+      ]
+    },
+    {
+      "collectionGroup": "change_events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "serviceId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "changedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "user_subscriptions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "serviceId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "publicProjects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "jurisdiction.wardNumber", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "publicProjects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "category", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "projectMilestones",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "projectId", "order": "ASCENDING" },
+        { "fieldPath": "sequenceOrder", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "micro_tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "jurisdictionId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "micro_tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "categoryId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "micro_tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "task_claims",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "taskId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "task_claims",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "citizenId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "completion_submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "taskId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "completion_submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "claimId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "moderation_events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "taskId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": [
     {
       "collectionGroup": "privacyExports",

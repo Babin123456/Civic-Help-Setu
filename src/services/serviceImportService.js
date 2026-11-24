@@ -1,3 +1,4 @@
+import { validateCivicDataset } from './civicDataQualityService.js';
 // Parsing and validation for bulk service imports (CSV / JSON).
 // Everything here is pure so it can be tested without a browser; saving the
 // accepted records is done by importAdminServices in adminService.js.
@@ -191,13 +192,25 @@ function jsonToRecords(text) {
   if (!Array.isArray(list)) {
     throw new Error('JSON must be an array of services or an object with a "services" array');
   }
+  // Explicit opt-in: strict contracts must never silently fall back to legacy parsing.
+  let contractResult = null;
+  if (data && !Array.isArray(data) && Object.hasOwn(data, 'contractVersion')) {
+    contractResult = validateCivicDataset({
+      registryVersion: 1,
+      entities: list.map(record => ({ type: 'service', version: data.contractVersion, record })),
+    });
+    if (contractResult.errors.length) throw new Error(contractResult.errors[0].message);
+  }
   return list.map((raw, idx) => {
     // Accept the flat CSV-style source columns in JSON too.
     if (raw && typeof raw === 'object' && !raw.officialSources && raw.officialSourceUrl) {
       const { officialSourceName, officialSourceUrl, ...rest } = raw;
       raw = { ...rest, officialSources: [{ name: officialSourceName, url: officialSourceUrl }] };
     }
-    return { row: idx + 1, raw };
+    const rejected = contractResult?.quarantined.find(item => item.index === idx);
+    return { row: idx + 1, raw, contractErrors: rejected?.errors,
+      contractVersion: contractResult ? data.contractVersion : null };
+
   });
 }
 
@@ -401,8 +414,16 @@ export function buildImportPreview(text, { fileName = '', existingServices = [] 
   const seenIds = new Map();
   const seenNames = new Map();
 
-  for (const { row, raw } of records) {
-    const { service, errors, warnings } = validateRecord(raw);
+  for (const { row, raw, contractErrors, contractVersion } of records) {
+    if (contractErrors?.length) {
+      report.invalid.push({ row, name: '', errors: contractErrors.map(error => `${error.field}: ${error.message}`), warnings: [] });
+      continue;
+    }
+    const checked = validateRecord(raw);
+    const { errors, warnings } = checked;
+    const service = checked.service && contractVersion
+      ? { ...raw, ...checked.service, dataContract: { type: 'service', version: contractVersion } }
+      : checked.service;
     const name = typeof raw?.name === 'string' ? raw.name.trim() : '';
     if (!service) {
       report.invalid.push({ row, name, errors, warnings });

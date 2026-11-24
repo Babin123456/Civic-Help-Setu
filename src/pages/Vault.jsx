@@ -37,8 +37,13 @@ import InactivityLockModal from '../components/vault/InactivityLockModal';
 import WatermarkAttestationModal from '../components/vault/WatermarkAttestationModal';
 import DocumentRenewalDigestModal from '../components/vault/DocumentRenewalDigestModal';
 import DocumentQualityOcrInspectorModal from '../components/vault/DocumentQualityOcrInspectorModal';
+
 import EvidenceGraphContradictionModal from '../components/vault/EvidenceGraphContradictionModal';
 import { Lock, Unlock, GitCompare } from 'lucide-react';
+
+import DocumentValidityCalendar from '../components/DocumentValidityCalendar';
+import { Lock, Unlock, ShieldAlert } from 'lucide-react';
+
 import {
   startInactivityTracker,
   stopInactivityTracker,
@@ -82,6 +87,9 @@ const Vault = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [validityDocumentTypes, setValidityDocumentTypes] = useState([]);
+  const [validityIssueDate, setValidityIssueDate] = useState('');
+  const [validityStateKey, setValidityStateKey] = useState('CENTRAL');
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
@@ -393,6 +401,17 @@ const Vault = () => {
 
         {/* Document Expiration Warnings */}
         <ExpiringDocumentsAlert expiringList={expiringDocs} />
+
+        {/* Document Validity Calendar */}
+        <DocumentValidityCalendar
+          documentTypes={validityDocumentTypes}
+          issueDate={validityIssueDate}
+          stateKey={validityStateKey}
+          onReminderToggle={() => toast({ title: 'Reminder toggled', description: 'Reminder settings updated' })}
+          onEditDocument={() => setIsModalOpen(true)}
+          onOpenSource={() => toast({ title: 'Source info', description: 'Source rules referenced' })}
+          showAIExplanation={false}
+        />
 
         {/* Pre-flight Inspection & Format Check */}
         <DocumentPreflightChecker onAuditComplete={refreshVault} />
