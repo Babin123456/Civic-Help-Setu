@@ -120,7 +120,7 @@ const PolicySimulationWorkspace = lazy(() => import('./pages/PolicySimulationWor
 const ComplaintQualityCoachWorkspace = lazy(() => import('./pages/ComplaintQualityCoachWorkspace'));
 const ServiceChangeSandboxWorkspace = lazy(() => import('./pages/ServiceChangeSandboxWorkspace'));
 const DigitalEvidenceLockerWorkspace = lazy(() => import('./pages/DigitalEvidenceLockerWorkspace'));
-const ServiceChangeSandboxWorkspace = lazy(() => import('./pages/ServiceChangeSandboxWorkspace'));
+const CaseCollaborationWorkspace = lazy(() => import('./components/caseCollaboration/CaseCollaborationWorkspace'));
 const JourneyBenchmarkPage = lazy(() => import('./pages/JourneyBenchmarkPage'));
 const Services = lazy(() => import('./pages/Services'));
 const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
@@ -245,7 +245,7 @@ function AppRoot() {
                             <Route path="/complaint-coach" element={<ComplaintQualityCoachWorkspace />} />
                             <Route path="/services/:serviceId/complaint-coach" element={<ComplaintQualityCoachWorkspace />} />
                             {/* Civic case collaboration space with granular, revocable sharing */}
-                            <Route path="/case-collaboration" element={<ServiceChangeSandboxWorkspace />} />
+                            <Route path="/case-collaboration" element={<CaseCollaborationWorkspace />} />
                             {/* Civic service change sandbox with shadow traffic evaluation */}
                             <Route path="/service-change-sandbox" element={<ServiceChangeSandboxWorkspace />} />
 
