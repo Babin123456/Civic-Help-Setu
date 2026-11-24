@@ -216,16 +216,59 @@ const matchesIdentity = (candidate, existing) => {
   return false;
 };
 
-export const createMemoryApplicationEventRepository = () => {
+export const createMemoryApplicationEventRepository = ({
+  storage = null,
+  storageKey = 'application_events',
+  outboxEnabled = typeof globalThis.process !== 'undefined' && globalThis.process.env?.OUTBOX_ENABLED === 'false' ? false : true,
+  outbox = null,
+  publisher = null,
+  deliveryUrl = null,
+} = {}) => {
   const events = new Map();
   const auditEntries = [];
   let auditSequence = 0;
 
-  return {
+  const resolvedStorage =
+    storage === 'firestore' || (typeof globalThis.process !== 'undefined' && globalThis.process.env?.USE_FIRESTORE_OUTBOX === 'true')
+      ? createFirestoreOutboxStorageAdapter()
+      : (storage || createMemoryStorageAdapter());
+
+  if (resolvedStorage && typeof resolvedStorage.read === 'function') {
+    Promise.resolve(resolvedStorage.read(storageKey))
+      .then((saved) => {
+        if (Array.isArray(saved)) {
+          saved.forEach((e) => events.set(e.eventId, e));
+        }
+      })
+      .catch(() => {});
+  }
+
+  const outboxInstance = outboxEnabled
+    ? (outbox || createEventOutbox({
+        storage: resolvedStorage,
+        storageKey: `${storageKey}_outbox`,
+        audit: (entry) => repository.audit(entry),
+      }))
+    : null;
+
+  const outboxPublisherInstance = outboxEnabled
+    ? (publisher || (outboxInstance ? createEventOutboxPublisher({
+        outbox: outboxInstance,
+        targetUrl: deliveryUrl,
+        audit: (entry) => repository.audit(entry),
+      }) : null))
+    : null;
+
+  const repository = {
+    outbox: outboxInstance,
+    outboxPublisher: outboxPublisherInstance,
+    outboxEnabled,
     reset() {
       events.clear();
       auditEntries.length = 0;
       auditSequence = 0;
+      if (outboxInstance?.reset) outboxInstance.reset().catch(() => {});
+      if (storage?.remove) storage.remove(storageKey).catch(() => {});
     },
     audit(entry) {
       auditSequence += 1;
