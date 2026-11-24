@@ -1,3 +1,4 @@
+import { apiFailureError } from '../utils/civicErrorContract.js';
 /**
  * src/services/abuseControlPlaneService.js
  *
@@ -28,7 +29,8 @@ class AbuseControlPlaneError extends Error {
 async function request(path, { method = 'GET', body, headers = {} } = {}) {
   const opts = { method, headers: { 'Content-Type': 'application/json', ...headers } };
   if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(`${BASE}${path}`, opts);
+  let res;
+  try { res = await fetch(`${BASE}${path}`, opts); } catch { throw apiFailureError(); }
   let data;
   try {
     data = await res.json();
@@ -36,12 +38,8 @@ async function request(path, { method = 'GET', body, headers = {} } = {}) {
     data = {};
   }
   if (!res.ok) {
-    throw new AbuseControlPlaneError(
-      data.error || `Request failed with status ${res.status}`,
-      data.code || 'request_failed',
-      res.status,
-      { retryAfterSeconds: data.retryAfterSeconds, details: data.details },
-    );
+    const safe = apiFailureError(res, data);
+    throw Object.assign(new AbuseControlPlaneError(safe.message, safe.code, safe.status), { retryable: safe.retryable, recoveryAction: safe.recoveryAction, correlationId: safe.correlationId, meta: { retryAfterSeconds: safe.retryAfterSeconds } });
   }
   return data;
 }

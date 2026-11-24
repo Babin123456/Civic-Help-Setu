@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /**
  * api/synthetic-datasets.js
  *
@@ -36,7 +37,7 @@ function scanObjectForPII(obj) {
   return false;
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   // CORS & Methods
   if (req.method === 'OPTIONS') {
     res.setHeader('Allow', 'GET, POST, OPTIONS');
@@ -118,3 +119,5 @@ export default async function handler(req, res) {
   res.setHeader('Allow', 'GET, POST, OPTIONS');
   return res.status(405).json({ error: `Method ${req.method} not allowed` });
 }
+
+export default withApiErrorContract(handler);

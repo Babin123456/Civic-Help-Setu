@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /**
  * Single Vercel serverless entry point for all Civic Help Setu API routes.
  * Keeping handlers under api/_lib prevents Vercel from deploying each file
@@ -138,7 +139,7 @@ function getRoute(req) {
   return decodeURIComponent(route).replace(/^\/+|\/+$/g, "");
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   const route = getRoute(req);
 
   // Handle terminology graph routes
@@ -156,29 +157,23 @@ export default async function handler(req, res) {
     return res.status(404).json({ error: "API route not found" });
   }
 
-  try {
-    const result = await routeHandler(req, res);
+  const result = await routeHandler(req, res);
 
-    // Normalize legacy handlers that return { status, headers, body } rather
-    // than writing directly to the Vercel response object.
-    if (
-      result &&
-      typeof result.status === "number" &&
-      Object.prototype.hasOwnProperty.call(result, "body") &&
-      !res.writableEnded
-    ) {
-      for (const [name, value] of Object.entries(result.headers || {})) {
-        res.setHeader(name, value);
-      }
-      return res.status(result.status).json(result.body);
+  // Normalize legacy handlers that return { status, headers, body } rather
+  // than writing directly to the Vercel response object.
+  if (
+    result &&
+    typeof result.status === "number" &&
+    Object.prototype.hasOwnProperty.call(result, "body") &&
+    !res.writableEnded
+  ) {
+    for (const [name, value] of Object.entries(result.headers || {})) {
+      res.setHeader(name, value);
     }
-
-    return result;
-  } catch (error) {
-    console.error(`API dispatcher error for "${route}":`, error);
-    if (!res.writableEnded) {
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-    return undefined;
+    return res.status(result.status).json(result.body);
   }
+
+  return result;
 }
+
+export default withApiErrorContract(handler);
