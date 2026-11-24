@@ -38,6 +38,6 @@ describe('PropertyTaxDisputeGuideService', () => {
     expect(glossary.length).toBeGreaterThanOrEqual(3);
     const sas = glossary.find(g => g.term.includes('SAS'));
     expect(sas).toBeDefined();
-    expect(sas.definition).toContain('Self-Assessment Scheme');
+    expect(sas.term).toContain('SAS / Self-Assessment Scheme');
   });
 });
