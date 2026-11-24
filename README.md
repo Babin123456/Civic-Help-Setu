@@ -149,6 +149,9 @@ A policy-team workspace for exploring how process changes could affect service d
 ### 🧪 20. Civic Service Change Sandbox with Shadow Traffic Evaluation
 
 A maintainer workspace for comparing a proposed service workflow against current behavior before publishing. Creates versioned staging snapshots, replays synthetic journeys, compares completion / validation / accessibility outcomes, blocks writes to production during shadow runs, and supports rollback and deterministic replay. Results are illustrative and untrusted. Available at `/service-change-sandbox`. See [architecture, data-flow, threat model and deployment documentation](docs/civic-service-change-sandbox.md).
+### 🧪 19. Public Service Journey Benchmark & Open Evaluation Dataset
+
+A standardized evaluation benchmark and open synthetic dataset for evaluating public service navigation, multilingual understanding (Hindi, Urdu, English), statutory citation grounding, and abstention safety against unverified claims or tout recommendations. Keeps deterministic rules outside LLM prompts and provides anti-contamination canary tokens. Available at `/journey-benchmark`. See [architecture, threat-model, and evaluation documentation](docs/public-service-journey-benchmark.md).
 
 
 ---
@@ -200,6 +203,7 @@ The platform includes the following major application areas:
 | Agent Sandbox | Isolated workers for untrusted civic document parsers with CPU/memory/time limits, no network by default, output validation and threat scanning (`/agent-sandbox`) |
 | Policy Scenario Simulator | Agent-based simulation of how policy changes affect demand, travel burden and document requirements (`/policy-simulation`) |
 | Service Change Sandbox | Versioned staging snapshots and synthetic shadow-traffic comparison of completion, validation and accessibility outcomes (`/service-change-sandbox`) |
+| Journey Benchmark & Dataset | Standardized synthetic benchmark & evaluation dataset for civic navigation, vernacular comprehension and citation grounding (`/journey-benchmark`) |
 
 
 The availability of individual features depends on the application's current implementation and configuration.

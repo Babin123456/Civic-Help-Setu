@@ -55,6 +55,7 @@ import agentSandbox from "./_lib/handlers/agent-sandbox.js";
 import policySimulation from "./_lib/handlers/policy-simulation.js";
 import serviceChangeSandbox from "./_lib/handlers/service-change-sandbox.js";
 import civicReleaseLedger from "./_lib/handlers/civic-release-ledger.js";
+import journeyBenchmark from "./_lib/handlers/journey-benchmark.js";
 import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
 
 
@@ -102,6 +103,7 @@ const handlers = {
   "agent-sandbox": agentSandbox,
   "policy-simulation": policySimulation,
   "service-change-sandbox": serviceChangeSandbox,
+  "journey-benchmark": journeyBenchmark,
   "civic-knowledge-graph": civicKnowledgeGraph,
   "knowledge-graph": civicKnowledgeGraph,
 };
