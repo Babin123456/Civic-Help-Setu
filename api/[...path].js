@@ -52,6 +52,7 @@ import jurisdictionHandoff from "./_lib/handlers/jurisdiction-handoff.js";
 import agentSandbox from "./_lib/handlers/agent-sandbox.js";
 import policySimulation from "./_lib/handlers/policy-simulation.js";
 import civicReleaseLedger from "./_lib/handlers/civic-release-ledger.js";
+import civicEvidenceLocker from "./_lib/handlers/civic-evidence-locker.js";
 
 
 const handlers = {
@@ -95,6 +96,7 @@ const handlers = {
   "jurisdiction-handoff": jurisdictionHandoff,
   "agent-sandbox": agentSandbox,
   "policy-simulation": policySimulation,
+  "civic-evidence-locker": civicEvidenceLocker,
 };
 
 // Terminology graph routes

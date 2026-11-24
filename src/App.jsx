@@ -115,6 +115,7 @@ const FeeEvidenceAssistant = lazy(() => import('./pages/FeeEvidenceAssistant'));
 const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHandoffWorkspace'));
 const AgentSandboxWorkspace = lazy(() => import('./pages/AgentSandboxWorkspace'));
 const PolicySimulationWorkspace = lazy(() => import('./pages/PolicySimulationWorkspace'));
+const DigitalEvidenceLockerWorkspace = lazy(() => import('./pages/DigitalEvidenceLockerWorkspace'));
 const Services = lazy(() => import('./pages/Services'));
 const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
 
@@ -322,6 +323,10 @@ function AppRoot() {
                             <Route path="/evidence-dossier" element={<EvidenceDossierWorkspace />} />
                             <Route path="/verify-evidence" element={<EvidenceDossierWorkspace />} />
                             <Route path="/evidence-manifest" element={<EvidenceDossierWorkspace />} />
+
+                            <Route path="/digital-evidence-locker" element={<DigitalEvidenceLockerWorkspace />} />
+                            <Route path="/evidence-locker" element={<DigitalEvidenceLockerWorkspace />} />
+                            <Route path="/encrypted-locker" element={<DigitalEvidenceLockerWorkspace />} />
                             <Route path="/track" element={<Track />} />
                             <Route path="/civic-works" element={<CivicWorksBoard />} />
                             <Route path="/micro-volunteer-board" element={<MicroVolunteerTaskBoard />} />
