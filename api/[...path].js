@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /**
  * Single Vercel serverless entry point for all Civic Help Setu API routes.
  * Keeping handlers under api/_lib prevents Vercel from deploying each file
@@ -56,9 +57,11 @@ import agentIncidentResponse from "./_lib/handlers/agent-incident-response.js";
 import policySimulation from "./_lib/handlers/policy-simulation.js";
 import serviceChangeSandbox from "./_lib/handlers/service-change-sandbox.js";
 import civicReleaseLedger from "./_lib/handlers/civic-release-ledger.js";
+import complaintQualityCoach from "./_lib/handlers/complaint-quality-coach.js";
 import civicEvidenceLocker from "./_lib/handlers/civic-evidence-locker.js";
 import journeyBenchmark from "./_lib/handlers/journey-benchmark.js";
 import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
+import caseCollaboration from "./_lib/handlers/case-collaboration.js";
 import { createMeshReadinessHandler } from "./_lib/handlers/mesh-readiness.js";
 import { createMeshReadinessLayer } from "./_lib/mesh/middleware.js";
 
@@ -106,11 +109,13 @@ const baseHandlers = {
   "jurisdiction-handoff": jurisdictionHandoff,
   "agent-sandbox": agentSandbox,
   "policy-simulation": policySimulation,
+  "complaint-quality-coach": complaintQualityCoach,
   "civic-evidence-locker": civicEvidenceLocker,
   "service-change-sandbox": serviceChangeSandbox,
   "journey-benchmark": journeyBenchmark,
   "civic-knowledge-graph": civicKnowledgeGraph,
   "knowledge-graph": civicKnowledgeGraph,
+  "case-collaboration": caseCollaboration,
 };
 
 // Terminology graph routes
@@ -189,4 +194,4 @@ export function createApiDispatcher({
   };
 }
 
-export default createApiDispatcher();
+export default withApiErrorContract(createApiDispatcher());

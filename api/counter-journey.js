@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /**
  * api/counter-journey.js — Server‑side handler for the civic service counter
  * journey simulator (#843).
@@ -60,7 +61,7 @@ function readBearerRole(headers) {
 // ---------------------------------------------------------------------------
 // Route entry point
 // ---------------------------------------------------------------------------
-export default async function handler(req, res) {
+async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'GET') {
@@ -251,3 +252,4 @@ export default async function handler(req, res) {
   // ---------- Unknown POST action ----------
   return json(400, { error: 'unknown_action', message: `POST action "${action}" is not supported.` });
 }
+export default withApiErrorContract(handler);

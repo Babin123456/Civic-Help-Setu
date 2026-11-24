@@ -117,8 +117,10 @@ const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHand
 const AgentSandboxWorkspace = lazy(() => import('./pages/AgentSandboxWorkspace'));
 const KnowledgeGraphQueryWorkspace = lazy(() => import('./pages/KnowledgeGraphQueryWorkspace'));
 const PolicySimulationWorkspace = lazy(() => import('./pages/PolicySimulationWorkspace'));
-const DigitalEvidenceLockerWorkspace = lazy(() => import('./pages/DigitalEvidenceLockerWorkspace'));
+const ComplaintQualityCoachWorkspace = lazy(() => import('./pages/ComplaintQualityCoachWorkspace'));
 const ServiceChangeSandboxWorkspace = lazy(() => import('./pages/ServiceChangeSandboxWorkspace'));
+const DigitalEvidenceLockerWorkspace = lazy(() => import('./pages/DigitalEvidenceLockerWorkspace'));
+const CaseCollaborationWorkspace = lazy(() => import('./components/caseCollaboration/CaseCollaborationWorkspace'));
 const JourneyBenchmarkPage = lazy(() => import('./pages/JourneyBenchmarkPage'));
 const Services = lazy(() => import('./pages/Services'));
 const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
@@ -239,6 +241,11 @@ function AppRoot() {
                             <Route path="/policy-simulation" element={<PolicySimulationWorkspace />} />
                             <Route path="/services/:serviceId/policy-simulation" element={<PolicySimulationWorkspace />} />
 
+                            {/* Agentic Civic Complaint Quality and Completeness Coach (#1190) */}
+                            <Route path="/complaint-coach" element={<ComplaintQualityCoachWorkspace />} />
+                            <Route path="/services/:serviceId/complaint-coach" element={<ComplaintQualityCoachWorkspace />} />
+                            {/* Civic case collaboration space with granular, revocable sharing */}
+                            <Route path="/case-collaboration" element={<CaseCollaborationWorkspace />} />
                             {/* Civic service change sandbox with shadow traffic evaluation */}
                             <Route path="/service-change-sandbox" element={<ServiceChangeSandboxWorkspace />} />
 

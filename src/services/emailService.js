@@ -1,3 +1,4 @@
+import { apiFailureError } from '../utils/civicErrorContract.js';
 /**
  * Shared Email Service
  * Central service for sending emails that enforces notification preferences.
@@ -69,7 +70,7 @@ export async function sendEmail({ to, template, data, userId, forceEssential = f
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'unknown' }));
+      const error = apiFailureError(response, await response.json().catch(() => ({})));
       logDiagnostic(`Email send failed: ${template}`, error);
       return { sent: false, reason: 'send_failed', error, category };
     }
@@ -79,7 +80,7 @@ export async function sendEmail({ to, template, data, userId, forceEssential = f
     return { sent: true, messageId: result.messageId, category };
   } catch (err) {
     logDiagnostic(`Email send error: ${template}`, err);
-    return { sent: false, reason: 'network_error', error: err.message, category };
+    return { sent: false, reason: 'network_error', error: apiFailureError().message, category };
   }
 }
 
