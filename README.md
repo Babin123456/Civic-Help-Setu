@@ -145,6 +145,10 @@ Runs untrusted civic document parsers / agent tools in isolated workers with CPU
 
 A policy-team workspace for exploring how process changes could affect service demand, travel burden and document requirements before rollout. Uses synthetic personas and deterministic rules (never an AI model for simulation maths), reports sensitivity and uncertainty, validates against aggregate public statistics, and prohibits individual prediction or unsupported causal claims. Available at `/policy-simulation`. See [architecture, data-flow, threat model and deployment documentation](docs/civic-policy-scenario-simulator.md).
 
+### 🧪 19. Public Service Journey Benchmark & Open Evaluation Dataset
+
+A standardized evaluation benchmark and open synthetic dataset for evaluating public service navigation, multilingual understanding (Hindi, Urdu, English), statutory citation grounding, and abstention safety against unverified claims or tout recommendations. Keeps deterministic rules outside LLM prompts and provides anti-contamination canary tokens. Available at `/journey-benchmark`. See [architecture, threat-model, and evaluation documentation](docs/public-service-journey-benchmark.md).
+
 
 ---
 
@@ -194,6 +198,7 @@ The platform includes the following major application areas:
 | Greenhouse-Gas Inventory | Department activity data, versioned factors, approvals and public emissions totals (`/ghg-inventory`) |
 | Agent Sandbox | Isolated workers for untrusted civic document parsers with CPU/memory/time limits, no network by default, output validation and threat scanning (`/agent-sandbox`) |
 | Policy Scenario Simulator | Agent-based simulation of how policy changes affect demand, travel burden and document requirements (`/policy-simulation`) |
+| Journey Benchmark & Dataset | Standardized synthetic benchmark & evaluation dataset for civic navigation, vernacular comprehension and citation grounding (`/journey-benchmark`) |
 
 
 The availability of individual features depends on the application's current implementation and configuration.

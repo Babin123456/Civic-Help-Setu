@@ -117,6 +117,7 @@ const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHand
 const AgentSandboxWorkspace = lazy(() => import('./pages/AgentSandboxWorkspace'));
 const KnowledgeGraphQueryWorkspace = lazy(() => import('./pages/KnowledgeGraphQueryWorkspace'));
 const PolicySimulationWorkspace = lazy(() => import('./pages/PolicySimulationWorkspace'));
+const JourneyBenchmarkPage = lazy(() => import('./pages/JourneyBenchmarkPage'));
 const Services = lazy(() => import('./pages/Services'));
 const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
 
@@ -187,6 +188,10 @@ function AppRoot() {
 
                             {/* Secure agent sandbox for untrusted civic document processing */}
                             <Route path="/agent-sandbox" element={<AgentSandboxWorkspace />} />
+
+                            {/* Public service journey benchmark and open evaluation dataset */}
+                            <Route path="/journey-benchmark" element={<JourneyBenchmarkPage />} />
+                            <Route path="/benchmark" element={<JourneyBenchmarkPage />} />
                             <Route path="/knowledge-graph" element={<KnowledgeGraphQueryWorkspace />} />
                             <Route path="/knowledge-graph-query" element={<KnowledgeGraphQueryWorkspace />} />
                             <Route path="/services/change-feed" element={<ChangeFeedPage />} />
