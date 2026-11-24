@@ -115,6 +115,7 @@ const FeeEvidenceAssistant = lazy(() => import('./pages/FeeEvidenceAssistant'));
 const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHandoffWorkspace'));
 const AgentSandboxWorkspace = lazy(() => import('./pages/AgentSandboxWorkspace'));
 const PolicySimulationWorkspace = lazy(() => import('./pages/PolicySimulationWorkspace'));
+const ChaosResilienceWorkspace = lazy(() => import('./pages/ChaosResilienceWorkspace'));
 const Services = lazy(() => import('./pages/Services'));
 const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
 
@@ -227,6 +228,8 @@ function AppRoot() {
                             {/* Agent-based civic policy scenario simulator */}
                             <Route path="/policy-simulation" element={<PolicySimulationWorkspace />} />
                             <Route path="/services/:serviceId/policy-simulation" element={<PolicySimulationWorkspace />} />
+                            <Route path="/chaos-engineering" element={<ChaosResilienceWorkspace />} />
+                            <Route path="/resilience" element={<ChaosResilienceWorkspace />} />
 
                             <Route path="/water-bill-visualizer" element={<WaterBillVisualizerPage />} />
 
