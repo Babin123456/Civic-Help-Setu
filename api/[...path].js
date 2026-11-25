@@ -77,6 +77,7 @@ import syntheticDatasets from "./_lib/syntheticDatasets.js";
 import { withRequestSecurity } from "./_lib/requestSecurity.js";
 import { createMeshReadinessHandler } from "./_lib/handlers/mesh-readiness.js";
 import { createMeshReadinessLayer } from "./_lib/mesh/middleware.js";
+import { createIdempotencyLayer, resolveIdempotencyConfig } from "./_lib/idempotencyMiddleware.js";
 
 
 const baseHandlers = {
@@ -208,6 +209,7 @@ function normalizeLegacyResult(result, res) {
 
 export function createApiDispatcher({
   meshLayer = createMeshReadinessLayer(),
+  idempotencyLayer = createIdempotencyLayer(resolveIdempotencyConfig()),
   extraHandlers = {},
 } = {}) {
   const handlers = {
@@ -231,7 +233,8 @@ export function createApiDispatcher({
     }
 
     try {
-      const result = await meshLayer.executeRoute(req, res, route, routeHandler);
+      const wrappedHandler = (r, s) => idempotencyLayer.execute(r, s, route, routeHandler);
+      const result = await meshLayer.executeRoute(req, res, route, wrappedHandler);
       return normalizeLegacyResult(result, res);
     } catch (error) {
       console.error(`API dispatcher error for "${route}":`, error);
