@@ -49,6 +49,24 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 
 | Key | Written by | What it holds | Category |
 |---|---|---|---|
+| `civicbridge_senior_tribunal_petitions` | `seniorCitizenTribunalStorage.js` | Saved senior citizen maintenance and Section 23 property revocation tribunal petitions | Drafts and in-progress work |
+| `civicbridge_rera_complaints` | `reraDisputeStorage.js` | Saved RERA delayed possession, defect liability and Form M/N dispute complaints | Drafts and in-progress work |
+| `civicbridge_abc_conflict_records` | `strayAnimalStorage.js` | Saved municipal stray animal conflict, ABC audits and Rabies PEP emergency records | Drafts and in-progress work |
+| `civicbridge_noise_pollution_logs` | `noisePollutionStorage.js` | Saved ambient noise pollution decibel logs, curfew records, and SDM complaint notices | Drafts and in-progress work |
+| `civicbridge_solid_waste_audits` | `solidWasteStorage.js` | Saved municipal solid waste dumping, bulk waste generator audits and NGT notices | Drafts and in-progress work |
+| `civicbridge_patient_grievance_records` | `clinicalEstablishmentStorage.js` | Saved clinical establishment emergency refusal, standard rate overbilling audits, and DRA complaints with SHA-256 seals | Drafts and in-progress work |
+| `civicbridge_electricity_cgrf_vault` | `electricityConsumerStorage.js` | Saved electricity consumer outage compensation claims, Section 56(1) disconnection audits, meter test reports and CGRF petitions with SHA-256 seals | Drafts and in-progress work |
+| `civicbridge_accessibility_audit_vault` | `accessibilityAuditStorage.js` | Structured accessibility screening results | Drafts and in-progress work |
+| `civicbridge_dark_patterns_vault` | `darkPatternsStorage.js` | Scrubbed dark pattern evidence and pricing records | Drafts and in-progress work |
+| `civicbridge_vendor_rights_vault` | `streetVendorStorage.js` | Saved street vendor Section 3(3) eviction immunity audits, Section 19 goods seizure inventories, and TVC grievance records | Drafts and in-progress work |
+| `civicbridge_evidence_dossiers_v1` | `evidenceDossierStorage.js` | Saved citizen evidence manifests, file SHA-256 digests, and verification dossiers with storage seals | Drafts and in-progress work |
+| `civicbridge_electricity_cgrf_vault` | `electricityConsumerStorage.js` | Saved electricity consumer outage compensation claims, Section 56(1) disconnection audits, meter test reports and CGRF petitions with SHA-256 seals | Drafts and in-progress work |
+| `civicbridge_rte_grievance_vault` | `rteAdmissionStorage.js` | Saved RTE Section 12(1)(c) quota eligibility, screening violation audits, capitation penalties, and Section 32 petitions with SHA-256 seals | Drafts and in-progress work |
+| `civicbridge_accessibility_cases_v1` | `accessibilityEscalationStorage.js` | Saved accessibility complaint timelines, evidence logs, follow-up milestones, and escalation drafts under RPwD Act 2016 | Drafts and in-progress work |
+| `civicbridge_accessibility_tracker_settings_v1` | `accessibilityEscalationStorage.js` | Local user settings and preferences for accessibility follow-up reminders | Drafts and in-progress work |
+| `civicbridge_legal_sources_v1` | `legalSourceStorage.js` | Versioned statutory source citations, provisions, and SemVer lifecycle states | Drafts and in-progress work |
+| `civicbridge_legal_draft_snapshots_v1` | `legalSourceStorage.js` | Immutable historical citation snapshots sealed in citizen drafting templates | Drafts and in-progress work |
+| `civicbridge_legal_sources_audit_v1` | `legalSourceStorage.js` | Append-only audit trail for statutory reviews, publications, and rollbacks | Drafts and in-progress work |
 | `civicbridge_checklists` | `checklistStorage.js` | Which checklist items are ticked, per checklist or application id | Drafts and in-progress work |
 | `civicbridge_preparation_plans_v1` | `applicationPreparationPlanService.js` | Saved application preparation plan and customized checklist progress | Drafts and in-progress work |
 | `civic_journey_progress_<journeyId>` (one per journey) | `journeyDependencyEngine.js` | Completed tasks of a journey plan | Drafts and in-progress work |
@@ -59,6 +77,8 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_eligibility_assessments` | `assessmentStorage.js` | Answers and results of eligibility checks | Drafts and in-progress work |
 | `civicbridge_applicant_profiles_v1` | `applicantProfileService.js` | Household and family member applicant profiles for scoped assessments | Drafts and in-progress work |
 | `civicbridge_applications` | `trackingService.js` | Applications the person tracks: reference id, service, status, stages | Tracking records |
+| `civicbridge_application_events_v1` | `applicationEventService.js` | Append-only timeline events with source type, source and ingestion timestamps, status, actor, payload version, and citizen notes kept separate from official records | Tracking records |
+| `civicbridge_event_inconsistency_reports_v1` | `applicationEventService.js` | Citizen reports that flagged conflicting, duplicate, or out-of-order timeline evidence for review | Reviews, votes and reports |
 | `civicbridge_office_tokens` | `locationService.js` | Office visit tokens and appointments | Tracking records |
 | `civic_grievance_tickets` | `grievanceService.js` | Grievance tickets raised from the app | Tracking records |
 | `civicbridge_reminders` | `reminderNotificationService.js` | Renewal, submission and document expiry reminders | Tracking records |
@@ -95,15 +115,71 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civicbridge_conflict_records_v1` | `citizenDraftSyncEngine.js` | Local conflict records waiting for user merge resolution | Drafts and in-progress work |
 | `civicbridge_device_cursors_v1` | `citizenDraftSyncEngine.js` | Device sync cursors and high-water revision marks | Drafts and in-progress work |
 | `civicbridge_tombstones_v1` | `citizenDraftSyncEngine.js` | Deletion tombstones to prevent resurrection of deleted drafts | Drafts and in-progress work |
+| `civicbridge_continuity_plans_v1` | `continuityPlannerService.js` | Public service continuity plans, recovery objectives and contact trees | Drafts and in-progress work |
+| `civicbridge_incident_scenarios_v1` | `continuityPlannerService.js` | Tabletop incident drill scenarios and timeline inject templates | Drafts and in-progress work |
+| `civicbridge_service_dependencies_v1` | `continuityPlannerService.js` | Municipal service dependency mappings and manual fallback procedures | Drafts and in-progress work |
+| `civicbridge_exercise_runs_v1` | `continuityPlannerService.js` | Tabletop drill exercise logs, decisions, response gaps and after-action reports | Reviews, votes and reports |
+| `civicbridge_action_items_v1` | `continuityPlannerService.js` | Corrective action items stemming from continuity drill gaps | Tracking records |
+| `civicbridge_continuity_audit_logs_v1` | `continuityAuditService.js` | Append-only audit logs of plan approvals, drill closures and override decisions | Reviews, votes and reports |
+| `civicbridge_continuity_recommendations_v1` | `continuityPlannerService.js` | Human-in-the-loop decision records on automated continuity recommendations | Drafts and in-progress work |
+| `civicbridge_tree_report_attachments_v1` | `treeInventoryService.js` | Validated citizen-report images and metadata (no raw personal identifiers) | Reviews, votes and reports |
+| `civicbridge_tree_citizen_reports_v1` | `treeInventoryService.js` | Citizen tree observations, tracking codes, triage and review state | Reviews, votes and reports |
+| `civicbridge_tree_reports_v1` | `treeInventoryMigrations.js` | Legacy citizen tree reports read once during migration | Reviews, votes and reports |
+| `civicbridge_tree_reporter_key` | `TreeHealthInventory.jsx` | Random local key used only to rate-limit and deduplicate citizen tree reports | Reviews, votes and reports |
 | `civicbridge_civic_works_reports_v1` | `civicWorksBoardService.js` | Ward civic works reports and moderation state | Reviews, votes and reports |
+
+| `civicbridge_npsc_fee_history_v1` | `nationalPublicServiceCentreService.js` | Locally recorded fee versions, sources, verification dates, and audit trails for receipt comparisons | Saved items |
+| `civicbridge_npsc_fee_observations_v1` | `nationalPublicServiceCentreService.js` | Community fee observations and their moderation state | Reviews, votes and reports |
+
+| `civicbridge_office_comparison_reports_v1` | `officeComparisonReportService.js` | Outdated office-record reports queued on this device when the review endpoint is unavailable: office id, reason, short note and optional official source. No identity or contact fields | Reviews, votes and reports |
+
 | `civicbridge_civic_works_clusters_v1` | `civicWorksBoardService.js` | Clustered duplicate ward reports | Reviews, votes and reports |
 | `civicbridge_civic_works_rate_limit_v1` | `civicWorksBoardService.js` | Ward report submission rate limit tracking | Reviews, votes and reports |
+
+| `civicbridge_notice_deadline_state_v1` | `dateCandidateService.js` | Citizen confirmations, edits and dismissals for public notice deadlines | Tracking records |
+
+| `civicbridge_hazard_reports_v1` | `roadSafetyBlackspotService.js` | Citizen-reported road hazards and defects (sanitized, PII stripped) | Reviews, votes and reports |
+| `civicbridge_road_segments_v1` | `roadSafetyBlackspotService.js` | Monitored road segment geometries, classifications, and speed limits | Cached public reference data |
+| `civicbridge_crash_aggregates_v1` | `roadSafetyBlackspotService.js` | Aggregated government crash figures and exposure denominators | Cached public reference data |
+| `civicbridge_road_features_v1` | `roadSafetyBlackspotService.js` | Road physical features (lighting, pedestrian crossings, calming devices) | Cached public reference data |
+| `civicbridge_risk_runs_v1` | `roadSafetyBlackspotService.js` | Automated risk run calculation parameters, timestamps, and model version | Audit and execution records |
+| `civicbridge_review_cases_v1` | `roadSafetyBlackspotService.js` | Blackspot review cases, officer inspection findings, and transition history | Operational review cases |
+| `civicbridge_intervention_records_v1` | `roadSafetyBlackspotService.js` | Planned and executed engineering countermeasures, budgets, and outcomes | Operational countermeasure records |
+| `civicbridge_road_safety_rate_limit_v1` | `roadSafetyBlackspotService.js` | Rolling submission rate limit timestamps for hazard reports (15m window) | Technical anti-abuse rate limits |
+| `civicbridge_road_safety_audit_logs_v1` | `roadSafetyBlackspotService.js` | Append-only audit events for municipal blackspot case transitions and interventions | Audit and execution records |
+
 | `civicbridge_journey_handoffs_v1` | `journeyHandoffService.js` | Journey handoff bundles and shared checklist links | Drafts and in-progress work |
 | `civicbridge_readiness_scorecards` | `readinessScorecardService.js` | Citizen application readiness scores and missing document audits | Drafts and in-progress work |
 | `civicbridge_offline_cache` | `offlineCacheService.js` | Copies of saved guides and application stages for offline use | Offline copies and location |
 | `civicbridge_offline_last_sync` | `offlineCacheService.js` | Time of the last offline sync | Offline copies and location |
 | `civicbridge_cached_shelters` | `disasterReliefService.js` | Copy of the public relief shelter list (no personal data) | Offline copies and location |
 | `civicbridge_user_coords` (sessionStorage) | `locationService.js` | Last location the browser gave the app, for the nearby offices page. Gone when the tab closes | Offline copies and location |
+| `civicbridge_office_comparison_draft_v1` (sessionStorage) | `officeComparisonDraft.js` | Service, state, district, locality, contact channel, wheelchair filter, distance radius, view mode and up to three selected office IDs for the office comparison workspace. No names, identity numbers or contact details. Gone when the tab closes | Drafts and in-progress work |
+| `civic_fire_noc_checklist_dossier` | `fireNocService.js` | Fire safety and NOC application compliance dossiers | Drafts and in-progress work |
+| `civicbridge_civic_works_reporter_id` | `civicWorksBoardService.js` | Anonymous device-scoped reporter identifier | Tracking records |
+| `civic_admin_operations_digest_config` | `adminDigestService.js` | Administrative operations digest frequency configuration | Tracking records |
+| `civic_admin_operations_digest_logs` | `adminDigestService.js` | Operations notification and delivery log receipts | Tracking records |
+| `civic_application_lifecycle_email_logs` | `applicationLifecycleEmailService.js` | Status change transactional email history | Tracking records |
+| `civic_application_notification_preferences` | `notificationPreferenceService.js` | Citizen notification preference options | Account security |
+| `civic_service_checklist_email_logs` | `checklistEmailService.js` | Checklist export email logs | Tracking records |
+| `civic_application_deadline_reminder_configs` | `deadlineReminderService.js` | Citizen application deadline reminder schedules | Tracking records |
+| `civic_application_deadline_reminder_logs` | `deadlineReminderService.js` | Delivery receipts for statutory deadline warnings | Tracking records |
+| `civic_privacy_safe_feedback_store` | `feedbackService.js` | De-identified citizen experience feedback | Reviews, votes and reports |
+| `civic_help_setu_contributors_cache` | `contributorService.js` | Cached open source contributor metadata | Offline copies and location |
+| `civic_rental_transition_checklists_v1` | `rentalTransitionService.js` | Rental move-in and handover verification checklists | Drafts and in-progress work |
+| `civic_tender_readiness_checklists_v1` | `tenderReadinessService.js` | Public procurement eligibility checklists and bids | Drafts and in-progress work |
+| `civicbridge_transactional_delivery_logs` | `transactionalEmailService.js` | Outgoing delivery transaction IDs | Tracking records |
+| `civicbridge_watertanker_requests` | `waterTankerService.js` | Municipal emergency water tanker delivery requests | Tracking records |
+| `civic_address_change_planner_v1` | `addressChangeStorage.js` | Moving-home address change checklists and task statuses | Drafts and in-progress work |
+| `civic_library_checklists_v1` | `libraryChecklistStorage.js` | Library membership application checklists | Drafts and in-progress work |
+| `civicbridge_library_checklist_change` | `libraryChecklistStorage.js` | Local storage update event channel for library checklists | Technical anti-abuse rate limits |
+| `civic_recovery_checklists` | `lostDocumentRecoveryNavigatorService.js` | Lost government document recovery checklists | Drafts and in-progress work |
+| `civicbridge_small_business_establishments_v1` | `smallBusinessLicenceService.js` | Small business establishments registry and licence profiles | Drafts and in-progress work |
+| `civicbridge_business_checklist_progress_v1` | `smallBusinessLicenceService.js` | Small business renewal and closure checklist progress | Drafts and in-progress work |
+| `civic_surveys_v1` | `surveyStorage.js` | Public survey definitions and diagnostic schema | Drafts and in-progress work |
+| `civic_survey_responses_v1` | `surveyStorage.js` | Anonymized citizen survey responses and sample weights | Reviews, votes and reports |
+| `civic_survey_consent_events_v1` | `surveyStorage.js` | Audit records for survey participation consent | Audit and execution records |
+| `civic_survey_audit_events_v1` | `surveyStorage.js` | Append-only audit events for civic surveys | Audit and execution records |
 
 The offline copies only duplicate tracking records and saved items, so clearing either of those clears them too. The result list says so.
 
@@ -124,11 +200,12 @@ After clearing, the sample reviews, sample audit reports and the sample vault do
 | `civicbridge_reader_preferences` | User reading mode preferences (font size, contrast, spacing) | Display preference |
 | `civicbridge_catalogue_enrichment_queue_v1` | Proposed AI service enrichments pending admin review | Admin review queue |
 | `civicbridge_dismissed_recommendations`, `civicbridge_catalogue_completeness_dismissals` | Dismissed recommendation IDs and admin catalogue completeness quality check dismissals | UI dismissals and admin review state |
-| `civicbridge_custom_services`, `civicbridge_audit_logs`, `civicbridge_rbac_users`, `civicbridge_service_submissions` | Admin portal data | Not citizen data |
+| `civicbridge_custom_services`, `civicbridge_audit_logs`, `civicbridge_rbac_users`, `civicbridge_service_submissions`, `civicbridge_change_events`, `civicbridge_review_approvals` | Admin portal data and versioned civic service change events | Not citizen data |
 | `civicbridge_barrier_audit_logs`, `civicbridge_freshness_trust_reviews_v1`, `civicbridge_link_health_v1`, `civicbridge_public_notices_digest_v1`, `civicbridge_source_conflicts`, `civicbridge_conflict_audit_logs`, `civicbridge_duplicate_review_states` | Admin barrier moderation, freshness reviews, official link check results, public gazette digest cache, and source conflict audit queues | Admin portal moderation and public digest cache |
 | `civicbridge_barrier_audit_logs`, `civicbridge_freshness_trust_reviews_v1`, `civicbridge_public_notices_digest_v1`, `civicbridge_service_availability_notices_v1`, `civicbridge_source_conflicts`, `civicbridge_conflict_audit_logs` | Admin barrier moderation, freshness reviews, public gazette digest cache, and source conflict audit queues | Admin portal moderation and public digest cache |
 | `civicbridge_barrier_audit_logs`, `civicbridge_freshness_trust_reviews_v1`, `civicbridge_service_ownership_v1`, `civicbridge_public_notices_digest_v1`, `civicbridge_source_conflicts`, `civicbridge_conflict_audit_logs` | Admin barrier moderation, freshness reviews, service reviewer assignments, public gazette digest cache, and source conflict audit queues | Admin portal moderation and public digest cache |
 | `civicbridge_location_denied` (sessionStorage) | A flag that the location permission was refused in this tab | No personal data, gone when the tab closes |
+| `civicbridge_comparison_stale_dismissed` (sessionStorage) | A flag that the comparison stale-data warning was dismissed in this tab | No personal data, gone when the tab closes |
 | `civicbridge_app_status_qr_tokens` | QR tokens for application status sharing | Shared feature data |
 | `civicbridge_app_status_qr_rate_limits` | Rate limits for application status QR generation | Shared feature data |
 | `civicbridge_catalogue_auditor_dismissals_v2` | Dismissed catalogue auditor review items | Admin moderation state |
@@ -140,6 +217,29 @@ After clearing, the sample reviews, sample audit reports and the sample vault do
 | `civicbridge_shareable_citizen_profiles` | Shareable citizen profile tokens | Sharing feature |
 | `civicbridge_voluntary_profile_opt_in` | Voluntary profile participation consent | Voluntary profile feature |
 | `civicbridge_voluntary_profile_attrs` | Voluntary profile attribute selections | Voluntary profile feature |
+| `civicbridge_synthetic_profiles_v1` | Testing scenario configurations and seeds | Synthetic dataset generation parameters (#778) |
+| `civicbridge_synthetic_jobs_v1` | Local generation job statuses and execution logs | Asynchronous synthetic generation job tracking (#778) |
+| `civicbridge_synthetic_artifacts_meta_v1` | Certified synthetic dataset metadata, checksums, and k-anonymity scores | Synthetic artifact cataloging (#778) |
+| `civicbridge_synthetic_artifact_data_` | Isolated synthetic dataset payloads (offices, services, applications, grievances) | Ephemeral testing payload storage (#778) |
+| `civicbridge_synthetic_validation_runs_v1` | Zero-PII compliance and referential integrity audit logs | Synthetic verification history (#778) |
+| `civicbridge_synthetic_schema_catalog_v1` | Canonical schema definitions and field constraints | Schema catalog storage (#778) |
+| `civicbridge_synthetic_audit_logs_v1` | Append-only audit logs for synthetic generation and migrations | Security audit trail (#778) |
+| `civicbridge_synthetic_migration_backup_v1` | Pre-migration snapshot backup for zero-data-loss rollback | Schema rollback storage (#778) |
+| `civicbridge_tenants_v1` | Multi-authority civic administration workspace profiles | Multi-tenant isolation feature (#779) |
+| `civicbridge_tenant_memberships_v1` | Authority staff memberships, assigned roles, and ward jurisdictions | Multi-tenant isolation feature (#779) |
+| `civicbridge_tenant_roles_v1` | Granular tenant role permission schemas | Multi-tenant isolation feature (#779) |
+| `civicbridge_tenant_settings_v1` | Authority-specific SLA rules, emergency notices, and dispatch boundaries | Multi-tenant isolation feature (#779) |
+| `civicbridge_tenant_audit_events_v1` | SHA-256 tamper-evident hash-chained authority audit trail | Multi-tenant isolation feature (#779) |
+| `civicbridge_tenant_datasets_v1` | Partitioned authority operational datasets and ward service tickets | Multi-tenant isolation feature (#779) |
+| `civicbridge_shared_catalogue_v1` | Controlled cross-tenant public catalogue guides with PII redacted | Multi-tenant isolation feature (#779) |
+| `civicbridge_active_tenant_context_v1` | Active authority context selection on device | Multi-tenant isolation feature (#779) |
+| `civicbridge_tenant_migration_backup_v1` | Snapshot backup for tenant schema migration rollback | Multi-tenant isolation feature (#779) |
+| `civicbridge_counter_aggregates_v1`, `civicbridge_capacity_plans_v1`, `civicbridge_forecast_runs_v1`, `civicbridge_capacity_audit_logs_v1` | Historical footfall aggregates (Zero-PII), Erlang-C capacity plans, forecast runs, and append-only staffing override audit logs (#764) | Operations and capacity management |
+| `civicbridge_tree_inventory_meta_v1`, `civicbridge_tree_assets_v1`, `civicbridge_tree_species_v1`, `civicbridge_tree_inspections_v1`, `civicbridge_tree_maintenance_orders_v1`, `civicbridge_tree_pruning_events_v1`, `civicbridge_tree_planting_sites_v1`, `civicbridge_tree_triage_suggestions_v1`, `civicbridge_tree_audit_events_v1`, `civicbridge_tree_idempotency_v1`, `civicbridge_tree_rate_limit_v1`, `civicbridge_tree_migration_backup_v1`, `civicbridge_trees_v1` | Municipal tree register, inspection history, maintenance orders, pruning history, planting sites, triage suggestions, append-only audit chain, idempotency/rate-limit state, schema metadata and rollback backup | Public-authority operating records, not a citizen profile. Kept so clearing a citizen's data cannot erase the public register or audit trail. The tree module applies its own 365-day retention to closed citizen reports |
+| `civicbridge_ward_issue_events_v1`, `civicbridge_ward_geometries_v1`, `civicbridge_ward_metrics_v1`, `civicbridge_aggregation_runs_v1`, `civicbridge_privacy_rules_v1`, `civicbridge_ward_recommendations_v1`, `civicbridge_ward_issue_audit_logs_v1`, `civicbridge_ward_issue_rate_limit_v1`, `civicbridge_ward_heatmap_migration_backup_v1` | Anonymized ward-level civic issue heatmap, coarse events, published metrics, k-anonymity privacy thresholds, explainable recommendations, and audit logs | Municipal aggregate analytics and operating records. Coarse ward-level centroids only, zero citizen PII stored. Kept under retained operational records. |
+| `civic_ghg_inventory_v1` | Municipal greenhouse-gas inventory bundle: emission sources, department activity records, versioned factors, reporting periods, calculation runs, human estimate decisions and the append-only audit trail | Public-authority environmental reporting records, not a citizen profile. Only approved aggregates are exposed publicly; internal notes and document metadata stay in the municipal workspace. The module applies its own retention and rollback policy (`applyGhgRetentionPolicy`) |
+| `civicbridge_knowledge_sources_v1`, `civicbridge_source_snapshots_v1`, `civicbridge_transformation_runs_v1`, `civicbridge_provenance_edges_v1`, `civicbridge_editorial_reviews_v1`, `civicbridge_supersession_links_v1`, `civicbridge_provenance_audit_v1` | Public knowledge sources, snapshots, transformations, provenance DAG edges, editorial reviews, supersession links, and audit logs (#777) | Statutory provenance records, not citizen personal data |
+| `civic_relief_incidents_v1`, `civic_relief_need_reports_v1`, `civic_relief_resource_inventory_v1`, `civic_relief_stock_movements_v1`, `civic_relief_distribution_sites_v1`, `civic_relief_allocation_proposals_v1`, `civic_relief_delivery_confirmations_v1`, `civic_relief_partner_verifications_v1`, `civic_relief_forecast_runs_v1`, `civic_relief_audit_logs_v1`, `civic_relief_archive_v1`, `civic_relief_meta_v1` | Disaster relief incidents, need reports, stock batches, append-only stock movements, distribution sites, allocation proposals, delivery confirmations, verified partners, versioned forecast runs, append-only audit trail, retention archive and schema metadata (#747) | Public-authority relief operating records, not a citizen profile. Free text is PII-scanned on intake and rejected if it contains identifiers; public projections are allow-listed. Terminal need reports are anonymised by the module's own retention policy (`applyReliefRetentionPolicy`), and clearing a citizen's data cannot erase an active relief ledger or audit trail |
 
 ## Remote data
 

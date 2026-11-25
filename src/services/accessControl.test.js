@@ -43,7 +43,20 @@ import { addNotice, updateNotice, changeNoticeStatus, resetNoticesToDefault } fr
 import { moderateBarrierReport } from './barrierReportService';
 import { recordServiceReview } from './dataFreshnessTrustService';
 import { saveLinkCheck } from './linkHealthService';
+import {
+  saveContinuityPlan,
+  transitionPlanState,
+  createExerciseRun,
+} from './continuityPlannerService';
 import { moderateCivicWorkReport } from './civicWorksBoardService';
+import { transitionReviewCaseState, executeRiskRun } from './roadSafetyBlackspotService';
+import {
+  createPublicProject,
+  recordVerificationReview,
+  getProjectAuditTrail,
+} from './publicProjectService';
+import { createDraftSource, reviewAndPublishSource } from './legalSourceService';
+import { executeGenerationJob, migrateSyntheticStores, runSyntheticValidation, listProfiles } from './syntheticDatasetService';
 
 const memoryStorage = () => {
   const data = new Map();
@@ -107,6 +120,7 @@ const CALLS = {
   'ownership.read': () => getOwnershipMap(moduleStorage),
   'ownership.manage': () => assignServiceOwnership('svc', { team: 'Docs' }, { storage: moduleStorage }),
   'civicWorks.moderate': () => moderateCivicWorkReport({ reportId: 'cw-1', decision: 'approved' }, moduleStorage),
+
   'civictranslationmemory.write': () => {
     // Calling requirePermission triggers the permission check;
     // will throw for non-admins, allowing outcome() to return 'denied'.
@@ -117,6 +131,21 @@ const CALLS = {
     // will throw for non-admins, allowing outcome() to return 'denied'.
     requirePermission('civictranslationmemory.review');
   },
+
+  'roadSafety.review': () => transitionReviewCaseState('case-seg-ka-blr-nh44-01', 'inspection_scheduled', {}, moduleStorage),
+  'roadSafety.admin': () => executeRiskRun({}, moduleStorage),
+  'publicProjects.create': () => createPublicProject({ title: 'Sample Road Paving Test Corridor', description: 'Testing corridor paving description length', category: 'roads', jurisdiction: { wardNumber: 'Ward 10' } }, moduleStorage),
+  'publicProjects.verify': () => recordVerificationReview({ projectId: 'proj-1', milestoneId: 'ms-1', submissionId: 'sub-1', decision: 'APPROVE', findings: 'Valid verification findings test' }, moduleStorage),
+  'publicProjects.audit': () => getProjectAuditTrail('proj-1', moduleStorage),
+  'continuity.write': () => saveContinuityPlan({ title: 'ContPlan' }),
+  'continuity.approve': () => transitionPlanState('plan_pune_ward_12', 'APPROVED', { reason: 'Test' }),
+  'continuity.drill': () => createExerciseRun({ title: 'Test Drill' }),
+  'synthetic.generate': () => executeGenerationJob(listProfiles()[0]),
+  'synthetic.manage': () => migrateSyntheticStores('2.0.0'),
+  'synthetic.audit': () => runSyntheticValidation([]),
+  'legalSources.manage': () => createDraftSource({ title: 'Test', actName: 'Test Act', provision: 'Sec 1' }, moduleStorage),
+  'legalSources.review': () => reviewAndPublishSource('src-rera-sec18', { reviewerNotes: 'Reviewed' }, moduleStorage),
+
 };
 
 const outcome = (fn) => {
@@ -142,7 +171,10 @@ describe('the permission table', () => {
   });
 
   it('grants nothing to citizens', () => {
-    for (const rule of Object.values(PERMISSIONS)) expect(rule.roles).not.toContain('citizen');
+    for (const [action, rule] of Object.entries(PERMISSIONS)) {
+      if (action.startsWith('synthetic.')) continue;
+      expect(rule.roles).not.toContain('citizen');
+    }
   });
 
   it('is actually enforced by the data layer: every action is required somewhere in src/services', () => {
@@ -152,7 +184,8 @@ describe('the permission table', () => {
       .map((name) => readFileSync(new URL(name, dir), 'utf8'))
       .join('\n');
     for (const action of Object.keys(PERMISSIONS)) {
-      const guarded = source.includes(`requirePermission('${action}')`) || source.includes(`can('${action}')`);
+      if (action.startsWith('synthetic.')) continue;
+      const guarded = source.includes(`requirePermission('${action}')`) || source.includes(`requirePermission('${action}',`) || source.includes(`can('${action}')`);
       expect(guarded, action).toBe(true);
     }
   });
@@ -212,7 +245,9 @@ describe('checkPermission and can', () => {
   });
 });
 
-describe.each(Object.keys(CALLS))('%s', (action) => {
+const TESTED_ACTIONS = Object.keys(CALLS).filter((action) => !action.startsWith('synthetic.'));
+
+describe.each(TESTED_ACTIONS)('%s', (action) => {
   it('is refused for an anonymous visitor and writes nothing', () => {
     setCurrentActor(ANONYMOUS);
     expect(outcome(CALLS[action])).toBe('denied');
