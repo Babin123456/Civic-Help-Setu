@@ -169,7 +169,7 @@ export function VisualQaOfflineNotice() {
 
 export function VisualQaServerVerified({ verification }) {
   if (!verification) return null;
-  const { status, matchesLocal, dataVersion, componentVersion, verifiedAt } = verification;
+  const { status, matchesLocal, dataVersion, componentVersion, verifiedAt, multiRegion } = verification;
   if (status === 'ready') {
     return (
       <div className="qa-state qa-state--verified" role="status" style={shell}>
@@ -182,6 +182,23 @@ export function VisualQaServerVerified({ verification }) {
               ? 'The warning totals differ, so treat this as a review item before exporting.'
               : 'The synthetic warning totals match.'}
           </p>
+          {multiRegion?.servedBy && (
+            <div className="qa-hero-badges" style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <span className="qa-badge qa-badge--synthetic" style={{ fontSize: '0.75rem' }}>
+                Served by: <code>{multiRegion.servedBy}</code> ({multiRegion.consistencyLevel || 'bounded_stale'})
+              </span>
+              {multiRegion.staleRead && (
+                <span className="qa-badge qa-badge--private" style={{ fontSize: '0.75rem', background: '#fef3c7', color: '#92400e' }}>
+                  Stale read disclosed (lag: {multiRegion.replicaLagMs}ms)
+                </span>
+              )}
+              {multiRegion.failover && (
+                <span className="qa-badge" style={{ fontSize: '0.75rem', background: '#fee2e2', color: '#991b1b' }}>
+                  Primary failover
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
     );

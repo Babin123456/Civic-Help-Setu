@@ -71,6 +71,7 @@ import complaintQualityCoach from "./_lib/handlers/complaint-quality-coach.js";
 import civicEvidenceLocker from "./_lib/handlers/civic-evidence-locker.js";
 import journeyBenchmark from "./_lib/handlers/journey-benchmark.js";
 import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
+import multiRegionStatus from "./_lib/handlers/multi-region-status.js";
 import caseCollaboration from "./_lib/handlers/case-collaboration.js";
 import syntheticDatasets from "./_lib/syntheticDatasets.js";
 
@@ -132,6 +133,9 @@ const handlers = {
   "journey-benchmark": journeyBenchmark,
   "civic-knowledge-graph": civicKnowledgeGraph,
   "knowledge-graph": civicKnowledgeGraph,
+  "multi-region-health": multiRegionStatus,
+  "multi-region-status": multiRegionStatus,
+  "multi-region-metrics": multiRegionStatus,
   "case-collaboration": caseCollaboration,
   "synthetic-datasets": syntheticDatasets,
 };

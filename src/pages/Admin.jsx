@@ -100,6 +100,7 @@ import DuplicateServiceDetectorPanel from '../components/admin/DuplicateServiceD
 import CatalogueConflictDetectorPanel from '../components/admin/CatalogueConflictDetectorPanel';
 import CivicWorksModeratorPanel from '../components/civicWorks/CivicWorksModeratorPanel';
 import AccessibilityInspectorPanel from '../components/AccessibilityInspectorPanel';
+import MultiRegionHealthPanel from '../components/admin/MultiRegionHealthPanel';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -774,6 +775,7 @@ const Admin = () => {
               { id: 'release-ledger', label: 'Release Signatures & Ledger', badge: null },
               { id: 'chaos-resilience', label: 'Chaos & Resilience Suite', badge: null },
               { id: 'counter-demand', label: 'Counter Demand & Staffing', badge: null },
+              { id: 'multi-region', label: 'Multi-Region Topology & Lag', badge: null },
               { id: 'audit', label: 'Audit Trail Logs', badge: null },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
@@ -1894,6 +1896,13 @@ const Admin = () => {
             {activeTab === 'counter-demand' && (
               <div>
                 <CounterDemandReviewQueue />
+              </div>
+            )}
+
+            {/* Multi-Region Topology & Lag Dashboard Tab (#1233) */}
+            {activeTab === 'multi-region' && (
+              <div>
+                <MultiRegionHealthPanel />
               </div>
             )}
 

@@ -16,6 +16,7 @@
 import { createRateLimiter, clientKey } from '../abuseGuard.js';
 import { bearerToken } from '../firebaseToken.js';
 import { resolveRole } from '../../../src/services/roleService.js';
+import { getMultiRegionInstance } from '../multiRegionReadIntegration.js';
 import { SERVICE_CATEGORIES } from '../../../src/data/serviceCategories.js';
 import {
   CONTENT_LENGTHS,
@@ -290,6 +291,24 @@ export default async function handler(req, res) {
 
     try {
       const report = runVisualQaScan(filters);
+
+      try {
+        const instance = await getMultiRegionInstance();
+        if (instance) {
+          const clientContext = instance.buildClientContext(
+            req.headers,
+            reviewer?.userId ? { id: reviewer.userId, role: reviewer.role } : null
+          );
+          const decision = await instance.routeRead({
+            collectionPath: 'services',
+            clientContext,
+          });
+          instance.decorateResponse(res, decision);
+        }
+      } catch {
+        // Multi-region layer fallback
+      }
+
       return res.status(200).json({
         data: report,
         meta: {
@@ -410,6 +429,20 @@ export default async function handler(req, res) {
     return res.status(400).json(
       failure(400, 'ERR_INVALID_SUGGESTION_DECISION', 'The suggestion decision is not valid.', errors).body
     );
+  }
+
+  try {
+    if (reviewer?.userId) {
+      const instance = await getMultiRegionInstance();
+      if (instance) {
+        const { token } = await instance.issueToken(reviewer.userId, Date.now(), `qa_${Date.now()}`);
+        if (token) {
+          res.setHeader('x-read-your-writes-token', token);
+        }
+      }
+    }
+  } catch {
+    // Multi-region token issuance fallback
   }
 
   return res.status(200).json({
