@@ -37,13 +37,13 @@ import floodIncidentReports from "./_lib/handlers/flood-incident-reports.js";
 import schoolZoneAudits from "./_lib/handlers/school-zone-audits.js";
 import heatReliefObservations from "./_lib/handlers/heat-relief-observations.js";
 
-import { GET as graphGET, POST as graphPOST } from "./graph/route.js";
+import { GET as graphGET, POST as graphPOST } from "./_lib/graphRoute.js";
 import {
   GET_REVIEW_QUEUE as reviewQueueGET,
   POST as reviewPOST,
   POST_APPROVE as approvePOST,
   POST_REJECT as rejectPOST,
-} from "./graph/route.js";
+} from "./_lib/graphRoute.js";
 
 import accessibilityInspector from "./_lib/handlers/accessibility-inspector.js";
 
@@ -69,6 +69,7 @@ import civicEvidenceLocker from "./_lib/handlers/civic-evidence-locker.js";
 import journeyBenchmark from "./_lib/handlers/journey-benchmark.js";
 import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
 import caseCollaboration from "./_lib/handlers/case-collaboration.js";
+import syntheticDatasets from "./_lib/syntheticDatasets.js";
 
 import { withRequestSecurity, internalErrorResponse } from "./_lib/requestSecurity.js";
 
@@ -124,6 +125,7 @@ const handlers = {
   "civic-knowledge-graph": civicKnowledgeGraph,
   "knowledge-graph": civicKnowledgeGraph,
   "case-collaboration": caseCollaboration,
+  "synthetic-datasets": syntheticDatasets,
 };
 
 // Terminology graph routes
