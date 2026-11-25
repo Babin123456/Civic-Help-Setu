@@ -36,6 +36,25 @@ service cloud.firestore {
       return isMember() && request.auth.token.get('role', 'citizen') == 'admin';
     }
 
+    // Tenant boundary helpers: tenantId comes only from the signed token, never from a document.
+    function actorTenantId() {
+      return request.auth.token.get('tenantId', '');
+    }
+
+    function hasValidTenantId(tenantId) {
+      return tenantId is string
+        && tenantId.matches('^(STATE|DISTRICT|MUNICIPALITY|DEPARTMENT|state|district|municipality|department):[A-Za-z0-9-]+$');
+    }
+
+    function canAccessTenant(targetTenantId) {
+      return isMember()
+        && hasValidTenantId(targetTenantId)
+        && (
+          request.auth.token.get('role', 'citizen') == 'super_admin'
+          || (actorTenantId() != '' && actorTenantId() == targetTenantId)
+        );
+    }
+
     // ---------- what is being written ----------
 
     function incoming() {

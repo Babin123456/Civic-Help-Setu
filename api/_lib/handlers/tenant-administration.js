@@ -10,6 +10,7 @@
  */
 
 import { createRateLimiter, createSingleFlight, clientKey } from '../abuseGuard.js';
+import { checkTenantAccess } from '../../../src/services/tenantContext.js';
 
 const rateLimiter = createRateLimiter({ limit: 30, windowMs: 60 * 1000 });
 const singleFlight = createSingleFlight();
@@ -148,6 +149,18 @@ export default async function handler(req, res) {
         message: 'Administrative request validation failed.',
         details: validationErrors,
       });
+    }
+
+    const principal = req.auth?.user || req.user || req.principal || null;
+    if (principal) {
+      const access = checkTenantAccess(principal, payload.tenantId);
+      if (!access.allowed) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          code: 'TENANT_ACCESS_DENIED',
+          message: `Cross-tenant mutation denied (${access.reason}).`,
+        });
+      }
     }
 
     const seal = generateAdminActionSeal(payload);

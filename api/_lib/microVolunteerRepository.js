@@ -12,6 +12,15 @@
  */
 
 import { createMemoryStorage } from '../../src/services/microVolunteerMigrations.js';
+import { checkTenantAccess } from '../../src/services/tenantContext.js';
+
+function assertTenantScope(actor, targetTenantId) {
+  if (!actor) return;
+  const access = checkTenantAccess(actor, targetTenantId);
+  if (!access.allowed) {
+    throw new Error(`TENANT_ACCESS_DENIED: ${access.reason}`);
+  }
+}
 
 export const createMicroVolunteerMemoryRepository = ({ storage = createMemoryStorage() } = {}) => {
   const adapter = storage;
@@ -22,7 +31,12 @@ export const createMicroVolunteerMemoryRepository = ({ storage = createMemorySto
       if (typeof adapter.clear === 'function') adapter.clear();
     },
     /** Runs `work` with the repository storage and returns its result. */
-    withStorage: (work) => work(adapter),
+    withStorage: (work, { actor = null, tenantId = null } = {}) => {
+      if (actor) {
+        assertTenantScope(actor, tenantId);
+      }
+      return work(adapter);
+    },
   };
 };
 

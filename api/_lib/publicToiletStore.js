@@ -2,6 +2,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { FieldPath } from 'firebase-admin/firestore';
 import { getFirestoreAdmin } from './firebaseAdmin.js';
+import { checkTenantAccess } from '../../src/services/tenantContext.js';
 
 export class ToiletStoreError extends Error {
   constructor(code) { super(code); this.code = code; }
@@ -43,9 +44,17 @@ export class FirestoreToiletStore {
     });
   }
 
-  async list({ limit, cursor }) {
+  async list({ limit, cursor, tenantId = null, actor = null }) {
+    if (actor && tenantId) {
+      const access = checkTenantAccess(actor, tenantId);
+      if (!access.allowed) throw new ToiletStoreError('tenant_access_denied');
+    }
     const after = decodeCursor(cursor);
-    let query = this.collection.orderBy('createdAt', 'desc').orderBy(FieldPath.documentId(), 'desc');
+    let query = this.collection;
+    if (tenantId) {
+      query = query.where('tenantId', '==', tenantId);
+    }
+    query = query.orderBy('createdAt', 'desc').orderBy(FieldPath.documentId(), 'desc');
     if (after) query = query.startAfter(...after);
     const snapshot = await query.limit(limit + 1).get();
     const documents = snapshot.docs.slice(0, limit);
@@ -62,13 +71,17 @@ export class FirestoreToiletStore {
     };
   }
 
-  async review(id, decision, actorId) {
+  async review(id, decision, actorId, { actor = null } = {}) {
     if (!/^[a-f0-9]{64}$/.test(id)) throw new ToiletStoreError('invalid_id');
     const ref = this.collection.doc(id);
     return this.db.runTransaction(async tx => {
       const snapshot = await tx.get(ref);
       if (!snapshot.exists) throw new ToiletStoreError('not_found');
       const record = snapshot.data();
+      if (actor && record.tenantId) {
+        const access = checkTenantAccess(actor, record.tenantId);
+        if (!access.allowed) throw new ToiletStoreError('tenant_access_denied');
+      }
       if (record.status === decision) return { id, status: decision };
       if (record.status !== 'queued_for_moderation') throw new ToiletStoreError('review_conflict');
       tx.update(ref, { status: decision, review: { actorId, at: new Date().toISOString(), decision } });
