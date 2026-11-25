@@ -80,6 +80,8 @@ On the Saved page, a collection switcher groups guides by their folder. A guide 
 
 Use the tracking dashboard to organize service journeys and review available progress information.
 
+Each tracked application also has a timeline replay. It shows append-only event records grouped by submission, acknowledgement, review, query, and outcome; keeps citizen notes separate from official-source events; and compares two stored snapshots field by field. Conflicting or out-of-order evidence is routed to review instead of being overwritten. AI-style summaries are labelled as suggestions, cite event IDs and exact source dates, and never infer an official decision. See [the timeline replay and event-difference documentation](docs/application-timeline-replay-and-event-diff.md).
+
 ### 🔐 6. Secure Authentication
 
 Authentication powered by Clerk, with support for email-based authentication and Google sign-in where configured.
@@ -111,6 +113,55 @@ A responsive design with theme support, built to provide a consistent experience
 ### ♿ 13. Accessibility-Focused Design
 
 Clear navigation, readable content, consistent interaction patterns, and a user-centered approach to public-service information.
+
+
+### 🧾 14. Public Service Centre Fee Evidence Assistant
+
+Compare charges on an assisted-service-centre receipt with verified, versioned fee schedules. Government, portal, authorised-centre, and optional service charges are shown separately; receipt identifiers are redacted by default and unknown components are marked unverified. The assistant never collects payment credentials or initiates transactions. See [the fee evidence guide](docs/public-service-centre-fee-evidence-assistant.md).
+
+### 🧪 14. Privacy-Safe Synthetic Civic Dataset Generator
+
+Generate reproducible, schema-aware service guides, citizen applications, and grievance records with zero production PII, complete referential integrity, and one-click local development database loading (#778).
+### 🚨 14. Civic Incident Response Drill & Public Service Continuity Planner
+
+A dedicated preparedness workspace for municipal authorities and disaster response teams. Model critical service dependencies, detect single points of failure (SPOF) and dependency cycles with graph analysis, run tabletop exercises with timed inject simulations, record tactical decisions, calculate recovery time objective (RTO) gaps, generate printable offline continuity runbooks, and track corrective action items to closure. See [architecture and operational documentation](docs/civic-incident-response-drill-planner.md).
+
+### 🏛️ 15. Multi-Authority Tenant Workspaces
+
+Isolated administration workspaces for distinct municipal and district civic authorities, supporting sovereign staff memberships, anti-IDOR scoped datasets, tamper-evident SHA-256 audit logs, bounded local AI guidance, and controlled cross-tenant public catalogue sharing.
+
+### 🧪 16. Catalogue Visual QA Workspace
+
+A reviewer-only workspace for responsive service-card layout checks. Render the production card against deterministic synthetic long-title, multilingual and missing-metadata fixtures at named desktop, tablet and mobile viewports; inspect bounding boxes, overflow warnings and metadata gaps; review synthetic suggestions; compare a saved screenshot baseline; and export a private snapshot. It never reads or publishes production catalogue or citizen data, and review progress is not an official application status. See [architecture, API and accessibility documentation](docs/civic-service-catalogue-visual-qa.md).
+
+### 🌱 17. Municipal Greenhouse-Gas Inventory & Emissions Reporting
+
+A role-scoped workspace for local-authority climate reporting. Departments submit activity data with units, periods, source-document metadata and correction notes; the service calculates explainable `tCO2e` with immutable versioned emission factors, separates measured, estimated and excluded values, and keeps every calculation reproducible. Reviewers approve submissions before totals are published, missing-data estimates require a human decision, and the public view exposes only approved aggregates. See [architecture, methodology and rollback documentation](docs/municipal-greenhouse-gas-inventory.md).
+
+### 🧪 18. Secure Agent Sandbox for Untrusted Civic Document Processing
+
+Runs untrusted civic document parsers / agent tools in isolated workers with CPU, memory and time limits; network disabled by default; restricted filesystem access; output validation; dependency and threat scanning. Results are illustrative and untrusted, and must be reviewed by a human before any civic action. Available at `/agent-sandbox`. See [architecture, data-flow, threat model and deployment documentation](docs/secure-agent-sandbox.md).
+
+### 🧪 19. Agent-Based Civic Policy Scenario Simulator
+
+A policy-team workspace for exploring how process changes could affect service demand, travel burden and document requirements before rollout. Uses synthetic personas and deterministic rules (never an AI model for simulation maths), reports sensitivity and uncertainty, validates against aggregate public statistics, and prohibits individual prediction or unsupported causal claims. Available at `/policy-simulation`. See [architecture, data-flow, threat model and deployment documentation](docs/civic-policy-scenario-simulator.md).
+
+### 🧪 19. Civic Case Collaboration Space with Granular, Revocable Sharing
+
+A citizen workspace for sharing selected case documents with a trusted helper
+without exposing the entire account. Supports item-level sharing, expiry,
+revocation, view/download scopes, recipient authentication, watermarked
+exports, audit access, link-guessing prevention and blocked cached access after
+revocation. Results are illustrative and untrusted. Available at
+`/case-collaboration`. See [architecture, data-flow, threat model and
+deployment documentation](docs/civic-case-collaboration.md).
+### 🧪 20. Civic Service Change Sandbox with Shadow Traffic Evaluation
+
+A maintainer workspace for comparing a proposed service workflow against current behavior before publishing. Creates versioned staging snapshots, replays synthetic journeys, compares completion / validation / accessibility outcomes, blocks writes to production during shadow runs, and supports rollback and deterministic replay. Results are illustrative and untrusted. Available at `/service-change-sandbox`. See [architecture, data-flow, threat model and deployment documentation](docs/civic-service-change-sandbox.md).
+### 🧪 19. Public Service Journey Benchmark & Open Evaluation Dataset
+
+A standardized evaluation benchmark and open synthetic dataset for evaluating public service navigation, multilingual understanding (Hindi, Urdu, English), statutory citation grounding, and abstention safety against unverified claims or tout recommendations. Keeps deterministic rules outside LLM prompts and provides anti-contamination canary tokens. Available at `/journey-benchmark`. See [architecture, threat-model, and evaluation documentation](docs/public-service-journey-benchmark.md).
+
 
 ---
 
@@ -151,6 +202,19 @@ The platform includes the following major application areas:
 | Open Source     | Explore community contributions           |
 | Privacy Policy  | Review privacy-related information        |
 | Admin           | Access authorized administrative features |
+
+| Form Explainer  | Multilingual UP form field guidance & error-prevention assistant ([#1001](docs/multilingual-government-form-field-explainer.md)) |
+
+| Catalogue Visual QA | Reviewer-only responsive service-card layout checks with synthetic fixtures and private review snapshots |
+| Synthetic Datasets | Generate privacy-safe civic datasets (`/synthetic-datasets`) |
+| Authority Workspaces | Multi-authority sovereign administration, isolated staff, datasets, and audit logs |
+| Greenhouse-Gas Inventory | Department activity data, versioned factors, approvals and public emissions totals (`/ghg-inventory`) |
+| Agent Sandbox | Isolated workers for untrusted civic document parsers with CPU/memory/time limits, no network by default, output validation and threat scanning (`/agent-sandbox`) |
+| Policy Scenario Simulator | Agent-based simulation of how policy changes affect demand, travel burden and document requirements (`/policy-simulation`) |
+| Case Collaboration Space | Item-level, time-bound, revocable sharing of selected case documents with a trusted helper; view/download scopes, passcode gating, audit log and watermarking (`/case-collaboration`) |
+| Service Change Sandbox | Versioned staging snapshots and synthetic shadow-traffic comparison of completion, validation and accessibility outcomes (`/service-change-sandbox`) |
+| Journey Benchmark & Dataset | Standardized synthetic benchmark & evaluation dataset for civic navigation, vernacular comprehension and citation grounding (`/journey-benchmark`) |
+
 
 The availability of individual features depends on the application's current implementation and configuration.
 
@@ -301,6 +365,8 @@ npm test
 ```
 
 Run this command if a test script is configured in `package.json`. If the script is not configured, use the test command provided by the project.
+
+Dependency update pull requests follow the [dependency maintenance policy](docs/DEPENDENCY_MAINTENANCE.md).
 
 ---
 
