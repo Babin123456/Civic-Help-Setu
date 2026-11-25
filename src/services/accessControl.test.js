@@ -107,6 +107,16 @@ const CALLS = {
   'ownership.read': () => getOwnershipMap(moduleStorage),
   'ownership.manage': () => assignServiceOwnership('svc', { team: 'Docs' }, { storage: moduleStorage }),
   'civicWorks.moderate': () => moderateCivicWorkReport({ reportId: 'cw-1', decision: 'approved' }, moduleStorage),
+  'civictranslationmemory.write': () => {
+    // Calling requirePermission triggers the permission check;
+    // will throw for non-admins, allowing outcome() to return 'denied'.
+    requirePermission('civictranslationmemory.write');
+  },
+  'civictranslationmemory.review': () => {
+    // Calling requirePermission triggers the permission check;
+    // will throw for non-admins, allowing outcome() to return 'denied'.
+    requirePermission('civictranslationmemory.review');
+  },
 };
 
 const outcome = (fn) => {

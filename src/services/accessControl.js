@@ -18,6 +18,20 @@
  * enforcement for shared data needs a backend or Firebase rules (see docs/ACCESS_CONTROL.md).
  */
 
+/** Translation Memory privileged actions: who may do what. Add new features here. */
+export const TRANSLATION_MEMORY_PERMISSIONS = {
+  'civictranslationmemory.write': {
+    roles: ['admin'],
+    resource: 'civic_translation_memory',
+    description: 'Submit, rollback or manage translation memory entries',
+  },
+  'civictranslationmemory.review': {
+    roles: ['admin'],
+    resource: 'civic_translation_memory',
+    description: 'Approve or reject translation memory proposals',
+  },
+};
+
 /** Every privileged action: who may do it, and what it touches. Add new admin features here. */
 export const PERMISSIONS = {
   'services.write': { roles: ['admin'], resource: 'civicbridge_custom_services', description: 'Add or edit a service guide' },
@@ -46,6 +60,8 @@ export const PERMISSIONS = {
   'ownership.read': { roles: ['admin'], resource: 'civicbridge_service_ownership_v1', description: 'Read who is assigned to review each service guide, with private notes' },
   'ownership.manage': { roles: ['admin'], resource: 'civicbridge_service_ownership_v1', description: 'Assign, reassign or clear the reviewer of a service guide' },
   'civicWorks.moderate': { roles: ['admin'], resource: 'civicbridge_civic_works_reports_v1', description: 'Moderate ward-level civic work reports, cluster duplicates, record official acknowledgements and verify completion evidence' },
+  'civictranslationmemory.write': { roles: ['admin'], resource: 'civic_translation_memory', description: 'Submit, rollback or manage translation memory entries' },
+  'civictranslationmemory.review': { roles: ['admin'], resource: 'civic_translation_memory', description: 'Approve or reject translation memory proposals' },
 };
 
 export class PermissionDeniedError extends Error {
