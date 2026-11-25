@@ -22,7 +22,7 @@
       "workflowPath": ".github/workflows/pr-quality.yml",
       "artifactName": "civic-quality-evidence",
       "configurationBlobs": {
-        ".github/workflows/pr-quality.yml": "e29190311b3ea6bcbd556d1f0415d5bf0d6939c6",
+        ".github/workflows/pr-quality.yml": "59db70d0667dc7957fcd69b82b23800c730aef48",
         "package.json": "49e46b87a9b7a546d6f915df5be6488c3b18d619",
         "package-lock.json": "0a23a6517dea68c64be2d91269cff082841e9642",
         "scripts/platform-quality-evidence.mjs": "0344fe3af098bd924d1a01462b7650c4345ce74a",

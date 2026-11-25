@@ -176,3 +176,11 @@ records alongside the schema. See [Civic data quality contracts](docs/CIVIC_DATA
 for supported entities, the existing import integration, limits and rollback.
 
 Regional directory device-local review, history, limits and rollout: [docs/REGIONAL_SERVICE_DIRECTORY.md](docs/REGIONAL_SERVICE_DIRECTORY.md).
+
+## Internal civic event contract changes
+
+Use the existing bus and the `events` section of the shared registry rather than
+creating another event system. Run `npm run contracts:check -- --base <full-base-commit-sha>`
+and the generated sample, real CLI and bus integration tests described in
+[the event contract runbook](docs/CIVIC_EVENT_CONTRACTS.md). Retain published
+versions, owned change history and consumer migration records.
