@@ -1,4 +1,20 @@
 import { createHash } from 'node:crypto';
+import { assertTenantAccess, checkTenantAccess, parseTenantId } from '../../src/services/tenantContext.js';
+
+function assertRepositoryTenantAccess(actor, targetTenantId) {
+  if (!actor) return;
+  if (!targetTenantId) {
+    throw new Error('TENANT_CONTEXT_REQUIRED: Record has no tenantId or jurisdictionId');
+  }
+  if (typeof actor === 'object' && ('tenantId' in actor || 'isSystem' in actor) && parseTenantId(targetTenantId)) {
+    const check = checkTenantAccess(actor, targetTenantId);
+    if (!check.allowed) {
+      throw new Error(`TENANT_ACCESS_DENIED: ${check.reason}`);
+    }
+    return;
+  }
+  assertTenantAccess(actor, targetTenantId);
+}
 
 /**
  * Deterministically hashes the validated submission payload to detect conflicting
@@ -99,15 +115,25 @@ export function createGhgFirestoreRepository({ firestore }) {
       });
     },
 
-    async getSubmission(submissionId) {
+    async getSubmission(submissionId, { actor = null } = {}) {
       const doc = await firestore.collection('ghgSubmissions').doc(submissionId).get();
       if (!doc.exists) return null;
-      return doc.data();
+      const data = doc.data();
+      assertRepositoryTenantAccess(actor, data.tenantId || data.jurisdictionId);
+      return data;
     },
 
-    async listSubmissions({ jurisdictionId = null, limit = 100 } = {}) {
+    async listSubmissions({ jurisdictionId = null, tenantId = null, actor = null, limit = 100 } = {}) {
+      const effectiveTenant = tenantId || jurisdictionId;
+      if (actor && effectiveTenant) {
+        assertRepositoryTenantAccess(actor, effectiveTenant);
+      } else if (actor && !actor.isSystem && !actor.tenantId) {
+        throw new Error('TENANT_CONTEXT_REQUIRED: Cannot list submissions without tenant context');
+      }
       let query = firestore.collection('ghgSubmissions');
-      if (jurisdictionId) {
+      if (tenantId) {
+        query = query.where('tenantId', '==', tenantId);
+      } else if (jurisdictionId) {
         query = query.where('jurisdictionId', '==', jurisdictionId.toUpperCase());
       }
       const snapshot = await query.limit(limit).get();
@@ -162,12 +188,24 @@ export function createGhgMemoryRepository() {
       return { status: 'created', receipt };
     },
 
-    async getSubmission(submissionId) {
-      return submissionsStore.get(submissionId) || null;
+    async getSubmission(submissionId, { actor = null } = {}) {
+      const data = submissionsStore.get(submissionId) || null;
+      if (!data) return null;
+      assertRepositoryTenantAccess(actor, data.tenantId || data.jurisdictionId);
+      return data;
     },
 
-    async listSubmissions({ jurisdictionId = null } = {}) {
+    async listSubmissions({ jurisdictionId = null, tenantId = null, actor = null } = {}) {
+      const effectiveTenant = tenantId || jurisdictionId;
+      if (actor && effectiveTenant) {
+        assertRepositoryTenantAccess(actor, effectiveTenant);
+      } else if (actor && !actor.isSystem && !actor.tenantId) {
+        throw new Error('TENANT_CONTEXT_REQUIRED: Cannot list submissions without tenant context');
+      }
       const all = Array.from(submissionsStore.values());
+      if (tenantId) {
+        return all.filter((sub) => sub.tenantId === tenantId);
+      }
       if (!jurisdictionId) return all;
       return all.filter((sub) => sub.jurisdictionId === jurisdictionId.toUpperCase());
     },
