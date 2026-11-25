@@ -74,12 +74,12 @@ import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
 import multiRegionStatus from "./_lib/handlers/multi-region-status.js";
 import caseCollaboration from "./_lib/handlers/case-collaboration.js";
 import syntheticDatasets from "./_lib/syntheticDatasets.js";
+import { withRequestSecurity } from "./_lib/requestSecurity.js";
+import { createMeshReadinessHandler } from "./_lib/handlers/mesh-readiness.js";
+import { createMeshReadinessLayer } from "./_lib/mesh/middleware.js";
 
-import { withRequestSecurity, internalErrorResponse } from "./_lib/requestSecurity.js";
 
-
-
-const handlers = {
+const baseHandlers = {
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
   "business-licence-feedback": businessLicence,
@@ -189,26 +189,7 @@ function getRoute(req) {
   return decodeURIComponent(route).replace(/^\/+|\/+$/g, "");
 }
 
-async function handler(req, res) {
-  const route = getRoute(req);
-
-  // Handle terminology graph routes
-  if (graphRoutes[route] && req.method === "GET") {
-    return await invokeGraphHandler(req, res, graphRoutes[route]);
-  }
-
-  if (graphPostRoutes[route] && req.method === "POST") {
-    return await invokeGraphHandler(req, res, graphPostRoutes[route]);
-  }
-
-  const routeHandler = handlers[route];
-
-  if (!routeHandler) {
-    return res.status(404).json({ error: "API route not found" });
-  }
-
-  const result = await routeHandler(req, res);
-
+function normalizeLegacyResult(result, res) {
   // Normalize legacy handlers that return { status, headers, body } rather
   // than writing directly to the Vercel response object.
   if (
@@ -222,11 +203,47 @@ async function handler(req, res) {
     }
     return res.status(result.status).json(result.body);
   }
-
   return result;
+}
+
+export function createApiDispatcher({
+  meshLayer = createMeshReadinessLayer(),
+  extraHandlers = {},
+} = {}) {
+  const handlers = {
+    ...baseHandlers,
+    "mesh-readiness": createMeshReadinessHandler({ meshLayer }),
+    ...extraHandlers,
+  };
+
+  return async function handler(req, res) {
+    const route = getRoute(req);
+
+    const routeHandler =
+      graphRoutes[route] && req.method === "GET"
+        ? (r, s) => invokeGraphHandler(r, s, graphRoutes[route])
+        : graphPostRoutes[route] && req.method === "POST"
+          ? (r, s) => invokeGraphHandler(r, s, graphPostRoutes[route])
+          : handlers[route];
+
+    if (!routeHandler) {
+      return res.status(404).json({ error: "API route not found" });
+    }
+
+    try {
+      const result = await meshLayer.executeRoute(req, res, route, routeHandler);
+      return normalizeLegacyResult(result, res);
+    } catch (error) {
+      console.error(`API dispatcher error for "${route}":`, error);
+      if (!res.writableEnded) {
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+      return undefined;
+    }
+  };
 }
 
 // Wrap the dispatcher with Error Contract and CSRF/Origin/CORS enforcement.
 // allowMissingOrigin: true keeps direct server-to-server calls working on
 // legacy top-level functions; forged Origins and cookie CSRF are always enforced.
-export default withApiErrorContract(withRequestSecurity(handler, { allowMissingOrigin: true }));
+export default withApiErrorContract(withRequestSecurity(createApiDispatcher(), { allowMissingOrigin: true }));
