@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef, useId, useCallback } from 'react';
 import {
-  FileBadge, ShieldCheck, Upload, CreditCard, Car, FileText,
-  Plus, Search, Eye, AlertTriangle, Layers, Download, Tag, Stamp, Calendar, Camera, KeyRound
+  FileBadge, ShieldCheck, CreditCard, Car, FileText,
+  Plus, Search, Eye, Download, Tag, Stamp, Calendar, Camera, KeyRound
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../context/ConfirmationDialogContext';
@@ -37,7 +37,8 @@ import InactivityLockModal from '../components/vault/InactivityLockModal';
 import WatermarkAttestationModal from '../components/vault/WatermarkAttestationModal';
 import DocumentRenewalDigestModal from '../components/vault/DocumentRenewalDigestModal';
 import DocumentQualityOcrInspectorModal from '../components/vault/DocumentQualityOcrInspectorModal';
-import { Lock, Unlock, ShieldAlert } from 'lucide-react';
+import ZkProofGeneratorModal from '../components/vault/ZkProofGeneratorModal';
+import { Lock, Unlock } from 'lucide-react';
 import {
   startInactivityTracker,
   stopInactivityTracker,
@@ -86,6 +87,7 @@ const Vault = () => {
   const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
   const [isRenewalDigestOpen, setIsRenewalDigestOpen] = useState(false);
   const [isOcrInspectorOpen, setIsOcrInspectorOpen] = useState(false);
+  const [isZkProofModalOpen, setIsZkProofModalOpen] = useState(false);
   const [taggingDoc, setTaggingDoc] = useState(null);
   const [watermarkDoc, setWatermarkDoc] = useState(null);
   const [expiringDocs, setExpiringDocs] = useState(() => getExpiringDocuments());
@@ -316,6 +318,16 @@ const Vault = () => {
           </div>
 
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setIsZkProofModalOpen(true)}
+              aria-label="Generate Zero-Knowledge Attribute Proof"
+              style={{ padding: '0.75rem 1.15rem', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <ShieldCheck size={17} color="#2563eb" />
+              <span>ZK Proofs</span>
+            </button>
             <button
               type="button"
               className="btn btn-secondary"
@@ -1036,6 +1048,12 @@ const Vault = () => {
           onClose={() => setIsRenewalDigestOpen(false)}
           documents={documents}
           onUpdated={refreshVault}
+        />
+
+        {/* Zero-Knowledge Attribute Proof Generator Modal (#1161) */}
+        <ZkProofGeneratorModal
+          isOpen={isZkProofModalOpen}
+          onClose={() => setIsZkProofModalOpen(false)}
         />
       </div>
     </div>

@@ -60,6 +60,7 @@ import RentalTransitionWorkspace from './pages/RentalTransitionWorkspace';
 import CitizenDraftSyncWorkspace from './pages/CitizenDraftSyncWorkspace';
 import WardBudgetWorkspace from './pages/WardBudgetWorkspace';
 import CivicSurveyWorkspace from './pages/CivicSurveyWorkspace';
+import ZkAttributeVerifierView from './pages/ZkAttributeVerifierView';
 
 const Services = lazy(() => import('./pages/Services'));
 
@@ -147,6 +148,9 @@ function AppRoot() {
                       <Route path="/shared-directory/:token" element={<SharedDirectoryView />} />
                       <Route path="/app-status/:token" element={<PublicApplicationStatusView />} />
                       <Route path="/shared-profile/:token" element={<SharedProfileView />} />
+                      <Route path="/verify-attribute" element={<ZkAttributeVerifierView />} />
+                      <Route path="/services/attribute-verifier" element={<ZkAttributeVerifierView />} />
+                      <Route path="/attribute-proof" element={<ZkAttributeVerifierView />} />
 
                       <Route path="/saved" element={
                         <ProtectedRoute>
