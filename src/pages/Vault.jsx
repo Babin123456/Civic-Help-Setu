@@ -39,10 +39,9 @@ import DocumentRenewalDigestModal from '../components/vault/DocumentRenewalDiges
 import DocumentQualityOcrInspectorModal from '../components/vault/DocumentQualityOcrInspectorModal';
 
 import EvidenceGraphContradictionModal from '../components/vault/EvidenceGraphContradictionModal';
-import { Lock, Unlock, GitCompare } from 'lucide-react';
+import { Lock, Unlock, GitCompare, ShieldAlert } from 'lucide-react';
 
 import DocumentValidityCalendar from '../components/DocumentValidityCalendar';
-import { Lock, Unlock, ShieldAlert } from 'lucide-react';
 
 import {
   startInactivityTracker,
