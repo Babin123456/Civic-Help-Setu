@@ -787,3 +787,15 @@ export const getGraphMetadata = () => {
       'AI-assisted civic service terminology relationship graph. Edges marked PENDING require human review before publication.',
   };
 };
+
+/**
+ * Returns the terminology graph interface for backwards compatibility with graph routes and panels.
+ */
+export const getTerminologyGraph = () => ({
+  graphMetadata: getGraphMetadata(),
+  getPendingEdges,
+  getApprovedEdges,
+  searchTerminology,
+  getRelevantTermsForIssue,
+  glossaryEntryToNode,
+});

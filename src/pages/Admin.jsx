@@ -47,6 +47,7 @@ import PedestrianBarrierReviewQueue from '../components/admin/PedestrianBarrierR
 import AddressChangeCorrectionQueue from '../components/admin/AddressChangeCorrectionQueue';
 import ProvenanceReviewQueue from '../components/admin/ProvenanceReviewQueue';
 import CivicReleaseProvenanceLedgerPanel from '../components/admin/CivicReleaseProvenanceLedgerPanel';
+import CivicChaosResiliencePanel from '../components/admin/CivicChaosResiliencePanel';
 import CounterDemandReviewQueue from '../components/admin/CounterDemandReviewQueue';
 import SurveyAuditQueue from '../components/admin/SurveyAuditQueue';
 import PublicToiletReviewQueue from '../components/admin/PublicToiletReviewQueue';
@@ -772,6 +773,7 @@ const Admin = () => {
               { id: 'public-projects', label: 'Public Project Timeline', badge: null },
               { id: 'provenance-reviews', label: 'Knowledge Provenance', badge: null },
               { id: 'release-ledger', label: 'Release Signatures & Ledger', badge: null },
+              { id: 'chaos-resilience', label: 'Chaos & Resilience Suite', badge: null },
               { id: 'counter-demand', label: 'Counter Demand & Staffing', badge: null },
               { id: 'multi-region', label: 'Multi-Region Topology & Lag', badge: null },
               { id: 'audit', label: 'Audit Trail Logs', badge: null },
@@ -1014,6 +1016,7 @@ const Admin = () => {
                 )}
 
                 <ServiceOwnershipModal
+                  auditLogs={auditLogs}
                   isOpen={ownershipModal.isOpen}
                   onClose={() => setOwnershipModal({ isOpen: false, service: null })}
                   service={ownershipModal.service}
@@ -1879,6 +1882,13 @@ const Admin = () => {
             {activeTab === 'release-ledger' && (
               <div>
                 <CivicReleaseProvenanceLedgerPanel />
+              </div>
+            )}
+
+            {/* Civic Operations Chaos Engineering & Resilience Suite (#1192) */}
+            {activeTab === 'chaos-resilience' && (
+              <div>
+                <CivicChaosResiliencePanel />
               </div>
             )}
 

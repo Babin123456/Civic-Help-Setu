@@ -1,7 +1,14 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /**
  * Single Vercel serverless entry point for all Civic Help Setu API routes.
  * Keeping handlers under api/_lib prevents Vercel from deploying each file
  * as a separate function while preserving their public /api/* URLs.
+ *
+ * All mutation endpoints are protected by CSRF, Origin and CORS validation
+ * (api/_lib/requestSecurity.js). Read-only endpoints (GET/HEAD/OPTIONS) remain
+ * publicly accessible. Configuration is via server-only environment variables:
+ *   APP_ORIGIN, APP_ALLOWED_ORIGINS, APP_CORS_ALLOW_CREDENTIALS,
+ *   CSRF_COOKIE_NAME, CSRF_HEADER_NAME, APP_REQUIRE_ORIGIN, APP_ALLOW_MISSING_ORIGIN
  */
 import addressChange from "./_lib/handlers/address-change-corrections.js";
 import businessLicence from "./_lib/handlers/business-licence-feedback.js";
@@ -26,17 +33,20 @@ import openContractingAnalytics from "./_lib/handlers/open-contracting-analytics
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+
+import civicDataCleanRoom from "./_lib/handlers/civic-data-clean-room.js";
+
 import floodIncidentReports from "./_lib/handlers/flood-incident-reports.js";
 import schoolZoneAudits from "./_lib/handlers/school-zone-audits.js";
 import heatReliefObservations from "./_lib/handlers/heat-relief-observations.js";
 
-import { GET as graphGET, POST as graphPOST } from "./graph/route.js";
+import { GET as graphGET, POST as graphPOST } from "./_lib/graphRoute.js";
 import {
   GET_REVIEW_QUEUE as reviewQueueGET,
   POST as reviewPOST,
   POST_APPROVE as approvePOST,
   POST_REJECT as rejectPOST,
-} from "./graph/route.js";
+} from "./_lib/graphRoute.js";
 
 import accessibilityInspector from "./_lib/handlers/accessibility-inspector.js";
 
@@ -56,17 +66,28 @@ import agentIncidentResponse from "./_lib/handlers/agent-incident-response.js";
 import policySimulation from "./_lib/handlers/policy-simulation.js";
 import serviceChangeSandbox from "./_lib/handlers/service-change-sandbox.js";
 import civicReleaseLedger from "./_lib/handlers/civic-release-ledger.js";
+import civicChaosEngineering from "./_lib/handlers/civic-chaos-engineering.js";
+import complaintQualityCoach from "./_lib/handlers/complaint-quality-coach.js";
 import civicEvidenceLocker from "./_lib/handlers/civic-evidence-locker.js";
 import journeyBenchmark from "./_lib/handlers/journey-benchmark.js";
 import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
 import multiRegionStatus from "./_lib/handlers/multi-region-status.js";
+import caseCollaboration from "./_lib/handlers/case-collaboration.js";
+import syntheticDatasets from "./_lib/syntheticDatasets.js";
+
+import { withRequestSecurity, internalErrorResponse } from "./_lib/requestSecurity.js";
+
 
 
 const handlers = {
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
   "business-licence-feedback": businessLicence,
+
+  "civic-data-clean-room": civicDataCleanRoom,
+
   "catalogue-visual-qa": catalogueVisualQa,
+
   "civic-surveys": civicSurveys,
   "accessibility-inspector": accessibilityInspector,
   "community-facility-corrections": communityFacility,
@@ -105,6 +126,8 @@ const handlers = {
   "jurisdiction-handoff": jurisdictionHandoff,
   "agent-sandbox": agentSandbox,
   "policy-simulation": policySimulation,
+  "civic-chaos-engineering": civicChaosEngineering,
+  "complaint-quality-coach": complaintQualityCoach,
   "civic-evidence-locker": civicEvidenceLocker,
   "service-change-sandbox": serviceChangeSandbox,
   "journey-benchmark": journeyBenchmark,
@@ -113,21 +136,44 @@ const handlers = {
   "multi-region-health": multiRegionStatus,
   "multi-region-status": multiRegionStatus,
   "multi-region-metrics": multiRegionStatus,
+  "case-collaboration": caseCollaboration,
+  "synthetic-datasets": syntheticDatasets,
 };
 
-// Terminology graph routes
+// Adapt Fetch-style graph handlers to Vercel's Node request/response API.
+async function invokeGraphHandler(req, res, graphHandler) {
+  const forwardedHost = req.headers?.["x-forwarded-host"] || req.headers?.host || "localhost";
+  const forwardedProto = req.headers?.["x-forwarded-proto"] || "https";
+  const requestUrl = new URL(req.url || "/", `${forwardedProto}://${forwardedHost}`);
+  const method = (req.method || "GET").toUpperCase();
+  const headers = new Headers();
+
+  for (const [name, value] of Object.entries(req.headers || {})) {
+    if (Array.isArray(value)) value.forEach((item) => headers.append(name, item));
+    else if (value !== undefined) headers.set(name, String(value));
+  }
+
+  const init = { method, headers };
+  if (method !== "GET" && method !== "HEAD") {
+    init.body = typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? {});
+  }
+
+  const graphResponse = await graphHandler(new Request(requestUrl, init));
+  graphResponse.headers.forEach((value, name) => res.setHeader(name, value));
+  const body = await graphResponse.text();
+  return res.status(graphResponse.status).send(body);
+}
+
+// Terminology graph routes. Keep /review as a backwards-compatible alias.
 const graphRoutes = {
   "graph": graphGET,
-  "graph/": graphGET,
   "graph/review": reviewQueueGET,
-  "graph/review/": reviewQueueGET,
+  "graph/review/queue": reviewQueueGET,
 };
 
 const graphPostRoutes = {
   "graph": graphPOST,
-  "graph/": graphPOST,
   "graph/review": reviewPOST,
-  "graph/review/": reviewPOST,
   "graph/review/approve": approvePOST,
   "graph/review/reject": rejectPOST,
 };
@@ -143,16 +189,16 @@ function getRoute(req) {
   return decodeURIComponent(route).replace(/^\/+|\/+$/g, "");
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   const route = getRoute(req);
 
   // Handle terminology graph routes
-  if (graphRoutes[route]) {
-    return await graphRoutes[route](req, res);
+  if (graphRoutes[route] && req.method === "GET") {
+    return await invokeGraphHandler(req, res, graphRoutes[route]);
   }
 
-  if (graphPostRoutes[route]) {
-    return await graphPostRoutes[route](req, res);
+  if (graphPostRoutes[route] && req.method === "POST") {
+    return await invokeGraphHandler(req, res, graphPostRoutes[route]);
   }
 
   const routeHandler = handlers[route];
@@ -161,29 +207,26 @@ export default async function handler(req, res) {
     return res.status(404).json({ error: "API route not found" });
   }
 
-  try {
-    const result = await routeHandler(req, res);
+  const result = await routeHandler(req, res);
 
-    // Normalize legacy handlers that return { status, headers, body } rather
-    // than writing directly to the Vercel response object.
-    if (
-      result &&
-      typeof result.status === "number" &&
-      Object.prototype.hasOwnProperty.call(result, "body") &&
-      !res.writableEnded
-    ) {
-      for (const [name, value] of Object.entries(result.headers || {})) {
-        res.setHeader(name, value);
-      }
-      return res.status(result.status).json(result.body);
+  // Normalize legacy handlers that return { status, headers, body } rather
+  // than writing directly to the Vercel response object.
+  if (
+    result &&
+    typeof result.status === "number" &&
+    Object.prototype.hasOwnProperty.call(result, "body") &&
+    !res.writableEnded
+  ) {
+    for (const [name, value] of Object.entries(result.headers || {})) {
+      res.setHeader(name, value);
     }
-
-    return result;
-  } catch (error) {
-    console.error(`API dispatcher error for "${route}":`, error);
-    if (!res.writableEnded) {
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-    return undefined;
+    return res.status(result.status).json(result.body);
   }
+
+  return result;
 }
+
+// Wrap the dispatcher with Error Contract and CSRF/Origin/CORS enforcement.
+// allowMissingOrigin: true keeps direct server-to-server calls working on
+// legacy top-level functions; forged Origins and cookie CSRF are always enforced.
+export default withApiErrorContract(withRequestSecurity(handler, { allowMissingOrigin: true }));

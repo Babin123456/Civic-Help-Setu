@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /**
  * api/abuse-control-plane.js
  *
@@ -34,6 +35,7 @@ import {
 } from './_lib/abuseSchemas.js';
 import { privacyIdentifier } from './_lib/abuseControlPlane.js';
 import { getProductionAbuseStore, resetProductionAbuseStoreCacheForTests } from './_lib/abuseStore.js';
+import { withRequestSecurity } from './_lib/requestSecurity.js';
 
 const ID_SEGMENT = /^[a-z0-9_-]{1,128}$/;
 
@@ -77,7 +79,7 @@ export function createAbuseControlPlaneHandler({
   if (!verifySession) throw new TypeError('createAbuseControlPlaneHandler needs verifySession');
   if (!authorizeOperator) throw new TypeError('createAbuseControlPlaneHandler needs authorizeOperator');
 
-  return async function handler(req, res) {
+  return withApiErrorContract(withRequestSecurity(async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
     const { method, url = '', headers = {}, query: routeQuery = {}, body } = req;
     const query = { ...parseUrlQuery(url), ...routeQuery };
@@ -255,7 +257,7 @@ export function createAbuseControlPlaneHandler({
 
     res.setHeader('Allow', 'GET, POST, PATCH');
     return res.status(405).json({ error: 'method_not_allowed' });
-  };
+  }, { allowMissingOrigin: true }));
 }
 
 // Expose for tests.

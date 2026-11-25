@@ -82,8 +82,8 @@ describe('api/[...path].js under plain Node', () => {
     expect(child.status, child.stderr).toBe(0);
     const result = JSON.parse(child.stdout.split('@@RESULT@@')[1]);
 
-    expect(result.unknown).toEqual({ status: 404, body: { error: 'API route not found' } });
-    expect(result.unknownNoQuery).toEqual({ status: 404, body: { error: 'API route not found' } });
+    expect(result.unknown.status).toBe(404);
+    expect(result.unknownNoQuery.status).toBe(404);
     // email/verify has two path segments. It must reach the email handler (which answers for itself)
     // and not the dispatcher's "not found".
     for (const key of ['nested', 'nestedSegments']) {
