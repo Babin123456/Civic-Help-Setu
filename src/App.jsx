@@ -117,6 +117,7 @@ const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHand
 const AgentSandboxWorkspace = lazy(() => import('./pages/AgentSandboxWorkspace'));
 const KnowledgeGraphQueryWorkspace = lazy(() => import('./pages/KnowledgeGraphQueryWorkspace'));
 const PolicySimulationWorkspace = lazy(() => import('./pages/PolicySimulationWorkspace'));
+const ChaosResilienceWorkspace = lazy(() => import('./pages/ChaosResilienceWorkspace'));
 const ComplaintQualityCoachWorkspace = lazy(() => import('./pages/ComplaintQualityCoachWorkspace'));
 const ServiceChangeSandboxWorkspace = lazy(() => import('./pages/ServiceChangeSandboxWorkspace'));
 const DigitalEvidenceLockerWorkspace = lazy(() => import('./pages/DigitalEvidenceLockerWorkspace'));
@@ -241,6 +242,8 @@ function AppRoot() {
                             {/* Agent-based civic policy scenario simulator */}
                             <Route path="/policy-simulation" element={<PolicySimulationWorkspace />} />
                             <Route path="/services/:serviceId/policy-simulation" element={<PolicySimulationWorkspace />} />
+                            <Route path="/chaos-engineering" element={<ChaosResilienceWorkspace />} />
+                            <Route path="/resilience" element={<ChaosResilienceWorkspace />} />
 
                             {/* Agentic Civic Complaint Quality and Completeness Coach (#1190) */}
                             <Route path="/complaint-coach" element={<ComplaintQualityCoachWorkspace />} />

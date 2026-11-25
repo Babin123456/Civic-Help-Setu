@@ -63,6 +63,7 @@ import agentIncidentResponse from "./_lib/handlers/agent-incident-response.js";
 import policySimulation from "./_lib/handlers/policy-simulation.js";
 import serviceChangeSandbox from "./_lib/handlers/service-change-sandbox.js";
 import civicReleaseLedger from "./_lib/handlers/civic-release-ledger.js";
+import civicChaosEngineering from "./_lib/handlers/civic-chaos-engineering.js";
 import complaintQualityCoach from "./_lib/handlers/complaint-quality-coach.js";
 import civicEvidenceLocker from "./_lib/handlers/civic-evidence-locker.js";
 import journeyBenchmark from "./_lib/handlers/journey-benchmark.js";
@@ -115,6 +116,7 @@ const handlers = {
   "jurisdiction-handoff": jurisdictionHandoff,
   "agent-sandbox": agentSandbox,
   "policy-simulation": policySimulation,
+  "civic-chaos-engineering": civicChaosEngineering,
   "complaint-quality-coach": complaintQualityCoach,
   "civic-evidence-locker": civicEvidenceLocker,
   "service-change-sandbox": serviceChangeSandbox,
