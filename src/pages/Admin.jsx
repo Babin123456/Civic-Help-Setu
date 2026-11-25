@@ -29,7 +29,7 @@ import {
   rejectServiceSubmission,
 } from '../services/adminService';
 
-import * as importBatchService from '../services/importBatchService';
+import importBatchService from '../services/importBatchService';
 import AdminStatsGrid from '../components/admin/AdminStatsGrid';
 import ServiceModal from '../components/admin/ServiceModal';
 import ReportResolutionModal from '../components/admin/ReportResolutionModal';
@@ -764,7 +764,7 @@ const Admin = () => {
               { id: 'duplicates', label: 'Duplicate Detection', badge: null },
   {
     id: 'imports',
-    label: `Imports (${stats?.total || 0})`,
+    label: `Imports (${importBatchService.getStatistics().total})`,
     badge: null,
   },
               { id: 'conflicts', label: 'Requirement Conflicts', badge: null },

@@ -10,6 +10,7 @@ import { withApiErrorContract } from './_lib/errorContract.js';
  *   APP_ORIGIN, APP_ALLOWED_ORIGINS, APP_CORS_ALLOW_CREDENTIALS,
  *   CSRF_COOKIE_NAME, CSRF_HEADER_NAME, APP_REQUIRE_ORIGIN, APP_ALLOW_MISSING_ORIGIN
  */
+import bottleneckFeedback from "./_lib/handlers/bottleneck-feedback.js";
 import addressChange from "./_lib/handlers/address-change-corrections.js";
 import businessLicence from "./_lib/handlers/business-licence-feedback.js";
 import catalogueVisualQa from "./_lib/handlers/catalogue-visual-qa.js";
@@ -81,6 +82,7 @@ import { createIdempotencyLayer, resolveIdempotencyConfig } from "./_lib/idempot
 
 
 const baseHandlers = {
+  "bottleneck-feedback": bottleneckFeedback,
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
   "business-licence-feedback": businessLicence,

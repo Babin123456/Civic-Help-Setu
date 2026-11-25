@@ -163,8 +163,6 @@ const BatchCard = ({ batch, onSelect, onDownloadFailedRows, onRetryBatch, onResu
   );
 };
 
-ImportConsole.displayName = 'ImportConsole';
-
 const ImportConsole = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -763,5 +761,7 @@ const ImportConsole = () => {
     </main>
   );
 };
+
+ImportConsole.displayName = 'ImportConsole';
 
 export default ImportConsole;

@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Runs firebase/firestore.rules and firebase/storage.rules against the local Firebase emulators. Separate from the app's own package.json so the app does not depend on firebase-tools.",
   "scripts": {
-    "test": "firebase emulators:exec --only auth,firestore,storage --project civicbridge-rules-test --config ../firebase.json \"node --test --test-concurrency=1 firestore-rules.test.mjs storage-rules.test.mjs cloud-records.test.mjs token-flow.test.mjs toilet-submissions.test.mjs\"",
+    "test": "firebase emulators:exec --only auth,firestore,storage --project civicbridge-rules-test --config ../firebase.json \"node --test --test-concurrency=1 firestore-rules.test.mjs storage-rules.test.mjs cloud-records.test.mjs token-flow.test.mjs toilet-submissions.test.mjs feedback-pipeline.test.mjs\"",
     "test:toilets": "firebase emulators:exec --only firestore --project civicbridge-rules-test --config ../firebase.json \"node --test toilet-submissions.test.mjs\""
   },
   "devDependencies": {
