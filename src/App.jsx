@@ -129,6 +129,7 @@ const JourneyBenchmarkPage = lazy(() => import('./pages/JourneyBenchmarkPage'));
 const Services = lazy(() => import('./pages/Services'));
 const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
 const CostCarbonGovernorWorkspacePage = lazy(() => import('./pages/CostCarbonGovernorWorkspace'));
+const PolicyEngineWorkspacePage = lazy(() => import('./pages/PolicyEngineWorkspace'));
 
 const ServicesFallback = () => (
   <div className="section">
@@ -425,6 +426,9 @@ function AppRoot() {
 
                             {/* Civic Agent Cost & Carbon Budget Governor (public, read-only aggregates) */}
                             <Route path="/cost-carbon-governor" element={<CostCarbonGovernorWorkspacePage />} />
+
+                            {/* Civic Agent Workflow Policy-as-Code Engine (public evaluation UI) */}
+                            <Route path="/policy-engine" element={<PolicyEngineWorkspacePage />} />
 
                             <Route path="/tenants" element={<TenantAdministrationWorkspace />} />
                             <Route path="/tenants/:tenantId" element={<TenantAdministrationWorkspace />} />
