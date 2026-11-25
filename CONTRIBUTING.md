@@ -1,5 +1,8 @@
 # Contributing to CivicBridge
 
+Platform capacity evidence, trust configuration, CI-only limits and operator recovery:
+[Platform scorecard](docs/PLATFORM_CAPACITY_SCORECARD.md) (#1285).
+
 First off, thank you for considering contributing to CivicBridge! It's people like you that make this open-source civic-tech platform possible.
 
 ## How Can I Contribute?
