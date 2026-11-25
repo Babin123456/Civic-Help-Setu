@@ -21,6 +21,7 @@ import { withApiErrorContract } from './_lib/errorContract.js';
  */
 
 import { createRateLimiter, createSingleFlight } from './_lib/abuseGuard.js';
+import { withRequestSecurity } from './_lib/requestSecurity.js';
 import { detectImportFormat, csvToImportRecords, jsonToImportRecords, buildImportPreview, executeImport, approveImportBatch } from '../src/services/importValidationService';
 import { importBatchService } from '../src/services/importBatchService';
 import { requirePermission } from '../src/services/accessControl';
@@ -377,4 +378,4 @@ async function _handleRollback(body) {
 const logError = (err) => {
   console.error('[import-batches] Error:', err);
 };
-export default withApiErrorContract(handler);
+export default withApiErrorContract(withRequestSecurity(handler, { allowMissingOrigin: true }));

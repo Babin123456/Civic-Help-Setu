@@ -3,6 +3,12 @@ import { withApiErrorContract } from './_lib/errorContract.js';
  * Single Vercel serverless entry point for all Civic Help Setu API routes.
  * Keeping handlers under api/_lib prevents Vercel from deploying each file
  * as a separate function while preserving their public /api/* URLs.
+ *
+ * All mutation endpoints are protected by CSRF, Origin and CORS validation
+ * (api/_lib/requestSecurity.js). Read-only endpoints (GET/HEAD/OPTIONS) remain
+ * publicly accessible. Configuration is via server-only environment variables:
+ *   APP_ORIGIN, APP_ALLOWED_ORIGINS, APP_CORS_ALLOW_CREDENTIALS,
+ *   CSRF_COOKIE_NAME, CSRF_HEADER_NAME, APP_REQUIRE_ORIGIN, APP_ALLOW_MISSING_ORIGIN
  */
 import addressChange from "./_lib/handlers/address-change-corrections.js";
 import businessLicence from "./_lib/handlers/business-licence-feedback.js";
@@ -53,6 +59,7 @@ import reliefOperations from "./_lib/handlers/relief-operations.js";
 import jurisdictionHandoff from "./_lib/handlers/jurisdiction-handoff.js";
 
 import agentSandbox from "./_lib/handlers/agent-sandbox.js";
+import agentIncidentResponse from "./_lib/handlers/agent-incident-response.js";
 import policySimulation from "./_lib/handlers/policy-simulation.js";
 import serviceChangeSandbox from "./_lib/handlers/service-change-sandbox.js";
 import civicReleaseLedger from "./_lib/handlers/civic-release-ledger.js";
@@ -61,6 +68,8 @@ import civicEvidenceLocker from "./_lib/handlers/civic-evidence-locker.js";
 import journeyBenchmark from "./_lib/handlers/journey-benchmark.js";
 import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
 import caseCollaboration from "./_lib/handlers/case-collaboration.js";
+
+import { withRequestSecurity, internalErrorResponse } from "./_lib/requestSecurity.js";
 
 
 const handlers = {
@@ -180,4 +189,7 @@ async function handler(req, res) {
   return result;
 }
 
-export default withApiErrorContract(handler);
+// Wrap the dispatcher with Error Contract and CSRF/Origin/CORS enforcement.
+// allowMissingOrigin: true keeps direct server-to-server calls working on
+// legacy top-level functions; forged Origins and cookie CSRF are always enforced.
+export default withApiErrorContract(withRequestSecurity(handler, { allowMissingOrigin: true }));

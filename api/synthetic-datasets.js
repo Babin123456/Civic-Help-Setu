@@ -14,6 +14,7 @@ import { withApiErrorContract } from './_lib/errorContract.js';
 
 import { createRateLimiter, createSingleFlight, clientKey } from './_lib/abuseGuard.js';
 import { validateGenerationPayload } from './_lib/syntheticSchemaContract.js';
+import { withRequestSecurity } from './_lib/requestSecurity.js';
 
 const rateLimiter = createRateLimiter({ limit: 12, windowMs: 60 * 1000 });
 const singleFlight = createSingleFlight();
@@ -120,4 +121,4 @@ async function handler(req, res) {
   return res.status(405).json({ error: `Method ${req.method} not allowed` });
 }
 
-export default withApiErrorContract(handler);
+export default withApiErrorContract(withRequestSecurity(handler, { allowMissingOrigin: true }));

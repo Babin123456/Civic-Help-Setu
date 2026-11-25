@@ -5,6 +5,7 @@ import {
   createApplicationEventsHandler,
 } from './_lib/applicationEvents.js';
 import { createRateLimiter } from './_lib/abuseGuard.js';
+import { withRequestSecurity } from './_lib/requestSecurity.js';
 
 let handler = null;
 
@@ -56,4 +57,4 @@ async function route(req, res) {
   res.status(result.status).json(result.body);
 }
 
-export default withApiErrorContract(route);
+export default withApiErrorContract(withRequestSecurity(route, { allowMissingOrigin: true }));

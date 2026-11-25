@@ -19,6 +19,7 @@ import { withApiErrorContract } from './_lib/errorContract.js';
  */
 
 import { createRateLimiter, createSingleFlight } from './_lib/abuseGuard.js';
+import { withRequestSecurity } from './_lib/requestSecurity.js';
 import {
   createResourceListing,
   getResourceListing,
@@ -430,4 +431,4 @@ async function handler(req, res) {
     }
   });
 }
-export default withApiErrorContract(handler);
+export default withApiErrorContract(withRequestSecurity(handler, { allowMissingOrigin: true }));
