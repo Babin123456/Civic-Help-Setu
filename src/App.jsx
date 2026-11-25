@@ -152,12 +152,7 @@ function AppRoot() {
                     <SkipToContent />
                     <Navbar />
 
-                                    <div className="app-layout" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '100vw', overflowX: 'clip' }}>
-                    <OfflineBanner />
-                    <SkipToContent />
-                    <Navbar />
-
-<main id="main-content" style={{ flex: 1, minWidth: 0, width: '100%' }} tabIndex="-1">
+                    <main id="main-content" style={{ flex: 1, minWidth: 0, width: '100%' }} tabIndex="-1">
                       <RouteErrorBoundary>
                         <Suspense fallback={<div className="section" role="status" aria-live="polite"><div className="container">Loading page…</div></div>}>
                           <Routes>
