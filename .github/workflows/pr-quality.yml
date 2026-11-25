@@ -5,6 +5,7 @@ on:
     branches: [main]
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -42,19 +43,42 @@ jobs:
         run: npm ci
 
       - name: Civic contract compatibility and change audit
+        id: contracts
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         env:
           CONTRACT_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: npm run contracts:check -- --base "$CONTRACT_BASE_SHA"
 
       - name: Lint
+        id: lint
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run lint
 
       - name: Test
+        id: test
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm test
 
       - name: Build
+        id: build
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run build
+
+      - name: Record platform quality evidence
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        env:
+          QUALITY_INSTALL: ${{ steps.install.outcome }}
+          QUALITY_CONTRACTS: ${{ steps.contracts.outcome }}
+          QUALITY_LINT: ${{ steps.lint.outcome }}
+          QUALITY_TEST: ${{ steps.test.outcome }}
+          QUALITY_BUILD: ${{ steps.build.outcome }}
+        run: node scripts/platform-quality-evidence.mjs
+
+      - name: Upload platform quality evidence
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: civic-quality-evidence
+          path: .platform-evidence/quality.json
+          if-no-files-found: error
+          retention-days: 14

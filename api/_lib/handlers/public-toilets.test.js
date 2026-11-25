@@ -97,6 +97,18 @@ describe('Public Toilet Serverless API Handler (#758)', () => {
     expect(res.body.receiptSeal).toMatch(/^PT-[a-f0-9-]{36}$/);
     expect(db.records.size).toBe(1);
     expect([...db.records.values()][0].facilityId).toBe('pt-blr-ward150-001');
+    expect(res.headers['x-read-your-writes-token']).toBeDefined();
+  });
+
+  it('decorates GET response with multi-region headers', async () => {
+    const req = { method: 'GET', headers: { 'x-client-region': 'us-central1' } };
+    const res = createMockRes();
+
+    await handler(req, res);
+    expect(res.statusCode).toBe(200);
+    expect(res.headers['x-served-by']).toBeDefined();
+    expect(res.headers['x-consistency']).toBeDefined();
+    expect(res.headers['x-primary-region']).toBe('asia-south1');
   });
 });
 

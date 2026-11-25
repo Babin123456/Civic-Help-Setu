@@ -14,6 +14,7 @@
 import { createRateLimiter } from '../abuseGuard.js';
 import { getProductionToiletStore } from '../publicToiletStore.js';
 import { authorizeToiletModerator } from '../toiletModerator.js';
+import { getMultiRegionInstance } from '../multiRegionReadIntegration.js';
 
 const AADHAAR_REGEX = /\b\d{4}\s?\d{4}\s?\d{4}\b/;
 const PAN_REGEX = /\b[A-Z]{5}[0-9]{4}[A-Z]\b/i;
@@ -123,6 +124,20 @@ return async function handler(req, res) {
     }
   }
   if (req.method === 'GET') {
+    try {
+      const instance = await getMultiRegionInstance();
+      if (instance) {
+        const clientContext = instance.buildClientContext(req.headers);
+        const decision = await instance.routeRead({
+          collectionPath: 'publicToiletSubmissions',
+          clientContext,
+        });
+        instance.decorateResponse(res, decision);
+      }
+    } catch {
+      // Multi-region decorator fallback
+    }
+
     return res.status(200).json({
       status: 'healthy',
       service: 'public-toilet-service',
@@ -187,6 +202,19 @@ return async function handler(req, res) {
         ...(payload.cleanlinessLevel !== undefined ? { cleanlinessLevel: payload.cleanlinessLevel } : {}),
       };
       const record = await (await getStore()).create(submissionEntry, key);
+
+      try {
+        const userId = req.headers?.['x-user-id'] || key;
+        const instance = await getMultiRegionInstance();
+        if (instance && userId) {
+          const { token } = await instance.issueToken(userId, record.timestamp || Date.now(), `toilet_${Date.now()}`);
+          if (token) {
+            res.setHeader('x-read-your-writes-token', token);
+          }
+        }
+      } catch {
+        // Multi-region token issuance fallback
+      }
 
       return res.status(201).json({
         success: true,

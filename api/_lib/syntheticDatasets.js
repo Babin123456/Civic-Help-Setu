@@ -1,4 +1,3 @@
-import { withApiErrorContract } from './_lib/errorContract.js';
 /**
  * api/synthetic-datasets.js
  *
@@ -12,8 +11,8 @@ import { withApiErrorContract } from './_lib/errorContract.js';
  *  - Deterministic execution output.
  */
 
-import { createRateLimiter, createSingleFlight, clientKey } from './_lib/abuseGuard.js';
-import { validateGenerationPayload } from './_lib/syntheticSchemaContract.js';
+import { createRateLimiter, createSingleFlight, clientKey } from './abuseGuard.js';
+import { validateGenerationPayload } from './syntheticSchemaContract.js';
 
 const rateLimiter = createRateLimiter({ limit: 12, windowMs: 60 * 1000 });
 const singleFlight = createSingleFlight();
@@ -120,4 +119,4 @@ async function handler(req, res) {
   return res.status(405).json({ error: `Method ${req.method} not allowed` });
 }
 
-export default withApiErrorContract(handler);
+export default handler;

@@ -1116,6 +1116,13 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
               })}
 
               {renderNavLink({
+
+                to: '/data-clean-room',
+                label: 'Data Clean Room',
+                icon: Shield
+              })}
+
+              {renderNavLink({
                 to: '/up-jan-sunwai',
                 label: t('nav.upJanSunwai', 'UP Jan Sunwai & Hearings'),
                 icon: Calendar
@@ -1216,6 +1223,7 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 to: '/civic-data-api',
                 label: 'Civic Data API',
                 icon: KeyRound
+
               })}
 
               {renderNavLink({

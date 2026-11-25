@@ -20,6 +20,9 @@ import RouteErrorFallback from './components/common/RouteErrorFallback';
 import RouteErrorBoundary from './components/common/RouteErrorBoundary';
 import { ServiceCardSkeletonGrid } from './components/ServiceCardSkeleton';
 
+import DataCleanRoomWorkspace from './pages/DataCleanRoomWorkspace';
+
+
 import ShelterStatusBoard from './pages/ShelterStatusBoard';
 
 const ResourceExchangePage = lazy(() => import('./components/resource-exchange/ResourceExchangePage'));
@@ -117,6 +120,7 @@ const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHand
 const AgentSandboxWorkspace = lazy(() => import('./pages/AgentSandboxWorkspace'));
 const KnowledgeGraphQueryWorkspace = lazy(() => import('./pages/KnowledgeGraphQueryWorkspace'));
 const PolicySimulationWorkspace = lazy(() => import('./pages/PolicySimulationWorkspace'));
+const ChaosResilienceWorkspace = lazy(() => import('./pages/ChaosResilienceWorkspace'));
 const ComplaintQualityCoachWorkspace = lazy(() => import('./pages/ComplaintQualityCoachWorkspace'));
 const ServiceChangeSandboxWorkspace = lazy(() => import('./pages/ServiceChangeSandboxWorkspace'));
 const DigitalEvidenceLockerWorkspace = lazy(() => import('./pages/DigitalEvidenceLockerWorkspace'));
@@ -124,6 +128,7 @@ const CaseCollaborationWorkspace = lazy(() => import('./components/caseCollabora
 const JourneyBenchmarkPage = lazy(() => import('./pages/JourneyBenchmarkPage'));
 const Services = lazy(() => import('./pages/Services'));
 const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
+const CostCarbonGovernorWorkspacePage = lazy(() => import('./pages/CostCarbonGovernorWorkspace'));
 
 const ServicesFallback = () => (
   <div className="section">
@@ -146,6 +151,7 @@ function AppRoot() {
                     <OfflineBanner />
                     <SkipToContent />
                     <Navbar />
+
                     <main id="main-content" style={{ flex: 1, minWidth: 0, width: '100%' }} tabIndex="-1">
                       <RouteErrorBoundary>
                         <Suspense fallback={<div className="section" role="status" aria-live="polite"><div className="container">Loading page…</div></div>}>
@@ -240,6 +246,8 @@ function AppRoot() {
                             {/* Agent-based civic policy scenario simulator */}
                             <Route path="/policy-simulation" element={<PolicySimulationWorkspace />} />
                             <Route path="/services/:serviceId/policy-simulation" element={<PolicySimulationWorkspace />} />
+                            <Route path="/chaos-engineering" element={<ChaosResilienceWorkspace />} />
+                            <Route path="/resilience" element={<ChaosResilienceWorkspace />} />
 
                             {/* Agentic Civic Complaint Quality and Completeness Coach (#1190) */}
                             <Route path="/complaint-coach" element={<ComplaintQualityCoachWorkspace />} />
@@ -415,6 +423,9 @@ function AppRoot() {
                               </ProtectedRoute>
                             } />
 
+                            {/* Civic Agent Cost & Carbon Budget Governor (public, read-only aggregates) */}
+                            <Route path="/cost-carbon-governor" element={<CostCarbonGovernorWorkspacePage />} />
+
                             <Route path="/tenants" element={<TenantAdministrationWorkspace />} />
                             <Route path="/tenants/:tenantId" element={<TenantAdministrationWorkspace />} />
                             <Route path="/tenant-workspace" element={<TenantAdministrationWorkspace />} />
@@ -432,6 +443,7 @@ function AppRoot() {
                 </ConfirmationDialogProvider>
               </NetworkProvider>
             </LanguageProvider>
+
           </AuthProvider>
         </ToastProvider>
       </AccessibilityProvider>
