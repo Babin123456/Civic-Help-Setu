@@ -33,6 +33,9 @@ import openContractingAnalytics from "./_lib/handlers/open-contracting-analytics
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+
+import civicDataCleanRoom from "./_lib/handlers/civic-data-clean-room.js";
+
 import floodIncidentReports from "./_lib/handlers/flood-incident-reports.js";
 import schoolZoneAudits from "./_lib/handlers/school-zone-audits.js";
 import heatReliefObservations from "./_lib/handlers/heat-relief-observations.js";
@@ -74,11 +77,16 @@ import syntheticDatasets from "./_lib/syntheticDatasets.js";
 import { withRequestSecurity, internalErrorResponse } from "./_lib/requestSecurity.js";
 
 
+
 const handlers = {
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
   "business-licence-feedback": businessLicence,
+
+  "civic-data-clean-room": civicDataCleanRoom,
+
   "catalogue-visual-qa": catalogueVisualQa,
+
   "civic-surveys": civicSurveys,
   "accessibility-inspector": accessibilityInspector,
   "community-facility-corrections": communityFacility,
