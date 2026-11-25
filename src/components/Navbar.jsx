@@ -1120,7 +1120,9 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 to: '/data-clean-room',
                 label: 'Data Clean Room',
                 icon: Shield
+              })}
 
+              {renderNavLink({
                 to: '/up-jan-sunwai',
                 label: t('nav.upJanSunwai', 'UP Jan Sunwai & Hearings'),
                 icon: Calendar
