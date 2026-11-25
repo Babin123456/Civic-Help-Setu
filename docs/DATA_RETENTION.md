@@ -177,3 +177,10 @@ The **Clear my data** screen says this next to the button:
 - `CONSENT_CATEGORIES[*].retentionDays` (14, 30, 60, 90, 365) is shown in the Privacy Center but nothing in the code enforces it. Real expiry would need a timestamp on every record and a cleanup on load. Not done here.
 - Records are not encrypted in `localStorage`. The wording on the Privacy page about encrypted web storage does not match the code.
 - `civicbridge_vault_pin` is reserved and nothing writes it, so the vault has no lock today.
+
+## Federated Civic Data Query Layer (#1162)
+
+- **Zero Client-Side Persistence**: Federated queries execute across department adapters and return aggregate metrics only. Neither query inputs nor analytical result sets are ever stored in `localStorage` or `sessionStorage`.
+- **In-Memory Lifecycle**: Query responses exist strictly in React memory state and are discarded upon navigating away or closing the browser tab.
+- **Differential Privacy & Anonymity**: Cohorts with fewer than 10 events ($k < 10$) are automatically suppressed before being displayed to prevent inference or re-identification.
+

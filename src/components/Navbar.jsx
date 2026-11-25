@@ -26,7 +26,8 @@ import {
   Droplets,
   KeyRound,
   Store,
-  Trees
+  Trees,
+  Database
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -125,6 +126,13 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
           normalizedPath === '/ward-budget' ||
           normalizedPath === '/services/ward-budget-proposal' ||
           normalizedPath.startsWith('/ward-budget/')
+        );
+      }
+
+      if (normalizedTarget === '/federated-data') {
+        return (
+          normalizedPath === '/federated-data' ||
+          normalizedPath === '/federated-civic-data'
         );
       }
 
@@ -861,6 +869,13 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 to: '/ward-budget',
                 label: t('nav.wardBudget', 'Ward Budget & Deliberation'),
                 icon: Users
+              })}
+
+              {renderNavLink({
+                to: '/federated-data',
+                activeTarget: '/federated-data',
+                label: t('nav.federatedData', 'Federated Civic Data'),
+                icon: Database
               })}
 
               {renderNavLink({
