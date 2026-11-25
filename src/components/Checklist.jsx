@@ -68,11 +68,18 @@ const Checklist = ({ items = [], checklistId, label = 'Checklist', requirements 
           .
         </p>
       )}
+      {items.length === 0 ? (
+        <p className="cl-empty">No documents are listed for this service yet. Check with the official source before you visit.</p>
+      ) : (
       <ul className="cl-list" aria-label={label}>
         {items.map((item) => {
           const isChecked = checked.includes(item);
+          const reqType = requirements?.[item]?.type;
           return (
-            <li key={item} className={`cl-item${isChecked ? ' is-done' : ''}`}>
+            <li
+              key={item}
+              className={`cl-item${reqType ? ` cl-item--${reqType}` : ''}${isChecked ? ' is-done' : ''}`}
+            >
               <label className="cl-label">
                 <input
                   type="checkbox"
@@ -94,6 +101,7 @@ const Checklist = ({ items = [], checklistId, label = 'Checklist', requirements 
           );
         })}
       </ul>
+      )}
 
       <p className="cl-status" role="status" aria-live="polite">
         {STATUS_TEXT[status] || ''}
