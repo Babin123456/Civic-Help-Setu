@@ -128,19 +128,40 @@ const handlers = {
   "synthetic-datasets": syntheticDatasets,
 };
 
-// Terminology graph routes
+// Adapt Fetch-style graph handlers to Vercel's Node request/response API.
+async function invokeGraphHandler(req, res, graphHandler) {
+  const forwardedHost = req.headers?.["x-forwarded-host"] || req.headers?.host || "localhost";
+  const forwardedProto = req.headers?.["x-forwarded-proto"] || "https";
+  const requestUrl = new URL(req.url || "/", `${forwardedProto}://${forwardedHost}`);
+  const method = (req.method || "GET").toUpperCase();
+  const headers = new Headers();
+
+  for (const [name, value] of Object.entries(req.headers || {})) {
+    if (Array.isArray(value)) value.forEach((item) => headers.append(name, item));
+    else if (value !== undefined) headers.set(name, String(value));
+  }
+
+  const init = { method, headers };
+  if (method !== "GET" && method !== "HEAD") {
+    init.body = typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? {});
+  }
+
+  const graphResponse = await graphHandler(new Request(requestUrl, init));
+  graphResponse.headers.forEach((value, name) => res.setHeader(name, value));
+  const body = await graphResponse.text();
+  return res.status(graphResponse.status).send(body);
+}
+
+// Terminology graph routes. Keep /review as a backwards-compatible alias.
 const graphRoutes = {
   "graph": graphGET,
-  "graph/": graphGET,
   "graph/review": reviewQueueGET,
-  "graph/review/": reviewQueueGET,
+  "graph/review/queue": reviewQueueGET,
 };
 
 const graphPostRoutes = {
   "graph": graphPOST,
-  "graph/": graphPOST,
   "graph/review": reviewPOST,
-  "graph/review/": reviewPOST,
   "graph/review/approve": approvePOST,
   "graph/review/reject": rejectPOST,
 };
@@ -160,12 +181,12 @@ async function handler(req, res) {
   const route = getRoute(req);
 
   // Handle terminology graph routes
-  if (graphRoutes[route]) {
-    return await graphRoutes[route](req, res);
+  if (graphRoutes[route] && req.method === "GET") {
+    return await invokeGraphHandler(req, res, graphRoutes[route]);
   }
 
-  if (graphPostRoutes[route]) {
-    return await graphPostRoutes[route](req, res);
+  if (graphPostRoutes[route] && req.method === "POST") {
+    return await invokeGraphHandler(req, res, graphPostRoutes[route]);
   }
 
   const routeHandler = handlers[route];
