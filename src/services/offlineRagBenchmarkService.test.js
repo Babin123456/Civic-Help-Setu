@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   computeRetrievalMetrics,
+  computeCitationMetrics,
   OfflineRagBenchmarkHarness,
   GOLDEN_RAG_BENCHMARK_DATASET,
 } from './offlineRagBenchmarkService';
@@ -101,5 +102,75 @@ describe('Offline RAG Evaluation and Regression Benchmark (#613)', () => {
     expect(metrics.recall).toBe(0.0);
     expect(metrics.mrr).toBe(0.0);
     expect(metrics.ndcg).toBe(0.0);
+  });
+
+  it('computes citation precision and recall accurately', () => {
+    const mockGuidance = {
+      status: 'SUCCESS',
+      claims: [
+        {
+          claimId: 'c1',
+          status: 'SUPPORTED',
+          citations: [{ serviceId: 'aadhaar-update', url: 'https://myaadhaar.uidai.gov.in' }],
+        },
+        {
+          claimId: 'c2',
+          status: 'UNKNOWN',
+          citations: [],
+        },
+      ],
+      unsupportedClaims: [{ claimId: 'c2', text: 'unknown claim' }],
+    };
+
+    const expected = [{ serviceId: 'aadhaar-update' }];
+    const metrics = computeCitationMetrics(mockGuidance, expected);
+
+    expect(metrics.citationPrecision).toBe(1.0);
+    expect(metrics.citationRecall).toBe(1.0);
+    expect(metrics.unsupportedClaimRate).toBe(0.5);
+  });
+
+  it('evaluates provenance generator through benchmark harness with citation tracking', async () => {
+    const harness = new OfflineRagBenchmarkHarness();
+
+    const mockProvenanceGenerator = async ({ query }) => {
+      if (query.includes('Aadhaar')) {
+        return {
+          status: 'SUCCESS',
+          serviceId: 'aadhaar-update',
+          overallGrounded: true,
+          claims: [
+            {
+              claimId: 'c1',
+              status: 'SUPPORTED',
+              citations: [{ serviceId: 'aadhaar-update' }],
+            },
+          ],
+          unsupportedClaims: [],
+        };
+      }
+      if (query.includes('Mars')) {
+        return {
+          status: 'UNSUPPORTED',
+          serviceId: null,
+          overallGrounded: false,
+          claims: [],
+          unsupportedClaims: [{ claimId: 'c-mars', text: query }],
+        };
+      }
+      return {
+        status: 'SUCCESS',
+        serviceId: 'other-service',
+        overallGrounded: true,
+        claims: [{ claimId: 'c-gen', status: 'SUPPORTED', citations: [{ serviceId: 'other-service' }] }],
+        unsupportedClaims: [],
+      };
+    };
+
+    const report = await harness.evaluateProvenance(mockProvenanceGenerator);
+    expect(report.summary.evaluatedCount).toBe(GOLDEN_RAG_BENCHMARK_DATASET.length);
+    expect(report.summary.unanswerablePrecision).toBe(1.0);
+    expect(report.summary.meanCitationPrecision).toBeGreaterThan(0);
+    expect(report.summary.latencyP50).toBeDefined();
   });
 });
