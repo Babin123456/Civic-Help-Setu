@@ -284,6 +284,36 @@
         ]
       },
       {
+        "eventType": "TEMPORAL_POLICY_EVALUATED",
+        "version": "1.0.0",
+        "owner": "gavalidivya0-arch",
+        "producers": [
+          "*"
+        ],
+        "legacy": true,
+        "schema": {
+          "type": "json"
+        },
+        "samples": [
+          {}
+        ]
+      },
+      {
+        "eventType": "TEMPORAL_RULE_PUBLISHED",
+        "version": "1.0.0",
+        "owner": "gavalidivya0-arch",
+        "producers": [
+          "*"
+        ],
+        "legacy": true,
+        "schema": {
+          "type": "json"
+        },
+        "samples": [
+          {}
+        ]
+      },
+      {
         "eventType": "APPLICATION_SUBMITTED",
         "version": "2.0.0",
         "owner": "GoldRay19",
@@ -357,6 +387,18 @@
         "version": "1.0.0",
         "owner": "GoldRay19",
         "reason": "Register the existing free-form process-local bus contract without tightening legacy payloads."
+      },
+      {
+        "eventType": "TEMPORAL_POLICY_EVALUATED",
+        "version": "1.0.0",
+        "owner": "gavalidivya0-arch",
+        "reason": "Register legacy 1.0.0 contract for temporal policy evaluation outbox events."
+      },
+      {
+        "eventType": "TEMPORAL_RULE_PUBLISHED",
+        "version": "1.0.0",
+        "owner": "gavalidivya0-arch",
+        "reason": "Register legacy 1.0.0 contract for temporal rule publication outbox events."
       },
       {
         "eventType": "APPLICATION_SUBMITTED",

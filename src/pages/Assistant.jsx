@@ -111,6 +111,7 @@ const Assistant = () => {
     let response;
     let gatewayMeta = null;
     try {
+
       const gatewayRes = await executeModelGateway({ query: safeQuery });
       gatewayMeta = gatewayRes.meta || null;
       response = gatewayRes;
@@ -119,6 +120,28 @@ const Assistant = () => {
       response = await runCivicAgentPipeline(safeQuery, {
         serviceContextId: currentServiceContextId,
       });
+
+
+      const searchParams = new URLSearchParams(location.search);
+      const jurisdictionParam = searchParams.get('state') || searchParams.get('jurisdiction') || null;
+      response = await askGroundedCivicAssistant(safeQuery, {
+        jurisdictionCode: jurisdictionParam,
+      });
+    } catch (groundingErr) {
+      logDiagnostic('Grounded retrieval error, falling back to basic assistant:', groundingErr);
+      response = await askCivicAssistant(safeQuery);
+
+      try {
+        const gatewayRes = await executeModelGateway({ query: safeQuery });
+        gatewayMeta = gatewayRes.meta || null;
+        response = gatewayRes;
+      } catch (gatewayErr) {
+        logDiagnostic('Model Gateway error, falling back to civic agent pipeline:', gatewayErr);
+        response = await runCivicAgentPipeline(safeQuery, {
+          serviceContextId: currentServiceContextId,
+        });
+      }
+
     }
     return {
       id: `asst-${Date.now()}`,

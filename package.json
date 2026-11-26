@@ -15,6 +15,7 @@
     "test": "vitest run",
     "eval:workflows": "node scripts/evaluateDurableWorkflows.mjs",
     "eval:contracts": "node scripts/evaluateAgentContracts.mjs",
+    "eval:harness": "node scripts/runCivicAgentEvalHarness.mjs",
     "eval:gateway": "vitest run src/services/gateway/gatewayEvaluationReport.test.js",
     "rules:test": "npm --prefix firebase/emulator install --no-audit --no-fund && npm --prefix firebase/emulator test",
     "lhci:collect": "lhci collect",
