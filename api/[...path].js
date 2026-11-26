@@ -4,6 +4,7 @@
  * as a separate function while preserving their public /api/* URLs.
  */
 import addressChange from "./_lib/handlers/address-change-corrections.js";
+import agentWorkflows from "./_lib/handlers/agent-workflows.js";
 import businessLicence from "./_lib/handlers/business-licence-feedback.js";
 import communityFacility from "./_lib/handlers/community-facility-corrections.js";
 import crematorium from "./_lib/handlers/crematorium-corrections.js";
@@ -23,6 +24,7 @@ import civicSurveys from "./_lib/handlers/civic-surveys.js";
 
 const handlers = {
   "address-change-corrections": addressChange,
+  "agent-workflows": agentWorkflows,
   "business-licence-feedback": businessLicence,
   "civic-surveys": civicSurveys,
   "community-facility-corrections": communityFacility,

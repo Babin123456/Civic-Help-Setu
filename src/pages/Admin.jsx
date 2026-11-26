@@ -43,6 +43,7 @@ import RoadHazardReviewQueue from '../components/admin/RoadHazardReviewQueue';
 import AddressChangeCorrectionQueue from '../components/admin/AddressChangeCorrectionQueue';
 import SurveyAuditQueue from '../components/admin/SurveyAuditQueue';
 import AuditLogViewer from '../components/admin/AuditLogViewer';
+import WorkflowDeadLetterPanel from '../components/admin/WorkflowDeadLetterPanel';
 import ServiceImportPanel from '../components/admin/ServiceImportPanel';
 import ServiceRecordList from '../components/admin/ServiceRecordList';
 import ServiceLifecycleReview from '../components/admin/ServiceLifecycleReview';
@@ -1773,7 +1774,8 @@ const Admin = () => {
 
             {/* Audit Trail Tab */}
             {activeTab === 'audit' && (
-              <div>
+              <div className="space-y-6">
+                <WorkflowDeadLetterPanel />
                 <AuditLogViewer auditLogs={auditLogs} />
               </div>
             )}

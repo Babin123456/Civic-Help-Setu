@@ -30,6 +30,7 @@ import { logDiagnostic } from '../utils/diagnostics';
 import { getAllServices } from '../services/serviceCatalog';
 import { queryCivicKnowledge } from '../services/groundedCivicRagService';
 import SourceTraceabilityPanel from '../components/assistant/SourceTraceabilityPanel';
+import DurableWorkflowPanel from '../components/assistant/DurableWorkflowPanel';
 
 const Assistant = () => {
   const [messages, setMessages] = useState(() => loadChatHistory());
@@ -513,6 +514,11 @@ const Assistant = () => {
 
         {/* Personalized Civic Recommendations based on User Profile Context */}
         <PersonalizedRecommendationsPanel onSelectPrompt={(prompt) => handleSendMessage(prompt)} />
+
+        {/* Durable Event-Sourced Civic Agent Workflow (ADR-1149) */}
+        <div className="mb-4">
+          <DurableWorkflowPanel serviceId={currentServiceContextId} />
+        </div>
 
         {/* Contextual Civic-Service Question Suggestion Panel (#385) */}
         <CivicQuestionSuggestionPanel
