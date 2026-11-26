@@ -3,8 +3,8 @@ import {
   createFirestoreIngestionStorageAdapter,
   createPartnerIngestionBoundary,
   createPartnerIngestionHandler,
-} from './_lib/partnerIngestionBoundary.js';
-import { createRateLimiter } from './_lib/abuseGuard.js';
+} from './partnerIngestionBoundary.js';
+import { createRateLimiter } from './abuseGuard.js';
 
 let cachedHandler = null;
 
@@ -20,7 +20,7 @@ export async function buildPartnerIngestionHandler({
   if (!verifySession && CLERK_SECRET_KEY) {
     try {
       const { verifyToken, createClerkClient } = await import('@clerk/backend');
-      const { resolveRole } = await import('../src/services/roleService.js');
+      const { resolveRole } = await import('../../src/services/roleService.js');
       const clerk = createClerkClient({ secretKey: CLERK_SECRET_KEY });
       verifySession = async (sessionToken) => {
         const claims = await verifyToken(sessionToken, { secretKey: CLERK_SECRET_KEY });
