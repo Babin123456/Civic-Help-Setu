@@ -332,6 +332,22 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // Human-in-the-Loop Agent Review Studio (#1150): admin-only, approved snapshots immutable.
+    match /agentReviewOutputs/{outputId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && noPrivilegedKeys(incoming())
+        && text('status', 40)
+        && text('contractVersion', 40)
+        && incoming().version is int
+        && incoming().version >= 1;
+      allow update: if isAdmin()
+        && noPrivilegedKeys(incoming())
+        && !(stored().status in ['approved', 'edited_approved'])
+        && incoming().version == stored().version + 1;
+      allow delete: if false;
+    }
+
     // ---------- everything else ----------
     match /{document=**} {
       allow read, write: if false;

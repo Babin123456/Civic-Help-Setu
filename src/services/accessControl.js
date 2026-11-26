@@ -48,6 +48,9 @@ export const PERMISSIONS = {
   'civicWorks.moderate': { roles: ['admin'], resource: 'civicbridge_civic_works_reports_v1', description: 'Moderate ward-level civic work reports, cluster duplicates, record official acknowledgements and verify completion evidence' },
   'roadSafety.review': { roles: ['admin'], resource: 'civicbridge_review_cases_v1', description: 'Review detected road safety blackspots, conduct site inspections, and plan interventions' },
   'roadSafety.admin': { roles: ['admin'], resource: 'civicbridge_risk_runs_v1', description: 'Configure risk weighting parameters, trigger risk runs, and archive road safety cases' },
+  'agentReview.read': { roles: ['admin'], resource: 'civicbridge_agent_review_studio_v1', description: 'Inspect high-impact AI proposals, source passages, and review audit history' },
+  'agentReview.decide': { roles: ['admin'], resource: 'civicbridge_agent_review_studio_v1', description: 'Approve, edit, reject, escalate, or fork versioned AI civic outputs' },
+  'agentReview.submit': { roles: ['admin', 'citizen'], resource: 'civicbridge_agent_review_studio_v1', description: 'Flag and submit an untrusted AI civic output proposal for human review' },
 };
 
 export class PermissionDeniedError extends Error {

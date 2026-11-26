@@ -20,9 +20,11 @@ import tenderCorrections from "./_lib/handlers/tender-corrections.js";
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import agentReviewStudio from "./_lib/handlers/agent-review-studio.js";
 
 const handlers = {
   "address-change-corrections": addressChange,
+  "agent-review-studio": agentReviewStudio,
   "business-licence-feedback": businessLicence,
   "civic-surveys": civicSurveys,
   "community-facility-corrections": communityFacility,
