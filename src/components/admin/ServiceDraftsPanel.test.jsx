@@ -9,6 +9,7 @@ import { LanguageProvider } from '../../context/LanguageContext';
 
 vi.mock('../../context/AuthContext', () => ({
   useAuth: () => ({ user: null }),
+  useOptionalAuth: () => null,
 }));
 vi.mock('../../context/ToastContext', () => ({
   useToast: () => ({ toast: { success: vi.fn(), error: vi.fn() } }),

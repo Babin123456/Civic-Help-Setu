@@ -5,6 +5,7 @@ import {
   getLastUserMessage,
   hasUserMessages,
   trimHistory,
+  formatCaseMemoryContext,
 } from './conversationContext';
 
 const history = (serviceId) => [
@@ -49,5 +50,30 @@ describe('helpers', () => {
   it('starter prompts have labels and prompts', () => {
     expect(STARTER_PROMPTS.length).toBeGreaterThan(3);
     STARTER_PROMPTS.forEach((p) => expect(p.label && p.prompt).toBeTruthy());
+  });
+
+  it('formats case memory context into demarcated facts and proposals', () => {
+    const memories = [
+      {
+        entryType: 'FACTUAL_NOTE',
+        category: 'DOCUMENT_METADATA',
+        payload: { title: 'Aadhaar Card', text: 'Verified proof of identity.' },
+      },
+      {
+        entryType: 'MODEL_PROPOSAL',
+        category: 'ACTION_STEP',
+        provenance: { confidenceScore: 0.95 },
+        payload: { title: 'Next Step', text: 'Visit closest seva kendra.' },
+      },
+    ];
+
+    const formatted = formatCaseMemoryContext(memories);
+    expect(formatted).toContain('[VERIFIED CASE FACTS - GROUND TRUTH]');
+    expect(formatted).toContain('- (DOCUMENT_METADATA) Aadhaar Card: Verified proof of identity.');
+    expect(formatted).toContain('[UNVERIFIED AI PROPOSALS - REQUIRES CITIZEN CONFIRMATION]');
+    expect(formatted).toContain('- (ACTION_STEP) Next Step [conf: 95%]: Visit closest seva kendra.');
+
+    expect(formatCaseMemoryContext([])).toBe('');
+    expect(formatCaseMemoryContext(null)).toBe('');
   });
 });
