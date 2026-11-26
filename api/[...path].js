@@ -1,4 +1,6 @@
+/* global process */
 import { withApiErrorContract } from './_lib/errorContract.js';
+import fairScheduler from "./_lib/fairSchedulerRoute.js";
 /**
  * Single Vercel serverless entry point for all Civic Help Setu API routes.
  * Keeping handlers under api/_lib prevents Vercel from deploying each file
@@ -31,6 +33,7 @@ import tenderCorrections from "./_lib/handlers/tender-corrections.js";
 import transitConcessions from "./_lib/handlers/transit-concessions.js";
 import openContractingAnalytics from "./_lib/handlers/open-contracting-analytics.js";
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
+import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
 import federatedCivicQuery from "./_lib/handlers/federated-civic-query.js";
@@ -75,13 +78,17 @@ import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
 import multiRegionStatus from "./_lib/handlers/multi-region-status.js";
 import caseCollaboration from "./_lib/handlers/case-collaboration.js";
 import syntheticDatasets from "./_lib/syntheticDatasets.js";
+import cacheManagement from "./_lib/handlers/cache-management.js";
 import { withRequestSecurity } from "./_lib/requestSecurity.js";
 import { createMeshReadinessHandler } from "./_lib/handlers/mesh-readiness.js";
 import { createMeshReadinessLayer } from "./_lib/mesh/middleware.js";
 import { createIdempotencyLayer, resolveIdempotencyConfig } from "./_lib/idempotencyMiddleware.js";
+import { createCacheMiddleware, getCacheSystem } from "./_lib/cacheMiddleware.js";
+import { createCacheFeatureFlagEngine } from "../src/services/distributedCache/index.js";
 
 
 const baseHandlers = {
+  "fair-scheduler": fairScheduler,
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
   "business-licence-feedback": businessLicence,
@@ -114,7 +121,11 @@ const baseHandlers = {
   "send-email": sendEmail,
   "share-by-email": shareByEmail,
   "tender-corrections": tenderCorrections,
+
+  "ward-analytics": wardAnalytics,
+
   "transit-concessions": transitConcessions,
+
   "ward-budget-proposals": wardBudgetProposals,
   "water-quality-register": waterQualityRegister,
   "ward-issue-heatmap": wardIssueHeatmap,
@@ -141,6 +152,13 @@ const baseHandlers = {
   "multi-region-metrics": multiRegionStatus,
   "case-collaboration": caseCollaboration,
   "synthetic-datasets": syntheticDatasets,
+  "cache": cacheManagement,
+  "cache/status": cacheManagement,
+  "cache/metrics": cacheManagement,
+  "cache/invalidate": cacheManagement,
+  "cache/flush": cacheManagement,
+  "cache/health": cacheManagement,
+  "cache-management": cacheManagement,
 };
 
 // Adapt Fetch-style graph handlers to Vercel's Node request/response API.
@@ -209,6 +227,44 @@ function normalizeLegacyResult(result, res) {
   return result;
 }
 
+// Cache system singleton for the dispatcher
+let cacheSystemPromise = null;
+let cacheMiddleware = null;
+
+/**
+ * Initialize the cache system and middleware.
+ */
+async function initializeCacheSystem() {
+  if (cacheSystemPromise) return cacheSystemPromise;
+
+  cacheSystemPromise = (async () => {
+    // Create feature flag engine for cache rollout
+    const ffEngine = createCacheFeatureFlagEngine({
+      initialFlags: {
+        'civic.cache.distributed': { defaultEnabled: true, rolloutPercentage: 100, killSwitch: false, exposure: 'server' },
+        'civic.cache.invalidation': { defaultEnabled: true, rolloutPercentage: 100, killSwitch: false, exposure: 'server' },
+      },
+    });
+
+    const cacheSystem = await getCacheSystem({
+      featureFlagEngine: ffEngine,
+      featureFlagContext: {}, // Will be populated per-request
+      onMetric: (metric) => {
+        // In production, send to metrics system
+        if (process.env.NODE_ENV !== 'test') {
+          console.debug('[Cache Metric]', JSON.stringify(metric));
+        }
+      },
+      onError: (err) => console.error('[Cache System]', err),
+    });
+
+    cacheMiddleware = createCacheMiddleware(cacheSystem);
+    return cacheSystem;
+  })();
+
+  return cacheSystemPromise;
+}
+
 export function createApiDispatcher({
   meshLayer = createMeshReadinessLayer(),
   idempotencyLayer = createIdempotencyLayer(resolveIdempotencyConfig()),
@@ -235,6 +291,17 @@ export function createApiDispatcher({
     }
 
     try {
+      // Initialize cache system on first request
+      await initializeCacheSystem();
+
+      // Apply cache middleware to attach cache helpers to request
+      await new Promise((resolve, reject) => {
+        cacheMiddleware(req, res, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+
       const wrappedHandler = (r, s) => idempotencyLayer.execute(r, s, route, routeHandler);
       const result = await meshLayer.executeRoute(req, res, route, wrappedHandler);
       return normalizeLegacyResult(result, res);

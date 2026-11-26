@@ -56,6 +56,7 @@ import CitizenDraftSyncWorkspace from './pages/CitizenDraftSyncWorkspace';
 import WardBudgetWorkspace from './pages/WardBudgetWorkspace';
 import CivicSurveyWorkspace from './pages/CivicSurveyWorkspace';
 import FederatedQueryExplorer from './pages/FederatedQueryExplorer';
+import WardAnalyticsDashboard from './pages/WardAnalyticsDashboard';
 
 
 import DataCleanRoomWorkspace from './pages/DataCleanRoomWorkspace';
@@ -168,6 +169,7 @@ const Services = lazy(() => import('./pages/Services'));
 const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
 const CostCarbonGovernorWorkspacePage = lazy(() => import('./pages/CostCarbonGovernorWorkspace'));
 const PolicyEngineWorkspacePage = lazy(() => import('./pages/PolicyEngineWorkspace'));
+const FreshnessPredictionWorkspacePage = lazy(() => import('./pages/FreshnessPredictionWorkspace'));
 
 const ServicesFallback = () => (
   <div className="section">
@@ -215,6 +217,8 @@ function AppRoot() {
                       <Route path="/services/ward-budget-proposal" element={<WardBudgetWorkspace />} />
                       <Route path="/ward-budget" element={<WardBudgetWorkspace />} />
                       <Route path="/ward-budget/:id" element={<WardBudgetWorkspace />} />
+                      <Route path="/ward-analytics" element={<WardAnalyticsDashboard />} />
+                      <Route path="/analytics/ward-issues" element={<WardAnalyticsDashboard />} />
                       <Route path="/services/:id" element={<ServiceDetails />} />
                       <Route path="/acronyms" element={<Acronyms />} />
                       <Route path="/eligibility" element={<Eligibility />} />
@@ -574,6 +578,9 @@ function AppRoot() {
 
                             {/* Civic Agent Workflow Policy-as-Code Engine (public evaluation UI) */}
                             <Route path="/policy-engine" element={<PolicyEngineWorkspacePage />} />
+
+                            {/* Civic Information Freshness Prediction & Review Prioritization (maintainer triage UI) */}
+                            <Route path="/freshness-prediction" element={<FreshnessPredictionWorkspacePage />} />
 
                             <Route path="/tenants" element={<TenantAdministrationWorkspace />} />
                             <Route path="/tenants/:tenantId" element={<TenantAdministrationWorkspace />} />
