@@ -3,8 +3,8 @@ import { parseAssistantQuery, parseSlugParam } from '../utils/searchParams';
 import { useLocation, Link } from 'react-router-dom';
 import { Send, AlertCircle, Loader2, Sparkles, Mic, MicOff, BookOpen, RefreshCw, Pencil, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { runPreInferenceGuardrails } from '../ai/aiGuardrailPipeline';
-import { askCivicAssistant } from '../ai/civicAssistant';
-import { askGroundedCivicAssistant } from '../ai/groundedCivicAssistant';
+import { runCivicAgentPipeline } from '../ai/agents/agentOrchestrator';
+import AgentContractBadge from '../components/assistant/AgentContractBadge';
 import SourceGroundedBadge from '../components/assistant/SourceGroundedBadge';
 import ModelGatewayBadge from '../components/assistant/ModelGatewayBadge';
 import { executeModelGateway } from '../services/gateway/modelGatewayService';
@@ -91,13 +91,10 @@ const Assistant = () => {
       gatewayMeta = gatewayRes.meta || null;
       response = gatewayRes;
     } catch (gatewayErr) {
-      logDiagnostic('Model Gateway error, falling back to grounded civic assistant:', gatewayErr);
-      try {
-        response = await askGroundedCivicAssistant(safeQuery);
-      } catch (groundingErr) {
-        logDiagnostic('Grounded retrieval error, falling back to basic assistant:', groundingErr);
-        response = await askCivicAssistant(safeQuery);
-      }
+      logDiagnostic('Model Gateway error, falling back to civic agent pipeline:', gatewayErr);
+      response = await runCivicAgentPipeline(safeQuery, {
+        serviceContextId: currentServiceContextId,
+      });
     }
     return {
       id: `asst-${Date.now()}`,
@@ -113,6 +110,7 @@ const Assistant = () => {
       suggestions: response.suggestions || [],
       guardrail: response.guardrail || null,
       entailment: response.entailment || null,
+      contractMeta: response.contractMeta || null,
       gatewayMeta,
       timestamp: new Date().toISOString(),
     };
@@ -322,6 +320,7 @@ const Assistant = () => {
           />
           {msg.gatewayMeta && <ModelGatewayBadge meta={msg.gatewayMeta} />}
         </div>
+        <AgentContractBadge contractMeta={msg.contractMeta} />
 
         {(msg.status === 'blocked' || msg.guardrail?.injection?.blocked) && (
           <div
