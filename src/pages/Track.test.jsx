@@ -57,4 +57,20 @@ describe('Track page integration (#582)', () => {
     expect(html).toContain('track-reference-help');
     expect(html).toContain('Journey Planner');
   });
+
+  it('renders cross-portal reconciliation controls and banner on active application', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter initialEntries={['/track']}>
+        <AuthProvider>
+          <ToastProvider>
+            <Track />
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    expect(html).toContain('Reconcile Status');
+    expect(html).toContain('Cross-Portal Status Reconciliation');
+    expect(html).toContain('Reconcile Updates');
+  });
 });
