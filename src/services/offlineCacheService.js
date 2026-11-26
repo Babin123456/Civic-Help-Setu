@@ -3,7 +3,8 @@
  * emergency packs, and active application tokens for offline access.
  */
 import { MOCK_SERVICES } from '../data/services.js';
-import { EMERGENCY_PACK_STORAGE_KEY, EMERGENCY_PACK_META } from '../data/emergencyPacks.js';
+import { EMERGENCY_PACKS } from '../data/emergencyPacks.js';
+import { INDIAN_STATES_AND_UTS } from '../data/jurisdictions.js';
 import { logDiagnostic } from '../utils/diagnostics';
 
 const CACHE_KEY = 'civicbridge_offline_cache';
