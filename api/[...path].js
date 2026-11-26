@@ -50,6 +50,7 @@ import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import temporalPolicy from "./_lib/handlers/temporal-policy.js";
 import agentReviewStudio from "./_lib/handlers/agent-review-studio.js";
 import civicAgentEval from "./_lib/handlers/civic-agent-eval.js";
 
@@ -160,6 +161,7 @@ const baseHandlers = {
   "rental-checklist-corrections": rentalChecklist,
   "send-email": sendEmail,
   "share-by-email": shareByEmail,
+  "temporal-policy": temporalPolicy,
   "tender-corrections": tenderCorrections,
 
   "verifiable-evidence-bundles": verifiableEvidenceBundles,
