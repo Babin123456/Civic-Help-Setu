@@ -20,6 +20,7 @@ import tenderCorrections from "./_lib/handlers/tender-corrections.js";
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import firewallScan from "./_lib/handlers/firewall-scan.js";
 
 const handlers = {
   "address-change-corrections": addressChange,
@@ -30,6 +31,7 @@ const handlers = {
   "email/preferences": emailPreferences,
   "email/verify": emailVerify,
   "fire-compliance-feedback": fireCompliance,
+  "firewall-scan": firewallScan,
   "library-corrections": libraryCorrections,
   "pds-observations": pdsObservations,
   "privacy-exports": privacyExports,

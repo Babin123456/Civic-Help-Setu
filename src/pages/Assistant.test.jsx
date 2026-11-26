@@ -59,4 +59,9 @@ describe('Assistant page, fresh chat', () => {
     expect(serviceHtml).toContain('Which documents are usually needed for Birth Certificate?');
     expect(serviceHtml).toContain('Where can I find the official application link for Birth Certificate?');
   });
+
+  it('renders accessible toggle for attaching untrusted external documents', () => {
+    expect(html).toContain('Attach untrusted document / web snippet');
+    expect(html).toContain('aria-expanded="false"');
+  });
 });

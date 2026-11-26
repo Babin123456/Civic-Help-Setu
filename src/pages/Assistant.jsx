@@ -30,6 +30,7 @@ import { logDiagnostic } from '../utils/diagnostics';
 import { getAllServices } from '../services/serviceCatalog';
 import { queryCivicKnowledge } from '../services/groundedCivicRagService';
 import SourceTraceabilityPanel from '../components/assistant/SourceTraceabilityPanel';
+import FirewallInspectionPanel from '../components/assistant/FirewallInspectionPanel';
 
 const Assistant = () => {
   const [messages, setMessages] = useState(() => loadChatHistory());
@@ -43,6 +44,9 @@ const Assistant = () => {
   const inputRef = useRef(null);
   const [failedQuery, setFailedQuery] = useState(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showExternalDoc, setShowExternalDoc] = useState(false);
+  const [externalDocText, setExternalDocText] = useState('');
+  const [externalDocType, setExternalDocType] = useState('uploaded_pdf');
   // Messages cleared by "New conversation", kept in memory only for the undo window
   const [undoSnapshot, setUndoSnapshot] = useState(null);
   const undoNoticeRef = useRef(null);
@@ -58,7 +62,7 @@ const Assistant = () => {
     saveChatHistory(messages);
   }, [messages]);
 
-  const getAnswer = async (query, history) => {
+  const getAnswer = async (query, history, externalDocument = null) => {
     // Short follow-ups like "what are the fees?" reuse the service from the last answer
     const resolved = resolveFollowUpQuery(query, history);
     const preGuardrail = runPreInferenceGuardrails(resolved);
@@ -76,7 +80,10 @@ const Assistant = () => {
 
     let response;
     try {
-      response = await askGroundedCivicAssistant(safeQuery);
+      response = await askGroundedCivicAssistant(
+        safeQuery,
+        externalDocument ? { externalDocument } : {}
+      );
     } catch (groundingErr) {
       logDiagnostic('Grounded retrieval error, falling back to basic assistant:', groundingErr);
       response = await askCivicAssistant(safeQuery);
@@ -95,6 +102,7 @@ const Assistant = () => {
       suggestions: response.suggestions || [],
       guardrail: response.guardrail || null,
       entailment: response.entailment || null,
+      firewall: response.firewall || null,
       timestamp: new Date().toISOString(),
     };
   };
@@ -126,13 +134,24 @@ const Assistant = () => {
       };
       setMessages((prev) => [...prev, userMessage]);
     }
+    const externalDocument = externalDocText.trim()
+      ? {
+          contractVersion: '1.0.0',
+          sourceType: externalDocType,
+          sourceId: externalDocType === 'uploaded_pdf' ? 'user-uploaded-pdf' : 'user-external-web',
+          content: externalDocText.trim(),
+        }
+      : null;
+
     setInput('');
+    setExternalDocText('');
+    setShowExternalDoc(false);
     setIsLoading(true);
     setError(null);
     setFailedQuery(null);
 
     try {
-      const assistantMessage = await getAnswer(safeQuery, history);
+      const assistantMessage = await getAnswer(safeQuery, history, externalDocument);
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err) {
       logDiagnostic('Assistant request failed', err);
@@ -307,6 +326,8 @@ const Assistant = () => {
             <span>AI Safety Guardrail: Request blocked before inference</span>
           </div>
         )}
+
+        {msg.firewall && <FirewallInspectionPanel firewall={msg.firewall} />}
 
         {msg.entailment && (msg.entailment.verifiedCount > 0 || !msg.entailment.overallSupported) && (
           <div
@@ -698,6 +719,60 @@ const Assistant = () => {
           />
         )}
 
+        {/* Untrusted External Document / Web Snippet Toggle (#1151) */}
+        <div style={{ marginBottom: '0.75rem' }}>
+          <button
+            type="button"
+            aria-expanded={showExternalDoc}
+            onClick={() => setShowExternalDoc((prev) => !prev)}
+            className="btn"
+            style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', borderRadius: '99px' }}
+          >
+            {showExternalDoc ? 'Hide untrusted document scanner' : 'Attach untrusted document / web snippet'}
+          </button>
+
+          {showExternalDoc && (
+            <div
+              role="region"
+              aria-label="Untrusted document firewall input"
+              style={{
+                marginTop: '0.5rem',
+                padding: '0.75rem',
+                borderRadius: '0.75rem',
+                border: '1px solid var(--border-main)',
+                background: 'var(--bg-secondary)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem',
+              }}
+            >
+              <label htmlFor="external-doc-type" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                Source Type (treated as untrusted evidence)
+              </label>
+              <select
+                id="external-doc-type"
+                value={externalDocType}
+                onChange={(e) => setExternalDocType(e.target.value)}
+                style={{ padding: '0.35rem 0.5rem', borderRadius: '0.4rem', fontSize: '0.85rem' }}
+              >
+                <option value="uploaded_pdf">Uploaded PDF text</option>
+                <option value="external_web">External web page content</option>
+              </select>
+              <label htmlFor="external-doc-text" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                Retrieved Content (ephemeral, scanned by Prompt-Injection Firewall)
+              </label>
+              <textarea
+                id="external-doc-text"
+                rows={3}
+                value={externalDocText}
+                onChange={(e) => setExternalDocText(e.target.value)}
+                placeholder="Paste extracted civic PDF or web snippet to scan before synthesis..."
+                style={{ padding: '0.5rem', borderRadius: '0.4rem', fontSize: '0.85rem', width: '100%' }}
+              />
+            </div>
+          )}
+        </div>
+
         {/* Input Bar */}
         <form
           onSubmit={(e) => {
@@ -797,3 +872,4 @@ const Assistant = () => {
 };
 
 export default Assistant;
+
