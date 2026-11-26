@@ -25,7 +25,7 @@ import {
   PRIVACY_LIMITS,
   STATUTORY_MUNICIPAL_DISCLAIMER,
 } from '../../data/wardAnalyticsContract';
-import { fetchDifferentiallyPrivateWardAnalytics } from '../../services/wardIssueHeatmapService';
+import { fetchDifferentiallyPrivateWardAnalytics } from '../../services/wardAnalyticsQueryService';
 
 export default function WardIssueHeatmap({ defaultWard = '', clientId = 'web-dashboard-client' }) {
   const [selectedWard, setSelectedWard] = useState(defaultWard);
