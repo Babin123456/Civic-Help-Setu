@@ -13,11 +13,16 @@
     "headers:check": "node scripts/generateVercelHeaders.js --check",
     "preview": "vite preview",
     "test": "vitest run",
+
+    "eval:gateway": "vitest run src/services/gateway/gatewayEvaluationReport.test.js",
+    "rules:test": "npm --prefix firebase/emulator install --no-audit --no-fund && npm --prefix firebase/emulator test"
+
     "rules:test": "npm --prefix firebase/emulator install --no-audit --no-fund && npm --prefix firebase/emulator test",
     "lhci:collect": "lhci collect",
     "lhci:assert": "lhci assert",
     "contracts:check": "node scripts/contracts/check.mjs",
     "contracts:validate": "node scripts/contracts/validate.mjs"
+
   },
   "dependencies": {
     "@clerk/backend": "^3.31.4",
