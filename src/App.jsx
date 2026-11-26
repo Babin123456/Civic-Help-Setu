@@ -102,6 +102,7 @@ const AccessibleRouteBarrierWorkspace = lazy(() => import('./pages/AccessibleRou
 const StreetlightOutageWorkspace = lazy(() => import('./pages/StreetlightOutageWorkspace'));
 const ReliefOperationsWorkspace = lazy(() => import('./pages/ReliefOperationsWorkspace'));
 const GhgInventoryWorkspace = lazy(() => import('./pages/GhgInventoryWorkspace'));
+const OfflineEmergencyCardWorkspace = lazy(() => import('./pages/OfflineEmergencyCardWorkspace'));
 const WaterQualityRegister = lazy(() => import('./pages/WaterQualityRegister'));
 const PublicProjectsWorkspace = lazy(() => import('./pages/PublicProjectsWorkspace'));
 const WardIssueHeatmapWorkspace = lazy(() => import('./pages/WardIssueHeatmapWorkspace'));
@@ -395,6 +396,9 @@ function AppRoot() {
                             <Route path="/ghg-inventory" element={<GhgInventoryWorkspace />} />
                             <Route path="/emissions-inventory" element={<GhgInventoryWorkspace />} />
                             <Route path="/services/ghg-inventory" element={<GhgInventoryWorkspace />} />
+                            <Route path="/offline-emergency-card" element={<OfflineEmergencyCardWorkspace />} />
+                            <Route path="/emergency-card" element={<OfflineEmergencyCardWorkspace />} />
+                            <Route path="/services/offline-emergency-card" element={<OfflineEmergencyCardWorkspace />} />
                             <Route path="/shared-checklist/:token" element={<SharedChecklistView />} />
                             <Route path="/shared-directory/:token" element={<SharedDirectoryView />} />
                             <Route path="/app-status/:token" element={<PublicApplicationStatusView />} />
