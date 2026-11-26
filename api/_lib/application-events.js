@@ -1,11 +1,11 @@
-import { withApiErrorContract } from './_lib/errorContract.js';
+import { withApiErrorContract } from './errorContract.js';
 /* global process */
 import {
   applicationEventRepository,
   createApplicationEventsHandler,
-} from './_lib/applicationEvents.js';
-import { createRateLimiter } from './_lib/abuseGuard.js';
-import { withRequestSecurity } from './_lib/requestSecurity.js';
+} from './applicationEvents.js';
+import { createRateLimiter } from './abuseGuard.js';
+import { withRequestSecurity } from './requestSecurity.js';
 
 let handler = null;
 
@@ -14,7 +14,7 @@ async function build() {
   if (!CLERK_SECRET_KEY) return null;
 
   const { verifyToken, createClerkClient } = await import('@clerk/backend');
-  const { resolveRole } = await import('../src/services/roleService.js');
+  const { resolveRole } = await import('../../src/services/roleService.js');
   const clerk = createClerkClient({ secretKey: CLERK_SECRET_KEY });
 
   return createApplicationEventsHandler({

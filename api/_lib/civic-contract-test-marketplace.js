@@ -34,12 +34,12 @@ import {
   validateListQuery,
   validateRecordDrift,
   schemaVersion
-} from './_lib/civicContractTestMarketplaceSchemas.js';
+} from './civicContractTestMarketplaceSchemas.js';
 import {
   getContractTestStore,
   resetContractTestStoreCacheForTests
-} from './_lib/civicContractTestMarketplaceStore.js';
-import { createContractTestMarketplaceEngine } from '../src/services/civicContractTestMarketplaceEngine.js';
+} from './civicContractTestMarketplaceStore.js';
+import { createContractTestMarketplaceEngine } from '../../src/services/civicContractTestMarketplaceEngine.js';
 
 const ID_SEGMENT = /^[a-z0-9_-]{1,128}$/;
 

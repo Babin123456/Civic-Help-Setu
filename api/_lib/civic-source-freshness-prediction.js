@@ -29,12 +29,12 @@ import {
   validateListQuery,
   validateDriftEvent,
   schemaVersion,
-} from './_lib/civicSourceFreshnessPredictionSchemas.js';
+} from './civicSourceFreshnessPredictionSchemas.js';
 import {
   getProductionFreshnessStore,
   resetProductionFreshnessStoreCacheForTests
-} from './_lib/civicSourceFreshnessPredictionStore.js';
-import { createFreshnessPredictionEngine } from '../src/services/civicSourceFreshnessPredictionEngine.js';
+} from './civicSourceFreshnessPredictionStore.js';
+import { createFreshnessPredictionEngine } from '../../src/services/civicSourceFreshnessPredictionEngine.js';
 
 const ID_SEGMENT = /^[a-z0-9_-]{1,128}$/;
 

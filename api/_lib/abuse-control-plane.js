@@ -1,4 +1,4 @@
-import { withApiErrorContract } from './_lib/errorContract.js';
+import { withApiErrorContract } from './errorContract.js';
 /**
  * api/abuse-control-plane.js
  *
@@ -32,10 +32,10 @@ import {
   validateUpdateAppeal,
   validateListQuery,
   schemaVersion,
-} from './_lib/abuseSchemas.js';
-import { privacyIdentifier } from './_lib/abuseControlPlane.js';
-import { getProductionAbuseStore, resetProductionAbuseStoreCacheForTests } from './_lib/abuseStore.js';
-import { withRequestSecurity } from './_lib/requestSecurity.js';
+} from './abuseSchemas.js';
+import { privacyIdentifier } from './abuseControlPlane.js';
+import { getProductionAbuseStore, resetProductionAbuseStoreCacheForTests } from './abuseStore.js';
+import { withRequestSecurity } from './requestSecurity.js';
 
 const ID_SEGMENT = /^[a-z0-9_-]{1,128}$/;
 

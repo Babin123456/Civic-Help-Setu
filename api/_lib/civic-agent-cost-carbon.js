@@ -30,13 +30,13 @@ import {
   validatePolicyConfig,
   validateListQuery,
   schemaVersion,
-} from './_lib/civicAgentCostCarbonSchemas.js';
+} from './civicAgentCostCarbonSchemas.js';
 import {
   getProductionCostCarbonStore,
   resetProductionCostCarbonStoreCacheForTests,
-} from './_lib/civicAgentCostCarbonStore.js';
-import { createCostCarbonGovernor } from '../src/services/civicAgentCostCarbonGovernor.js';
-import { DEFAULT_COST_CARBON_POLICY } from '../src/data/civicAgentCostCarbonConstants.js';
+} from './civicAgentCostCarbonStore.js';
+import { createCostCarbonGovernor } from '../../src/services/civicAgentCostCarbonGovernor.js';
+import { DEFAULT_COST_CARBON_POLICY } from '../../src/data/civicAgentCostCarbonConstants.js';
 
 const ID_SEGMENT = /^[a-z0-9_-]{1,128}$/;
 

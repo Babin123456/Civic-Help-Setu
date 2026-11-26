@@ -1,6 +1,19 @@
 /* global process */
 import { withApiErrorContract } from './_lib/errorContract.js';
 import fairScheduler from "./_lib/fairSchedulerRoute.js";
+import partnerIngestion from "./_lib/partner-ingestion.js";
+import abuseControlPlane from "./_lib/abuse-control-plane.js";
+import applicationEvents from "./_lib/application-events.js";
+import civicAgentCostCarbon from "./_lib/civic-agent-cost-carbon.js";
+import civicAgentPolicy from "./_lib/civic-agent-policy.js";
+import civicContractTestMarketplace from "./_lib/civic-contract-test-marketplace.js";
+import civicRecommendationExperimentation from "./_lib/civic-recommendation-experimentation.js";
+import civicSourceFreshnessPrediction from "./_lib/civic-source-freshness-prediction.js";
+import counterJourney from "./_lib/counter-journey.js";
+import importBatches from "./_lib/import-batches.js";
+import neighbourhoodResourceExchange from "./_lib/neighbourhood-resource-exchange.js";
+import roadHazards from "./_lib/road-hazards.js";
+
 /**
  * Single Vercel serverless entry point for all Civic Help Setu API routes.
  * Keeping handlers under api/_lib prevents Vercel from deploying each file
@@ -37,7 +50,11 @@ import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+
 import firewallScan from "./_lib/handlers/firewall-scan.js";
+
+import agentReviewStudio from "./_lib/handlers/agent-review-studio.js";
+
 
 import verifiableEvidenceBundles from "./_lib/handlers/verifiable-evidence-bundles.js";
 
@@ -100,8 +117,21 @@ import { createCacheFeatureFlagEngine } from "../src/services/distributedCache/i
 const baseHandlers = {
   "bottleneck-feedback": bottleneckFeedback,
   "fair-scheduler": fairScheduler,
+  "partner-ingestion": partnerIngestion,
+  "abuse-control-plane": abuseControlPlane,
+  "application-events": applicationEvents,
+  "civic-agent-cost-carbon": civicAgentCostCarbon,
+  "civic-agent-policy": civicAgentPolicy,
+  "civic-contract-test-marketplace": civicContractTestMarketplace,
+  "civic-recommendation-experimentation": civicRecommendationExperimentation,
+  "civic-source-freshness-prediction": civicSourceFreshnessPrediction,
+  "counter-journey": counterJourney,
+  "import-batches": importBatches,
+  "neighbourhood-resource-exchange": neighbourhoodResourceExchange,
+  "road-hazards": roadHazards,
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
+  "agent-review-studio": agentReviewStudio,
   "business-licence-feedback": businessLicence,
 
   "civic-data-clean-room": civicDataCleanRoom,
@@ -370,12 +400,29 @@ export function createApiDispatcher({
       if (res.writableEnded) return;
     }
 
+    const delegatedApiRoutes = [
+      "abuse-control-plane",
+      "application-events",
+      "civic-agent-cost-carbon",
+      "civic-agent-policy",
+      "civic-contract-test-marketplace",
+      "civic-recommendation-experimentation",
+      "civic-source-freshness-prediction",
+      "counter-journey",
+      "import-batches",
+      "neighbourhood-resource-exchange",
+      "road-hazards",
+    ];
+    const delegatedRoute = delegatedApiRoutes.find(
+      (route) => targetRoute === route || targetRoute.startsWith(`${route}/`)
+    );
+
     const routeHandler =
       (graphRoutes[rawRoute] || graphRoutes[targetRoute]) && req.method === "GET"
         ? (r, s) => invokeGraphHandler(r, s, graphRoutes[rawRoute] || graphRoutes[targetRoute])
         : (graphPostRoutes[rawRoute] || graphPostRoutes[targetRoute]) && req.method === "POST"
           ? (r, s) => invokeGraphHandler(r, s, graphPostRoutes[rawRoute] || graphPostRoutes[targetRoute])
-          : handlers[rawRoute] || handlers[targetRoute];
+          : handlers[rawRoute] || handlers[targetRoute] || (delegatedRoute ? handlers[delegatedRoute] : undefined);
 
     if (!routeHandler) {
       return res.status(404).json({ error: "API route not found" });
@@ -394,7 +441,27 @@ export function createApiDispatcher({
       });
 
       const effectiveRoute = targetRoute || rawRoute;
-      const wrappedHandler = (r, s) => idempotencyLayer.execute(r, s, effectiveRoute, routeHandler);
+      let delegatedRequest = req;
+      if (delegatedRoute) {
+        const forwardedHost = req.headers?.["x-forwarded-host"] || req.headers?.host || "localhost";
+        const forwardedProto = req.headers?.["x-forwarded-proto"] || "https";
+        const normalizedUrl = new URL(req.url || "/", `${forwardedProto}://${forwardedHost}`);
+        normalizedUrl.pathname = `/api/${targetRoute}`;
+        normalizedUrl.searchParams.delete("path");
+        delegatedRequest = Object.create(req);
+        delegatedRequest.url = `${normalizedUrl.pathname}${normalizedUrl.search}`;
+        delegatedRequest.query = { ...(req.query || {}) };
+        delete delegatedRequest.query.path;
+      }
+      const wrappedHandler = (r, s) => {
+        const request = delegatedRoute ? delegatedRequest : r;
+        return idempotencyLayer.execute(
+          request,
+          s,
+          effectiveRoute,
+          () => routeHandler(request, s)
+        );
+      };
       const result = await meshLayer.executeRoute(req, res, effectiveRoute, wrappedHandler);
       return normalizeLegacyResult(result, res);
     } catch (error) {
