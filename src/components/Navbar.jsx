@@ -26,7 +26,8 @@ import {
   Droplets,
   KeyRound,
   Store,
-  Trees
+  Trees,
+  FileBadge
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -912,6 +913,12 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                   to: '/vault',
                   label: t('nav.vault', 'Document Vault'),
                   icon: Shield
+                })}
+
+                {renderNavLink({
+                  to: '/wallet',
+                  label: 'Citizen Data Wallet',
+                  icon: FileBadge
                 })}
 
                 {renderNavLink({

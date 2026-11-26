@@ -60,6 +60,7 @@ import RentalTransitionWorkspace from './pages/RentalTransitionWorkspace';
 import CitizenDraftSyncWorkspace from './pages/CitizenDraftSyncWorkspace';
 import WardBudgetWorkspace from './pages/WardBudgetWorkspace';
 import CivicSurveyWorkspace from './pages/CivicSurveyWorkspace';
+import CitizenDataWallet from './pages/CitizenDataWallet';
 
 const Services = lazy(() => import('./pages/Services'));
 
@@ -157,6 +158,17 @@ function AppRoot() {
                       <Route path="/vault" element={
                         <ProtectedRoute>
                           <Vault />
+                        </ProtectedRoute>
+                      } />
+
+                      <Route path="/wallet" element={
+                        <ProtectedRoute>
+                          <CitizenDataWallet />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/data-wallet" element={
+                        <ProtectedRoute>
+                          <CitizenDataWallet />
                         </ProtectedRoute>
                       } />
 
