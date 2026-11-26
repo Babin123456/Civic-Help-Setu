@@ -1843,7 +1843,8 @@ const Admin = () => {
             {activeTab === 'model-gateway' && (
               <div>
                 <ModelGatewayDashboard />
-
+              </div>
+            )}
 
             {/* Differentially Private Ward Civic Analytics Tab */}
             {activeTab === 'ward-analytics' && (
