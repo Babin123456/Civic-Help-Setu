@@ -30,13 +30,13 @@ import {
   validateListQuery,
   validateSimulate,
   schemaVersion,
-} from './_lib/civicAgentPolicySchemas.js';
+} from './civicAgentPolicySchemas.js';
 import {
   getProductionPolicyStore,
   resetProductionPolicyStoreCacheForTests,
-} from './_lib/civicAgentPolicyStore.js';
-import { createPolicyEngine } from '../src/services/civicAgentPolicyEngine.js';
-import { simulatePolicyDecisions } from '../src/services/civicAgentPolicySimulation.js';
+} from './civicAgentPolicyStore.js';
+import { createPolicyEngine } from '../../src/services/civicAgentPolicyEngine.js';
+import { simulatePolicyDecisions } from '../../src/services/civicAgentPolicySimulation.js';
 
 const ID_SEGMENT = /^[a-z0-9_-]{1,128}$/;
 

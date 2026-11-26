@@ -1,4 +1,4 @@
-import { withApiErrorContract } from './_lib/errorContract.js';
+import { withApiErrorContract } from './errorContract.js';
 /**
  * api/neighbourhood-resource-exchange.js
  * Server-side endpoint for the Neighbourhood Resource Exchange feature (#760).
@@ -18,8 +18,8 @@ import { withApiErrorContract } from './_lib/errorContract.js';
  *  - All state transitions are validated with actionable messages
  */
 
-import { createRateLimiter, createSingleFlight } from './_lib/abuseGuard.js';
-import { withRequestSecurity } from './_lib/requestSecurity.js';
+import { createRateLimiter, createSingleFlight } from './abuseGuard.js';
+import { withRequestSecurity } from './requestSecurity.js';
 import {
   createResourceListing,
   getResourceListing,
@@ -34,7 +34,7 @@ import {
   isListingExpired,
   getExpiringListings,
   SCHEMA_VERSION,
-} from '../src/services/resourceExchangeService.js';
+} from '../../src/services/resourceExchangeService.js';
 
 const rateLimiter = createRateLimiter({ limit: 10, windowMs: 60 * 1000 });
 const singleFlight = createSingleFlight();

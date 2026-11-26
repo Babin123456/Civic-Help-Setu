@@ -112,6 +112,55 @@ export const computeRetrievalMetrics = (retrievedResults = [], targetServiceId, 
 };
 
 /**
+ * Computes citation-level precision, citation recall, and unsupported claim detection metrics.
+ *
+ * @param {Object} guidanceResponse - Response from civicGuidanceProvenanceService
+ * @param {Array<Object>} expectedCitations - Ground-truth citation expectations
+ * @returns {{ citationPrecision: number, citationRecall: number, unsupportedClaimRate: number }}
+ */
+export const computeCitationMetrics = (guidanceResponse = {}, expectedCitations = []) => {
+  const claims = guidanceResponse.claims || [];
+  const supportedClaims = claims.filter((c) => c.status === 'SUPPORTED');
+  const actualCitations = supportedClaims.flatMap((c) => c.citations || []);
+
+  const totalCitations = actualCitations.length;
+  if (!expectedCitations || expectedCitations.length === 0) {
+    return {
+      citationPrecision: totalCitations === 0 ? 1.0 : 0.0,
+      citationRecall: totalCitations === 0 ? 1.0 : 0.0,
+      unsupportedClaimRate: claims.length > 0
+        ? Number(((guidanceResponse.unsupportedClaims || []).length / claims.length).toFixed(4))
+        : 0.0,
+    };
+  }
+
+  let truePositives = 0;
+  for (const cite of actualCitations) {
+    if (
+      expectedCitations.some(
+        (exp) =>
+          (exp.serviceId && exp.serviceId === cite.serviceId) ||
+          (exp.url && exp.url === cite.url)
+      )
+    ) {
+      truePositives += 1;
+    }
+  }
+
+  const citationPrecision = totalCitations > 0 ? truePositives / totalCitations : 0.0;
+  const citationRecall = truePositives / expectedCitations.length;
+  const unsupportedClaimRate = claims.length > 0
+    ? Number(((guidanceResponse.unsupportedClaims || []).length / claims.length).toFixed(4))
+    : 0.0;
+
+  return {
+    citationPrecision: Number(citationPrecision.toFixed(4)),
+    citationRecall: Number(Math.min(1.0, citationRecall).toFixed(4)),
+    unsupportedClaimRate,
+  };
+};
+
+/**
  * Benchmark Evaluation Harness
  */
 export class OfflineRagBenchmarkHarness {
@@ -170,6 +219,81 @@ export class OfflineRagBenchmarkHarness {
       meanNdcg: Number((totalNdcg / count).toFixed(4)),
       latencyP50: p50,
       latencyP95: p95,
+      timestamp: new Date().toISOString(),
+    };
+
+    return {
+      summary,
+      itemReports,
+    };
+  }
+
+  /**
+   * Run benchmark against a candidate guidance generator function with claim citations
+   * provenanceFn contract: ({ query, targetJurisdiction }) => Promise<CivicGuidanceResponseV1>
+   */
+  async evaluateProvenance(provenanceFn, options = { split: 'test' }) {
+    const testItems = this.dataset.filter((d) => !options.split || d.split === options.split);
+
+    let totalRecall = 0;
+    let totalCitationPrecision = 0;
+    let totalCitationRecall = 0;
+    let correctlyDeclinedCount = 0;
+    let unanswerableCount = 0;
+    const itemReports = [];
+    const latencies = [];
+
+    for (const item of testItems) {
+      const start = Date.now();
+      const output = await provenanceFn({
+        query: item.query,
+        jurisdictionCode: item.expectedJurisdiction === 'unknown' ? null : item.expectedJurisdiction,
+      });
+      const duration = Date.now() - start;
+      latencies.push(duration);
+
+      const isTargetHit =
+        item.targetServiceId &&
+        (output.serviceId === item.targetServiceId ||
+          (output.retrievedPassages || []).some((p) => p.serviceId === item.targetServiceId));
+
+      const isUnanswerable = !item.answerable;
+      if (isUnanswerable) {
+        unanswerableCount += 1;
+        if (output.status === 'UNSUPPORTED' || !output.overallGrounded) {
+          correctlyDeclinedCount += 1;
+        }
+      }
+
+      const expectedCites = item.targetServiceId ? [{ serviceId: item.targetServiceId }] : [];
+      const citeMetrics = computeCitationMetrics(output, expectedCites);
+
+      const recall = isTargetHit || (isUnanswerable && output.status === 'UNSUPPORTED') ? 1.0 : 0.0;
+      totalRecall += recall;
+      totalCitationPrecision += citeMetrics.citationPrecision;
+      totalCitationRecall += citeMetrics.citationRecall;
+
+      itemReports.push({
+        id: item.id,
+        query: item.query,
+        target: item.targetServiceId,
+        recall,
+        citationMetrics: citeMetrics,
+        latencyMs: duration,
+      });
+    }
+
+    latencies.sort((a, b) => a - b);
+    const count = testItems.length || 1;
+    const summary = {
+      evaluatedCount: count,
+      meanRecall: Number((totalRecall / count).toFixed(4)),
+      meanCitationPrecision: Number((totalCitationPrecision / count).toFixed(4)),
+      meanCitationRecall: Number((totalCitationRecall / count).toFixed(4)),
+      unanswerablePrecision:
+        unanswerableCount > 0 ? Number((correctlyDeclinedCount / unanswerableCount).toFixed(4)) : 1.0,
+      latencyP50: latencies[Math.floor(latencies.length * 0.5)] || 0,
+      latencyP95: latencies[Math.floor(latencies.length * 0.95)] || 0,
       timestamp: new Date().toISOString(),
     };
 

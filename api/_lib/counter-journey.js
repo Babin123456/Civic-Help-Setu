@@ -1,4 +1,4 @@
-import { withApiErrorContract } from './_lib/errorContract.js';
+import { withApiErrorContract } from './errorContract.js';
 /**
  * api/counter-journey.js — Server‑side handler for the civic service counter
  * journey simulator (#843).
@@ -17,18 +17,18 @@ import { withApiErrorContract } from './_lib/errorContract.js';
  *   deterministic; the handler just wires them to HTTP.
  */
 
-import { createRateLimiter, clientKey } from './_lib/abuseGuard.js';
+import { createRateLimiter, clientKey } from './abuseGuard.js';
 import {
   validateJourneyRequest,
   COUNTER_JOURNEY_DATA_VERSION,
   COUNTER_JOURNEY_DISCLAIMER,
   getCounterJourneyById,
-} from '../src/services/civicCounterJourneyService.js';
+} from '../../src/services/civicCounterJourneyService.js';
 import {
   getCounterJourneyCatalogue,
   evaluateCounterJourney,
   buildJourneyChecklistText,
-} from '../src/services/civicCounterJourneyService.js';
+} from '../../src/services/civicCounterJourneyService.js';
 
 /** Rate limiter for all POST endpoints (per address). */
 const addressLimiter = createRateLimiter({ limit: 30, windowMs: 60 * 1000 });

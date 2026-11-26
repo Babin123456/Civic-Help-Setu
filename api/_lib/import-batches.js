@@ -1,4 +1,4 @@
-import { withApiErrorContract } from './_lib/errorContract.js';
+import { withApiErrorContract } from './errorContract.js';
 /**
  * api/import-batches.js
  * Server-side endpoint for the staged civic dataset import console.
@@ -20,11 +20,11 @@ import { withApiErrorContract } from './_lib/errorContract.js';
  *  - Deterministic error codes for UI translation
  */
 
-import { createRateLimiter, createSingleFlight } from './_lib/abuseGuard.js';
-import { withRequestSecurity } from './_lib/requestSecurity.js';
-import { detectImportFormat, csvToImportRecords, jsonToImportRecords, buildImportPreview, executeImport, approveImportBatch } from '../src/services/importValidationService';
-import { importBatchService } from '../src/services/importBatchService';
-import { requirePermission } from '../src/services/accessControl';
+import { createRateLimiter, createSingleFlight } from './abuseGuard.js';
+import { withRequestSecurity } from './requestSecurity.js';
+import { detectImportFormat, csvToImportRecords, jsonToImportRecords, buildImportPreview, executeImport, approveImportBatch } from '../../src/services/importValidationService';
+import { importBatchService } from '../../src/services/importBatchService';
+import { requirePermission } from '../../src/services/accessControl';
 
 const rateLimiter = createRateLimiter({ limit: 20, windowMs: 60 * 1000 });
 const singleFlight = createSingleFlight();

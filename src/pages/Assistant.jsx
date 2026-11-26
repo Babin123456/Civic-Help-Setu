@@ -3,8 +3,8 @@ import { parseAssistantQuery, parseSlugParam } from '../utils/searchParams';
 import { useLocation, Link } from 'react-router-dom';
 import { Send, AlertCircle, Loader2, Sparkles, Mic, MicOff, BookOpen, RefreshCw, Pencil, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { runPreInferenceGuardrails } from '../ai/aiGuardrailPipeline';
-import { askCivicAssistant } from '../ai/civicAssistant';
-import { askGroundedCivicAssistant } from '../ai/groundedCivicAssistant';
+import { runCivicAgentPipeline } from '../ai/agents/agentOrchestrator';
+import AgentContractBadge from '../components/assistant/AgentContractBadge';
 import SourceGroundedBadge from '../components/assistant/SourceGroundedBadge';
 import ModelGatewayBadge from '../components/assistant/ModelGatewayBadge';
 import { executeModelGateway } from '../services/gateway/modelGatewayService';
@@ -33,11 +33,34 @@ import { getAllServices } from '../services/serviceCatalog';
 import { queryCivicKnowledge } from '../services/groundedCivicRagService';
 import SourceTraceabilityPanel from '../components/assistant/SourceTraceabilityPanel';
 import DurableWorkflowPanel from '../components/assistant/DurableWorkflowPanel';
+import ClaimProvenanceGuidance from '../components/assistant/ClaimProvenanceGuidance';
+
+import {
+  createReviewStudioStore,
+  buildReviewProposalFromAssistantResponse,
+} from '../services/agentReviewStudioService';
+
 import CaseMemoryInspectionModal from '../components/assistant/CaseMemoryInspectionModal';
 import { caseMemoryEngine } from '../services/agentMemory/caseMemoryEngine';
 
+
 const Assistant = () => {
   const [messages, setMessages] = useState(() => loadChatHistory());
+  const [flaggedReviewIds, setFlaggedReviewIds] = useState({});
+
+  const handleFlagForReview = (msg) => {
+    try {
+      const store = createReviewStudioStore();
+      const proposal = buildReviewProposalFromAssistantResponse(
+        msg.data?.title || 'Civic guidance inquiry',
+        msg
+      );
+      store.submitProposal({ ...proposal, idempotencyKey: `asst-flag-${msg.id}` });
+      setFlaggedReviewIds((prev) => ({ ...prev, [msg.id]: true }));
+    } catch (err) {
+      logDiagnostic('Failed to flag assistant response for review', err);
+    }
+  };
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -92,13 +115,10 @@ const Assistant = () => {
       gatewayMeta = gatewayRes.meta || null;
       response = gatewayRes;
     } catch (gatewayErr) {
-      logDiagnostic('Model Gateway error, falling back to grounded civic assistant:', gatewayErr);
-      try {
-        response = await askGroundedCivicAssistant(safeQuery);
-      } catch (groundingErr) {
-        logDiagnostic('Grounded retrieval error, falling back to basic assistant:', groundingErr);
-        response = await askCivicAssistant(safeQuery);
-      }
+      logDiagnostic('Model Gateway error, falling back to civic agent pipeline:', gatewayErr);
+      response = await runCivicAgentPipeline(safeQuery, {
+        serviceContextId: currentServiceContextId,
+      });
     }
     return {
       id: `asst-${Date.now()}`,
@@ -114,7 +134,14 @@ const Assistant = () => {
       suggestions: response.suggestions || [],
       guardrail: response.guardrail || null,
       entailment: response.entailment || null,
+
+      provenance: response.provenance || null,
+      claims: response.claims || [],
+      unsupportedClaims: response.unsupportedClaims || [],
+
+      contractMeta: response.contractMeta || null,
       gatewayMeta,
+
       timestamp: new Date().toISOString(),
     };
   };
@@ -323,6 +350,7 @@ const Assistant = () => {
           />
           {msg.gatewayMeta && <ModelGatewayBadge meta={msg.gatewayMeta} />}
         </div>
+        <AgentContractBadge contractMeta={msg.contractMeta} />
 
         {(msg.status === 'blocked' || msg.guardrail?.injection?.blocked) && (
           <div
@@ -377,6 +405,24 @@ const Assistant = () => {
                 ? `Entailment Check: Verified (${msg.entailment.verifiedCount} claim${msg.entailment.verifiedCount === 1 ? '' : 's'})`
                 : `Entailment Caution: ${msg.entailment.unsupportedCount + msg.entailment.contradictedCount} unverified/conflicting claim(s)`}
             </span>
+            <button
+              type="button"
+              onClick={() => handleFlagForReview(msg)}
+              disabled={Boolean(flaggedReviewIds[msg.id])}
+              style={{
+                marginLeft: 'auto',
+                padding: '0.2rem 0.55rem',
+                borderRadius: '0.4rem',
+                border: '1px solid currentColor',
+                background: 'transparent',
+                color: 'inherit',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                cursor: flaggedReviewIds[msg.id] ? 'default' : 'pointer',
+              }}
+            >
+              {flaggedReviewIds[msg.id] ? 'Sent to Review Studio' : 'Flag for Human Review'}
+            </button>
           </div>
         )}
 
@@ -458,6 +504,17 @@ const Assistant = () => {
               <BookOpen size={16} /> View Full Detailed Roadmap
             </Link>
           </div>
+        )}
+
+        {/* Claim-Level Source Provenance & Passages (#1154) */}
+        {(msg.provenance || (msg.claims && msg.claims.length > 0)) && (
+          <ClaimProvenanceGuidance
+            provenance={msg.provenance}
+            claims={msg.claims}
+            unsupportedClaims={msg.unsupportedClaims}
+            failClosedNotice={msg.provenance?.failClosedNotice || data.missingInformationNotice}
+            disclaimer={data.disclaimer}
+          />
         )}
 
         {/* Sources, review dates and limitations (omitted when the response has no source data) */}
