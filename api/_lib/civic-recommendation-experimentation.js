@@ -17,13 +17,13 @@ import {
   validateRecordMetric,
   validateRollback,
   schemaVersion
-} from './_lib/civicRecommendationExperimentationSchemas.js';
+} from './civicRecommendationExperimentationSchemas.js';
 import {
   getExperimentationStore
-} from './_lib/civicRecommendationExperimentationStore.js';
+} from './civicRecommendationExperimentationStore.js';
 import {
   createRecommendationExperimentationEngine
-} from '../src/services/civicRecommendationExperimentationEngine.js';
+} from '../../src/services/civicRecommendationExperimentationEngine.js';
 
 const ID_SEGMENT = /^[a-z0-9_-]{1,128}$/;
 
@@ -226,10 +226,10 @@ let defaultHandler = null;
 
 export default async function handler(req, res) {
   if (!defaultHandler) {
-    const { verifySession: defaultVerify } = await import('./_lib/clerkAuth.js').catch(() => ({
+    const { verifySession: defaultVerify } = await import('./clerkAuth.js').catch(() => ({
       verifySession: async (token) => (token ? { userId: 'default-user' } : null)
     }));
-    const { authorizeOperator: defaultAuthorize } = await import('./_lib/operatorAuth.js').catch(() => ({
+    const { authorizeOperator: defaultAuthorize } = await import('./operatorAuth.js').catch(() => ({
       authorizeOperator: async (r) => (r ? { userId: 'default-op', role: 'admin' } : null)
     }));
 

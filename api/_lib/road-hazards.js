@@ -1,4 +1,4 @@
-import { withApiErrorContract } from './_lib/errorContract.js';
+import { withApiErrorContract } from './errorContract.js';
 /**
  * api/road-hazards.js
  * Server-side endpoint for validating citizen road hazard reports, defect disclosures,
@@ -12,8 +12,8 @@ import { withApiErrorContract } from './_lib/errorContract.js';
  *  - Queued for administrator review before affecting public blackspot scores.
  */
 
-import { createRateLimiter, createSingleFlight } from './_lib/abuseGuard.js';
-import { withRequestSecurity } from './_lib/requestSecurity.js';
+import { createRateLimiter, createSingleFlight } from './abuseGuard.js';
+import { withRequestSecurity } from './requestSecurity.js';
 
 const rateLimiter = createRateLimiter({ limit: 10, windowMs: 60 * 1000 });
 const singleFlight = createSingleFlight();
