@@ -19,7 +19,7 @@ import {
   validateWorkflowGraph,
   validateSyntheticPersona,
   checkForbiddenFields,
-} from '../data/digitalTwinContract';
+} from '../data/digitalTwinContract.js';
 
 /**
  * Validates graph integrity, detecting cycles, unreachable steps, and terminal dead ends.

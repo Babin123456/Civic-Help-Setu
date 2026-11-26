@@ -8,7 +8,7 @@
  * Aadhaar/PAN numbers, live phone numbers, or private documents.
  */
 
-import { PERSONA_ARCHETYPES } from './digitalTwinContract';
+import { PERSONA_ARCHETYPES } from './digitalTwinContract.js';
 
 export const SYNTHETIC_PERSONAS = [
   {

@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   HelpCircle,
   AlertCircle,
   CheckCircle2,
-  X,
   ChevronDown,
   ChevronUp,
   ShieldCheck,
@@ -15,6 +14,9 @@ import {
   submitBottleneckFeedback,
 } from '../../services/bottleneckFeedbackService';
 
+import { useOptionalAuth } from '../../context/AuthContext';
+import { feedbackRequest, encodeFeedbackAttachment } from '../../services/bottleneckFeedbackApi.js';
+
 const BottleneckFeedbackPrompt = ({
   serviceId,
   serviceName,
@@ -22,6 +24,14 @@ const BottleneckFeedbackPrompt = ({
   currentStepTitle = null,
   onDismiss = null,
 }) => {
+  const { isDemoMode, getSessionToken } = useOptionalAuth() || {};
+  const localDemo = isDemoMode && import.meta.env.DEV && import.meta.env.VITE_SHARED_FEEDBACK !== 'true';
+  const [busy, setBusy] = useState(false);
+  const [file, setFile] = useState(null);
+  const receipt = useRef(null);
+  const inFlight = useRef(false);
+  const timer = useRef(null);
+  useEffect(() => () => clearTimeout(timer.current), []);
   const [isOpen, setIsOpen] = useState(false);
   const [category, setCategory] = useState(FEEDBACK_CATEGORIES[0].id);
   const [rating, setRating] = useState(3);
@@ -38,12 +48,13 @@ const BottleneckFeedbackPrompt = ({
     setPiiWarning(hasSuspectNumbers);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    if (inFlight.current) return;
+    inFlight.current = true; setBusy(true); setError('');
 
     try {
-      submitBottleneckFeedback({
+      const payload = {
         serviceId,
         serviceName,
         stepIndex: currentStepIndex,
@@ -51,18 +62,25 @@ const BottleneckFeedbackPrompt = ({
         category,
         rating,
         notes,
-      });
+        ...(file ? { attachment: await encodeFeedbackAttachment(file) } : {}),
+      };
+      if (localDemo) submitBottleneckFeedback(payload);
+      else {
+        const fingerprint = JSON.stringify(payload);
+        if (receipt.current?.fingerprint !== fingerprint) receipt.current = { fingerprint, key: crypto.randomUUID() };
+        await feedbackRequest({ method: 'POST', body: payload, key: receipt.current.key, getToken: getSessionToken });
+      }
 
       setSubmitted(true);
-      setTimeout(() => {
+      timer.current = setTimeout(() => {
         setSubmitted(false);
         setIsOpen(false);
-        setNotes('');
+        setNotes(''); setFile(null); receipt.current = null;
         if (onDismiss) onDismiss();
       }, 2500);
     } catch (err) {
       setError(err.message || 'Could not save feedback.');
-    }
+    } finally { inFlight.current = false; setBusy(false); }
   };
 
   return (
@@ -77,6 +95,7 @@ const BottleneckFeedbackPrompt = ({
         transition: 'all 0.2s ease',
       }}
     >
+      {localDemo && <p role="status" style={{ padding: '0 1rem' }}>Local demonstration: feedback stays on this device and is not sent to maintainers.</p>}
       {/* Non-intrusive Collapsible Trigger */}
       <button
         type="button"
@@ -147,13 +166,13 @@ const BottleneckFeedbackPrompt = ({
               <CheckCircle2 size={32} style={{ margin: '0 auto 0.5rem' }} />
               <div style={{ fontWeight: '700', fontSize: '1rem' }}>Thank You for Your Feedback!</div>
               <div style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                Our community maintainers will review this step to make instructions clearer and more accessible.
+                {localDemo ? 'Saved on this device for demonstration only.' : 'Received by the shared moderation queue. Attachments remain private until scanned.'}
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form aria-busy={busy} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {error && (
-                <div
+                <div role="alert"
                   style={{
                     padding: '0.65rem 0.85rem',
                     borderRadius: '0.5rem',
@@ -179,6 +198,8 @@ const BottleneckFeedbackPrompt = ({
                       <button
                         type="button"
                         key={cat.id}
+                        disabled={busy}
+                        aria-pressed={isSelected}
                         onClick={() => setCategory(cat.id)}
                         style={{
                           padding: '0.4rem 0.85rem',
@@ -207,6 +228,8 @@ const BottleneckFeedbackPrompt = ({
                 </label>
                 <input
                   type="range"
+                  aria-label="Friction level"
+                  disabled={busy}
                   min="1"
                   max="5"
                   step="1"
@@ -234,6 +257,9 @@ const BottleneckFeedbackPrompt = ({
                   Optional details (What specifically was missing or unclear?)
                 </label>
                 <textarea
+                  aria-label="Feedback details"
+                  maxLength={1500}
+                  disabled={busy}
                   rows={3}
                   value={notes}
                   onChange={handleNotesChange}
@@ -269,6 +295,12 @@ const BottleneckFeedbackPrompt = ({
                 )}
               </div>
 
+              {!localDemo && <label>
+                Optional attachment (PNG, JPEG or PDF, up to 256 KB)
+                <input type="file" accept="image/png,image/jpeg,application/pdf" disabled={busy}
+                  onChange={event => setFile(event.target.files?.[0] || null)} />
+                <small>Do not upload personal documents. Files are quarantined; only scanner-approved files can be opened by moderators.</small>
+              </label>}
               {/* Action Buttons */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', alignItems: 'center' }}>
                 <button
@@ -281,6 +313,7 @@ const BottleneckFeedbackPrompt = ({
                 </button>
                 <button
                   type="submit"
+                  disabled={busy}
                   className="btn btn-primary"
                   style={{
                     padding: '0.45rem 1.25rem',
@@ -290,7 +323,7 @@ const BottleneckFeedbackPrompt = ({
                     gap: '0.4rem',
                   }}
                 >
-                  <Send size={14} /> Submit Feedback
+                  <Send size={14} /> {busy ? 'Sending…' : 'Submit Feedback'}
                 </button>
               </div>
             </form>

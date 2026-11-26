@@ -10,7 +10,7 @@
  * 5. New Municipal Water & Sewerage Connection (v1.0.0 Multi-Office Baseline)
  */
 
-import { NODE_TYPES, EDGE_TYPES, TERMINAL_STATUSES } from './digitalTwinContract';
+import { NODE_TYPES, EDGE_TYPES, TERMINAL_STATUSES } from './digitalTwinContract.js';
 
 /**
  * Baseline Working Workflow: Income Certificate (v1.0.0)

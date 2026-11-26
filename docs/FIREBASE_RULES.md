@@ -129,3 +129,5 @@ The `Firebase rules` workflow runs the emulator tests on every pull request that
 ## What rules cannot do
 
 Rules see one request at a time: they cannot rate limit per IP or per minute, send an e-mail or check a value against another service. Use Firebase App Check and quotas for abuse limits, and keep anything that needs a trusted decision (changing roles, publishing aggregates) in server code.
+
+Shared guide feedback now uses the server-owned ingestion/moderation boundary. See [Public feedback pipeline](PUBLIC_FEEDBACK_PIPELINE.md) for the version-2 cutover, private attachment quarantine and legacy-record retention. Clients cannot directly read/write `bottleneckFeedback`, its audit subcollections or its aggregates.

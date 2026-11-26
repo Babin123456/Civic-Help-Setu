@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   FileCheck,
   Upload,
+  ScanSearch,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -27,6 +28,8 @@ import {
   approveServiceSubmission,
   rejectServiceSubmission,
 } from '../services/adminService';
+
+import importBatchService from '../services/importBatchService';
 import AdminStatsGrid from '../components/admin/AdminStatsGrid';
 import ServiceModal from '../components/admin/ServiceModal';
 import ReportResolutionModal from '../components/admin/ReportResolutionModal';
@@ -40,9 +43,18 @@ import CommunityFacilityCorrectionQueue from '../components/admin/CommunityFacil
 import LibraryCorrectionQueue from '../components/admin/LibraryCorrectionQueue';
 import RentalCorrectionQueue from '../components/admin/RentalCorrectionQueue';
 import RoadHazardReviewQueue from '../components/admin/RoadHazardReviewQueue';
+import PedestrianBarrierReviewQueue from '../components/admin/PedestrianBarrierReviewQueue';
 import AddressChangeCorrectionQueue from '../components/admin/AddressChangeCorrectionQueue';
+import ProvenanceReviewQueue from '../components/admin/ProvenanceReviewQueue';
+import CivicReleaseProvenanceLedgerPanel from '../components/admin/CivicReleaseProvenanceLedgerPanel';
+import CivicChaosResiliencePanel from '../components/admin/CivicChaosResiliencePanel';
+import CounterDemandReviewQueue from '../components/admin/CounterDemandReviewQueue';
 import SurveyAuditQueue from '../components/admin/SurveyAuditQueue';
+import PublicToiletReviewQueue from '../components/admin/PublicToiletReviewQueue';
+import TransitConcessionReviewQueue from '../components/admin/TransitConcessionReviewQueue';
+import OpenContractingAuditQueue from '../components/admin/OpenContractingAuditQueue';
 import AuditLogViewer from '../components/admin/AuditLogViewer';
+import ModelGatewayDashboard from '../components/admin/ModelGatewayDashboard';
 import ServiceImportPanel from '../components/admin/ServiceImportPanel';
 import ServiceRecordList from '../components/admin/ServiceRecordList';
 import ServiceLifecycleReview from '../components/admin/ServiceLifecycleReview';
@@ -61,6 +73,7 @@ import ServiceDraftsPanel from '../components/admin/ServiceDraftsPanel';
 import CivicWorkflowDigitalTwinWorkspace from './CivicWorkflowDigitalTwinWorkspace';
 import { getDraftForService, listDrafts, saveDraft } from '../services/serviceDrafts';
 import CatalogueMigrationPanel from '../components/admin/CatalogueMigrationPanel';
+import ImportConsole from '../pages/ImportConsole';
 import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
 import CatalogueCompletenessPanel from '../components/admin/CatalogueCompletenessPanel';
 import EligibilityTestBenchPanel from '../components/admin/EligibilityTestBenchPanel';
@@ -88,6 +101,13 @@ import RuleConflictInspectorModal from '../components/admin/RuleConflictInspecto
 import DuplicateServiceDetectorPanel from '../components/admin/DuplicateServiceDetectorPanel';
 import CatalogueConflictDetectorPanel from '../components/admin/CatalogueConflictDetectorPanel';
 import CivicWorksModeratorPanel from '../components/civicWorks/CivicWorksModeratorPanel';
+import AgentReviewStudioPanel from '../components/admin/AgentReviewStudioPanel';
+
+import WardIssueHeatmap from '../components/analytics/WardIssueHeatmap';
+
+import AccessibilityInspectorPanel from '../components/AccessibilityInspectorPanel';
+import MultiRegionHealthPanel from '../components/admin/MultiRegionHealthPanel';
+
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -626,6 +646,21 @@ const Admin = () => {
 
             <button
               type="button"
+              onClick={() => navigate('/services/catalogue-visual-qa')}
+              className="btn btn-secondary"
+              style={{
+                padding: '0.5rem 0.85rem',
+                fontSize: '0.85rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+              }}
+            >
+              <ScanSearch size={16} /> Catalogue visual QA
+            </button>
+
+            <button
+              type="button"
               onClick={handleLogout}
               className="btn btn-secondary"
               style={{
@@ -734,8 +769,32 @@ const Admin = () => {
                 badge: null,
               },
               { id: 'duplicates', label: 'Duplicate Detection', badge: null },
+  {
+    id: 'imports',
+    label: `Imports (${importBatchService.getStatistics().total})`,
+    badge: null,
+  },
               { id: 'conflicts', label: 'Requirement Conflicts', badge: null },
               { id: 'civic-works', label: 'Ward Public Works', badge: null },
+
+              { id: 'agent-review', label: 'Agent Review Studio', badge: null },
+
+
+              { id: 'model-gateway', label: 'Model Gateway & Residency', badge: null },
+
+
+              { id: 'ward-analytics', label: 'Ward Civic Analytics', badge: null },
+
+              { id: 'pedestrian-barriers', label: 'Pedestrian Route Barriers', badge: null },
+              { id: 'public-projects', label: 'Public Project Timeline', badge: null },
+              { id: 'provenance-reviews', label: 'Knowledge Provenance', badge: null },
+              { id: 'release-ledger', label: 'Release Signatures & Ledger', badge: null },
+              { id: 'chaos-resilience', label: 'Chaos & Resilience Suite', badge: null },
+              { id: 'counter-demand', label: 'Counter Demand & Staffing', badge: null },
+              { id: 'multi-region', label: 'Multi-Region Topology & Lag', badge: null },
+
+
+
               { id: 'audit', label: 'Audit Trail Logs', badge: null },
               { id: 'digital-twin', label: 'Digital Twin Simulation', badge: null },
             ].map((tab) => {
@@ -804,6 +863,9 @@ const Admin = () => {
 
                 {/* Citizen-Reported Service Barrier Insights Dashboard (#148) */}
                 <BarrierInsightsDashboard />
+
+                {/* AI-assisted Accessibility Inspector (#832) */}
+                <AccessibilityInspectorPanel />
               </div>
             )}
 
@@ -974,6 +1036,7 @@ const Admin = () => {
                 )}
 
                 <ServiceOwnershipModal
+                  auditLogs={auditLogs}
                   isOpen={ownershipModal.isOpen}
                   onClose={() => setOwnershipModal({ isOpen: false, service: null })}
                   service={ownershipModal.service}
@@ -1162,12 +1225,21 @@ const Admin = () => {
                 <div style={{ marginTop: '2rem' }}>
                   <LibraryCorrectionQueue />
                 </div>
+                <TransitConcessionReviewQueue />
                 <div style={{ marginTop: '2rem' }}>
                   <AddressChangeCorrectionQueue />
                 </div>
                 <div style={{ marginTop: '2rem' }}>
+                  <CounterDemandReviewQueue />
+                </div>
+                <div style={{ marginTop: '2rem' }}>
                   <SurveyAuditQueue />
                   <RoadHazardReviewQueue />
+                  <PublicToiletReviewQueue />
+                  <div style={{ marginTop: '2rem' }}>
+                    <PedestrianBarrierReviewQueue />
+                  </div>
+                  <OpenContractingAuditQueue />
                 </div>
               </div>
             )}
@@ -1773,6 +1845,112 @@ const Admin = () => {
               </div>
             )}
 
+
+            {/* Human-in-the-Loop Agent Review Studio Tab */}
+            {activeTab === 'agent-review' && (
+              <div>
+                <AgentReviewStudioPanel />
+              </div>
+            )}
+
+            {/* Model Gateway & Data Residency Tab (#1153) */}
+            {activeTab === 'model-gateway' && (
+              <div>
+                <ModelGatewayDashboard />
+              </div>
+            )}
+
+            {/* Differentially Private Ward Civic Analytics Tab */}
+            {activeTab === 'ward-analytics' && (
+              <div style={{ backgroundColor: '#ffffff', padding: '1.5rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
+                <WardIssueHeatmap clientId="admin-analytics-session" />
+              </div>
+            )}
+
+            {/* Pedestrian Route Barrier Moderation Tab */}
+            {activeTab === 'pedestrian-barriers' && (
+              <div>
+                <PedestrianBarrierReviewQueue />
+              </div>
+            )}
+
+            {/* Public Infrastructure Projects Verification Tab */}
+            {activeTab === 'public-projects' && (
+              <div
+                style={{
+                  background: 'var(--bg-card)',
+                  padding: '1.5rem',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-light)',
+                }}
+              >
+                <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)' }}>
+                  Geospatial Public Project Verification &amp; Evidence Timeline
+                </h3>
+                <p
+                  style={{
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.9rem',
+                    marginBottom: '1.25rem',
+                  }}
+                >
+                  Manage public civil infrastructure projects across roads, stormwater
+                  drains, schools, and civic buildings. Review photographic evidence
+                  submissions and commit authorized verification decisions.
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => navigate('/public-projects')}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                  }}
+                >
+                  Open Public Projects Workspace &amp; Review Queue
+                </button>
+              </div>
+            )}
+
+            {/* Knowledge Provenance Review Queue Tab (#777) */}
+            {activeTab === 'provenance-reviews' && (
+              <div>
+                <ProvenanceReviewQueue />
+              </div>
+            )}
+
+            {/* Civic Release Provenance Signatures & Release Ledger (#1178) */}
+            {activeTab === 'release-ledger' && (
+              <div>
+                <CivicReleaseProvenanceLedgerPanel />
+              </div>
+            )}
+
+            {/* Civic Operations Chaos Engineering & Resilience Suite (#1192) */}
+            {activeTab === 'chaos-resilience' && (
+              <div>
+                <CivicChaosResiliencePanel />
+              </div>
+            )}
+
+            {/* Counter Demand & Queue Staffing Moderation Tab (#764) */}
+            {activeTab === 'counter-demand' && (
+              <div>
+                <CounterDemandReviewQueue />
+              </div>
+            )}
+
+            {/* Multi-Region Topology & Lag Dashboard Tab (#1233) */}
+            {activeTab === 'multi-region' && (
+              <div>
+                <MultiRegionHealthPanel />
+
+
+
+              </div>
+            )}
+
             {/* Audit Trail Tab */}
             {activeTab === 'audit' && (
               <div>
@@ -1786,10 +1964,13 @@ const Admin = () => {
                 <CivicWorkflowDigitalTwinWorkspace />
               </div>
             )}
+
+            {/* Import Console Tab */}
+            {activeTab === 'imports' && <ImportConsole />}
           </div>
-        </div>
 
         {/* Modals */}
+        <>
         <ConfirmationDialog
           isOpen={Boolean(pendingAction)}
           title={pendingAction?.dialog.title}
@@ -1848,7 +2029,9 @@ const Admin = () => {
           onApprove={handleApproveSubmission}
           onReject={handleRejectSubmission}
         />
+        </>
       </div>
+    </div>
     </div>
   );
 };

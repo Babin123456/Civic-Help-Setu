@@ -185,7 +185,7 @@ export const reciprocalRankFusion = ({
 /**
  * In-Memory Hybrid Index Store
  */
-class HybridIndexStore {
+export class HybridIndexStore {
   constructor() {
     this.chunks = [];
     this.vectors = new Map(); // chunkId -> { vector, contentHash, modelName, modelVersion }
@@ -290,7 +290,7 @@ class HybridIndexStore {
     let fallbackUsed = false;
     try {
       denseQueryVector = generateDenseEmbedding(query);
-    } catch (err) {
+    } catch {
       fallbackUsed = true;
     }
 
