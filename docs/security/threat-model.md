@@ -233,6 +233,19 @@ Likelihood and impact are rough: Low, Medium, High. Status is what the code does
 
 - A person can edit their own `localStorage`. The services parse with `try/catch`, check types (for example `isValidVaultRecord` on import) and fall back to defaults, so a broken value does not crash the app. This only affects that person. Low risk, listed for completeness.
 
+### T12: Explainable eligibility simulation and counterfactual generation (Issue #1156)
+
+- **What:** The simulation engine allows citizens to test hypothetical "what-if" input scenarios and generates counterfactual suggestions (e.g. acquiring an income certificate or adjusting family income thresholds). Three distinct risks exist:
+  1. *Deceptive Authority & False Reliance:* Citizens could mistake simulated hypothetical outcomes for formal government benefit grants or binding denials.
+  2. *Algorithmic / Combinatorial Denial-of-Service:* Malformed rule graphs with cyclic dependencies or unbounded perturbation matrices could exhaust browser CPU cycles.
+  3. *PII Leakage in Simulation Payloads:* Passing raw personal identifiers or identity documents into the simulator could expose them to memory dumps or unintended persistence.
+  4. *Rule Hallucination / Drift:* Fabricating rules or criteria without official gazette or circular backing.
+- **Mitigation:**
+  - Mandatory un-dismissible administrative banner: *"Informational Guidance Only — Not an Official Legal Determination"*. No autonomous filing or official claims.
+  - Strict cycle detection in rule graph validation (`ruleGraphRegistry.js`) and bounded search depth ($\le 3$) with a 25ms computational budget in `counterfactualEngine.js`.
+  - Input sanitizer rejecting forbidden PII keys (`FORBIDDEN_FIELDS` from `serviceContract.js`), running entirely client-side without network egress.
+  - Deterministic typed rule graphs with mandatory statutory citations (`authority`, `circularNo`, `orderDate`).
+
 ## 6. Proposed follow ups
 
 These are suggestions for new issues. They are **not filed yet**; the maintainer decides which to open and at what priority. Existing issues are referenced by number instead of being repeated.
