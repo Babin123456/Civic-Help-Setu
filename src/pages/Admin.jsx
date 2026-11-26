@@ -1931,13 +1931,12 @@ const Admin = () => {
             )}
 
             {/* Import Console Tab */}
-            {activeTab === 'imports' && (
-              <ImportConsole />
-            )}
+            {activeTab === 'imports' && <ImportConsole />}
           </div>
         </div>
 
         {/* Modals */}
+        <>
         <ConfirmationDialog
           isOpen={Boolean(pendingAction)}
           title={pendingAction?.dialog.title}
@@ -1996,6 +1995,7 @@ const Admin = () => {
           onApprove={handleApproveSubmission}
           onReject={handleRejectSubmission}
         />
+        </>
       </div>
     </div>
   );
