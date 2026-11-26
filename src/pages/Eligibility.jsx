@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Sparkles, ShieldCheck, Bookmark, HelpCircle, Calculator } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Sparkles, ShieldCheck, Calculator, Clock } from 'lucide-react';
 import UniversalEligibilityWizard from '../components/eligibility/UniversalEligibilityWizard';
 import SavedAssessmentsList from '../components/eligibility/SavedAssessmentsList';
 import EntitlementCalculatorModal from '../components/eligibility/EntitlementCalculatorModal';
@@ -163,6 +164,27 @@ const Eligibility = () => {
             <Calculator size={16} />
             <span>Welfare Subsidy Maximizer</span>
           </button>
+          <Link
+            to="/temporal-policy"
+            style={{
+              padding: '0.6rem 1.5rem',
+              borderRadius: '99px',
+              fontWeight: '700',
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              border: '1px solid var(--accent-main)',
+              background: 'var(--bg-secondary)',
+              color: 'var(--accent-main)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              textDecoration: 'none',
+              transition: 'all 0.2s',
+            }}
+          >
+            <Clock size={16} />
+            <span>As-Of Policy Simulator</span>
+          </Link>
         </div>
 
         {/* Transparent logic privacy banner */}

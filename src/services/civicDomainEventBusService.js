@@ -42,6 +42,8 @@ export const CIVIC_EVENT_TYPE = {
   DEFICIENCY_NOTICE_ISSUED: 'DEFICIENCY_NOTICE_ISSUED',
   DOCUMENT_VERIFIED: 'DOCUMENT_VERIFIED',
   FEE_RECEIPT_ISSUED: 'FEE_RECEIPT_ISSUED',
+  TEMPORAL_POLICY_EVALUATED: 'TEMPORAL_POLICY_EVALUATED',
+  TEMPORAL_RULE_PUBLISHED: 'TEMPORAL_RULE_PUBLISHED',
 };
 
 export const OUTBOX_STATUS = {
@@ -445,4 +447,11 @@ export function _resetEventBusInternalStores() {
   consumerRegistry.clear();
   consumerExecutionLogs.clear();
   administrativeAuditLog.length = 0;
+}
+
+/**
+ * Retrieves all outbox events for inspection and testing.
+ */
+export function getOutboxEvents() {
+  return Array.from(outboxStore.values());
 }

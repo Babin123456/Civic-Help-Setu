@@ -20,6 +20,7 @@ import tenderCorrections from "./_lib/handlers/tender-corrections.js";
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import temporalPolicy from "./_lib/handlers/temporal-policy.js";
 
 const handlers = {
   "address-change-corrections": addressChange,
@@ -36,6 +37,7 @@ const handlers = {
   "rental-checklist-corrections": rentalChecklist,
   "send-email": sendEmail,
   "share-by-email": shareByEmail,
+  "temporal-policy": temporalPolicy,
   "tender-corrections": tenderCorrections,
   "ward-budget-proposals": wardBudgetProposals,
   "water-tanker-reports": waterTankerReports,
