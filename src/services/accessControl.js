@@ -122,3 +122,15 @@ export const actorLabel = (fallback = 'Admin') => {
   const actor = currentActor;
   return (actor && (actor.username || actor.fullName || actor.email)) || fallback;
 };
+
+/**
+ * Resolves jurisdiction codes assigned to an actor.
+ * @param {object|null} [actor] defaults to current actor
+ * @returns {string[]} array of jurisdiction codes
+ */
+export const resolveActorJurisdictions = (actor = currentActor) => {
+  if (!actor || typeof actor !== 'object') return [];
+  if (Array.isArray(actor.jurisdictions)) return [...actor.jurisdictions];
+  if (typeof actor.jurisdiction === 'string' && actor.jurisdiction) return [actor.jurisdiction];
+  return [];
+};
