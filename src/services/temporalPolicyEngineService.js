@@ -11,7 +11,7 @@
  * 7. Immutable audit snapshot creation with deterministic cryptographic digests.
  */
 
-import { sha256Hex } from './privacyIntegrityService';
+import { sha256Hex } from './privacyIntegrityService.js';
 
 export const JURISDICTION_LEVELS = {
   CENTRAL: 'central',

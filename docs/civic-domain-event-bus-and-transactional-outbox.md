@@ -3,8 +3,9 @@
 ## Overview
 Civic workflows—such as application lodgement, grievance escalation, deficiency notices, document verification, and fee receipt generation—often involve cross-cutting concerns (notifications, audit chains, compliance monitors, and analytics). Directly invoking side-effects synchronously within primary user actions creates fragile failure cascades, double-submission risks, and loss of critical state during transient network or service outages.
 
-The `civicDomainEventBusService` (`src/services/civicDomainEventBusService.js`) introduces an enterprise-grade internal event architecture utilizing the **Transactional Outbox Pattern**. It ensures that civic domain events are staged atomically with primary state mutations, dispatched reliably with exponential backoff retries, tracked through consumer offsets, quarantined via Dead-Letter Queues (DLQ) upon repeated failures, and replayed safely by authorized operators with full audit logging.
+The `civicDomainEventBusService` (`src/services/civicDomainEventBusService.js`) is a **process-local prototype**. Its maps stage events, track retries and successful handlers, retain dead letters, and record replay audit entries only until the process restarts. It does not commit events atomically with database writes, authenticate operators, or provide cross-process delivery guarantees. No production producer bootstrap is installed by this module.
 
+The [event contract registry and migration runbook](CIVIC_EVENT_CONTRACTS.md) defines the implemented admission checks, opt-in typed releases, consumer pins, CI impact reports, deprecation and rollback procedure. The transactional deployment architecture below is an integration goal, not a claim that durable storage exists.
 ---
 
 ## Architectural Pillars
@@ -34,9 +35,9 @@ Each event package encapsulates:
 
 ### 2. Transactional Outbox Pattern
 Instead of dispatching events directly across external network boundaries:
-1. The producer invokes `stageOutboxEvent(input)` within its atomic unit-of-work.
+1. The producer invokes `stageOutboxEvent(input)`; a deployment must supply a real database unit-of-work before claiming transactional staging.
 2. The event is stored with initial status `PENDING_DELIVERY`.
-3. If an identical `idempotencyKey` is presented on client retries, the existing outbox entry is returned immediately without creating duplicate deliveries.
+3. After contract validation, retries within the same tenant and producer return the existing entry only if event type, version, aggregate and sanitized payload match; conflicting reuse is rejected.
 
 ---
 
@@ -60,7 +61,7 @@ When an event exceeds its maximum retry threshold (`maxAttempts`, default 3):
 
 ### 5. Administrative Replay & Audit Trail
 Operational desk operators and administrators can resolve and replay dead-lettered events via `replayDeadLetterEvent()`:
-- **Authorization**: Requires authenticated `operatorId` and non-empty `justification`.
+- **Caller precondition**: Checks only non-empty `operatorId` and `justification` strings. A trusted authenticated/authorized operator boundary must be supplied by the caller; these fields alone do not authenticate anyone.
 - **Reset**: Resets delivery counters and clears failed consumer execution logs for that specific event.
 - **Audit Logging**: Writes an append-only audit record to `administrativeAuditLog` capturing timestamp, operator identity, target event, and operational justification.
 
@@ -72,7 +73,7 @@ Operational desk operators and administrators can resolve and replay dead-letter
 - Contact numbers are masked as `XXXXXX_REDACTED`.
 - Email addresses are mapped to non-routable scoped pseudonyms (`REDACTED@DOMAIN.LOCAL`).
 - Aadhaar and PAN numbers are redacted (`XXXX-XXXX-REDACTED`).
-- Authentication secrets and tokens are permanently stripped from event payloads.
+- The top-level `authTokens` field is removed. This is not recursive PII/secret detection: callers must pass reference-only payloads and must not include nested secrets.
 
 ---
 
@@ -96,5 +97,5 @@ Comprehensive Vitest unit tests in `src/services/civicDomainEventBusService.test
 5. Sequential delivery, retry backoff, and state transitions.
 6. Dead-Letter Queue (DLQ) routing upon retry exhaustion.
 7. Poison message isolation allowing healthy events to progress.
-8. Administrative replay with authorized justification and audit trail logging.
+8. Administrative replay input checks, justification and process-local audit trail logging.
 9. Observability and operational health metrics calculation.

@@ -5,7 +5,7 @@
  * historical decision evaluation snapshots with resilient in-memory fallback.
  */
 
-import { JURISDICTION_LEVELS, RULE_STATUS } from './temporalPolicyEngineService';
+import { JURISDICTION_LEVELS, RULE_STATUS } from './temporalPolicyEngineService.js';
 
 const STORAGE_KEY_RULES = 'civicbridge_temporal_rules_v1';
 const STORAGE_KEY_SNAPSHOTS = 'civicbridge_temporal_snapshots_v1';

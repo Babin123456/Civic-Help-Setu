@@ -5,9 +5,44 @@ import {
   runPreInferenceGuardrails,
   stripRedactionPlaceholders,
 } from './aiGuardrailPipeline';
+import { civicAgentIncidentResponse, REGISTERED_AGENTS } from '../services/incidentResponse/civicAgentIncidentResponseService';
 
 export const askCivicAssistant = async (rawQuery, options = {}) => {
   const { timeoutMs } = options;
+
+  // Incident Response & Kill-Switch verification boundary
+  const permission = civicAgentIncidentResponse.checkExecutionPermission(
+    REGISTERED_AGENTS.CIVIC_ASSISTANT,
+    { queryPayload: rawQuery }
+  );
+
+  if (!permission.permitted) {
+    const fallbackData = civicAgentIncidentResponse.getFallbackGuidance('default');
+    return {
+      status: 'fallback',
+      incidentIntervention: {
+        code: permission.code,
+        reason: permission.reason,
+      },
+      data: {
+        title: fallbackData.title,
+        summary: `${fallbackData.notice} Reason: ${permission.reason}`,
+        steps: fallbackData.steps,
+        officialSources: [{ title: 'Official National Portal', url: fallbackData.portalUrl }],
+        helpline: fallbackData.helpline,
+      },
+      serviceId: null,
+      suggestions: [
+        'How to reach physical citizen helpdesk?',
+        'Emergency civic helpline numbers',
+      ],
+      guardrail: {
+        decision: 'incident_fallback',
+        intervention: permission.code,
+      },
+    };
+  }
+
   const preGuardrail = runPreInferenceGuardrails(rawQuery || '');
   const guardrailMeta = {
     decision: preGuardrail.decision,

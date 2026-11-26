@@ -1,3 +1,4 @@
+import { validateCivicDataset } from './civicDataQualityService.js';
 // Parsing and validation for bulk service imports (CSV / JSON).
 // Everything here is pure so it can be tested without a browser; saving the
 // accepted records is done by importAdminServices in adminService.js.
@@ -7,6 +8,10 @@ import { SERVICE_CATEGORIES } from '../data/serviceCategories';
 
 export const MAX_IMPORT_BYTES = 1024 * 1024;
 export const MAX_IMPORT_ROWS = 500;
+
+export const IMPORT_LICENSES = ['CC0-1.0', 'CC-BY-4.0', 'CC-BY-SA-4.0', 'PDDL-1.0', 'Public Domain', 'Custom'];
+export const IMPORT_SOURCE_TERMS_PATTERN =
+  /^(Attribution required\.\s)?(License:\s)?(Source:\s)?/i;
 
 const DELIVERY_TYPES = [...new Set(['Online', 'Offline', 'Online / Offline', ...MOCK_SERVICES.map((s) => s.type)])];
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
@@ -50,6 +55,11 @@ export const CSV_COLUMNS = [
   'officialSourceName',
   'officialSourceUrl',
   'lastVerified',
+  'sourceUrl',
+  'retrievalTimestamp',
+  'license',
+  'attribution',
+  'sourceTerms',
 ];
 const PIPE_COLUMNS = new Set(['eligibility', 'documents', 'warnings']);
 const JSON_ONLY_FIELDS = new Set(['steps', 'officialSources', 'popularityScore', 'eligibilityRuleKey', 'dateGuidance', 'validityNote']);
@@ -176,6 +186,27 @@ function csvToRecords(text, warnings) {
     delete raw.officialSourceUrl;
     delete raw.officialSourceName;
     if (raw.speedDays !== undefined) raw.speedDays = Number(raw.speedDays);
+    // Only preserve source metadata if actually present in the source file
+    const hasSourceUrl = raw.sourceUrl !== undefined;
+    const hasRetrievalTimestamp = raw.retrievalTimestamp !== undefined;
+    const hasLicense = raw.license !== undefined;
+    const hasAttribution = raw.attribution !== undefined;
+    const hasSourceTerms = raw.sourceTerms !== undefined;
+    const sourceUrl = hasSourceUrl ? raw.sourceUrl : undefined;
+    const retrievalTimestamp = hasRetrievalTimestamp ? raw.retrievalTimestamp : undefined;
+    const license = hasLicense ? raw.license : undefined;
+    const attribution = hasAttribution ? raw.attribution : undefined;
+    const sourceTerms = hasSourceTerms ? raw.sourceTerms : undefined;
+    delete raw.sourceUrl;
+    delete raw.retrievalTimestamp;
+    delete raw.license;
+    delete raw.attribution;
+    delete raw.sourceTerms;
+    if (hasSourceUrl) raw.sourceUrl = sourceUrl;
+    if (hasRetrievalTimestamp) raw.retrievalTimestamp = retrievalTimestamp;
+    if (hasLicense) raw.license = license;
+    if (hasAttribution) raw.attribution = attribution;
+    if (hasSourceTerms) raw.sourceTerms = sourceTerms;
     return { row: line, raw };
   });
 }
@@ -191,13 +222,42 @@ function jsonToRecords(text) {
   if (!Array.isArray(list)) {
     throw new Error('JSON must be an array of services or an object with a "services" array');
   }
+  // Explicit opt-in: strict contracts must never silently fall back to legacy parsing.
+  let contractResult = null;
+  if (data && !Array.isArray(data) && Object.hasOwn(data, 'contractVersion')) {
+    contractResult = validateCivicDataset({
+      registryVersion: 1,
+      entities: list.map(record => ({ type: 'service', version: data.contractVersion, record })),
+    });
+    if (contractResult.errors.length) throw new Error(contractResult.errors[0].message);
+  }
   return list.map((raw, idx) => {
     // Accept the flat CSV-style source columns in JSON too.
     if (raw && typeof raw === 'object' && !raw.officialSources && raw.officialSourceUrl) {
-      const { officialSourceName, officialSourceUrl, ...rest } = raw;
-      raw = { ...rest, officialSources: [{ name: officialSourceName, url: officialSourceUrl }] };
+      const { officialSourceName, officialSourceUrl, sourceUrl, retrievalTimestamp, license, attribution, sourceTerms, ...rest } = raw;
+      raw = {
+        ...rest,
+        officialSources: [{ name: officialSourceName || 'Official Government Portal', url: officialSourceUrl || '' }],
+        sourceUrl,
+        retrievalTimestamp,
+        license,
+        attribution,
+        sourceTerms,
+      };
+    } else if (raw && typeof raw === 'object') {
+      raw = {
+        ...raw,
+        sourceUrl: raw.sourceUrl,
+        retrievalTimestamp: raw.retrievalTimestamp,
+        license: raw.license,
+        attribution: raw.attribution,
+        sourceTerms: raw.sourceTerms,
+      };
     }
-    return { row: idx + 1, raw };
+    const rejected = contractResult?.quarantined.find(item => item.index === idx);
+    return { row: idx + 1, raw, contractErrors: rejected?.errors,
+      contractVersion: contractResult ? data.contractVersion : null };
+
   });
 }
 
@@ -319,6 +379,45 @@ export function validateRecord(raw) {
     }));
   }
 
+  function isValidUrl(value) {
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function isValidDateYYYYMMDD(value) {
+  if (typeof value !== 'string') return false;
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return false;
+  const [, y, m, d] = match;
+  const date = new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
+  return date.getUTCFullYear() === Number(y) && date.getUTCMonth() === Number(m) - 1 && date.getUTCDate() === Number(d);
+}
+
+function isKnownLicense(value) {
+  return IMPORT_LICENSES.some((l) => l.toLowerCase() === value.toLowerCase());
+}
+
+// Validate import metadata fields that were added from CSV/JSON source URL/license info.
+  if (raw.sourceUrl !== undefined && !isValidUrl(raw.sourceUrl)) {
+    errors.push('sourceUrl must be a valid URL');
+  }
+  if (raw.retrievalTimestamp !== undefined && !isValidDateYYYYMMDD(raw.retrievalTimestamp)) {
+    errors.push('retrievalTimestamp must be a valid date in YYYY-MM-DD format');
+  }
+  if (raw.license !== undefined && !isKnownLicense(raw.license)) {
+    errors.push(`license must be one of: ${IMPORT_LICENSES.join(', ')}`);
+  }
+  if (raw.attribution !== undefined && typeof raw.attribution !== 'string') {
+    errors.push('attribution must be a text value');
+  }
+  if (raw.sourceTerms !== undefined && typeof raw.sourceTerms !== 'string') {
+    errors.push('sourceTerms must be a text value');
+  }
+
   for (const key of Object.keys(raw)) {
     if (!KNOWN_FIELDS.has(key)) warnings.push(`Unknown field "${key}" was ignored`);
   }
@@ -366,7 +465,7 @@ const detectFormat = (fileName, text) => {
  * @param {Array} [options.existingServices] services already in the catalog
  */
 export function buildImportPreview(text, { fileName = '', existingServices = [] } = {}) {
-  const report = { format: null, fileErrors: [], warnings: [], valid: [], invalid: [], duplicates: [], total: 0 };
+  const report = { format: null, fileErrors: [], warnings: [], valid: [], invalid: [], duplicates: [], total: 0, sourceMetadata: null };
 
   if (typeof text !== 'string' || text.trim() === '') {
     report.fileErrors.push('The file is empty');
@@ -396,13 +495,31 @@ export function buildImportPreview(text, { fileName = '', existingServices = [] 
     return report;
   }
 
+  // Extract source metadata from the first record (all records should have consistent source info)
+  const firstRaw = records[0]?.raw || {};
+  report.sourceMetadata = {
+    sourceUrl: firstRaw.sourceUrl || '',
+    retrievalTimestamp: firstRaw.retrievalTimestamp || '',
+    license: firstRaw.license || '',
+    attribution: firstRaw.attribution || '',
+    sourceTerms: firstRaw.sourceTerms || '',
+  };
+
   const existingIds = new Map(existingServices.map((s) => [s.id, s.name]));
   const existingNames = new Map(existingServices.map((s) => [normalizeName(s.name), s.name]));
   const seenIds = new Map();
   const seenNames = new Map();
 
-  for (const { row, raw } of records) {
-    const { service, errors, warnings } = validateRecord(raw);
+  for (const { row, raw, contractErrors, contractVersion } of records) {
+    if (contractErrors?.length) {
+      report.invalid.push({ row, name: '', errors: contractErrors.map(error => `${error.field}: ${error.message}`), warnings: [] });
+      continue;
+    }
+    const checked = validateRecord(raw);
+    const { errors, warnings } = checked;
+    const service = checked.service && contractVersion
+      ? { ...raw, ...checked.service, dataContract: { type: 'service', version: contractVersion } }
+      : checked.service;
     const name = typeof raw?.name === 'string' ? raw.name.trim() : '';
     if (!service) {
       report.invalid.push({ row, name, errors, warnings });
@@ -424,6 +541,14 @@ export function buildImportPreview(text, { fileName = '', existingServices = [] 
       report.valid.push({ row, service, warnings });
     }
   }
+
+  // Compute diff: new vs existing
+  report.diff = {
+    newServices: report.valid.length,
+    existingOverrides: 0,
+    conflicts: report.duplicates.length,
+  };
+
   return report;
 }
 
@@ -447,6 +572,11 @@ export function csvTemplate() {
     officialSourceName: 'Department of Social Justice',
     officialSourceUrl: 'https://socialjustice.gov.in',
     lastVerified: '2026-10-01',
+    sourceUrl: 'https://storage.example.gov/dataset.csv',
+    retrievalTimestamp: '2026-10-01',
+    license: 'CC-BY-4.0',
+    attribution: 'Data source: Department of Social Justice',
+    sourceTerms: 'Attribution required. See license for details.',
   };
   const quote = (v) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
   return `${CSV_COLUMNS.join(',')}\n${CSV_COLUMNS.map((c) => quote(example[c] || '')).join(',')}\n`;
