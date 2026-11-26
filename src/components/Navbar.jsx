@@ -1275,16 +1275,16 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
               })}
 
               {renderNavLink({
-
                 to: '/federated-data',
                 activeTarget: '/federated-data',
                 label: t('nav.federatedData', 'Federated Civic Data'),
                 icon: Database
+              })}
 
+              {renderNavLink({
                 to: '/open-contracting',
                 label: t('nav.openContracting', 'Procurement Red Flags'),
                 icon: ShieldAlert
-
               })}
 
               {renderNavLink({
