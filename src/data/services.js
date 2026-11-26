@@ -1371,7 +1371,8 @@ export const MOCK_SERVICES = [
       { label: 'CPGRAMS Citizen Redressal Helpline', phone: '1800-11-4000', url: 'https://pgportal.gov.in' }
     ],
     lastVerified: '2026-11-25'
-
+  },
+  {
     id: 'public-toilet-directory',
     jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
     name: 'Public Toilet Availability, Accessibility & Maintenance Status',
