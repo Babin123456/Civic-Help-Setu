@@ -159,6 +159,7 @@ export const filterReportsByWindow = (reports = [], windowStr = '30d') => {
     return !Number.isNaN(reportTime) && reportTime >= cutoffTime;
   });
 
+/**
  * Persistence, initial bootstrap seeding, migrations, and rollback support
  * for Anonymized Ward-Level Civic Issue Heatmap and Trend Explorer (#763).
  */
