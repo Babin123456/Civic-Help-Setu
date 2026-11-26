@@ -48,6 +48,7 @@ const WaterBillVisualizerPage = lazy(() => import('./pages/WaterBillVisualizerPa
 const ServiceDetails = lazy(() => import('./pages/ServiceDetails'));
 const Acronyms = lazy(() => import('./pages/Acronyms'));
 const Eligibility = lazy(() => import('./pages/Eligibility'));
+const TemporalPolicyWorkspace = lazy(() => import('./pages/TemporalPolicyWorkspace'));
 const NearbyOffices = lazy(() => import('./pages/NearbyOffices'));
 const Track = lazy(() => import('./pages/Track'));
 const Saved = lazy(() => import('./pages/Saved'));
@@ -226,6 +227,8 @@ function AppRoot() {
                             <Route path="/services/:id" element={<ServiceDetails />} />
                             <Route path="/acronyms" element={<Acronyms />} />
                             <Route path="/eligibility" element={<Eligibility />} />
+                            <Route path="/temporal-policy" element={<TemporalPolicyWorkspace />} />
+                            <Route path="/policy-timeline" element={<TemporalPolicyWorkspace />} />
                             <Route path="/nearby" element={<NearbyOffices />} />
                             <Route path="/nearby-offices" element={<NearbyOffices />} />
                             <Route path="/comparison" element={<ComparisonWorkspace />} />

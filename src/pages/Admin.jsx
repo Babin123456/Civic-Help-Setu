@@ -102,6 +102,7 @@ import DuplicateServiceDetectorPanel from '../components/admin/DuplicateServiceD
 import CatalogueConflictDetectorPanel from '../components/admin/CatalogueConflictDetectorPanel';
 import CivicWorksModeratorPanel from '../components/civicWorks/CivicWorksModeratorPanel';
 import AgentReviewStudioPanel from '../components/admin/AgentReviewStudioPanel';
+import CivicAgentEvalHarnessPanel from '../components/admin/CivicAgentEvalHarnessPanel';
 
 import WardIssueHeatmap from '../components/analytics/WardIssueHeatmap';
 
@@ -778,6 +779,7 @@ const Admin = () => {
               { id: 'civic-works', label: 'Ward Public Works', badge: null },
 
               { id: 'agent-review', label: 'Agent Review Studio', badge: null },
+              { id: 'agent-eval-harness', label: 'Agent Eval Harness', badge: null },
 
 
               { id: 'model-gateway', label: 'Model Gateway & Residency', badge: null },
@@ -1850,6 +1852,13 @@ const Admin = () => {
             {activeTab === 'agent-review' && (
               <div>
                 <AgentReviewStudioPanel />
+              </div>
+            )}
+
+            {/* Civic Agent Evaluation Harness Tab (#1147) */}
+            {activeTab === 'agent-eval-harness' && (
+              <div>
+                <CivicAgentEvalHarnessPanel />
               </div>
             )}
 
