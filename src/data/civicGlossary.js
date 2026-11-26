@@ -314,6 +314,32 @@ export const CIVIC_GLOSSARY = [
 ];
 
 /**
+ * Resolves a glossary entry by its ID or exact term/abbreviation match.
+ * @param {string} identifier
+ * @returns {Object|null}
+ */
+export function getGlossaryEntryById(identifier) {
+  if (!identifier || typeof identifier !== 'string') return null;
+  const clean = identifier.trim().toLowerCase();
+
+  // 1. Direct ID match
+  const byId = CIVIC_GLOSSARY.find((item) => item.id.toLowerCase() === clean);
+  if (byId) return byId;
+
+  // 2. Exact term match
+  const byTerm = CIVIC_GLOSSARY.find((item) => item.term.toLowerCase() === clean);
+  if (byTerm) return byTerm;
+
+  // 3. Exact abbreviation match
+  const byAbbr = CIVIC_GLOSSARY.find((item) =>
+    Array.isArray(item.abbreviations) && item.abbreviations.some((a) => a.toLowerCase() === clean)
+  );
+  if (byAbbr) return byAbbr;
+
+  return null;
+};
+
+/**
  * Finds all jargon terms appearing within arbitrary text.
  * @param {string} text
  * @returns {Array} Matching glossary items
@@ -366,4 +392,83 @@ export const searchGlossary = (query = '') => {
 
     return false;
   });
+};
+
+/**
+ * Searches the translation memory by term, language, or context.
+ * Integrated with glossary search for contributors and citizens.
+ *
+ * @param {string} query - search term, language pair, or context phrase
+ * @returns {Array} Matching translation memory entries
+ */
+export const searchTranslationMemoryInGlossary = (query = '') => {
+  if (!query || typeof query !== 'string' || !query.trim()) return [];
+
+  const q = query.toLowerCase().trim();
+  const storage = typeof localStorage !== 'undefined' ? localStorage : null;
+  if (!storage) return [];
+
+  try {
+    const all = getAllTranslationMemory(storage);
+
+    const results = all.filter((entry) => {
+      const searchable = [
+        entry.sourceTerm,
+        entry.suggestedTranslation,
+        entry.approvedTranslation,
+        entry.context,
+        entry.sourceReference,
+      ]
+        .filter((s) => s && typeof s === 'string')
+        .join(' ')
+        .toLowerCase();
+
+      return searchable.includes(q);
+    });
+
+    return results;
+  } catch (err) {
+    return [];
+  }
+};
+
+/**
+ * Combined search of both glossary and translation memory.
+ * Available for contributors and citizens to look up terms and translations.
+ *
+ * @param {string} query - search term
+ * @returns {Object} { glossary: Array, translationMemory: Array }
+ */
+export const searchAllGlossaryAndMemory = (query = '') => {
+  if (!query || typeof query !== 'string' || !query.trim()) return { glossary: CIVIC_GLOSSARY, translationMemory: [] };
+
+  const q = query.toLowerCase().trim();
+
+  const glossaryResults = CIVIC_GLOSSARY.filter((item) => {
+    // 1. Exact or partial term match
+    if (item.term.toLowerCase().includes(q)) return true;
+    if (item.id.toLowerCase().includes(q)) return true;
+
+    // 2. Abbreviation matches
+    if (Array.isArray(item.abbreviations)) {
+      if (item.abbreviations.some((abbr) => abbr.toLowerCase() === q || abbr.toLowerCase().includes(q))) {
+        return true;
+      }
+    }
+
+    // 3. Definition or context match
+    if (item.simpleMeaning && item.simpleMeaning.toLowerCase().includes(q)) return true;
+    if (item.context && item.context.toLowerCase().includes(q)) return true;
+
+    // 4. Multilingual match
+    if (item.hiTerm && item.hiTerm.toLowerCase().includes(q)) return true;
+    if (item.bnTerm && item.bnTerm.toLowerCase().includes(q)) return true;
+    if (item.taTerm && item.taTerm.toLowerCase().includes(q)) return true;
+
+    return false;
+  });
+
+  const memoryResults = searchTranslationMemoryInGlossary(query);
+
+  return { glossary: glossaryResults, translationMemory: memoryResults };
 };
