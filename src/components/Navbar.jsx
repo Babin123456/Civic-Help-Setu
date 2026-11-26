@@ -27,6 +27,9 @@ import {
   KeyRound,
   Store,
   Trees,
+
+  Database
+
   Calendar,
   HelpCircle,
   School,
@@ -49,6 +52,7 @@ import {
   GraduationCap,
   FolderLock,
   ClipboardList,
+
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -166,6 +170,12 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
         );
       }
 
+
+      if (normalizedTarget === '/federated-data') {
+        return (
+          normalizedPath === '/federated-data' ||
+          normalizedPath === '/federated-civic-data'
+
       if (normalizedTarget === '/up-jan-sunwai') {
         return (
           normalizedPath === '/up-jan-sunwai' ||
@@ -189,6 +199,7 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
           normalizedPath === '/open-contracting' ||
           normalizedPath === '/procurement-analytics' ||
           normalizedPath.startsWith('/open-contracting/')
+
         );
       }
 
@@ -1265,9 +1276,16 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
               })}
 
               {renderNavLink({
+
+                to: '/federated-data',
+                activeTarget: '/federated-data',
+                label: t('nav.federatedData', 'Federated Civic Data'),
+                icon: Database
+
                 to: '/open-contracting',
                 label: t('nav.openContracting', 'Procurement Red Flags'),
                 icon: ShieldAlert
+
               })}
 
               {renderNavLink({

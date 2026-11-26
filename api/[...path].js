@@ -36,6 +36,7 @@ import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import federatedCivicQuery from "./_lib/handlers/federated-civic-query.js";
 
 import civicDataCleanRoom from "./_lib/handlers/civic-data-clean-room.js";
 
@@ -103,6 +104,7 @@ const baseHandlers = {
   "crematorium-corrections": crematorium,
   "email/preferences": emailPreferences,
   "email/verify": emailVerify,
+  "federated-civic-query": federatedCivicQuery,
   "fire-compliance-feedback": fireCompliance,
   "flood-incident-reports": floodIncidentReports,
   "heat-relief-observations": heatReliefObservations,
