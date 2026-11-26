@@ -3,8 +3,8 @@ import { parseAssistantQuery, parseSlugParam } from '../utils/searchParams';
 import { useLocation, Link } from 'react-router-dom';
 import { Send, AlertCircle, Loader2, Sparkles, Mic, MicOff, BookOpen, RefreshCw, Pencil, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { runPreInferenceGuardrails } from '../ai/aiGuardrailPipeline';
-import { askCivicAssistant } from '../ai/civicAssistant';
-import { askGroundedCivicAssistant } from '../ai/groundedCivicAssistant';
+import { runCivicAgentPipeline } from '../ai/agents/agentOrchestrator';
+import AgentContractBadge from '../components/assistant/AgentContractBadge';
 import SourceGroundedBadge from '../components/assistant/SourceGroundedBadge';
 import SourcesAndLimitations from '../components/assistant/SourcesAndLimitations';
 import ChatHeaderControls from '../components/chat/ChatHeaderControls';
@@ -58,6 +58,10 @@ const Assistant = () => {
     saveChatHistory(messages);
   }, [messages]);
 
+  const currentServiceContextId = overrideServiceId !== null
+    ? (overrideServiceId || null)
+    : (urlServiceId || location.state?.serviceId || (!hasUserMessages(messages) ? null : lastAssistantServiceId(messages)));
+
   const getAnswer = async (query, history) => {
     // Short follow-ups like "what are the fees?" reuse the service from the last answer
     const resolved = resolveFollowUpQuery(query, history);
@@ -74,13 +78,9 @@ const Assistant = () => {
       }
     }
 
-    let response;
-    try {
-      response = await askGroundedCivicAssistant(safeQuery);
-    } catch (groundingErr) {
-      logDiagnostic('Grounded retrieval error, falling back to basic assistant:', groundingErr);
-      response = await askCivicAssistant(safeQuery);
-    }
+    const response = await runCivicAgentPipeline(safeQuery, {
+      serviceContextId: currentServiceContextId,
+    });
     return {
       id: `asst-${Date.now()}`,
       role: 'assistant',
@@ -95,6 +95,7 @@ const Assistant = () => {
       suggestions: response.suggestions || [],
       guardrail: response.guardrail || null,
       entailment: response.entailment || null,
+      contractMeta: response.contractMeta || null,
       timestamp: new Date().toISOString(),
     };
   };
@@ -267,9 +268,6 @@ const Assistant = () => {
   };
 
   const questionCount = messages.filter((m) => m.role === 'user').length;
-  const currentServiceContextId = overrideServiceId !== null
-    ? (overrideServiceId || null)
-    : (urlServiceId || location.state?.serviceId || (!hasUserMessages(messages) ? null : lastAssistantServiceId(messages)));
 
   const renderAssistantContent = (msg) => {
     if (msg.text && !msg.data) {
@@ -285,6 +283,7 @@ const Assistant = () => {
           confidenceScore={msg.confidenceScore ?? 0.85}
           sourcesCount={data.officialSources?.length || (msg.retrievedChunks?.length || 1)}
         />
+        <AgentContractBadge contractMeta={msg.contractMeta} />
 
         {(msg.status === 'blocked' || msg.guardrail?.injection?.blocked) && (
           <div
