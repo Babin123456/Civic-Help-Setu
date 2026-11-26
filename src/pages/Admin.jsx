@@ -1838,6 +1838,8 @@ const Admin = () => {
             {activeTab === 'ward-analytics' && (
               <div style={{ backgroundColor: '#ffffff', padding: '1.5rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
                 <WardIssueHeatmap clientId="admin-analytics-session" />
+              </div>
+            )}
 
             {/* Pedestrian Route Barrier Moderation Tab */}
             {activeTab === 'pedestrian-barriers' && (
