@@ -138,6 +138,7 @@ const Services = lazy(() => import('./pages/Services'));
 const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
 const CostCarbonGovernorWorkspacePage = lazy(() => import('./pages/CostCarbonGovernorWorkspace'));
 const PolicyEngineWorkspacePage = lazy(() => import('./pages/PolicyEngineWorkspace'));
+const ContractTestMarketplaceWorkspacePage = lazy(() => import('./pages/ContractTestMarketplaceWorkspace'));
 const FreshnessPredictionWorkspacePage = lazy(() => import('./pages/FreshnessPredictionWorkspace'));
 
 const ServicesFallback = () => (
@@ -438,6 +439,8 @@ function AppRoot() {
                             {/* Civic Agent Workflow Policy-as-Code Engine (public evaluation UI) */}
                             <Route path="/policy-engine" element={<PolicyEngineWorkspacePage />} />
 
+                            {/* Civic Service Integration Contract Test Marketplace (maintainer QA UI) */}
+                            <Route path="/contract-test-marketplace" element={<ContractTestMarketplaceWorkspacePage />} />
                             {/* Civic Information Freshness Prediction & Review Prioritization (maintainer triage UI) */}
                             <Route path="/freshness-prediction" element={<FreshnessPredictionWorkspacePage />} />
 
