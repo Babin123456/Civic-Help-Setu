@@ -82,3 +82,10 @@ export function clientKey(headers = {}) {
   }
   return null;
 }
+
+export {
+  createTenantRateLimiter,
+  createInMemoryBucketStore,
+  resolveRateLimitContext,
+  DEFAULT_ROUTE_PROFILES,
+} from './tenantRateLimiter.js';

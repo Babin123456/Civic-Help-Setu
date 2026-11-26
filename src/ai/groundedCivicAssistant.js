@@ -16,6 +16,7 @@ import {
   evaluateAssistantProposal,
   FIREWALL_DECISION,
 } from './promptInjectionFirewall.js';
+import { generateGuidanceWithProvenance } from '../services/civicGuidanceProvenanceService.js';
 
 export const MANDATORY_LEGAL_DISCLAIMER =
   'Notice: This guidance is retrieved from approved civic service guidelines and does not constitute an official government eligibility decision. Rules, deadlines, and fees may vary by municipality.';
@@ -116,6 +117,34 @@ export async function askGroundedCivicAssistant(query, options = {}) {
       status: 'unsupported',
       grounded: false,
       confidenceScore: retrieval.confidenceScore,
+      provenance: {
+        version: '1.0.0',
+        status: 'UNSUPPORTED',
+        claims: [],
+        unsupportedClaims: [
+          {
+            claimId: 'claim-unsupported-0',
+            text: sanitizedQuery,
+            status: 'UNKNOWN',
+            reason: 'No verified official government documentation found for this question.',
+          },
+        ],
+        overallGrounded: false,
+        jurisdiction: {
+          requestedCode: options.jurisdictionCode || null,
+          resolvedLevel: 'unknown',
+          isStateSpecific: false,
+        },
+      },
+      claims: [],
+      unsupportedClaims: [
+        {
+          claimId: 'claim-unsupported-0',
+          text: sanitizedQuery,
+          status: 'UNKNOWN',
+          reason: 'No verified official government documentation found for this question.',
+        },
+      ],
       guardrail: {
         decision: preGuardrail.decision,
         pii: preGuardrail.pii,
@@ -163,6 +192,18 @@ export async function askGroundedCivicAssistant(query, options = {}) {
     humanApproved: options.humanApproved === true,
   });
 
+  // Generate high-precision claim-level provenance
+  let provenance;
+  try {
+    provenance = await generateGuidanceWithProvenance({
+      query: retrievalQuery,
+      jurisdictionCode: options.jurisdictionCode || null,
+      referenceTimestamp: options.referenceTimestamp || Date.now(),
+    });
+  } catch {
+    provenance = null;
+  }
+
   // Generate contextual suggestions
   const serviceName = topChunk.serviceName;
   const suggestions = [
@@ -190,6 +231,9 @@ export async function askGroundedCivicAssistant(query, options = {}) {
           proposalCheck,
         }
       : null,
+    provenance,
+    claims: provenance?.claims || entailment.claims || [],
+    unsupportedClaims: provenance?.unsupportedClaims || [],
     guardrail: {
       decision: preGuardrail.decision,
       pii: preGuardrail.pii,
