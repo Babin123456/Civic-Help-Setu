@@ -15,6 +15,7 @@
     "test": "vitest run",
     "eval:contracts": "node scripts/evaluateAgentContracts.mjs",
     "eval:gateway": "vitest run src/services/gateway/gatewayEvaluationReport.test.js",
+    "eval:tool-registry": "node scripts/evaluateToolRegistry.mjs",
     "rules:test": "npm --prefix firebase/emulator install --no-audit --no-fund && npm --prefix firebase/emulator test",
     "lhci:collect": "lhci collect",
     "lhci:assert": "lhci assert",

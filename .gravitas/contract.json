@@ -1,29 +1,33 @@
 {
   "mode": "implement",
-  "objective": "Build Model Gateway with Routing, Fallback and Civic Data Residency Policies (#1153)",
+  "objective": "Create a Governed Agent Tool Registry with Capability-Based Permissions (#1146)",
   "acceptance_criteria": [
-    "AC-1: Deliver documented architecture and threat model covering component boundaries, data flows, failure modes, and residency guarantees",
-    "AC-2: Implement core domain model, provider-neutral adapters, and typed contracts with input validation",
-    "AC-3: Implement civic data residency policies (local-only, sovereign national, cross-border with scrubbing) and enforcement engine",
-    "AC-4: Implement multi-criteria model router (task risk, language, latency SLA, cost limits) and circuit breaker with deterministic non-LLM fallback",
-    "AC-5: Implement gateway telemetry, token/cost estimation, and safe observability without exposing raw citizen data",
-    "AC-6: Integrate model gateway into Civic Help Setu Assistant and provide accessible Admin/Assistant UI controls",
-    "AC-7: Deliver comprehensive test suite (unit, integration, resilience, concurrency, synthetic fixtures) passing with zero security lint regressions"
+    "AC-1: Deliver documented architecture (ADR), data-flow diagram, threat model, failure modes, and operational ownership",
+    "AC-2: Implement core domain model (tool schemas, scopes, risk tiers, approval requirements) and versioned contracts with boundary validation",
+    "AC-3: Implement short-lived scoped capability tokens with HMAC signing, replay protection, cross-user binding, and admin revocation",
+    "AC-4: Integrate server-side enforcement into api/[...path].js via api/_lib/handlers/agent-tool-registry.js with Clerk RBAC and PII-scrubbed audit logging",
+    "AC-5: Deliver end-to-end vertical slice in Assistant.jsx and Admin.jsx with accessible controls and human-approval gating",
+    "AC-6: Add unit, integration, concurrency, retry, and adversarial security tests using synthetic fixtures only, plus reproducible evaluation report",
+    "AC-7: Pass tests, lint, lint:security, contracts:check, and production build with zero merge conflicts"
   ],
   "non_goals": [
     "Do not claim official government integration, verification, legal authority, or guaranteed outcomes",
-    "Do not store or leak raw citizen PII or credentials in logs, prompts, or analytics",
-    "No autonomous statutory actions, benefit denials, or filing"
+    "Do not expose real citizen records, credentials, or private documents in logs, prompts, or analytics",
+    "No autonomous filing, benefit denial, or official-status claims"
   ],
-  "risk": "medium",
-  "budget": "balanced",
+  "risk": "high",
+  "budget": "deep",
   "allowed_write_scope": [
-    "src/services/gateway/",
+    "src/services/toolRegistry/",
     "src/ai/",
     "src/components/admin/",
     "src/components/assistant/",
     "src/pages/",
+    "api/",
+    "firebase/",
+    "scripts/",
     "docs/",
+    "package.json",
     ".gravitas/"
   ],
   "verification": "impact"

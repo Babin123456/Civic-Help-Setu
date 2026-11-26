@@ -51,6 +51,7 @@ import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
 import agentReviewStudio from "./_lib/handlers/agent-review-studio.js";
+import agentToolRegistry from "./_lib/handlers/agent-tool-registry.js";
 
 import verifiableEvidenceBundles from "./_lib/handlers/verifiable-evidence-bundles.js";
 
@@ -128,6 +129,7 @@ const baseHandlers = {
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
   "agent-review-studio": agentReviewStudio,
+  "agent-tool-registry": agentToolRegistry,
   "business-licence-feedback": businessLicence,
 
   "civic-data-clean-room": civicDataCleanRoom,
@@ -394,6 +396,7 @@ export function createApiDispatcher({
 
     const delegatedApiRoutes = [
       "abuse-control-plane",
+      "agent-tool-registry",
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-policy",

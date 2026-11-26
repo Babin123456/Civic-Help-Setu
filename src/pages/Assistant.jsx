@@ -41,6 +41,7 @@ import {
 
 import CaseMemoryInspectionModal from '../components/assistant/CaseMemoryInspectionModal';
 import { caseMemoryEngine } from '../services/agentMemory/caseMemoryEngine';
+import GovernedToolActionsPanel from '../components/assistant/GovernedToolActionsPanel';
 
 
 const Assistant = () => {
@@ -120,15 +121,16 @@ const Assistant = () => {
       logDiagnostic('Grounded retrieval error, falling back to basic assistant:', groundingErr);
       response = await askCivicAssistant(safeQuery);
 
-      const gatewayRes = await executeModelGateway({ query: safeQuery });
-      gatewayMeta = gatewayRes.meta || null;
-      response = gatewayRes;
-    } catch (gatewayErr) {
-      logDiagnostic('Model Gateway error, falling back to civic agent pipeline:', gatewayErr);
-      response = await runCivicAgentPipeline(safeQuery, {
-        serviceContextId: currentServiceContextId,
-      });
-
+      try {
+        const gatewayRes = await executeModelGateway({ query: safeQuery });
+        gatewayMeta = gatewayRes.meta || null;
+        response = gatewayRes;
+      } catch (gatewayErr) {
+        logDiagnostic('Model Gateway error, falling back to civic agent pipeline:', gatewayErr);
+        response = await runCivicAgentPipeline(safeQuery, {
+          serviceContextId: currentServiceContextId,
+        });
+      }
     }
     return {
       id: `asst-${Date.now()}`,
@@ -530,6 +532,14 @@ const Assistant = () => {
         {/* Sources, review dates and limitations (omitted when the response has no source data) */}
         {msg.ragResult && <SourceTraceabilityPanel ragResult={msg.ragResult} />}
         <SourcesAndLimitations message={msg} />
+
+        {/* Capability-governed tool actions (#1146) */}
+        <GovernedToolActionsPanel
+          serviceId={msg.serviceId}
+          title={data.title}
+          officialSources={data.officialSources}
+          sessionId={currentCaseId}
+        />
 
         {/* Suggested Follow-up Questions */}
         {msg.suggestions && msg.suggestions.length > 0 && (
