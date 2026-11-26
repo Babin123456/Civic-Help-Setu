@@ -20,3 +20,18 @@ export const escapeHtml = (value) =>
  */
 export const buildLetterPrintHtml = (title, text) =>
   `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escapeHtml(title)}</title><style>body{font-family:serif;font-size:13pt;line-height:1.6;padding:40px;}pre{font-family:inherit;white-space:pre-wrap;}</style></head><body><pre>${escapeHtml(text)}</pre></body></html>`;
+
+/**
+ * Fills a window opened with window.open('', '_blank') using DOM properties instead of
+ * document.write, so the title and the text are never parsed as markup. Used by the
+ * petition drafters, where the title carries a name the user typed.
+ */
+export const fillTextPrintWindow = (printWindow, title, text, bodyStyle = '') => {
+  const doc = printWindow.document;
+  doc.title = String(title ?? '');
+  if (bodyStyle) doc.body.style.cssText = bodyStyle;
+  doc.body.textContent = String(text ?? '');
+};
+
+export const PETITION_PRINT_BODY_STYLE =
+  'font-family: monospace; padding: 2rem; white-space: pre-wrap; font-size: 12px; line-height: 1.5; color: #000;';

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import AccessibleModal from '../common/AccessibleModal';
+import RegionalDirectoryReviewPanel from './RegionalDirectoryReviewPanel';
 import {
   QUEUE_STATUSES,
   MAX_TEAM_LENGTH,
@@ -124,14 +125,14 @@ const OwnershipForm = ({ service, current, users, onSave, onClear, onClose }) =>
 };
 
 /** Assign or reassign the reviewer, team, queue status and private note of one service guide. Admin page only. */
-const ServiceOwnershipModal = ({ isOpen, onClose, service, current, users = [], onSave, onClear }) => {
+const ServiceOwnershipModal = ({ isOpen, onClose, service, current, users = [], onSave, onClear, auditLogs = [] }) => {
   if (!service) return null;
   return (
     <AccessibleModal
       isOpen={isOpen}
       onClose={onClose}
       title="Review assignment"
-      subtitle={`Internal only. Not shown on the public page for ${service.name}.`}
+      subtitle={`Review ${service.name}. Assignment and private notes stay internal; the regional section identifies its public fields.`}
       maxWidth="520px"
     >
       <OwnershipForm
@@ -143,6 +144,7 @@ const ServiceOwnershipModal = ({ isOpen, onClose, service, current, users = [], 
         onClear={onClear}
         onClose={onClose}
       />
+      <RegionalDirectoryReviewPanel key={service.id} service={service} auditLogs={auditLogs} />
     </AccessibleModal>
   );
 };

@@ -302,17 +302,12 @@ test('barrierReports: filed by any session; read by filer and admins; moderated 
   await assertFails(updateDoc(doc(admin(), 'barrierReports/b1'), { description: 'edited' }));
 });
 
-test('bottleneckFeedback: filed by any session; moderated by admins only', async () => {
-  const feedback = (uid, extra = {}) => ({
-    reporterId: uid, serviceId: 'ration-card', category: 'documents', message: 'The form asks for the same proof twice.', status: 'new', createdAt: serverTimestamp(), ...extra,
-  });
-  await assertSucceeds(setDoc(doc(anonymous('anon1'), 'bottleneckFeedback/f1'), feedback('anon1')));
-  await assertFails(setDoc(doc(anonymous('anon1'), 'bottleneckFeedback/f2'), feedback('anon1', { message: 'x'.repeat(1501) })));
-  await assertFails(setDoc(doc(anonymous('anon1'), 'bottleneckFeedback/f3'), feedback('anon1', { status: 'addressed' })));
-  await assertFails(getDoc(doc(citizen('alice'), 'bottleneckFeedback/f1')));
-  await assertSucceeds(getDoc(doc(admin(), 'bottleneckFeedback/f1')));
-  await assertFails(updateDoc(doc(citizen('alice'), 'bottleneckFeedback/f1'), { status: 'dismissed' }));
-  await assertSucceeds(updateDoc(doc(admin(), 'bottleneckFeedback/f1'), { status: 'addressed' }));
+test('bottleneckFeedback: only server API may access shared intake and audits', async () => {
+  for (const db of [signedOut(), anonymous('anon1'), citizen('alice'), admin()]) {
+    await assertFails(setDoc(doc(db, 'bottleneckFeedback/f1'), { serviceId: 'driving-license', status: 'new' }));
+    await assertFails(getDoc(doc(db, 'bottleneckFeedback/f1')));
+    await assertFails(setDoc(doc(db, 'bottleneckFeedback/f1/audit/1'), { status: 'addressed' }));
+  }
 });
 
 test('communityAudits: public to read, filed by accounts, resolved by admins, one vote per account', async () => {

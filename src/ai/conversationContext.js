@@ -69,3 +69,35 @@ export const hasUserMessages = (messages = []) =>
 
 export const trimHistory = (messages = [], max = MAX_STORED_MESSAGES) =>
   messages.length > max ? messages.slice(messages.length - max) : messages;
+
+/**
+ * Formats case-isolated memory entries into demarcated prompt context.
+ * Strict separation between verified facts and untrusted AI proposals.
+ */
+export const formatCaseMemoryContext = (memories = []) => {
+  if (!Array.isArray(memories) || memories.length === 0) return '';
+
+  const facts = memories.filter((m) => m.entryType === 'FACTUAL_NOTE');
+  const proposals = memories.filter((m) => m.entryType === 'MODEL_PROPOSAL');
+
+  let output = '';
+
+  if (facts.length > 0) {
+    output += `[VERIFIED CASE FACTS - GROUND TRUTH]\n`;
+    facts.forEach((f) => {
+      output += `- (${f.category}) ${f.payload?.title || 'Note'}: ${f.payload?.text || ''}\n`;
+    });
+    output += '\n';
+  }
+
+  if (proposals.length > 0) {
+    output += `[UNVERIFIED AI PROPOSALS - REQUIRES CITIZEN CONFIRMATION]\n`;
+    proposals.forEach((p) => {
+      const conf = p.provenance?.confidenceScore ? `[conf: ${Math.round(p.provenance.confidenceScore * 100)}%]` : '';
+      output += `- (${p.category}) ${p.payload?.title || 'Suggestion'} ${conf}: ${p.payload?.text || ''}\n`;
+    });
+    output += '\n';
+  }
+
+  return output.trim();
+};

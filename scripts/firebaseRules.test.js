@@ -73,6 +73,14 @@ describe('firebase rule files', () => {
     expect(firestore).toMatch(/function isMember\(\) \{\s*return signedIn\(\) && !isAnonymous\(\);/);
     expect(storage).toContain("sign_in_provider != 'anonymous'");
   });
+
+  it('defines fail-closed tenant boundary helpers from signed token claims only', () => {
+    const tenantHelper = firestore.match(/function canAccessTenant\(targetTenantId\) \{([^}]*)\}/)[1];
+    expect(firestore).toContain("request.auth.token.get('tenantId', '')");
+    expect(tenantHelper).toContain('isMember()');
+    expect(tenantHelper).toContain('hasValidTenantId(targetTenantId)');
+    expect(tenantHelper).not.toMatch(/(?<![.\w])get\(|exists\(|getAfter\(|\/databases\//);
+  });
 });
 
 describe('the access policy document', () => {

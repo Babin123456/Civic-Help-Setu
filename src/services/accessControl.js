@@ -18,6 +18,20 @@
  * enforcement for shared data needs a backend or Firebase rules (see docs/ACCESS_CONTROL.md).
  */
 
+/** Translation Memory privileged actions: who may do what. Add new features here. */
+export const TRANSLATION_MEMORY_PERMISSIONS = {
+  'civictranslationmemory.write': {
+    roles: ['admin'],
+    resource: 'civic_translation_memory',
+    description: 'Submit, rollback or manage translation memory entries',
+  },
+  'civictranslationmemory.review': {
+    roles: ['admin'],
+    resource: 'civic_translation_memory',
+    description: 'Approve or reject translation memory proposals',
+  },
+};
+
 /** Every privileged action: who may do it, and what it touches. Add new admin features here. */
 export const PERMISSIONS = {
   'services.write': { roles: ['admin'], resource: 'civicbridge_custom_services', description: 'Add or edit a service guide' },
@@ -46,11 +60,50 @@ export const PERMISSIONS = {
   'ownership.read': { roles: ['admin'], resource: 'civicbridge_service_ownership_v1', description: 'Read who is assigned to review each service guide, with private notes' },
   'ownership.manage': { roles: ['admin'], resource: 'civicbridge_service_ownership_v1', description: 'Assign, reassign or clear the reviewer of a service guide' },
   'civicWorks.moderate': { roles: ['admin'], resource: 'civicbridge_civic_works_reports_v1', description: 'Moderate ward-level civic work reports, cluster duplicates, record official acknowledgements and verify completion evidence' },
+
+  'civictranslationmemory.write': { roles: ['admin'], resource: 'civic_translation_memory', description: 'Submit, rollback or manage translation memory entries' },
+  'civictranslationmemory.review': { roles: ['admin'], resource: 'civic_translation_memory', description: 'Approve or reject translation memory proposals' },
+
+
+  'civicDataApi.use': { roles: ['admin', 'citizen'], resource: 'civicbridge_api_clients_v1', description: 'Create and use scoped developer sandbox credentials' },
+  'civicDataApi.admin': { roles: ['admin'], resource: 'civicbridge_access_audits_v1', description: 'Approve production API clients, inspect usage anomalies and read API audit logs' },
+
+  'synthetic.generate': { roles: ['admin', 'citizen'], resource: 'civicbridge_synthetic_profiles_v1', description: 'Generate reproducible synthetic civic datasets' },
+  'synthetic.manage': { roles: ['admin'], resource: 'civicbridge_synthetic_profiles_v1', description: 'Configure schema catalog and synthetic profiles' },
+  'synthetic.audit': { roles: ['admin', 'citizen'], resource: 'civicbridge_synthetic_validation_runs_v1', description: 'Audit PII detection and validation runs' },
   'roadSafety.review': { roles: ['admin'], resource: 'civicbridge_review_cases_v1', description: 'Review detected road safety blackspots, conduct site inspections, and plan interventions' },
   'roadSafety.admin': { roles: ['admin'], resource: 'civicbridge_risk_runs_v1', description: 'Configure risk weighting parameters, trigger risk runs, and archive road safety cases' },
+
   'agentReview.read': { roles: ['admin'], resource: 'civicbridge_agent_review_studio_v1', description: 'Inspect high-impact AI proposals, source passages, and review audit history' },
   'agentReview.decide': { roles: ['admin'], resource: 'civicbridge_agent_review_studio_v1', description: 'Approve, edit, reject, escalate, or fork versioned AI civic outputs' },
   'agentReview.submit': { roles: ['admin', 'citizen'], resource: 'civicbridge_agent_review_studio_v1', description: 'Flag and submit an untrusted AI civic output proposal for human review' },
+
+
+  'agentMemory.admin': { roles: ['admin'], resource: 'chsetu:mem', description: 'Administer system-wide agent memory lifecycle sweeps and dead-letter queues' },
+  'agentMemory.read': { roles: ['admin', 'citizen'], resource: 'chsetu:mem', description: 'Read scoped case memory' },
+  'agentMemory.purge': { roles: ['admin', 'citizen'], resource: 'chsetu:mem', description: 'Purge scoped case memory' },
+
+  'publicProjects.create': { roles: ['admin'], resource: 'civicbridge_public_projects_v1', description: 'Create and configure public infrastructure projects, milestones and geometries' },
+  'publicProjects.verify': { roles: ['admin'], resource: 'civicbridge_verification_reviews_v1', description: 'Verify evidence and record milestone decisions for public projects' },
+  'publicProjects.audit': { roles: ['admin'], resource: 'civicbridge_project_audit_logs_v1', description: 'Inspect append-only project verification audit logs and unredacted assets' },
+  'continuity.write': { roles: ['admin'], resource: 'civicbridge_continuity_plans_v1', description: 'Create or update public service continuity plans and service dependencies' },
+  'continuity.approve': { roles: ['admin'], resource: 'civicbridge_continuity_plans_v1', description: 'Approve, activate or supersede continuity plans' },
+  'continuity.drill': { roles: ['admin'], resource: 'civicbridge_exercise_runs_v1', description: 'Schedule and facilitate incident tabletop exercises and record decisions' },
+  // Flood Hotspot Forecast and Safe-Route Advisory Engine
+  'flood.intelligence.execute': { roles: ['admin'], resource: 'civicbridge_flood_forecast_runs_v1', description: 'Execute flood risk model runs and generate hotspot cells' },
+  'flood.report.submit': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_reports_v1', description: 'Submit a flood waterlogging observation or report' },
+  'flood.report.moderate': { roles: ['admin'], resource: 'civicbridge_flood_reports_v1', description: 'Moderate flood reports: validate, reject, or flag as spam' },
+  'flood.report.read': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_reports_v1', description: 'Read flood reports within jurisdiction' },
+  'flood.hotspot.read': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_hotspot_cells_v1', description: 'Read computed hotspot cells and risk levels' },
+  'flood.route.advisory': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_route_advisories_v1', description: 'Generate safe route advisories avoiding flood hotspots' },
+  'flood.route.read': { roles: ['citizen', 'admin'], resource: 'civicbridge_flood_route_advisories_v1', description: 'Read route advisories within jurisdiction' },
+  'flood.admin': { roles: ['admin'], resource: 'civicbridge_flood_forecast_runs_v1', description: 'Configure flood intelligence parameters, trigger runs, and archive data' },
+  'legalSources.manage': { roles: ['admin'], resource: 'civicbridge_legal_sources_v1', description: 'Create, edit, or supersede legal sources' },
+  'legalSources.review': { roles: ['admin'], resource: 'civicbridge_legal_sources_v1', description: 'Review, approve, publish or roll back legal source versions' },
+
+
+
+
 };
 
 export class PermissionDeniedError extends Error {
@@ -90,8 +143,8 @@ export const checkPermission = (action, actor = currentActor) => {
 export const can = (action, actor = currentActor) => checkPermission(action, actor) === 'ok';
 
 /** Throws PermissionDeniedError unless the signed-in user may do `action`. */
-export const requirePermission = (action) => {
-  const result = checkPermission(action);
+export const requirePermission = (action, actor = currentActor) => {
+  const result = checkPermission(action, actor);
   if (result !== 'ok') throw new PermissionDeniedError(action, result);
 };
 
@@ -99,4 +152,16 @@ export const requirePermission = (action) => {
 export const actorLabel = (fallback = 'Admin') => {
   const actor = currentActor;
   return (actor && (actor.username || actor.fullName || actor.email)) || fallback;
+};
+
+/**
+ * Resolves jurisdiction codes assigned to an actor.
+ * @param {object|null} [actor] defaults to current actor
+ * @returns {string[]} array of jurisdiction codes
+ */
+export const resolveActorJurisdictions = (actor = currentActor) => {
+  if (!actor || typeof actor !== 'object') return [];
+  if (Array.isArray(actor.jurisdictions)) return [...actor.jurisdictions];
+  if (typeof actor.jurisdiction === 'string' && actor.jurisdiction) return [actor.jurisdiction];
+  return [];
 };
