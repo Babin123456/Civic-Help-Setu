@@ -100,6 +100,7 @@ import RuleConflictInspectorModal from '../components/admin/RuleConflictInspecto
 import DuplicateServiceDetectorPanel from '../components/admin/DuplicateServiceDetectorPanel';
 import CatalogueConflictDetectorPanel from '../components/admin/CatalogueConflictDetectorPanel';
 import CivicWorksModeratorPanel from '../components/civicWorks/CivicWorksModeratorPanel';
+import AgentReviewStudioPanel from '../components/admin/AgentReviewStudioPanel';
 
 import WardIssueHeatmap from '../components/analytics/WardIssueHeatmap';
 
@@ -775,6 +776,9 @@ const Admin = () => {
               { id: 'conflicts', label: 'Requirement Conflicts', badge: null },
               { id: 'civic-works', label: 'Ward Public Works', badge: null },
 
+              { id: 'agent-review', label: 'Agent Review Studio', badge: null },
+
+
               { id: 'model-gateway', label: 'Model Gateway & Residency', badge: null },
 
 
@@ -787,6 +791,7 @@ const Admin = () => {
               { id: 'chaos-resilience', label: 'Chaos & Resilience Suite', badge: null },
               { id: 'counter-demand', label: 'Counter Demand & Staffing', badge: null },
               { id: 'multi-region', label: 'Multi-Region Topology & Lag', badge: null },
+
 
 
               { id: 'audit', label: 'Audit Trail Logs', badge: null },
@@ -1839,6 +1844,12 @@ const Admin = () => {
             )}
 
 
+            {/* Human-in-the-Loop Agent Review Studio Tab */}
+            {activeTab === 'agent-review' && (
+              <div>
+                <AgentReviewStudioPanel />
+
+
             {/* Model Gateway & Data Residency Tab (#1153) */}
             {activeTab === 'model-gateway' && (
               <div>
@@ -1931,6 +1942,7 @@ const Admin = () => {
             {activeTab === 'multi-region' && (
               <div>
                 <MultiRegionHealthPanel />
+
 
 
               </div>

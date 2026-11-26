@@ -32,11 +32,33 @@ import { logDiagnostic } from '../utils/diagnostics';
 import { getAllServices } from '../services/serviceCatalog';
 import { queryCivicKnowledge } from '../services/groundedCivicRagService';
 import SourceTraceabilityPanel from '../components/assistant/SourceTraceabilityPanel';
+
+import {
+  createReviewStudioStore,
+  buildReviewProposalFromAssistantResponse,
+} from '../services/agentReviewStudioService';
+
 import CaseMemoryInspectionModal from '../components/assistant/CaseMemoryInspectionModal';
 import { caseMemoryEngine } from '../services/agentMemory/caseMemoryEngine';
 
+
 const Assistant = () => {
   const [messages, setMessages] = useState(() => loadChatHistory());
+  const [flaggedReviewIds, setFlaggedReviewIds] = useState({});
+
+  const handleFlagForReview = (msg) => {
+    try {
+      const store = createReviewStudioStore();
+      const proposal = buildReviewProposalFromAssistantResponse(
+        msg.data?.title || 'Civic guidance inquiry',
+        msg
+      );
+      store.submitProposal({ ...proposal, idempotencyKey: `asst-flag-${msg.id}` });
+      setFlaggedReviewIds((prev) => ({ ...prev, [msg.id]: true }));
+    } catch (err) {
+      logDiagnostic('Failed to flag assistant response for review', err);
+    }
+  };
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -375,6 +397,24 @@ const Assistant = () => {
                 ? `Entailment Check: Verified (${msg.entailment.verifiedCount} claim${msg.entailment.verifiedCount === 1 ? '' : 's'})`
                 : `Entailment Caution: ${msg.entailment.unsupportedCount + msg.entailment.contradictedCount} unverified/conflicting claim(s)`}
             </span>
+            <button
+              type="button"
+              onClick={() => handleFlagForReview(msg)}
+              disabled={Boolean(flaggedReviewIds[msg.id])}
+              style={{
+                marginLeft: 'auto',
+                padding: '0.2rem 0.55rem',
+                borderRadius: '0.4rem',
+                border: '1px solid currentColor',
+                background: 'transparent',
+                color: 'inherit',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                cursor: flaggedReviewIds[msg.id] ? 'default' : 'pointer',
+              }}
+            >
+              {flaggedReviewIds[msg.id] ? 'Sent to Review Studio' : 'Flag for Human Review'}
+            </button>
           </div>
         )}
 

@@ -50,6 +50,7 @@ import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import agentReviewStudio from "./_lib/handlers/agent-review-studio.js";
 
 import verifiableEvidenceBundles from "./_lib/handlers/verifiable-evidence-bundles.js";
 
@@ -126,6 +127,7 @@ const baseHandlers = {
   "road-hazards": roadHazards,
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
+  "agent-review-studio": agentReviewStudio,
   "business-licence-feedback": businessLicence,
 
   "civic-data-clean-room": civicDataCleanRoom,
