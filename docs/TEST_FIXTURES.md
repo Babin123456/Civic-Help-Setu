@@ -67,3 +67,7 @@ Valid means the record satisfies the [service data contract](SERVICE_DATA_CONTRA
 3. Run `npx vitest run src/test/fixtures`. The tests check, for your scenario: it is deterministic, it satisfies (or fails exactly as declared) the contract, it contains no real-looking personal data, and its links are on reserved domains.
 
 If the service contract gains a field or a rule, add or update scenarios so each new edge case has one.
+
+## Timeline replay fixtures
+
+`src/test/fixtures/applicationTimelineFixture.js` provides synthetic reviewer data for the application timeline replay and event-difference viewer (#839). It contains fictional official portal and office events, an out-of-order anomaly variant, and a citizen note kept separate as private guidance. There is no real citizen, identity number, contact detail, document content, or official decision in the fixture.

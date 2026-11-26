@@ -6,6 +6,8 @@ import { runPreInferenceGuardrails } from '../ai/aiGuardrailPipeline';
 import { askCivicAssistant } from '../ai/civicAssistant';
 import { askGroundedCivicAssistant } from '../ai/groundedCivicAssistant';
 import SourceGroundedBadge from '../components/assistant/SourceGroundedBadge';
+import ModelGatewayBadge from '../components/assistant/ModelGatewayBadge';
+import { executeModelGateway } from '../services/gateway/modelGatewayService';
 import SourcesAndLimitations from '../components/assistant/SourcesAndLimitations';
 import ChatHeaderControls from '../components/chat/ChatHeaderControls';
 import VoiceInputStatus from '../components/chat/VoiceInputStatus';
@@ -30,6 +32,8 @@ import { logDiagnostic } from '../utils/diagnostics';
 import { getAllServices } from '../services/serviceCatalog';
 import { queryCivicKnowledge } from '../services/groundedCivicRagService';
 import SourceTraceabilityPanel from '../components/assistant/SourceTraceabilityPanel';
+import CaseMemoryInspectionModal from '../components/assistant/CaseMemoryInspectionModal';
+import { caseMemoryEngine } from '../services/agentMemory/caseMemoryEngine';
 
 const Assistant = () => {
   const [messages, setMessages] = useState(() => loadChatHistory());
@@ -43,6 +47,7 @@ const Assistant = () => {
   const inputRef = useRef(null);
   const [failedQuery, setFailedQuery] = useState(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showCaseMemoryModal, setShowCaseMemoryModal] = useState(false);
   // Messages cleared by "New conversation", kept in memory only for the undo window
   const [undoSnapshot, setUndoSnapshot] = useState(null);
   const undoNoticeRef = useRef(null);
@@ -52,6 +57,11 @@ const Assistant = () => {
   const location = useLocation();
   const urlServiceId = parseSlugParam(new URLSearchParams(location.search).get('service') || new URLSearchParams(location.search).get('serviceId'));
   const [overrideServiceId, setOverrideServiceId] = useState(null);
+
+  const currentServiceContextId = overrideServiceId !== null
+    ? (overrideServiceId || null)
+    : (urlServiceId || location.state?.serviceId || (!hasUserMessages(messages) ? null : lastAssistantServiceId(messages)));
+  const currentCaseId = currentServiceContextId ? `case-${currentServiceContextId}` : 'general-consultation';
 
   // Save messages to persistent storage whenever they update
   useEffect(() => {
@@ -75,11 +85,19 @@ const Assistant = () => {
     }
 
     let response;
+    let gatewayMeta = null;
     try {
-      response = await askGroundedCivicAssistant(safeQuery);
-    } catch (groundingErr) {
-      logDiagnostic('Grounded retrieval error, falling back to basic assistant:', groundingErr);
-      response = await askCivicAssistant(safeQuery);
+      const gatewayRes = await executeModelGateway({ query: safeQuery });
+      gatewayMeta = gatewayRes.meta || null;
+      response = gatewayRes;
+    } catch (gatewayErr) {
+      logDiagnostic('Model Gateway error, falling back to grounded civic assistant:', gatewayErr);
+      try {
+        response = await askGroundedCivicAssistant(safeQuery);
+      } catch (groundingErr) {
+        logDiagnostic('Grounded retrieval error, falling back to basic assistant:', groundingErr);
+        response = await askCivicAssistant(safeQuery);
+      }
     }
     return {
       id: `asst-${Date.now()}`,
@@ -95,6 +113,7 @@ const Assistant = () => {
       suggestions: response.suggestions || [],
       guardrail: response.guardrail || null,
       entailment: response.entailment || null,
+      gatewayMeta,
       timestamp: new Date().toISOString(),
     };
   };
@@ -134,6 +153,24 @@ const Assistant = () => {
     try {
       const assistantMessage = await getAnswer(safeQuery, history);
       setMessages((prev) => [...prev, assistantMessage]);
+
+      // Automatically stage model proposal in case-isolated memory if structured guidance is returned
+      if (assistantMessage.data?.title || assistantMessage.data?.summary) {
+        const targetCaseId = assistantMessage.serviceId
+          ? `case-${assistantMessage.serviceId}`
+          : currentCaseId;
+        caseMemoryEngine
+          .recordModelProposal({
+            tenantId: 'default',
+            caseId: targetCaseId,
+            title: assistantMessage.data.title || 'Civic Guidance Proposal',
+            text: assistantMessage.data.summary || assistantMessage.text || '',
+            category: 'ACTION_STEP',
+            citationIds: assistantMessage.retrievedChunks?.map((c) => c.id || c.source) || [],
+            confidenceScore: assistantMessage.confidenceScore || 0.8,
+          })
+          .catch((err) => logDiagnostic('Failed to record model proposal to case memory', err));
+      }
     } catch (err) {
       logDiagnostic('Assistant request failed', err);
       setError("We couldn't process your request. Please try again.");
@@ -267,9 +304,6 @@ const Assistant = () => {
   };
 
   const questionCount = messages.filter((m) => m.role === 'user').length;
-  const currentServiceContextId = overrideServiceId !== null
-    ? (overrideServiceId || null)
-    : (urlServiceId || location.state?.serviceId || (!hasUserMessages(messages) ? null : lastAssistantServiceId(messages)));
 
   const renderAssistantContent = (msg) => {
     if (msg.text && !msg.data) {
@@ -280,11 +314,14 @@ const Assistant = () => {
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <SourceGroundedBadge
-          grounded={msg.grounded ?? (msg.serviceId !== null)}
-          confidenceScore={msg.confidenceScore ?? 0.85}
-          sourcesCount={data.officialSources?.length || (msg.retrievedChunks?.length || 1)}
-        />
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <SourceGroundedBadge
+            grounded={msg.grounded ?? (msg.serviceId !== null)}
+            confidenceScore={msg.confidenceScore ?? 0.85}
+            sourcesCount={data.officialSources?.length || (msg.retrievedChunks?.length || 1)}
+          />
+          {msg.gatewayMeta && <ModelGatewayBadge meta={msg.gatewayMeta} />}
+        </div>
 
         {(msg.status === 'blocked' || msg.guardrail?.injection?.blocked) && (
           <div
@@ -502,6 +539,7 @@ const Assistant = () => {
           onNewConversation={handleNewConversationClick}
           canReset={needsResetConfirmation(messages)}
           isLoading={isLoading}
+          onOpenCaseMemory={() => setShowCaseMemoryModal(true)}
         />
 
         {/* Voice Input Feedback */}
@@ -791,6 +829,12 @@ const Assistant = () => {
         variant="warning"
         onConfirm={handleConfirmNewConversation}
         onCancel={() => setShowResetConfirm(false)}
+      />
+
+      <CaseMemoryInspectionModal
+        isOpen={showCaseMemoryModal}
+        onClose={() => setShowCaseMemoryModal(false)}
+        caseId={currentCaseId}
       />
     </div>
   );
