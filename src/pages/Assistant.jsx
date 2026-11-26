@@ -6,6 +6,8 @@ import { runPreInferenceGuardrails } from '../ai/aiGuardrailPipeline';
 import { askCivicAssistant } from '../ai/civicAssistant';
 import { askGroundedCivicAssistant } from '../ai/groundedCivicAssistant';
 import SourceGroundedBadge from '../components/assistant/SourceGroundedBadge';
+import ModelGatewayBadge from '../components/assistant/ModelGatewayBadge';
+import { executeModelGateway } from '../services/gateway/modelGatewayService';
 import SourcesAndLimitations from '../components/assistant/SourcesAndLimitations';
 import ChatHeaderControls from '../components/chat/ChatHeaderControls';
 import VoiceInputStatus from '../components/chat/VoiceInputStatus';
@@ -75,11 +77,19 @@ const Assistant = () => {
     }
 
     let response;
+    let gatewayMeta = null;
     try {
-      response = await askGroundedCivicAssistant(safeQuery);
-    } catch (groundingErr) {
-      logDiagnostic('Grounded retrieval error, falling back to basic assistant:', groundingErr);
-      response = await askCivicAssistant(safeQuery);
+      const gatewayRes = await executeModelGateway({ query: safeQuery });
+      gatewayMeta = gatewayRes.meta || null;
+      response = gatewayRes;
+    } catch (gatewayErr) {
+      logDiagnostic('Model Gateway error, falling back to grounded civic assistant:', gatewayErr);
+      try {
+        response = await askGroundedCivicAssistant(safeQuery);
+      } catch (groundingErr) {
+        logDiagnostic('Grounded retrieval error, falling back to basic assistant:', groundingErr);
+        response = await askCivicAssistant(safeQuery);
+      }
     }
     return {
       id: `asst-${Date.now()}`,
@@ -95,6 +105,7 @@ const Assistant = () => {
       suggestions: response.suggestions || [],
       guardrail: response.guardrail || null,
       entailment: response.entailment || null,
+      gatewayMeta,
       timestamp: new Date().toISOString(),
     };
   };
@@ -280,11 +291,14 @@ const Assistant = () => {
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <SourceGroundedBadge
-          grounded={msg.grounded ?? (msg.serviceId !== null)}
-          confidenceScore={msg.confidenceScore ?? 0.85}
-          sourcesCount={data.officialSources?.length || (msg.retrievedChunks?.length || 1)}
-        />
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <SourceGroundedBadge
+            grounded={msg.grounded ?? (msg.serviceId !== null)}
+            confidenceScore={msg.confidenceScore ?? 0.85}
+            sourcesCount={data.officialSources?.length || (msg.retrievedChunks?.length || 1)}
+          />
+          {msg.gatewayMeta && <ModelGatewayBadge meta={msg.gatewayMeta} />}
+        </div>
 
         {(msg.status === 'blocked' || msg.guardrail?.injection?.blocked) && (
           <div
