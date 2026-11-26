@@ -20,6 +20,10 @@ import RouteErrorFallback from './components/common/RouteErrorFallback';
 import RouteErrorBoundary from './components/common/RouteErrorBoundary';
 import { ServiceCardSkeletonGrid } from './components/ServiceCardSkeleton';
 
+import FederatedQueryExplorer from './pages/FederatedQueryExplorer';
+import WardAnalyticsDashboard from './pages/WardAnalyticsDashboard';
+
+
 import DataCleanRoomWorkspace from './pages/DataCleanRoomWorkspace';
 
 
@@ -130,6 +134,7 @@ const Services = lazy(() => import('./pages/Services'));
 const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
 const CostCarbonGovernorWorkspacePage = lazy(() => import('./pages/CostCarbonGovernorWorkspace'));
 const PolicyEngineWorkspacePage = lazy(() => import('./pages/PolicyEngineWorkspace'));
+const FreshnessPredictionWorkspacePage = lazy(() => import('./pages/FreshnessPredictionWorkspace'));
 
 const ServicesFallback = () => (
   <div className="section">
@@ -153,7 +158,7 @@ function AppRoot() {
                     <SkipToContent />
                     <Navbar />
 
-                    <main id="main-content" style={{ flex: 1, minWidth: 0, width: '100%' }} tabIndex="-1">
+                  <main id="main-content" style={{ flex: 1, minWidth: 0, width: '100%' }} tabIndex="-1">
                       <RouteErrorBoundary>
                         <Suspense fallback={<div className="section" role="status" aria-live="polite"><div className="container">Loading page…</div></div>}>
                           <Routes>
@@ -430,6 +435,9 @@ function AppRoot() {
                             {/* Civic Agent Workflow Policy-as-Code Engine (public evaluation UI) */}
                             <Route path="/policy-engine" element={<PolicyEngineWorkspacePage />} />
 
+                            {/* Civic Information Freshness Prediction & Review Prioritization (maintainer triage UI) */}
+                            <Route path="/freshness-prediction" element={<FreshnessPredictionWorkspacePage />} />
+
                             <Route path="/tenants" element={<TenantAdministrationWorkspace />} />
                             <Route path="/tenants/:tenantId" element={<TenantAdministrationWorkspace />} />
                             <Route path="/tenant-workspace" element={<TenantAdministrationWorkspace />} />
@@ -447,6 +455,7 @@ function AppRoot() {
                 </ConfirmationDialogProvider>
               </NetworkProvider>
             </LanguageProvider>
+
 
           </AuthProvider>
         </ToastProvider>

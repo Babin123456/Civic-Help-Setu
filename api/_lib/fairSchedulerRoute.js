@@ -3,8 +3,8 @@ import {
   createFairScheduler,
   createFirestoreSchedulerStorageAdapter,
   createFairSchedulerHandler,
-} from './_lib/fairScheduler.js';
-import { createRateLimiter } from './_lib/abuseGuard.js';
+} from './fairScheduler.js';
+import { createRateLimiter } from './abuseGuard.js';
 
 let handler = null;
 
@@ -18,7 +18,7 @@ async function build() {
   if (CLERK_SECRET_KEY) {
     try {
       const { verifyToken, createClerkClient } = await import('@clerk/backend');
-      const { resolveRole } = await import('../src/services/roleService.js');
+      const { resolveRole } = await import('../../src/services/roleService.js');
       const clerk = createClerkClient({ secretKey: CLERK_SECRET_KEY });
       verifySession = async (sessionToken) => {
         const claims = await verifyToken(sessionToken, { secretKey: CLERK_SECRET_KEY });

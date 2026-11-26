@@ -120,6 +120,18 @@ const CALLS = {
   'ownership.read': () => getOwnershipMap(moduleStorage),
   'ownership.manage': () => assignServiceOwnership('svc', { team: 'Docs' }, { storage: moduleStorage }),
   'civicWorks.moderate': () => moderateCivicWorkReport({ reportId: 'cw-1', decision: 'approved' }, moduleStorage),
+
+  'civictranslationmemory.write': () => {
+    // Calling requirePermission triggers the permission check;
+    // will throw for non-admins, allowing outcome() to return 'denied'.
+    requirePermission('civictranslationmemory.write');
+  },
+  'civictranslationmemory.review': () => {
+    // Calling requirePermission triggers the permission check;
+    // will throw for non-admins, allowing outcome() to return 'denied'.
+    requirePermission('civictranslationmemory.review');
+  },
+
   'roadSafety.review': () => transitionReviewCaseState('case-seg-ka-blr-nh44-01', 'inspection_scheduled', {}, moduleStorage),
   'roadSafety.admin': () => executeRiskRun({}, moduleStorage),
   'publicProjects.create': () => createPublicProject({ title: 'Sample Road Paving Test Corridor', description: 'Testing corridor paving description length', category: 'roads', jurisdiction: { wardNumber: 'Ward 10' } }, moduleStorage),
@@ -133,6 +145,7 @@ const CALLS = {
   'synthetic.audit': () => runSyntheticValidation([]),
   'legalSources.manage': () => createDraftSource({ title: 'Test', actName: 'Test Act', provision: 'Sec 1' }, moduleStorage),
   'legalSources.review': () => reviewAndPublishSource('src-rera-sec18', { reviewerNotes: 'Reviewed' }, moduleStorage),
+
 };
 
 const outcome = (fn) => {
