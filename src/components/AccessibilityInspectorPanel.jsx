@@ -4,6 +4,7 @@ import {
   XCircle,
   Eye,
   FileCheck,
+  Sparkles,
 } from 'lucide-react';
 import accessibilityInspectorService, {
   AI_SUGGESTION_MARKER,

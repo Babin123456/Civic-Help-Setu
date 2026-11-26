@@ -264,20 +264,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    match /bottleneckFeedback/{feedbackId} {
-      allow create: if filedBy()
-        && onlyKeys(['reporterId', 'serviceId', 'category', 'message', 'status', 'createdAt'])
-        && hasKeys(['reporterId', 'serviceId', 'category', 'message', 'status', 'createdAt'])
-        && text('serviceId', 100)
-        && text('category', 60)
-        && text('message', 1500)
-        && incoming().status == 'new'
-        && serverTime('createdAt');
-      allow read: if isAdmin() || (signedIn() && stored().reporterId == request.auth.uid);
-      allow update: if isAdmin()
-        && changedOnly(['status', 'adminNotes', 'reviewedAt', 'reviewedBy'])
-        && incoming().status in ['new', 'reviewed', 'addressed', 'dismissed'];
-      allow delete: if isAdmin();
+    // Shared feedback is server-owned: public intake, quotas, quarantine, audit and
+    // moderation authorization all pass through /api/bottleneck-feedback.
+    match /bottleneckFeedback/{document=**} {
+      allow read, write: if false;
+    }
+    match /bottleneckFeedbackAggregates/{document=**} {
+      allow read, write: if false;
     }
 
     // Community discrepancy audits: readable by everyone (they are shown on the guide), filed by
