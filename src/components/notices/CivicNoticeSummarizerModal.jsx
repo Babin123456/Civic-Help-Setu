@@ -1,4 +1,4 @@
-import { useState, useId } from 'react';
+import { useState, useId, useCallback } from 'react';
 import {
   X,
   FileText,
@@ -10,7 +10,12 @@ import {
   Copy,
   Check,
   Search,
-  AlertTriangle
+  AlertTriangle,
+  File,
+  Plus,
+  Shield,
+  Lock,
+  LogOut,
 } from 'lucide-react';
 import { summarizeCivicNotice } from '../../services/civicNoticeSummarizerService';
 import { safeHttpUrl } from '../../utils/safeContent';
@@ -22,6 +27,8 @@ export default function CivicNoticeSummarizerModal({ isOpen, onClose, initialNot
   const [inputSourceUrl, setInputSourceUrl] = useState(initialNotice?.sourceUrl || '');
   const [summary, setSummary] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [showSideBySide, setShowSideBySide] = useState(false);
+  const [confirmCreateReminder, setConfirmCreateReminder] = useState(false);
 
   if (!isOpen) return null;
 
@@ -33,6 +40,7 @@ export default function CivicNoticeSummarizerModal({ isOpen, onClose, initialNot
       sourceUrl: inputSourceUrl
     });
     setSummary(result);
+    setShowSideBySide(true);
   };
 
   const handleCopySummary = async () => {
@@ -43,7 +51,9 @@ Deadline: ${summary.primaryDeadline}
 Target Audience: ${summary.audience}
 Required Actions:
 ${summary.actions.map((a, i) => `${i + 1}. ${a}`).join('\n') || 'None explicitly specified'}
-Official Source: ${summary.sourceUrl || 'Official Gazette / Bulletin'}`;
+Official Source: ${summary.sourceUrl || 'Official Gazette / Bulletin'}
+
+(Generated with clause-level source tracking. Verify all fields against the original notice.)`;
 
     try {
       if (navigator?.clipboard?.writeText) {
@@ -54,6 +64,65 @@ Official Source: ${summary.sourceUrl || 'Official Gazette / Bulletin'}`;
     } catch {
       /* ignore */
     }
+  };
+
+  const handleCreateReminder = () => {
+    setConfirmCreateReminder(true);
+  };
+
+  const handleConfirmCreateReminder = () => {
+    setConfirmCreateReminder(false);
+    // TODO: Create reminder/draft with user confirmation
+    onClose();
+  };
+
+  const handleCancelCreateReminder = () => {
+    setConfirmCreateReminder(false);
+  };
+
+  const renderFieldWithConfidence = (fieldName, fieldValue, clauseRef, confidence) => {
+    const confidenceColor = confidence >= 80 ? '#16a34a' : confidence >= 50 ? '#eab308' : '#f87171';
+    const confidenceLabel = confidence >= 80 ? 'High confidence' : confidence >= 50 ? 'Medium confidence' : 'Low confidence - verify';
+
+    return (
+      <div key={fieldName} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <strong style={{ fontSize: '0.78rem', color: confidenceColor }}>{confidenceLabel}</strong>
+        {clauseRef && clauseRef.paragraph > 0 && (
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>
+            Source: paragraph {clauseRef.paragraph}
+          </span>
+        )}
+        {clauseRef && clauseRef.source && (
+          <p style={{ margin: '0.1rem 0 0', fontSize: '0.72rem', color: 'var(--text-tertiary)', lineHeight: 1.3 }}>
+            {clauseRef.source.substring(0, 80)}{clauseRef.source.length > 80 ? '...' : ''}
+          </p>
+        )}
+        <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{fieldName}: {fieldValue}</span>
+      </div>
+    );
+  };
+
+  const renderUncertaintyWarnings = () => {
+    if (!summary?.uncertainties?.length) return null;
+    return (
+      <div
+        style={{
+          padding: '0.75rem 1rem',
+          background: 'rgba(254, 226, 226, 0.8)',
+          borderRadius: '6px',
+          border: '1px solid #fca5a5',
+          margin: '1rem 0',
+        }}
+      >
+        <AlertTriangle size={16} color="#f87171" style={{ marginRight: '0.3rem' }} />
+        <strong style={{ fontSize: '0.78rem', color: '#dc2626' }}>Uncertainty warnings:</strong>
+        <ul style={{ margin: '0.25rem 0 0', paddingLeft: '1rem', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+          {summary.uncertainties.map((u, i) => (
+            <li key={i}>{u}</li>
+          ))}
+        </ul>
+      </div>
+    );
   };
 
   return (
@@ -77,10 +146,10 @@ Official Source: ${summary.sourceUrl || 'Official Gazette / Bulletin'}`;
         className="card"
         style={{
           width: '100%',
-          maxWidth: '720px',
+          maxWidth: showSideBySide ? '1200px' : '720px',
           maxHeight: '90vh',
-          display: 'flex',
-          flexDirection: 'column',
+          display: showSideBySide ? 'flex' : 'column',
+          flexDirection: showSideBySide ? 'row' : 'column',
           backgroundColor: 'var(--bg-main, #ffffff)',
           borderRadius: '16px',
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.25)',
@@ -115,210 +184,50 @@ Official Source: ${summary.sourceUrl || 'Official Gazette / Bulletin'}`;
             </div>
             <div>
               <h2 id={headingId} style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>
-                Civic Notice Summarizer & Deadline Extractor
+                Civic Notice Plain-Language Summarizer
               </h2>
               <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                Extract verified deadlines and mandatory action instructions without hallucinated assumptions.
+                Extract key dates, jurisdiction, action items and contact route. Every statement links to a source passage. Uncertain fields are marked unknown.
               </p>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close modal"
-            className="btn btn-secondary"
-            style={{ padding: '0.35rem', borderRadius: '50%', border: 'none', cursor: 'pointer' }}
-          >
-            <X size={18} />
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close modal"
+              className="btn btn-secondary"
+              style={{ padding: '0.35rem', borderRadius: '50%', border: 'none', cursor: 'pointer' }}
+            >
+              <X size={18} />
+            </button>
+
+            {summary && (
+              <button
+                type="button"
+                onClick={() => setShowSideBySide(!showSideBySide)}
+                className="btn btn-secondary"
+                style={{ padding: '0.35rem', borderRadius: '6px', border: '1px solid var(--border-main)', cursor: 'pointer', fontSize: '0.78rem' }}
+              >
+                {showSideBySide ? 'Summary View' : 'Side-by-Side Review'}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Body */}
-        <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1, display: 'grid', gap: '1.25rem' }}>
-          {/* Notice Input Form */}
-          <form onSubmit={handleGenerateSummary} style={{ display: 'grid', gap: '0.85rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '0.25rem' }}>
-                Notice Title / Subject (Optional)
-              </label>
-              <input
-                type="text"
-                value={inputTitle}
-                onChange={(e) => setInputTitle(e.target.value)}
-                placeholder="e.g. Mandatory Aadhaar e-KYC for PM-Kisan Beneficiaries"
-                style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: '6px', border: '1px solid var(--border-main)' }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '0.25rem' }}>
-                Notice Full Text or Circular Excerpt
-              </label>
-              <textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                rows={4}
-                required
-                placeholder="Paste the full administrative notice or gazette notification text here..."
-                style={{ width: '100%', padding: '0.65rem 0.75rem', borderRadius: '6px', border: '1px solid var(--border-main)', fontSize: '0.85rem', lineHeight: 1.4 }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '0.25rem' }}>
-                Official Government Source URL
-              </label>
-              <input
-                type="url"
-                value={inputSourceUrl}
-                onChange={(e) => setInputSourceUrl(e.target.value)}
-                placeholder="https://..."
-                style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: '6px', border: '1px solid var(--border-main)' }}
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary"
-              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', padding: '0.65rem 1rem' }}
-            >
-              <Search size={16} /> Summarize & Extract Deadlines
-            </button>
-          </form>
-
-          {/* Generated Structured Summary Card */}
-          {summary && (
-            <div
-              style={{
-                border: '1px solid var(--border-main)',
-                borderRadius: '12px',
-                padding: '1.25rem',
-                backgroundColor: 'var(--bg-card, #f8fafc)',
-                display: 'grid',
-                gap: '1rem'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
-                <div>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--accent-main)' }}>
-                    Extracted Notice Intelligence
-                  </span>
-                  <h3 style={{ margin: '0.2rem 0', fontSize: '1.1rem', fontWeight: 700 }}>{summary.title}</h3>
-                </div>
-
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={handleCopySummary}
-                  style={{ fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
-                >
-                  {copied ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
-                  <span>{copied ? 'Copied' : 'Copy Summary'}</span>
-                </button>
-              </div>
-
-              {/* Purpose */}
-              <div>
-                <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)', display: 'block', marginBottom: '0.25rem' }}>
-                  Purpose / Core Announcement:
-                </strong>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-                  {summary.purpose}
-                </p>
-              </div>
-
-              {/* Deadline Box */}
-              <div
-                style={{
-                  padding: '0.85rem 1rem',
-                  borderRadius: '8px',
-                  backgroundColor: summary.hasDateAmbiguity
-                    ? 'rgba(245, 158, 11, 0.1)'
-                    : summary.deadlineStatus === 'EXPLICIT_DEADLINE'
-                    ? 'rgba(22, 163, 74, 0.1)'
-                    : 'rgba(100, 116, 139, 0.1)',
-                  border: `1px solid ${
-                    summary.hasDateAmbiguity
-                      ? '#fcd34d'
-                      : summary.deadlineStatus === 'EXPLICIT_DEADLINE'
-                      ? '#86efac'
-                      : '#cbd5e1'
-                  }`
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
-                  {summary.hasDateAmbiguity ? (
-                    <AlertTriangle size={16} color="#d97706" />
-                  ) : summary.deadlineStatus === 'EXPLICIT_DEADLINE' ? (
-                    <Calendar size={16} color="#16a34a" />
-                  ) : (
-                    <AlertCircle size={16} color="#64748b" />
-                  )}
-                  <strong style={{ fontSize: '0.88rem', color: summary.hasDateAmbiguity ? '#b45309' : summary.deadlineStatus === 'EXPLICIT_DEADLINE' ? '#15803d' : '#475569' }}>
-                    {summary.hasDateAmbiguity ? 'Date Ambiguity Surfaced:' : 'Stated Filing Deadline:'} {summary.primaryDeadline}
-                  </strong>
-                </div>
-
-                {summary.ambiguityNotice && (
-                  <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: '#b45309', lineHeight: 1.4 }}>
-                    {summary.ambiguityNotice}
-                  </p>
-                )}
-
-                {summary.deadlines.length > 0 && (
-                  <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1.25rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                    {summary.deadlines.map((d, i) => (
-                      <li key={i}>
-                        <strong>{d.dateString}</strong>: <em>{d.context}</em>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
-              {/* Actions Checklist */}
-              <div>
-                <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)', display: 'block', marginBottom: '0.35rem' }}>
-                  Extracted Citizen Action Instructions ({summary.actions.length}):
-                </strong>
-                {summary.actions.length === 0 ? (
-                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-                    No explicit action instructions found in the supplied notice text.
-                  </p>
-                ) : (
-                  <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.84rem', color: 'var(--text-secondary)', display: 'grid', gap: '0.35rem' }}>
-                    {summary.actions.map((act, idx) => (
-                      <li key={idx}>
-                        <CheckCircle2 size={13} color="var(--accent-main)" style={{ display: 'inline', marginRight: '4px' }} />
-                        {act}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
-              {/* Target Audience */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                <Users size={15} color="var(--accent-main)" />
-                <span>{summary.audience}</span>
-              </div>
-
-              {/* Verified Source URL Link */}
-              {summary.sourceUrl && (
-                <div style={{ fontSize: '0.82rem', borderTop: '1px solid var(--border-main)', paddingTop: '0.5rem' }}>
-                  <a
-                    href={safeHttpUrl(summary.sourceUrl) || undefined}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: 'var(--accent-main)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600 }}
-                  >
-                    <ExternalLink size={14} /> Verify Full Original Notice Document
-                  </a>
-                </div>
-              )}
-            </div>
-          )}
+        <div
+          style={{
+            padding: '1.5rem',
+            overflowY: 'auto',
+            flex: 1,
+            display: showSideBySide ? 'flex' : 'grid',
+            gap: showSideBySide ? '1.5rem' : '1.25rem',
+            justifyContent: showSideBySide ? 'flex-start' : 'start'
+          }}
+        >
+          {showSideBySide ? renderSideBySidePanel() : renderSummaryPanel()}
         </div>
 
         {/* Footer */}
@@ -334,8 +243,350 @@ Official Source: ${summary.sourceUrl || 'Official Gazette / Bulletin'}`;
           <button type="button" className="btn btn-secondary" onClick={onClose}>
             Close
           </button>
+
+          {summary && !showSideBySide && (
+            <>
+              <button
+                type="button"
+                onClick={handleCreateReminder}
+                className="btn btn-primary"
+                style={{ marginLeft: '0.5rem', padding: '0.5rem 1rem' }}
+              >
+                <Plus size={14} /> Create Reminder/Draft
+              </button>
+            </>
+          )}
+
+          {confirmCreateReminder && (
+            <>
+              <button type="button" className="btn btn-secondary" onClick={handleCancelCreateReminder}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-primary" onClick={handleConfirmCreateReminder}>
+                Create Reminder
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
   );
 }
+
+/* Side-by-Side Review Panel */
+const renderSideBySidePanel = () => {
+  const { purpose, deadlines, deadlineStatus, primaryDeadline, hasDateAmbiguity, ambiguityNotice,
+    actions, audience, isUniversal, sourceUrl, referenceNumber,
+    jurisdiction, fieldConfidence, uncertainties, clauseReferences, rawTextLength, privacyNotice } = summary || {};
+
+  return (
+    <div style={{ flex: 1, overflowY: 'auto' }}>
+      {/* Left: Plain-Language Summary */}
+      <div style={{ flex: 1, borderRight: '1px solid var(--border-main)' }}>
+        <h3 style={{ margin: '0 1rem 1rem', fontSize: '1rem', fontWeight: 600, color: 'var(--accent-main)' }}>
+          Plain-Language Summary
+        </h3>
+
+        {privacyNotice && (
+          <div
+            style={{
+              padding: '0.75rem 1rem',
+              background: 'rgba(241, 245, 249, 0.5)',
+              borderRadius: '6px',
+              border: '1px solid var(--border-main)',
+              fontSize: '0.75rem',
+              color: 'var(--text-secondary)',
+              marginBottom: '1rem',
+            }}
+          >
+            {privacyNotice}
+          </div>
+        )}
+
+        {/* Purpose */}
+        <div>
+          <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)', display: 'block', marginBottom: '0.2rem' }}>
+            Purpose / Core Announcement:
+          </strong>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+            {purpose || 'Not extracted'}
+          </p>
+          {fieldConfidence.purpose >= 50 && (
+            <span style={{ fontSize: '0.68rem', color: fieldConfidence.purpose >= 80 ? '#16a34a' : '#eab308' }}>
+              ({fieldConfidence.purpose}% confidence)
+            </span>
+          )}
+        </div>
+
+        {/* Deadline Box */}
+        <div
+          style={{
+            padding: '0.75rem 1rem',
+            borderRadius: '8px',
+            margin: '0.75rem 0',
+            background: hasDateAmbiguity
+              ? 'rgba(245, 158, 11, 0.1)'
+              : deadlineStatus === 'EXPLICIT_DEADLINE'
+              ? 'rgba(22, 163, 74, 0.1)'
+              : 'rgba(100, 116, 139, 0.1)',
+            border: `1px solid ${
+              hasDateAmbiguity ? '#fcd34d' : deadlineStatus === 'EXPLICIT_DEADLINE' ? '#86efac' : '#cbd5e1'
+            }`
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
+            {hasDateAmbiguity ? (
+              <AlertTriangle size={16} color="#d97706" />
+            ) : deadlineStatus === 'EXPLICIT_DEADLINE' ? (
+              <Calendar size={16} color="#16a34a" />
+            ) : (
+              <AlertCircle size={16} color="#64748b" />
+            )}
+            <strong style={{ fontSize: '0.85rem', color: hasDateAmbiguity ? '#b45309' : deadlineStatus === 'EXPLICIT_DEADLINE' ? '#15803d' : '#475569' }}>
+              {hasDateAmbiguity ? 'Date Ambiguity' : 'Filing Deadline'}: {primaryDeadline}
+            </strong>
+          </div>
+        </div>
+
+        {ambiguityNotice && (
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: '#b45309', lineHeight: 1.4 }}>
+            {ambiguityNotice}
+          </p>
+        )}
+
+        {deadlines.length > 0 && (
+          <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1rem', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+            {deadlines.map((d, i) => (
+              <li key={i}>
+                <strong>{d.dateString}</strong>: <em>{d.context || 'no context'}</em>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* Actions */}
+        <div>
+          <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)', display: 'block', marginBottom: '0.2rem' }}>
+            Extracted Citizen Action Instructions:
+          </strong>
+          {actions.length === 0 ? (
+            <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+              No explicit action instructions found in the supplied notice text.
+            </p>
+          ) : (
+            <ul style={{ margin: 0, paddingLeft: '1rem', fontSize: '0.78rem', color: 'var(--text-secondary)', gap: '0.25rem' }}>
+              {actions.map((act, idx) => (
+                <li key={idx}>
+                  <CheckCircle2 size={12} color="var(--accent-main)" style={{ display: 'inline', marginRight: '3px' }} />
+                  {act}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {fieldConfidence.actions >= 50 && (
+            <span style={{ fontSize: '0.68rem', color: fieldConfidence.actions >= 80 ? '#16a34a' : '#eab308' }}>
+              ({fieldConfidence.actions}% confidence)
+            </span>
+          )}
+        </div>
+
+        {/* Target Audience */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+          <Users size={13} color="var(--accent-main)" />
+          <span>{audience || 'Not extracted'}</span>
+          {isUniversal === false && (
+            <span style={{ fontSize: '0.68rem', color: '#6b7280' }}>(not universal - verify applicability)</span>
+          )}
+        </div>
+
+        {/* Jurisdiction */}
+        {jurisdiction && jurisdiction.label !== 'Unknown' && (
+          <div style={{ margin: '0.5rem 0', padding: '0.5rem 0.75rem', background: 'rgba(220, 38, 38, 0.05)', borderRadius: '4px', border: '1px solid #dc2626' }}>
+            <strong style={{ fontSize: '0.75rem', color: '#dc2626' }}>: Jurisdiction</strong>
+            <span style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+              {jurisdiction.label} ({jurisdiction.region})
+            </span>
+            {jurisdiction.confidence >= 50 && (
+              <span style={{ fontSize: '0.68rem', color: jurisdiction.confidence >= 80 ? '#16a34a' : '#eab308' }}>
+                ({jurisdiction.confidence}% confidence)
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Uncertainty warnings */}
+        {renderUncertaintyWarnings()}
+      </div>
+
+      {/* Right: Source Clause Review */}
+      <div style={{ flex: 1, paddingLeft: '1rem', overflowY: 'auto' }}>
+        <h3 style={{ margin: '0 1rem 1rem', fontSize: '1rem', fontWeight: 600, color: 'var(--accent-main)' }}>
+          Source Clause Review
+        </h3>
+
+        {privacyNotice && (
+          <div
+            style={{
+              padding: '0.75rem 1rem',
+              background: 'rgba(241, 245, 249, 0.5)',
+              borderRadius: '6px',
+              border: '1px solid var(--border-main)',
+              fontSize: '0.75rem',
+              color: 'var(--text-secondary)',
+              marginBottom: '1rem',
+            }}
+          >
+            {privacyNotice}
+          </div>
+        )}
+
+        {/* Dates with clause references */}
+        {deadlines.length > 0 && (
+          <div>
+            <strong style={{ fontSize: '0.78rem', color: 'var(--text-primary)', marginBottom: '0.3rem' }}>
+              Extracted Dates ({deadlines.length}):
+            </strong>
+            <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1rem', fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+              {deadlines.map((d, i) => (
+                <li key={i} style={{ borderBottom: '1px solid #e5e7eb', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
+                  <strong>Date:</strong> {d.dateString}
+                  <span style={{ fontSize: '0.68rem', color: 'var(--text-tertiary)', float: 'right' }}>
+                    Confidence: {clauseReferences.dates?.[i]?.confidence || 'N/A'}%
+                  </span>
+                  <p style={{ margin: '0.1rem 0 0', fontSize: '0.68rem', color: 'var(--text-tertiary)', lineHeight: 1.3 }}>
+                    {d.context || 'No context available'}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Actions with clause references */}
+        {actions.length > 0 && (
+          <div>
+            <strong style={{ fontSize: '0.78rem', color: 'var(--text-primary)', marginBottom: '0.3rem' }}>
+              Action Items ({actions.length}):
+            </strong>
+            <ul style={{ margin: '0.5rem 0 0', paddingLeft: '1rem', fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+              {actions.map((act, idx) => (
+                <li key={idx} style={{ borderBottom: '1px solid #e5e7eb', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
+                  <CheckCircle2 size={12} color="var(--accent-main)" style={{ display: 'inline-block', marginRight: '3px' }} />
+                  {act}
+                  <span style={{ fontSize: '0.68rem', color: 'var(--text-tertiary)', float: 'right' }}>
+                    Para {clauseReferences.actions?.[idx]?.paragraph || 'N/A'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Jurisdiction clause */}
+        {jurisdiction && jurisdiction.label !== 'Unknown' && (
+          <div>
+            <strong style={{ fontSize: '0.78rem', color: 'var(--text-primary)', marginBottom: '0.3rem' }}>
+              Jurisdiction Clause:
+            </strong>
+            <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.3 }}>
+              {jurisdiction.clauseReference?.source || 'No source available'}
+            </p>
+            {jurisdiction.clauseReference?.paragraph > 0 && (
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-tertiary)' }}>
+                Source: paragraph {jurisdiction.clauseReference.paragraph}
+              </span>
+            )}
+            <span style={{ fontSize: '0.68rem', color: jurisdiction.confidence >= 80 ? '#16a34a' : '#eab308' }}>
+              Confidence: {jurisdiction.confidence}%
+            </span>
+          </div>
+        )}
+
+        {/* Audience clause */}
+        {audience && audience !== 'Not extracted' && (
+          <div>
+            <strong style={{ fontSize: '0.78rem', color: 'var(--text-primary)', marginBottom: '0.3rem' }}>
+              Audience Clause:
+            </strong>
+            <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.3 }}>
+              {audience}
+            </p>
+            {audienceInfo?.clauseReference?.paragraph > 0 && (
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-tertiary)' }}>
+                Source: paragraph {audienceInfo.clauseReference.paragraph}
+              </span>
+            )}
+            <span style={{ fontSize: '0.68rem', color: audienceInfo.isUniversal === false && audience.text.includes('not explicitly restricted') ? '#eab308' : '#6b7280' }}>
+              Confidence: {audienceInfo.clauseReference?.confidence || 0}%
+            </span>
+          </div>
+        )}
+
+        {/* Purpose clause */}
+        {purpose && purpose !== 'Not extracted' && (
+          <div>
+            <strong style={{ fontSize: '0.78rem', color: 'var(--text-primary)', marginBottom: '0.3rem' }}>
+              Purpose Clause:
+            </strong>
+            <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.3 }}>
+              {purpose}
+            </p>
+            {purposeInfo?.clauseReference?.paragraph > 0 && (
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-tertiary)' }}>
+                Source: paragraph {purposeClause.clauseReference?.paragraph || 1}
+              </span>
+            )}
+            <span style={{ fontSize: '0.68rem', color: fieldConfidence.purpose >= 80 ? '#16a34a' : '#eab308' }}>
+              Confidence: {fieldConfidence.purpose}%
+            </span>
+          </div>
+        )}
+
+        {/* Reference number */}
+        {referenceNumber && referenceNumber !== 'N/A' && (
+          <div style={{ margin: '0.5rem 0', padding: '0.5rem 0.75rem', background: 'rgba(220, 38, 38, 0.05)', borderRadius: '4px', border: '1pxsolid #dc2626' }}>
+            <strong style={{ fontSize: '0.75rem', color: '#dc2626' }}>: Reference Number</strong>
+            <span style={{ fontSize: '0.82rem', color: 'var(--text-primary)' }}>{referenceNumber}</span>
+          </div>
+        )}
+
+        {/* Source URL link */}
+        {sourceUrl && (
+          <div style={{ margin: '1rem 0 0', padding: '0.5rem 0', borderTop: '1px solid var(--border-main)' }}>
+            <a
+              href={safeHttpUrl(sourceUrl) || undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontSize: '0.78rem',
+                color: 'var(--accent-main)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                fontWeight: 600
+              }}
+            >
+              <ExternalLink size={13} /> View Full Original Notice Document
+            </a>
+          </div>
+        )}
+
+        {/* Copyright & guidance notice */}
+        <div
+          style={{
+            marginTop: '1rem',
+            padding: '0.75rem 1rem',
+            background: 'rgba(254, 242, 242, 0.5)',
+            borderRadius: '6px',
+            border: '1px solid #fca5a5',
+            fontSize: '0.72rem',
+            color: '#991b1b'
+          }}
+        >
+          <strong>Copyright & Usage Guidance:</strong> This notice text is provided for civic assistance purposes. The summarizer generates plain-language extracts with clause-level references. Users should verify all extracted information against the original official document. No part of this summary should be reproduced or distributed without permission from the original source.
+        </div>
+      </div>
+    </div>
+  );
+};

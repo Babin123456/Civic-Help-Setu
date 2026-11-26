@@ -1,3 +1,4 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /**
  * api/road-hazards.js
  * Server-side endpoint for validating citizen road hazard reports, defect disclosures,
@@ -12,6 +13,7 @@
  */
 
 import { createRateLimiter, createSingleFlight } from './_lib/abuseGuard.js';
+import { withRequestSecurity } from './_lib/requestSecurity.js';
 
 const rateLimiter = createRateLimiter({ limit: 10, windowMs: 60 * 1000 });
 const singleFlight = createSingleFlight();
@@ -110,7 +112,7 @@ export function validateRoadHazardReportPayload(body) {
   return errors;
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'GET') {
@@ -174,3 +176,5 @@ export default async function handler(req, res) {
     });
   });
 }
+
+export default withApiErrorContract(withRequestSecurity(handler, { allowMissingOrigin: true }));

@@ -5,7 +5,7 @@ import ServiceDetails from './ServiceDetails.jsx';
 import { MOCK_SERVICES } from '../data/services';
 import { LanguageProvider } from '../context/LanguageContext';
 
-vi.mock('../context/AuthContext', () => ({ useAuth: () => ({ user: null }) }));
+vi.mock('../context/AuthContext', () => ({ useAuth: () => ({ user: null }), useOptionalAuth: () => null }));
 vi.mock('../context/ToastContext', () => ({ useToast: () => ({ toast: { success: vi.fn(), error: vi.fn() } }) }));
 
 const render = (path) =>

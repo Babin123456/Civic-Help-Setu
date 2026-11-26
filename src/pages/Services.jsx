@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { getAllServices } from '../services/serviceCatalog';
 import ServiceCard from '../components/ServiceCard';
+import RegionalDirectoryStatus from '../components/services/RegionalDirectoryStatus';
 import FilterToolbar from '../components/services/FilterToolbar';
 import QuickFilterPresets, { QUICK_PRESETS } from '../components/services/QuickFilterPresets';
 import DirectoryEmptyState from '../components/services/DirectoryEmptyState';
@@ -269,6 +270,22 @@ const Services = () => {
               <Building2 size={15} />
               <span>Civic Grievance & Department Router</span>
             </button>
+            <Link
+              to="/transit-concessions"
+              style={{
+                padding: '0.55rem 1.25rem',
+                borderRadius: '99px',
+                border: '1px solid var(--border-main)',
+                background: 'var(--bg-surface)',
+                color: 'var(--text-primary)',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+            >
+              Public transport concessions
+            </Link>
           </div>
         </StandardPageHeader>
 
@@ -355,6 +372,8 @@ const Services = () => {
           onResetFilters={handleResetFilters}
           hasActiveFilters={hasActiveFilters}
         />
+
+        <RegionalDirectoryStatus services={filteredServices} />
 
         {/* Services Grid or Empty State */}
         {filteredServices.length > 0 ? (

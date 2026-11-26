@@ -1,6 +1,6 @@
-import { MOCK_SERVICES } from '../data/services';
-import { sanitizeTextFields } from '../utils/safeContent';
-import { logDiagnostic } from '../utils/diagnostics';
+import { MOCK_SERVICES } from '../data/services.js';
+import { sanitizeTextFields } from '../utils/safeContent.js';
+import { logDiagnostic } from '../utils/diagnostics.js';
 
 // Where the admin dashboard keeps guides it added or edited (see adminService).
 export const CUSTOM_SERVICES_KEY = 'civicbridge_custom_services';

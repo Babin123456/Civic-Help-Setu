@@ -4,6 +4,7 @@ import {
   EDGE_TYPES,
   CivicKnowledgeEntityGraph,
 } from './civicEntityGraphService';
+import { isApprovedService } from './groundedCivicRagService';
 
 const MOCK_SERVICE_A = {
   id: 'driving-licence',
