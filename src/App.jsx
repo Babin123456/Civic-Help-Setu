@@ -24,6 +24,7 @@ const CitizenDataWallet = lazy(() => import('./pages/CitizenDataWallet'));
 import VerifiableEvidenceBundleWorkspace from './pages/VerifiableEvidenceBundleWorkspace';
 
 
+
 import ZkAttributeVerifierView from './pages/ZkAttributeVerifierView';
 import FederatedQueryExplorer from './pages/FederatedQueryExplorer';
 import WardAnalyticsDashboard from './pages/WardAnalyticsDashboard';
@@ -164,8 +165,10 @@ function AppRoot() {
                     <OfflineBanner />
                     <SkipToContent />
                     <Navbar />
+
                     <main id="main-content" style={{ flex: 1, minWidth: 0, width: '100%' }} tabIndex="-1">
-<RouteErrorBoundary>
+                      <RouteErrorBoundary>
+
                         <Suspense fallback={<div className="section" role="status" aria-live="polite"><div className="container">Loading page…</div></div>}>
                           <Routes>
                             <Route path="/" element={<Home />} />
@@ -197,7 +200,6 @@ function AppRoot() {
                                     <CitizenDataWallet />
                                 </ProtectedRoute>
                             } />
-
                             <Route path="/services/business-licence-checklist" element={<SmallBusinessLicencePage />} />
                             <Route path="/business-licence-checklist" element={<SmallBusinessLicencePage />} />
                             <Route path="/services/fire-noc-guide" element={<FireSafetyGuidePage />} />
@@ -476,6 +478,7 @@ function AppRoot() {
                 </ConfirmationDialogProvider>
               </NetworkProvider>
             </LanguageProvider>
+
           </AuthProvider>
         </ToastProvider>
       </AccessibilityProvider>

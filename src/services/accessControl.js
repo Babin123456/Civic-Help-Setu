@@ -74,6 +74,11 @@ export const PERMISSIONS = {
   'roadSafety.review': { roles: ['admin'], resource: 'civicbridge_review_cases_v1', description: 'Review detected road safety blackspots, conduct site inspections, and plan interventions' },
   'roadSafety.admin': { roles: ['admin'], resource: 'civicbridge_risk_runs_v1', description: 'Configure risk weighting parameters, trigger risk runs, and archive road safety cases' },
 
+  'agentReview.read': { roles: ['admin'], resource: 'civicbridge_agent_review_studio_v1', description: 'Inspect high-impact AI proposals, source passages, and review audit history' },
+  'agentReview.decide': { roles: ['admin'], resource: 'civicbridge_agent_review_studio_v1', description: 'Approve, edit, reject, escalate, or fork versioned AI civic outputs' },
+  'agentReview.submit': { roles: ['admin', 'citizen'], resource: 'civicbridge_agent_review_studio_v1', description: 'Flag and submit an untrusted AI civic output proposal for human review' },
+
+
   'agentMemory.admin': { roles: ['admin'], resource: 'chsetu:mem', description: 'Administer system-wide agent memory lifecycle sweeps and dead-letter queues' },
   'agentMemory.read': { roles: ['admin', 'citizen'], resource: 'chsetu:mem', description: 'Read scoped case memory' },
   'agentMemory.purge': { roles: ['admin', 'citizen'], resource: 'chsetu:mem', description: 'Purge scoped case memory' },
@@ -95,6 +100,7 @@ export const PERMISSIONS = {
   'flood.admin': { roles: ['admin'], resource: 'civicbridge_flood_forecast_runs_v1', description: 'Configure flood intelligence parameters, trigger runs, and archive data' },
   'legalSources.manage': { roles: ['admin'], resource: 'civicbridge_legal_sources_v1', description: 'Create, edit, or supersede legal sources' },
   'legalSources.review': { roles: ['admin'], resource: 'civicbridge_legal_sources_v1', description: 'Review, approve, publish or roll back legal source versions' },
+
 
 
 
