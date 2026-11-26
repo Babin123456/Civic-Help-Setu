@@ -163,3 +163,6 @@ export const useAuth = () => {
   }
   return ctx;
 };
+
+/** Public, SSR-compatible intake can run as a guest; privileged screens still use useAuth. */
+export const useOptionalAuth = () => useContext(AuthContext);
