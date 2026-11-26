@@ -12,6 +12,7 @@
     "headers:check": "node scripts/generateVercelHeaders.js --check",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:reconciliation": "vitest run tests/reconciliation-synthetic-bench.test.js",
     "rules:test": "npm --prefix firebase/emulator install --no-audit --no-fund && npm --prefix firebase/emulator test"
   },
   "dependencies": {
