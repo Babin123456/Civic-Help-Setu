@@ -31,6 +31,9 @@ export const DEFAULT_RESILIENCE_CONFIG = Object.freeze({
   resetTimeoutMs: 15_000,
   maxHalfOpenAttempts: 2,
   maxConcurrent: 32,
+  // Saturation callback options
+  saturationCheckIntervalMs: 5000,
+  saturationChangeThreshold: 0.15, // 15% change triggers callback
 });
 
 const RETRYABLE_HTTP_STATUSES = new Set([429, 502, 503, 504]);
@@ -95,6 +98,9 @@ export function createDependencyPolicy(dependencyId, options = {}) {
   let activeCalls = 0;
   let peakActiveCalls = 0;
   const recentOutcomes = []; // { at, ok, retried }
+  // Latency tracking for saturation metrics
+  const latencySamples = [];
+  const MAX_LATENCY_SAMPLES = 1000;
 
   function pruneWindow(at) {
     const cutoff = at - config.windowDurationMs;
@@ -262,6 +268,11 @@ export function createDependencyPolicy(dependencyId, options = {}) {
           });
           clearTimeout(timer);
 
+          // Record latency for saturation metrics
+          const latencyMs = now() - attemptAt;
+          latencySamples.push(latencyMs);
+          if (latencySamples.length > MAX_LATENCY_SAMPLES) latencySamples.shift();
+
           // Treat HTTP-like 5xx responses returned as objects as dependency failures
           if (result && typeof result.status === 'number' && result.status >= 500) {
             const httpErr = new MeshResilienceError(
@@ -288,6 +299,11 @@ export function createDependencyPolicy(dependencyId, options = {}) {
                 { status: 504, retryable: true, dependency: dependencyId }
               )
             : err;
+
+          // Record latency for failed attempts too
+          const latencyMs = now() - attemptAt;
+          latencySamples.push(latencyMs);
+          if (latencySamples.length > MAX_LATENCY_SAMPLES) latencySamples.shift();
 
           lastError = normalizedErr;
           const shouldRetry =
@@ -340,6 +356,13 @@ export function createDependencyPolicy(dependencyId, options = {}) {
     }
   }
 
+  function percentile(arr, p) {
+    if (!arr.length) return 0;
+    const sorted = [...arr].sort((a, b) => a - b);
+    const idx = Math.ceil(p / 100 * sorted.length) - 1;
+    return sorted[Math.max(0, idx)];
+  }
+
   function snapshot() {
     pruneWindow(now());
     const failures = recentOutcomes.filter((o) => !o.ok).length;
@@ -354,7 +377,76 @@ export function createDependencyPolicy(dependencyId, options = {}) {
       windowFailureCount: failures,
       lastStateChangeAt,
       openedAt,
+      latencyP50: percentile(latencySamples, 50),
+      latencyP95: percentile(latencySamples, 95),
+      latencyP99: percentile(latencySamples, 99),
     };
+  }
+
+  function getSaturation() {
+    pruneWindow(now());
+    const failures = recentOutcomes.filter((o) => !o.ok).length;
+    const total = recentOutcomes.length;
+    return {
+      dependencyId,
+      inFlight: activeCalls,
+      maxConcurrent: config.maxConcurrent,
+      utilization: config.maxConcurrent > 0 ? activeCalls / config.maxConcurrent : 0,
+      peakActiveCalls,
+      errorRate: total > 0 ? failures / total : 0,
+      latencyP50: percentile(latencySamples, 50),
+      latencyP95: percentile(latencySamples, 95),
+      latencyP99: percentile(latencySamples, 99),
+      breakerState: state,
+      windowCount: total,
+    };
+  }
+
+  // Saturation monitoring with callback
+  let saturationMonitorTimer = null;
+  let lastSaturation = null;
+
+  function checkSaturationChange() {
+    if (!config.onSaturationChange) return;
+    const current = getSaturation();
+    if (!lastSaturation) {
+      lastSaturation = current;
+      return;
+    }
+    const utilizationDelta = Math.abs(current.utilization - lastSaturation.utilization);
+    const errorRateDelta = Math.abs(current.errorRate - lastSaturation.errorRate);
+    const latencyP99Delta = Math.abs(current.latencyP99 - lastSaturation.latencyP99);
+    const maxLatency = Math.max(lastSaturation.latencyP99, current.latencyP99, 1);
+    const latencyP99DeltaPct = latencyP99Delta / maxLatency;
+
+    if (
+      utilizationDelta >= config.saturationChangeThreshold ||
+      errorRateDelta >= config.saturationChangeThreshold ||
+      latencyP99DeltaPct >= config.saturationChangeThreshold
+    ) {
+      lastSaturation = current;
+      config.onSaturationChange(current, lastSaturation);
+    }
+  }
+
+  function startSaturationMonitor() {
+    if (saturationMonitorTimer) return;
+    saturationMonitorTimer = setInterval(checkSaturationChange, config.saturationCheckIntervalMs);
+  }
+
+  function stopSaturationMonitor() {
+    if (saturationMonitorTimer) {
+      clearInterval(saturationMonitorTimer);
+      saturationMonitorTimer = null;
+    }
+  }
+
+  function recordExternalOutcome({ ok = true, latencyMs } = {}) {
+    if (typeof latencyMs === 'number' && Number.isFinite(latencyMs) && latencyMs >= 0) {
+      latencySamples.push(latencyMs);
+      if (latencySamples.length > MAX_LATENCY_SAMPLES) latencySamples.shift();
+    }
+    recordOutcome({ ok, isCanary: state === BREAKER_STATES.HALF_OPEN, retried: false });
   }
 
   function reset() {
@@ -362,14 +454,19 @@ export function createDependencyPolicy(dependencyId, options = {}) {
     recentOutcomes.length = 0;
     activeCalls = 0;
     peakActiveCalls = 0;
+    lastSaturation = null;
   }
 
   return {
     dependencyId,
     execute,
+    recordExternalOutcome,
     snapshot,
+    getSaturation,
     reset,
     getState: () => state,
+    startSaturationMonitor,
+    stopSaturationMonitor,
   };
 }
 
