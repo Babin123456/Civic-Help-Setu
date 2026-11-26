@@ -72,6 +72,9 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civic_journey_progress_<journeyId>` (one per journey) | `journeyDependencyEngine.js` | Completed tasks of a journey plan | Drafts and in-progress work |
 | `civic_accessibility_visit_plans` | `accessibilityPlannerService.js` | Optional visit preferences saved only after explicit consent; kept on this device, not cloud-synced or used in analytics | Drafts and in-progress work |
 | `civic_grievance_evidence_drafts` | `grievanceEvidenceService.js` | Private user-controlled grievance preparation drafts and timelines | Drafts and in-progress work |
+| `civic_evidence_bundles_v1` | `verifiableEvidenceBundleStorage.js` | Append-only verifiable evidence bundle manifests with Merkle roots and hash chains | Drafts and in-progress work |
+| `civic_evidence_bundle_files_v1` | `verifiableEvidenceBundleStorage.js` | Local raw file payloads and byte representations for evidence items | Drafts and in-progress work |
+| `civic_evidence_bundle_audits_v1` | `verifiableEvidenceBundleStorage.js` | Verification audit history and cryptographic check logs | Drafts and in-progress work |
 | `civic_grievance_drafts_v1` | `civicGrievanceDraftingService.js` | User-controlled formal civic grievance drafts and facts | Drafts and in-progress work |
 | `civic_life_event_journeys` | `lifeEventNavigatorService.js` | Saved life-event roadmap progress, hidden tasks and regional selections | Drafts and in-progress work |
 | `civicbridge_eligibility_assessments` | `assessmentStorage.js` | Answers and results of eligibility checks | Drafts and in-progress work |

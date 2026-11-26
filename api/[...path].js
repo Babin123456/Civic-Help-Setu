@@ -37,8 +37,12 @@ import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+
+import verifiableEvidenceBundles from "./_lib/handlers/verifiable-evidence-bundles.js";
+
 import zkAttributeProofVerify from "./_lib/handlers/zk-attribute-proof-verify.js";
 import federatedCivicQuery from "./_lib/handlers/federated-civic-query.js";
+
 
 import civicDataCleanRoom from "./_lib/handlers/civic-data-clean-room.js";
 
@@ -128,9 +132,13 @@ const baseHandlers = {
   "share-by-email": shareByEmail,
   "tender-corrections": tenderCorrections,
 
+  "verifiable-evidence-bundles": verifiableEvidenceBundles,
+
+
   "ward-analytics": wardAnalytics,
 
   "transit-concessions": transitConcessions,
+
 
   "ward-budget-proposals": wardBudgetProposals,
   "water-quality-register": waterQualityRegister,
