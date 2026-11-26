@@ -30,6 +30,7 @@ import { logDiagnostic } from '../utils/diagnostics';
 import { getAllServices } from '../services/serviceCatalog';
 import { queryCivicKnowledge } from '../services/groundedCivicRagService';
 import SourceTraceabilityPanel from '../components/assistant/SourceTraceabilityPanel';
+import ClaimProvenanceGuidance from '../components/assistant/ClaimProvenanceGuidance';
 
 const Assistant = () => {
   const [messages, setMessages] = useState(() => loadChatHistory());
@@ -76,7 +77,11 @@ const Assistant = () => {
 
     let response;
     try {
-      response = await askGroundedCivicAssistant(safeQuery);
+      const searchParams = new URLSearchParams(location.search);
+      const jurisdictionParam = searchParams.get('state') || searchParams.get('jurisdiction') || null;
+      response = await askGroundedCivicAssistant(safeQuery, {
+        jurisdictionCode: jurisdictionParam,
+      });
     } catch (groundingErr) {
       logDiagnostic('Grounded retrieval error, falling back to basic assistant:', groundingErr);
       response = await askCivicAssistant(safeQuery);
@@ -95,6 +100,9 @@ const Assistant = () => {
       suggestions: response.suggestions || [],
       guardrail: response.guardrail || null,
       entailment: response.entailment || null,
+      provenance: response.provenance || null,
+      claims: response.claims || [],
+      unsupportedClaims: response.unsupportedClaims || [],
       timestamp: new Date().toISOString(),
     };
   };
@@ -420,6 +428,17 @@ const Assistant = () => {
               <BookOpen size={16} /> View Full Detailed Roadmap
             </Link>
           </div>
+        )}
+
+        {/* Claim-Level Source Provenance & Passages (#1154) */}
+        {(msg.provenance || (msg.claims && msg.claims.length > 0)) && (
+          <ClaimProvenanceGuidance
+            provenance={msg.provenance}
+            claims={msg.claims}
+            unsupportedClaims={msg.unsupportedClaims}
+            failClosedNotice={msg.provenance?.failClosedNotice || data.missingInformationNotice}
+            disclaimer={data.disclaimer}
+          />
         )}
 
         {/* Sources, review dates and limitations (omitted when the response has no source data) */}
