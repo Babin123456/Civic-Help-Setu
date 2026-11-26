@@ -13,7 +13,7 @@
 import { createRateLimiter } from '../abuseGuard.js';
 import {
   fetchDifferentiallyPrivateWardAnalytics,
-} from '../../../src/services/wardIssueHeatmapService.js';
+} from '../../../src/services/wardAnalyticsQueryService.js';
 import {
   saveCivicReport,
 } from '../../../src/services/wardIssueHeatmapStorage.js';
