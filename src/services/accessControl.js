@@ -73,6 +73,11 @@ export const PERMISSIONS = {
   'synthetic.audit': { roles: ['admin', 'citizen'], resource: 'civicbridge_synthetic_validation_runs_v1', description: 'Audit PII detection and validation runs' },
   'roadSafety.review': { roles: ['admin'], resource: 'civicbridge_review_cases_v1', description: 'Review detected road safety blackspots, conduct site inspections, and plan interventions' },
   'roadSafety.admin': { roles: ['admin'], resource: 'civicbridge_risk_runs_v1', description: 'Configure risk weighting parameters, trigger risk runs, and archive road safety cases' },
+
+  'agentMemory.admin': { roles: ['admin'], resource: 'chsetu:mem', description: 'Administer system-wide agent memory lifecycle sweeps and dead-letter queues' },
+  'agentMemory.read': { roles: ['admin', 'citizen'], resource: 'chsetu:mem', description: 'Read scoped case memory' },
+  'agentMemory.purge': { roles: ['admin', 'citizen'], resource: 'chsetu:mem', description: 'Purge scoped case memory' },
+
   'publicProjects.create': { roles: ['admin'], resource: 'civicbridge_public_projects_v1', description: 'Create and configure public infrastructure projects, milestones and geometries' },
   'publicProjects.verify': { roles: ['admin'], resource: 'civicbridge_verification_reviews_v1', description: 'Verify evidence and record milestone decisions for public projects' },
   'publicProjects.audit': { roles: ['admin'], resource: 'civicbridge_project_audit_logs_v1', description: 'Inspect append-only project verification audit logs and unredacted assets' },
@@ -90,6 +95,7 @@ export const PERMISSIONS = {
   'flood.admin': { roles: ['admin'], resource: 'civicbridge_flood_forecast_runs_v1', description: 'Configure flood intelligence parameters, trigger runs, and archive data' },
   'legalSources.manage': { roles: ['admin'], resource: 'civicbridge_legal_sources_v1', description: 'Create, edit, or supersede legal sources' },
   'legalSources.review': { roles: ['admin'], resource: 'civicbridge_legal_sources_v1', description: 'Review, approve, publish or roll back legal source versions' },
+
 
 
 };
