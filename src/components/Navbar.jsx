@@ -27,9 +27,6 @@ import {
   KeyRound,
   Store,
   Trees,
-
-  Database
-
   Calendar,
   HelpCircle,
   School,
@@ -175,6 +172,8 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
         return (
           normalizedPath === '/federated-data' ||
           normalizedPath === '/federated-civic-data'
+        );
+      }
 
       if (normalizedTarget === '/up-jan-sunwai') {
         return (
