@@ -53,6 +53,7 @@ Sensitivity: **High** means identity or contact data, or free text that people t
 | Compared services, FAQ votes, journey progress, offline cache of guides | `comparisonService.js`, `faqService.js`, `journeyDependencyEngine.js`, `offlineCacheService.js` | `civic_compared_services`, `civicbridge_faq_votes`, `civic_journey_progress_<id>`, `civicbridge_offline_cache` | No | Low |
 | Theme, language, accessibility settings | `preferencesStorage.js`, `languagePreference.js` | `civicbridge_theme`, `civicbridge_lang`, `civicbridge_plain_lang`, `civicbridge_a11y_prefs`, `civicbridge_focus_mode` | No | Low |
 | Consent choices and a privacy audit log | `privacyConsentService.js` | `civicbridge_consent_preferences`, `civicbridge_privacy_audit_log` | No | Low |
+| Case-isolated agent memory (facts and AI proposals) | `caseMemoryEngine.js`, `caseMemoryStorage.js` | `chsetu:mem:<tenantId>:<caseId>:<entryId>` (localStorage, encrypted via Web Crypto AES-GCM-256) | No | High (encrypted at rest; per-case isolated; explicit TTL and deletion) |
 
 Other things worth knowing about the inventory:
 

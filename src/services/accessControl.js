@@ -48,6 +48,9 @@ export const PERMISSIONS = {
   'civicWorks.moderate': { roles: ['admin'], resource: 'civicbridge_civic_works_reports_v1', description: 'Moderate ward-level civic work reports, cluster duplicates, record official acknowledgements and verify completion evidence' },
   'roadSafety.review': { roles: ['admin'], resource: 'civicbridge_review_cases_v1', description: 'Review detected road safety blackspots, conduct site inspections, and plan interventions' },
   'roadSafety.admin': { roles: ['admin'], resource: 'civicbridge_risk_runs_v1', description: 'Configure risk weighting parameters, trigger risk runs, and archive road safety cases' },
+  'agentMemory.admin': { roles: ['admin'], resource: 'chsetu:mem', description: 'Administer system-wide agent memory lifecycle sweeps and dead-letter queues' },
+  'agentMemory.read': { roles: ['admin', 'citizen'], resource: 'chsetu:mem', description: 'Read scoped case memory' },
+  'agentMemory.purge': { roles: ['admin', 'citizen'], resource: 'chsetu:mem', description: 'Purge scoped case memory' },
 };
 
 export class PermissionDeniedError extends Error {
