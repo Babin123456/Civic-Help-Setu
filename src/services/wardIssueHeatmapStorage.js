@@ -158,6 +158,7 @@ export const filterReportsByWindow = (reports = [], windowStr = '30d') => {
     const reportTime = new Date(rpt.timestamp).getTime();
     return !Number.isNaN(reportTime) && reportTime >= cutoffTime;
   });
+};
 
 /**
  * Persistence, initial bootstrap seeding, migrations, and rollback support
