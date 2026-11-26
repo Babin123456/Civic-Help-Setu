@@ -846,6 +846,12 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
               })}
 
               {renderNavLink({
+                to: '/evidence-bundles',
+                label: 'Evidence Bundles',
+                icon: Shield
+              })}
+
+              {renderNavLink({
                 to: '/track',
                 label: t('nav.track', 'Track Status'),
                 icon: Settings

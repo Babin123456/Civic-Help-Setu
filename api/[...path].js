@@ -20,6 +20,7 @@ import tenderCorrections from "./_lib/handlers/tender-corrections.js";
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import verifiableEvidenceBundles from "./_lib/handlers/verifiable-evidence-bundles.js";
 
 const handlers = {
   "address-change-corrections": addressChange,
@@ -37,6 +38,7 @@ const handlers = {
   "send-email": sendEmail,
   "share-by-email": shareByEmail,
   "tender-corrections": tenderCorrections,
+  "verifiable-evidence-bundles": verifiableEvidenceBundles,
   "ward-budget-proposals": wardBudgetProposals,
   "water-tanker-reports": waterTankerReports,
 };

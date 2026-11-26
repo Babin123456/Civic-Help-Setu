@@ -82,4 +82,12 @@ describe('ServiceDetails', () => {
     expect(html).toContain('Launch Survey Workspace');
     expect(html).toContain('/surveys');
   });
+
+  it('renders the dedicated Verifiable Evidence Bundles entry card when viewing verifiable-evidence-bundles (#1160)', () => {
+    const html = render('/services/verifiable-evidence-bundles');
+    expect(html).toContain('Verifiable Evidence Bundles for Civic Complaints');
+    expect(html).toContain('Dedicated Verifiable Evidence Bundles &amp; Cryptographic Ledger Hub');
+    expect(html).toContain('Launch Evidence Workspace');
+    expect(html).toContain('/evidence-bundles');
+  });
 });

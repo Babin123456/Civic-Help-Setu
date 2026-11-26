@@ -60,6 +60,7 @@ import RentalTransitionWorkspace from './pages/RentalTransitionWorkspace';
 import CitizenDraftSyncWorkspace from './pages/CitizenDraftSyncWorkspace';
 import WardBudgetWorkspace from './pages/WardBudgetWorkspace';
 import CivicSurveyWorkspace from './pages/CivicSurveyWorkspace';
+import VerifiableEvidenceBundleWorkspace from './pages/VerifiableEvidenceBundleWorkspace';
 
 const Services = lazy(() => import('./pages/Services'));
 
@@ -137,6 +138,8 @@ function AppRoot() {
                       <Route path="/surveys" element={<CivicSurveyWorkspace />} />
                       <Route path="/survey-builder" element={<CivicSurveyWorkspace />} />
                       <Route path="/civic-surveys" element={<CivicSurveyWorkspace />} />
+                      <Route path="/evidence-bundles" element={<VerifiableEvidenceBundleWorkspace />} />
+                      <Route path="/verifiable-evidence" element={<VerifiableEvidenceBundleWorkspace />} />
                       <Route path="/track" element={<Track />} />
                       <Route path="/civic-works" element={<CivicWorksBoard />} />
                       <Route path="/road-safety" element={<RoadSafetyDashboard />} />
