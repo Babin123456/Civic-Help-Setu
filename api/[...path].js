@@ -33,6 +33,7 @@ import tenderCorrections from "./_lib/handlers/tender-corrections.js";
 import transitConcessions from "./_lib/handlers/transit-concessions.js";
 import openContractingAnalytics from "./_lib/handlers/open-contracting-analytics.js";
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
+import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
 
@@ -118,7 +119,11 @@ const baseHandlers = {
   "send-email": sendEmail,
   "share-by-email": shareByEmail,
   "tender-corrections": tenderCorrections,
+
+  "ward-analytics": wardAnalytics,
+
   "transit-concessions": transitConcessions,
+
   "ward-budget-proposals": wardBudgetProposals,
   "water-quality-register": waterQualityRegister,
   "ward-issue-heatmap": wardIssueHeatmap,
