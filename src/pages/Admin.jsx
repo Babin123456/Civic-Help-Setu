@@ -1848,7 +1848,8 @@ const Admin = () => {
             {activeTab === 'agent-review' && (
               <div>
                 <AgentReviewStudioPanel />
-
+              </div>
+            )}
 
             {/* Model Gateway & Data Residency Tab (#1153) */}
             {activeTab === 'model-gateway' && (
