@@ -1,0 +1,370 @@
+{
+  "registryVersion": 1,
+  "contracts": [
+    {
+      "id": "service",
+      "version": "1.0.0",
+      "owner": "GoldRay19",
+      "validator": "serviceRecord",
+      "fields": {
+        "id": {
+          "type": "slug",
+          "required": true
+        },
+        "name": {
+          "type": "text",
+          "required": true
+        },
+        "lastVerified": {
+          "type": "date",
+          "required": true
+        },
+        "officialSources": {
+          "type": "sources",
+          "required": true
+        },
+        "authorityId": {
+          "type": "slug",
+          "reference": "authority"
+        },
+        "documentIds": {
+          "type": "ids",
+          "reference": "document"
+        },
+        "deadlineIds": {
+          "type": "ids",
+          "reference": "deadline"
+        }
+      },
+      "producer": "service-import"
+    },
+    {
+      "id": "authority",
+      "version": "1.0.0",
+      "owner": "GoldRay19",
+      "validator": "metadata",
+      "fields": {
+        "id": {
+          "type": "slug",
+          "required": true
+        },
+        "name": {
+          "type": "text",
+          "required": true
+        },
+        "lastVerified": {
+          "type": "date",
+          "required": true
+        },
+        "officialSources": {
+          "type": "sources",
+          "required": true
+        },
+        "jurisdiction": {
+          "type": "jurisdiction",
+          "required": true
+        }
+      },
+      "producer": "public-metadata-preflight"
+    },
+    {
+      "id": "document",
+      "version": "1.0.0",
+      "owner": "GoldRay19",
+      "validator": "metadata",
+      "fields": {
+        "id": {
+          "type": "slug",
+          "required": true
+        },
+        "name": {
+          "type": "text",
+          "required": true
+        },
+        "lastVerified": {
+          "type": "date",
+          "required": true
+        },
+        "officialSources": {
+          "type": "sources",
+          "required": true
+        },
+        "authorityId": {
+          "type": "slug",
+          "required": true,
+          "reference": "authority"
+        },
+        "validityDays": {
+          "type": "integer",
+          "min": 1,
+          "max": 36500
+        }
+      },
+      "producer": "public-metadata-preflight"
+    },
+    {
+      "id": "deadline",
+      "version": "1.0.0",
+      "owner": "GoldRay19",
+      "validator": "metadata",
+      "fields": {
+        "id": {
+          "type": "slug",
+          "required": true
+        },
+        "name": {
+          "type": "text",
+          "required": true
+        },
+        "lastVerified": {
+          "type": "date",
+          "required": true
+        },
+        "officialSources": {
+          "type": "sources",
+          "required": true
+        },
+        "serviceId": {
+          "type": "slug",
+          "required": true,
+          "reference": "service"
+        },
+        "documentId": {
+          "type": "slug",
+          "reference": "document"
+        },
+        "dueDate": {
+          "type": "date",
+          "required": true
+        }
+      },
+      "producer": "public-metadata-preflight"
+    },
+    {
+      "id": "publicFacility",
+      "version": "1.0.0",
+      "owner": "GoldRay19",
+      "validator": "communityFacilityRecord",
+      "fields": {
+        "id": {
+          "type": "slug",
+          "required": true
+        },
+        "name": {
+          "type": "text",
+          "required": true
+        },
+        "authorityId": {
+          "type": "slug",
+          "required": true,
+          "reference": "authority"
+        },
+        "auditMetadata": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "producer": "public-metadata-preflight"
+    }
+  ],
+  "changes": [
+    {
+      "version": "1.0.0",
+      "owner": "civic-data-maintainers",
+      "reason": "Introduce a public-metadata registry reusing service and community facility validators; legacy imports stay supported."
+    }
+  ],
+  "events": {
+    "minimumDeprecationDays": 7,
+    "maxPayloadBytes": 65536,
+    "releases": [
+      {
+        "eventType": "APPLICATION_SUBMITTED",
+        "version": "1.0.0",
+        "owner": "GoldRay19",
+        "producers": [
+          "*"
+        ],
+        "legacy": true,
+        "schema": {
+          "type": "json"
+        },
+        "samples": [
+          {}
+        ]
+      },
+      {
+        "eventType": "APPLICATION_STATUS_CHANGED",
+        "version": "1.0.0",
+        "owner": "GoldRay19",
+        "producers": [
+          "*"
+        ],
+        "legacy": true,
+        "schema": {
+          "type": "json"
+        },
+        "samples": [
+          {}
+        ]
+      },
+      {
+        "eventType": "GRIEVANCE_LODGED",
+        "version": "1.0.0",
+        "owner": "GoldRay19",
+        "producers": [
+          "*"
+        ],
+        "legacy": true,
+        "schema": {
+          "type": "json"
+        },
+        "samples": [
+          {}
+        ]
+      },
+      {
+        "eventType": "GRIEVANCE_ESCALATED",
+        "version": "1.0.0",
+        "owner": "GoldRay19",
+        "producers": [
+          "*"
+        ],
+        "legacy": true,
+        "schema": {
+          "type": "json"
+        },
+        "samples": [
+          {}
+        ]
+      },
+      {
+        "eventType": "DEFICIENCY_NOTICE_ISSUED",
+        "version": "1.0.0",
+        "owner": "GoldRay19",
+        "producers": [
+          "*"
+        ],
+        "legacy": true,
+        "schema": {
+          "type": "json"
+        },
+        "samples": [
+          {}
+        ]
+      },
+      {
+        "eventType": "DOCUMENT_VERIFIED",
+        "version": "1.0.0",
+        "owner": "GoldRay19",
+        "producers": [
+          "*"
+        ],
+        "legacy": true,
+        "schema": {
+          "type": "json"
+        },
+        "samples": [
+          {}
+        ]
+      },
+      {
+        "eventType": "FEE_RECEIPT_ISSUED",
+        "version": "1.0.0",
+        "owner": "GoldRay19",
+        "producers": [
+          "*"
+        ],
+        "legacy": true,
+        "schema": {
+          "type": "json"
+        },
+        "samples": [
+          {}
+        ]
+      },
+      {
+        "eventType": "APPLICATION_SUBMITTED",
+        "version": "2.0.0",
+        "owner": "GoldRay19",
+        "producers": [
+          "CIVIC_CORE",
+          "APPLICATION_PORTAL"
+        ],
+        "legacy": false,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "serviceId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          "required": [
+            "serviceId"
+          ],
+          "additionalProperties": true
+        },
+        "samples": [
+          {
+            "serviceId": "SYNTHETIC_SERVICE"
+          }
+        ]
+      }
+    ],
+    "consumers": [],
+    "deprecations": [],
+    "changes": [
+      {
+        "eventType": "APPLICATION_SUBMITTED",
+        "version": "1.0.0",
+        "owner": "GoldRay19",
+        "reason": "Register the existing free-form process-local bus contract without tightening legacy payloads."
+      },
+      {
+        "eventType": "APPLICATION_STATUS_CHANGED",
+        "version": "1.0.0",
+        "owner": "GoldRay19",
+        "reason": "Register the existing free-form process-local bus contract without tightening legacy payloads."
+      },
+      {
+        "eventType": "GRIEVANCE_LODGED",
+        "version": "1.0.0",
+        "owner": "GoldRay19",
+        "reason": "Register the existing free-form process-local bus contract without tightening legacy payloads."
+      },
+      {
+        "eventType": "GRIEVANCE_ESCALATED",
+        "version": "1.0.0",
+        "owner": "GoldRay19",
+        "reason": "Register the existing free-form process-local bus contract without tightening legacy payloads."
+      },
+      {
+        "eventType": "DEFICIENCY_NOTICE_ISSUED",
+        "version": "1.0.0",
+        "owner": "GoldRay19",
+        "reason": "Register the existing free-form process-local bus contract without tightening legacy payloads."
+      },
+      {
+        "eventType": "DOCUMENT_VERIFIED",
+        "version": "1.0.0",
+        "owner": "GoldRay19",
+        "reason": "Register the existing free-form process-local bus contract without tightening legacy payloads."
+      },
+      {
+        "eventType": "FEE_RECEIPT_ISSUED",
+        "version": "1.0.0",
+        "owner": "GoldRay19",
+        "reason": "Register the existing free-form process-local bus contract without tightening legacy payloads."
+      },
+      {
+        "eventType": "APPLICATION_SUBMITTED",
+        "version": "2.0.0",
+        "owner": "GoldRay19",
+        "reason": "Opt-in typed contract for the serviceId already used by existing application-submission fixtures.",
+        "migration": "Keep publishing1.0.0 until every applicable consumer explicitly accepts2.0.0. Upgrade consumer version declarations first, then opt the producer into2.0.0 with a nonempty string serviceId. Keep1.0.0 and its schema for old consumers and rollback; no automatic migration or retirement."
+      }
+    ]
+  }
+}

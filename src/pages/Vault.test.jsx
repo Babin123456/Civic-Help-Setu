@@ -97,4 +97,15 @@ describe('Vault Page UI & Upload Constraints (#588)', () => {
     expect(html).toContain('Vault Passphrase');
     expect(html).toContain('Unlock Encrypted Vault');
   });
+
+  it('renders contradiction detector action button for cross-document verification (#1165)', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <Vault />
+      </MemoryRouter>
+    );
+
+    expect(html).toContain('Contradiction Detector');
+    expect(html).toContain('Cross-Document Contradiction &amp; Evidence Graph Verification');
+  });
 });

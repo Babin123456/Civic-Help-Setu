@@ -32,6 +32,7 @@ import {
 import JourneyPlannerModal from '../components/journey/JourneyPlannerModal';
 import ActiveApplicationsSummaryGrid from '../components/tracking/ActiveApplicationsSummaryGrid';
 import ApplicationTimeline from '../components/tracking/ApplicationTimeline';
+import ApplicationTimelineReplay from '../components/tracking/ApplicationTimelineReplay';
 import ActionRequiredAlert from '../components/tracking/ActionRequiredAlert';
 import LinkedDocumentsManager from '../components/tracking/LinkedDocumentsManager';
 import ManualAddApplicationModal from '../components/tracking/ManualAddApplicationModal';
@@ -400,6 +401,19 @@ const Track = () => {
                   <ApplicationTimeline stages={activeApp.stages || []} currentStageIndex={activeApp.currentStageIndex || 0} />
                   <LinkedDocumentsManager documents={activeApp.linkedDocs || []} />
                 </div>
+
+                <ApplicationTimelineReplay
+                  key={activeApp.id}
+                  application={activeApp}
+                  officialSourceUrl={
+                    services
+                      .find((service) => service.id === activeApp.serviceId)
+                      ?.officialSources?.find((source) => source.url)?.url || ''
+                  }
+                  onReportInconsistency={(report) =>
+                    toast?.success?.(`Inconsistency report ${report.reportId} saved for review.`)
+                  }
+                />
 
                 <ApplicationMilestoneTracker application={activeApp} />
 
