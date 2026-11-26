@@ -140,6 +140,7 @@ const CostCarbonGovernorWorkspacePage = lazy(() => import('./pages/CostCarbonGov
 const PolicyEngineWorkspacePage = lazy(() => import('./pages/PolicyEngineWorkspace'));
 const ContractTestMarketplaceWorkspacePage = lazy(() => import('./pages/ContractTestMarketplaceWorkspace'));
 const FreshnessPredictionWorkspacePage = lazy(() => import('./pages/FreshnessPredictionWorkspace'));
+const RecommendationExperimentationWorkspacePage = lazy(() => import('./pages/RecommendationExperimentationWorkspace'));
 
 const ServicesFallback = () => (
   <div className="section">
@@ -443,6 +444,8 @@ function AppRoot() {
                             <Route path="/contract-test-marketplace" element={<ContractTestMarketplaceWorkspacePage />} />
                             {/* Civic Information Freshness Prediction & Review Prioritization (maintainer triage UI) */}
                             <Route path="/freshness-prediction" element={<FreshnessPredictionWorkspacePage />} />
+                            {/* Civic Service Recommendation Experimentation Platform with Guardrails (#1193) */}
+                            <Route path="/recommendation-experimentation" element={<RecommendationExperimentationWorkspacePage />} />
 
                             <Route path="/tenants" element={<TenantAdministrationWorkspace />} />
                             <Route path="/tenants/:tenantId" element={<TenantAdministrationWorkspace />} />
