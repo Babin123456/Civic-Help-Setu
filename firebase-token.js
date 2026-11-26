@@ -1,6 +1,8 @@
+import { withApiErrorContract } from './_lib/errorContract.js';
 /* global process */
 import { createFirebaseTokenHandler } from './_lib/firebaseToken.js';
 import { createRateLimiter } from './_lib/abuseGuard.js';
+import { withRequestSecurity } from './_lib/requestSecurity.js';
 
 /**
  * POST /api/firebase-token
@@ -40,7 +42,7 @@ async function build() {
   });
 }
 
-export default async function route(req, res) {
+async function route(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   try {
     handler ??= await build();
@@ -56,3 +58,5 @@ export default async function route(req, res) {
   for (const [name, value] of Object.entries(result.headers)) res.setHeader(name, value);
   res.status(result.status).json(result.body);
 }
+
+export default withApiErrorContract(withRequestSecurity(route, { allowMissingOrigin: true }));
