@@ -88,10 +88,11 @@ export const extractConditionClause = (text) => {
 export const classifyItemText = (rawText, serviceContext = null) => {
   const cleaned = cleanItemText(rawText);
   const textForAnalysis = rawText || cleaned;
+  const context = serviceContext?.service || serviceContext;
 
   // 1. Check if the service catalogue already has verified documentRequirements
-  const catalogEntry = serviceContext?.documentRequirements?.[rawText]
-    || serviceContext?.documentRequirements?.[cleaned];
+  const catalogEntry = context?.documentRequirements?.[rawText]
+    || context?.documentRequirements?.[cleaned];
 
   if (catalogEntry && catalogEntry.type) {
     const isAmbiguous = isAmbiguousRequirement(textForAnalysis) || isAmbiguousRequirement(catalogEntry.condition);
@@ -101,6 +102,7 @@ export const classifyItemText = (rawText, serviceContext = null) => {
 
     return {
       title: cleaned,
+      label: cleaned,
       type: isAmbiguous && catalogEntry.type === REQUIREMENT_TYPES.REQUIRED
         ? REQUIREMENT_TYPES.UNVERIFIED
         : catalogEntry.type,
@@ -114,6 +116,7 @@ export const classifyItemText = (rawText, serviceContext = null) => {
   if (isAmbiguousRequirement(textForAnalysis)) {
     return {
       title: cleaned,
+      label: cleaned,
       type: REQUIREMENT_TYPES.UNVERIFIED,
       condition: CONFIRM_WITH_DEPARTMENT,
       isAmbiguous: true,
@@ -125,6 +128,7 @@ export const classifyItemText = (rawText, serviceContext = null) => {
   if (OPTIONAL_REGEX.test(textForAnalysis)) {
     return {
       title: cleaned,
+      label: cleaned,
       type: REQUIREMENT_TYPES.OPTIONAL,
       condition: null,
       isAmbiguous: false,
@@ -136,10 +140,11 @@ export const classifyItemText = (rawText, serviceContext = null) => {
   if (isOfficiallyMandatory(textForAnalysis)) {
     return {
       title: cleaned,
+      label: cleaned,
       type: REQUIREMENT_TYPES.REQUIRED,
       condition: null,
       isAmbiguous: false,
-      source: serviceContext?.officialSources?.[0] || null,
+      source: context?.officialSources?.[0] || null,
     };
   }
 
@@ -148,6 +153,7 @@ export const classifyItemText = (rawText, serviceContext = null) => {
   if (extractedCondition) {
     return {
       title: cleaned,
+      label: cleaned,
       type: REQUIREMENT_TYPES.CONDITIONAL,
       condition: extractedCondition,
       isAmbiguous: false,
@@ -158,6 +164,7 @@ export const classifyItemText = (rawText, serviceContext = null) => {
   // 6. Default to unverified without guessing official mandatory status
   return {
     title: cleaned,
+    label: cleaned,
     type: REQUIREMENT_TYPES.UNVERIFIED,
     condition: null,
     isAmbiguous: false,

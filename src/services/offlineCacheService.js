@@ -1,11 +1,14 @@
 /**
  * Service to manage local caching of civic guides, checklists,
- * and active application tokens for offline office visits.
+ * emergency packs, and active application tokens for offline access.
  */
 import { MOCK_SERVICES } from '../data/services.js';
+import { EMERGENCY_PACKS } from '../data/emergencyPacks.js';
+import { INDIAN_STATES_AND_UTS } from '../data/jurisdictions.js';
 import { logDiagnostic } from '../utils/diagnostics';
 
 const CACHE_KEY = 'civicbridge_offline_cache';
+const PACK_CACHE_KEY = 'civicbridge_emergency_pack_cache';
 const LAST_SYNC_KEY = 'civicbridge_offline_last_sync';
 const SAVED_RICH_KEY = 'civicbridge_saved_rich';
 const SAVED_LEGACY_KEY = 'civicbridge_saved';
@@ -156,7 +159,7 @@ export const cacheAllSavedGuides = () => {
 };
 
 /**
- * Get offline storage snapshot statistics
+ * Get offline storage snapshot statistics including emergency packs
  */
 export const getOfflineSnapshotStats = () => {
   try {
@@ -164,6 +167,9 @@ export const getOfflineSnapshotStats = () => {
     const cache = getOfflineCachedData();
     const serviceCount = Object.keys(cache.services || {}).length;
     const applicationCount = (cache.applications || []).length;
+    const packCount = Object.keys(cache.services || {}).filter(
+      (key) => key.startsWith('emergency-pack-')
+    ).length;
     const raw = storage.getItem(CACHE_KEY) || '';
     const sizeInKb = (new Blob([raw]).size / 1024).toFixed(1);
     const lastSync = storage.getItem(LAST_SYNC_KEY) || null;
@@ -171,6 +177,7 @@ export const getOfflineSnapshotStats = () => {
     return {
       serviceCount,
       applicationCount,
+      packCount,
       sizeInKb,
       lastSync
     };
@@ -178,6 +185,7 @@ export const getOfflineSnapshotStats = () => {
     return {
       serviceCount: 0,
       applicationCount: 0,
+      packCount: 0,
       sizeInKb: '0.0',
       lastSync: null
     };
@@ -192,8 +200,102 @@ export const clearOfflineCache = () => {
     const storage = getStorage();
     storage.removeItem(CACHE_KEY);
     storage.removeItem(LAST_SYNC_KEY);
+    storage.removeItem(PACK_CACHE_KEY);
     return true;
   } catch {
     return false;
+  }
+};
+
+/**
+ * Cache an emergency pack for offline access
+ */
+export const cacheEmergencyPackOffline = (pack) => {
+  if (!pack || !pack.state) return false;
+  try {
+    const storage = getStorage();
+    const current = getOfflineCachedData();
+    current.services = current.services || {};
+    current.services[`emergency-pack-${pack.state.replace(/\s+/g, '-').toLowerCase()}`] = {
+      ...pack,
+      cachedAt: new Date().toISOString(),
+      packType: 'emergency'
+    };
+    storage.setItem(CACHE_KEY, JSON.stringify(current));
+    storage.setItem(LAST_SYNC_KEY, new Date().toISOString());
+    storage.setItem(PACK_CACHE_KEY, JSON.stringify(current.services));
+    return true;
+  } catch (e) {
+    logDiagnostic('Error caching emergency pack offline:', e);
+    return false;
+  }
+};
+
+/**
+ * Remove an emergency pack from offline cache
+ */
+export const removeEmergencyPackOffline = (stateName) => {
+  if (!stateName) return false;
+  try {
+    const storage = getStorage();
+    const current = getOfflineCachedData();
+    const packKey = `emergency-pack-${stateName.replace(/\s+/g, '-').toLowerCase()}`;
+    if (current.services && current.services[packKey]) {
+      delete current.services[packKey];
+      storage.setItem(CACHE_KEY, JSON.stringify(current));
+      storage.setItem(LAST_SYNC_KEY, new Date().toISOString());
+      storage.setItem(PACK_CACHE_KEY, JSON.stringify(current.services));
+      return true;
+    }
+    return false;
+  } catch (e) {
+    logDiagnostic('Error removing emergency pack from offline cache:', e);
+    return false;
+  }
+};
+
+/**
+ * Get a cached emergency pack by state name
+ */
+export const getCachedEmergencyPack = (stateName) => {
+  if (!stateName) return null;
+  try {
+    const storage = getStorage();
+    const current = getOfflineCachedData();
+    const packKey = `emergency-pack-${stateName.replace(/\s+/g, '-').toLowerCase()}`;
+    return current.services?.[packKey] || null;
+  } catch (e) {
+    logDiagnostic('Error getting cached emergency pack:', e);
+    return null;
+  }
+};
+
+/**
+ * Cache all emergency packs for offline access
+ */
+export const cacheAllEmergencyPacks = () => {
+  try {
+    const storage = getStorage();
+    const current = getOfflineCachedData();
+
+    INDIAN_STATES_AND_UTS.forEach((state) => {
+      const pack = EMERGENCY_PACKS[state];
+      if (pack) {
+        current.services = current.services || {};
+        current.services[`emergency-pack-${state.replace(/\s+/g, '-').toLowerCase()}`] = {
+          ...pack,
+          cachedAt: new Date().toISOString(),
+          packType: 'emergency'
+        };
+      }
+    });
+
+    storage.setItem(CACHE_KEY, JSON.stringify(current));
+    storage.setItem(LAST_SYNC_KEY, new Date().toISOString());
+    storage.setItem(PACK_CACHE_KEY, JSON.stringify(current.services));
+    return { success: true, count: INDIAN_STATES_AND_UTS.length };
+  } catch (e) {
+    logDiagnostic('Failed to cache all emergency packs:', e);
+    return { success: false, count: 0 };
   }
 };

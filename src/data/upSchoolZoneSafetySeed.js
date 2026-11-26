@@ -1,0 +1,335 @@
+/**
+ * Seed data for Uttar Pradesh School-Zone Road Safety System
+ * Grounded in authentic UDISE+ identifiers, Lucknow municipal wards & rural blocks
+ */
+
+import {
+  HAZARD_TYPES,
+  HAZARD_SEVERITY_LEVELS,
+  ROAD_AUTHORITIES,
+  AUDIT_STATUSES,
+} from './upSchoolZoneSafetyContract';
+
+export const SEED_UP_SCHOOL_ZONES = [
+  {
+    id: 'SCH-UP-LKO-001',
+    udiseCode: '09300501201',
+    name: 'Government Girls Inter College (GGIC), Shahmina Road',
+    category: 'Secondary / Senior Secondary (6-12)',
+    studentCount: 1420,
+    district: 'Lucknow',
+    blockOrWard: 'Chowk / Old City (Zone 2, Ward 42)',
+    locationType: 'urban',
+    verifiedEntrances: [
+      {
+        gateId: 'G1-NORTH',
+        name: 'Main Gate - North Frontage',
+        coordinates: { lat: 26.8682, lng: 80.9124 },
+        facingRoadName: 'Shahmina Road - Medical College Link Corridor',
+        defaultAuthority: ROAD_AUTHORITIES.UP_PWD,
+        authoritySource: 'Reviewed UP PWD Major District Road Directory (MDR-65)',
+        roadClassification: 'Major District Road',
+        speedLimitDesignatedKmH: 25,
+        speedLimitSignPresent: false,
+      },
+      {
+        gateId: 'G2-WEST',
+        name: 'Pedestrian Side Gate - Victoria Memorial Link',
+        coordinates: { lat: 26.8678, lng: 80.9118 },
+        facingRoadName: 'Victoria Street Internal Lane',
+        defaultAuthority: ROAD_AUTHORITIES.MUNICIPAL_CORPORATION,
+        authoritySource: 'Lucknow Municipal Corporation Ward Street List (Zone 2)',
+        roadClassification: 'Municipal Ward Collector Street',
+        speedLimitDesignatedKmH: 20,
+        speedLimitSignPresent: true,
+      },
+    ],
+    smcDetails: {
+      presidentName: 'Smt. Sunita Srivastava',
+      headTeacherName: 'Dr. Reena Mehrotra',
+      contactOffice: 'SMC Secretariat, GGIC Shahmina Road, Lucknow',
+    },
+  },
+  {
+    id: 'SCH-UP-LKO-002',
+    udiseCode: '09300604502',
+    name: 'Prathmik Vidyalaya (Primary School), Gomti Nagar Sector 4',
+    category: 'Primary (1-5)',
+    studentCount: 380,
+    district: 'Lucknow',
+    blockOrWard: 'Gomti Nagar (Zone 4, Ward 68)',
+    locationType: 'urban',
+    verifiedEntrances: [
+      {
+        gateId: 'G1-SECTOR',
+        name: 'Primary Entrance - Viram Khand Link',
+        coordinates: { lat: 26.8489, lng: 80.9982 },
+        facingRoadName: 'Viram Khand Sector Road 4/2',
+        defaultAuthority: ROAD_AUTHORITIES.DEVELOPMENT_AUTHORITY,
+        authoritySource: 'Lucknow Development Authority (LDA) Master Plan 2031 & Sector Layout',
+        roadClassification: 'Development Authority Sub-Arterial Road',
+        speedLimitDesignatedKmH: 25,
+        speedLimitSignPresent: false,
+      },
+    ],
+    smcDetails: {
+      presidentName: 'Sri Manoj Kumar Verma',
+      headTeacherName: 'Smt. Rashmi Tiwari',
+      contactOffice: 'Prathmik Vidyalaya SMC Office, Viram Khand 4, Gomti Nagar',
+    },
+  },
+  {
+    id: 'SCH-UP-LKO-003',
+    udiseCode: '09300308801',
+    name: 'Sanvilian Vidyalaya (Composite School), Sarojini Nagar',
+    category: 'Composite (1-8)',
+    studentCount: 650,
+    district: 'Lucknow',
+    blockOrWard: 'Sarojini Nagar Block (Semi-Urban Peripheral)',
+    locationType: 'semi_urban',
+    verifiedEntrances: [
+      {
+        gateId: 'G1-HIGHWAY',
+        name: 'Front Gate - Highway Service Flank',
+        coordinates: { lat: 26.7583, lng: 80.8651 },
+        facingRoadName: 'Lucknow-Kanpur Highway NH-27 Service Lane',
+        defaultAuthority: ROAD_AUTHORITIES.NHAI,
+        authoritySource: 'NHAI PIU Lucknow / Kanpur Corridor Gazette Notification S.O. 1042(E)',
+        roadClassification: 'National Highway Service Corridor',
+        speedLimitDesignatedKmH: 30,
+        speedLimitSignPresent: false,
+      },
+    ],
+    smcDetails: {
+      presidentName: 'Sri Ram Asrey Yadav',
+      headTeacherName: 'Sri Devendra Singh',
+      contactOffice: 'Composite School Office, Sarojini Nagar, Lucknow',
+    },
+  },
+  {
+    id: 'SCH-UP-LKO-004',
+    udiseCode: '09300401503',
+    name: 'Prathmik Vidyalaya, Mohanlalganj Dehat',
+    category: 'Primary (1-5)',
+    studentCount: 220,
+    district: 'Lucknow',
+    blockOrWard: 'Mohanlalganj Block (Rural Approach)',
+    locationType: 'rural',
+    verifiedEntrances: [
+      {
+        gateId: 'G1-RURAL',
+        name: 'Village Approach Gate',
+        coordinates: { lat: 26.6852, lng: 80.9785 },
+        facingRoadName: 'Kurauni-Mohanlalganj Rural Link Road',
+        defaultAuthority: ROAD_AUTHORITIES.GRAM_PANCHAYAT,
+        authoritySource: 'Panchayati Raj Rural Road Register & PMGSY Connectivity Cell',
+        roadClassification: 'Rural Village Link Road',
+        speedLimitDesignatedKmH: 20,
+        speedLimitSignPresent: false,
+      },
+    ],
+    smcDetails: {
+      presidentName: 'Smt. Kamla Devi (Gram Pradhan nominee)',
+      headTeacherName: 'Sri Alok Kumar',
+      contactOffice: 'Gram Panchayat Bhawan / School Office, Mohanlalganj',
+    },
+  },
+  {
+    id: 'SCH-UP-KNP-005',
+    udiseCode: '09260103204',
+    name: 'Government Inter College (GIC), Civil Lines, Kanpur',
+    category: 'Secondary / Senior Secondary (6-12)',
+    studentCount: 1850,
+    district: 'Kanpur Nagar',
+    blockOrWard: 'Civil Lines (Zone 1, Ward 15)',
+    locationType: 'urban',
+    verifiedEntrances: [
+      {
+        gateId: 'G1-MALL-ROAD',
+        name: 'Main Gate - Mall Road Junction',
+        coordinates: { lat: 26.4715, lng: 80.3498 },
+        facingRoadName: 'Mahatma Gandhi Road / Mall Road Link',
+        defaultAuthority: ROAD_AUTHORITIES.MUNICIPAL_CORPORATION,
+        authoritySource: 'Kanpur Nagar Nigam Ward Infrastructure Directory (Zone 1)',
+        roadClassification: 'Urban Municipal Arterial Corridor',
+        speedLimitDesignatedKmH: 25,
+        speedLimitSignPresent: true,
+      },
+    ],
+    smcDetails: {
+      presidentName: 'Sri Rajeshwar Dayal',
+      headTeacherName: 'Sri V. K. Tripathi',
+      contactOffice: 'GIC Administrative Office, Civil Lines, Kanpur',
+    },
+  },
+];
+
+/**
+ * Seed active and historical safety audits demonstrating lifecycle
+ */
+export const SEED_UP_SCHOOL_AUDITS = [
+  {
+    id: 'AUD-UP-2026-001',
+    schoolId: 'SCH-UP-LKO-001',
+    schoolName: 'Government Girls Inter College (GGIC), Shahmina Road',
+    udiseCode: '09300501201',
+    gateId: 'G1-NORTH',
+    hazardType: HAZARD_TYPES.MISSING_ZEBRA_CROSSING,
+    hazardTitle: 'No zebra crossing or pedestrian beacon on high-speed Shahmina Road link',
+    severity: HAZARD_SEVERITY_LEVELS.HIGH,
+    severityRationale:
+      'High vehicle throughput on PWD corridor with over 1400 girl students crossing during 8:00 AM and 2:00 PM shift dismissals. No visible road markings.',
+    status: AUDIT_STATUSES.INSPECTED,
+    statusHistory: [
+      {
+        status: AUDIT_STATUSES.REPORTED,
+        timestamp: '2026-11-01T08:30:00.000Z',
+        actor: 'SMC Parent Member (R. Sharma)',
+        notes: 'Submitted initial audit with geotagged photo evidence.',
+      },
+      {
+        status: AUDIT_STATUSES.ACKNOWLEDGED,
+        timestamp: '2026-11-03T11:00:00.000Z',
+        actor: 'UP PWD Executive Engineer Office',
+        notes: 'Acknowledged receipt under Grievance Ref PWD/LKO/RS-891.',
+      },
+      {
+        status: AUDIT_STATUSES.INSPECTION_SCHEDULED,
+        timestamp: '2026-11-07T09:00:00.000Z',
+        actor: 'Joint Traffic Police & PWD Cell',
+        notes: 'Joint site inspection scheduled for 2026-11-10.',
+      },
+      {
+        status: AUDIT_STATUSES.INSPECTED,
+        timestamp: '2026-11-10T14:30:00.000Z',
+        actor: 'Assistant Engineer (PWD Provincial Division)',
+        notes: 'Site inspection confirmed absent markings; recommended thermoplastic zebra crossing and solar flashing amber beacon.',
+      },
+    ],
+    assignedAuthority: ROAD_AUTHORITIES.UP_PWD,
+    authoritySource: 'Reviewed UP PWD Major District Road Directory (MDR-65)',
+    isAuthorityManuallyOverridden: false,
+    auditDate: '2026-11-01',
+    reporterRole: 'Parent / SMC Member',
+    reporterToken: 'rep_token_lko_001', // kept secret for unredacted retrieval
+    publicImageUrl:
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240"><rect width="400" height="240" fill="%23223"/><text x="20" y="40" fill="%23eee" font-family="sans-serif" font-size="14">School Gate Corridor Evidence</text><rect x="60" y="80" width="120" height="90" fill="%23556" rx="4"/><rect x="80" y="95" width="45" height="40" fill="%23778" filter="blur(8px)"/><text x="90" y="120" fill="%23fff" font-size="9">[FACE REDACTED]</text><rect x="230" y="110" width="90" height="30" fill="%23112"/><text x="235" y="130" fill="%23fff" font-size="9">[PLATE REDACTED]</text></svg>',
+    redactionMetadata: {
+      isPrivacyRedacted: true,
+      facesRedactedCount: 1,
+      vehiclePlatesRedactedCount: 1,
+      redactionMethod: 'deterministic_privacy_blur_v1',
+      redactedAt: '2026-11-01T08:31:00.000Z',
+    },
+    suggestedIntervention:
+      'Paint high-visibility thermoplastic zebra stripes with retro-reflective glass beads and install solar-powered 300mm flashing amber beacons.',
+    endorsementCount: 18,
+    provenance: {
+      registeredUdiseCode: '09300501201',
+      verifiedEntranceCoordinates: { lat: 26.8682, lng: 80.9124 },
+      submittedVia: 'CivicHelpSetu-SchoolZoneAudit-v1',
+      clientTimestamp: '2026-11-01T08:30:00.000Z',
+    },
+  },
+  {
+    id: 'AUD-UP-LKO-002',
+    schoolId: 'SCH-UP-LKO-002',
+    schoolName: 'Prathmik Vidyalaya (Primary School), Gomti Nagar Sector 4',
+    udiseCode: '09300604502',
+    gateId: 'G1-SECTOR',
+    hazardType: HAZARD_TYPES.BLOCKED_FOOTPATH,
+    hazardTitle: 'Footpath pavers broken and obstructed by construction debris',
+    severity: HAZARD_SEVERITY_LEVELS.MEDIUM,
+    severityRationale:
+      'Young primary children forced to walk on road surface around concrete piles; vehicles accelerate around the blind bend.',
+    status: AUDIT_STATUSES.INTERIM_MEASURE_IMPLEMENTED,
+    statusHistory: [
+      {
+        status: AUDIT_STATUSES.REPORTED,
+        timestamp: '2026-10-15T09:15:00.000Z',
+        actor: 'Teacher / SMC Convener',
+        notes: 'Submitted hazard audit regarding rubble blocking school approach.',
+      },
+      {
+        status: AUDIT_STATUSES.ACKNOWLEDGED,
+        timestamp: '2026-10-18T10:00:00.000Z',
+        actor: 'LDA Engineering Cell',
+        notes: 'Notice served to builder occupying public right-of-way.',
+      },
+      {
+        status: AUDIT_STATUSES.INSPECTED,
+        timestamp: '2026-10-24T12:00:00.000Z',
+        actor: 'Junior Engineer (LDA Sector 4)',
+        notes: 'Inspection confirmed 18 meters of pedestrian walkway rendered unpassable.',
+      },
+      {
+        status: AUDIT_STATUSES.INTERIM_MEASURE_IMPLEMENTED,
+        timestamp: '2026-10-29T16:00:00.000Z',
+        actor: 'Ward Contractor & Traffic Volunteers',
+        notes: 'Reflective traffic cones and safe pedestrian barricaded corridor installed while debris removal is tendered.',
+      },
+    ],
+    assignedAuthority: ROAD_AUTHORITIES.DEVELOPMENT_AUTHORITY,
+    authoritySource: 'Lucknow Development Authority (LDA) Master Plan 2031 & Sector Layout',
+    isAuthorityManuallyOverridden: false,
+    auditDate: '2026-10-15',
+    reporterRole: 'School Teacher',
+    reporterToken: 'rep_token_lko_002',
+    publicImageUrl:
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240"><rect width="400" height="240" fill="%23243"/><text x="20" y="40" fill="%23eee" font-family="sans-serif" font-size="14">Obstructed Footway Evidence</text><circle cx="150" cy="120" r="28" fill="%23889" filter="blur(7px)"/><text x="110" y="125" fill="%23fff" font-size="9">[FACE REDACTED]</text></svg>',
+    redactionMetadata: {
+      isPrivacyRedacted: true,
+      facesRedactedCount: 1,
+      vehiclePlatesRedactedCount: 0,
+      redactionMethod: 'deterministic_privacy_blur_v1',
+      redactedAt: '2026-10-15T09:16:00.000Z',
+    },
+    suggestedIntervention:
+      'Clear rubble completely, restore interlocking paver blocks, and install 750mm steel bollards to prevent vehicle encroachment.',
+    endorsementCount: 9,
+    provenance: {
+      registeredUdiseCode: '09300604502',
+      verifiedEntranceCoordinates: { lat: 26.8489, lng: 80.9982 },
+      submittedVia: 'CivicHelpSetu-SchoolZoneAudit-v1',
+      clientTimestamp: '2026-10-15T09:15:00.000Z',
+    },
+  },
+  {
+    id: 'AUD-UP-LKO-003',
+    schoolId: 'SCH-UP-LKO-004',
+    schoolName: 'Prathmik Vidyalaya, Mohanlalganj Dehat',
+    udiseCode: '09300401503',
+    gateId: 'G1-RURAL',
+    hazardType: HAZARD_TYPES.SPEEDING_TRAFFIC_NO_CALMING,
+    hazardTitle: 'Speeding tractors and dumper trucks on rural approach road without speed breakers',
+    severity: HAZARD_SEVERITY_LEVELS.HIGH,
+    severityRationale:
+      'Narrow 3.75m rural carriageway with steep roadside drop-offs; vehicles travel at 50+ km/h past village primary school.',
+    status: AUDIT_STATUSES.REPORTED,
+    statusHistory: [
+      {
+        status: AUDIT_STATUSES.REPORTED,
+        timestamp: '2026-11-18T10:00:00.000Z',
+        actor: 'Gram Sabha Resident',
+        notes: 'Reported reckless speed of heavy sand vehicles past primary school gate.',
+      },
+    ],
+    assignedAuthority: ROAD_AUTHORITIES.GRAM_PANCHAYAT,
+    authoritySource: 'Panchayati Raj Rural Road Register & PMGSY Connectivity Cell',
+    isAuthorityManuallyOverridden: false,
+    auditDate: '2026-11-18',
+    reporterRole: 'Caregiver / Villager',
+    reporterToken: 'rep_token_lko_004',
+    publicImageUrl: null,
+    redactionMetadata: null,
+    suggestedIntervention:
+      'Construct IRC:99 compliant rounded speed humps (100mm height, 3.7m span) 50m on either approach and erect 20 km/h caution boards.',
+    endorsementCount: 24,
+    provenance: {
+      registeredUdiseCode: '09300401503',
+      verifiedEntranceCoordinates: { lat: 26.6852, lng: 80.9785 },
+      submittedVia: 'CivicHelpSetu-SchoolZoneAudit-v1',
+      clientTimestamp: '2026-11-18T10:00:00.000Z',
+    },
+  },
+];

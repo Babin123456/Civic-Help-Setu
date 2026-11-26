@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useId, useCallback } from 'react';
 import {
-  FileBadge, ShieldCheck, Upload, CreditCard, Car, FileText,
-  Plus, Search, Eye, AlertTriangle, Layers, Download, Tag, Stamp, Calendar, Camera, KeyRound
+  FileBadge, ShieldCheck, CreditCard, Car, FileText,
+  Plus, Search, Eye, Download, Tag, Stamp, Calendar, Camera, KeyRound,
+  Lock, Unlock, GitCompare, ShieldAlert,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../context/ConfirmationDialogContext';
@@ -37,7 +38,14 @@ import InactivityLockModal from '../components/vault/InactivityLockModal';
 import WatermarkAttestationModal from '../components/vault/WatermarkAttestationModal';
 import DocumentRenewalDigestModal from '../components/vault/DocumentRenewalDigestModal';
 import DocumentQualityOcrInspectorModal from '../components/vault/DocumentQualityOcrInspectorModal';
-import { Lock, Unlock, ShieldAlert } from 'lucide-react';
+
+import ZkProofGeneratorModal from '../components/vault/ZkProofGeneratorModal';
+
+
+import EvidenceGraphContradictionModal from '../components/vault/EvidenceGraphContradictionModal';
+
+import DocumentValidityCalendar from '../components/DocumentValidityCalendar';
+
 import {
   startInactivityTracker,
   stopInactivityTracker,
@@ -81,11 +89,19 @@ const Vault = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [validityDocumentTypes, setValidityDocumentTypes] = useState([]);
+  const [validityIssueDate, setValidityIssueDate] = useState('');
+  const [validityStateKey, setValidityStateKey] = useState('CENTRAL');
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
   const [isRenewalDigestOpen, setIsRenewalDigestOpen] = useState(false);
   const [isOcrInspectorOpen, setIsOcrInspectorOpen] = useState(false);
+
+  const [isZkProofModalOpen, setIsZkProofModalOpen] = useState(false);
+
+  const [isEvidenceGraphOpen, setIsEvidenceGraphOpen] = useState(false);
+
   const [taggingDoc, setTaggingDoc] = useState(null);
   const [watermarkDoc, setWatermarkDoc] = useState(null);
   const [expiringDocs, setExpiringDocs] = useState(() => getExpiringDocuments());
@@ -319,6 +335,16 @@ const Vault = () => {
             <button
               type="button"
               className="btn btn-secondary"
+              onClick={() => setIsZkProofModalOpen(true)}
+              aria-label="Generate Zero-Knowledge Attribute Proof"
+              style={{ padding: '0.75rem 1.15rem', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <ShieldCheck size={17} color="#2563eb" />
+              <span>ZK Proofs</span>
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
               onClick={() => setIsBackupModalOpen(true)}
               style={{ padding: '0.75rem 1.25rem', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
             >
@@ -357,6 +383,16 @@ const Vault = () => {
             <button
               type="button"
               className="btn btn-secondary"
+              onClick={() => setIsEvidenceGraphOpen(true)}
+              aria-label="Cross-Document Contradiction & Evidence Graph Verification"
+              style={{ padding: '0.75rem 1.15rem', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <GitCompare size={17} />
+              <span>Contradiction Detector</span>
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
               onClick={engagePrivacyLock}
               aria-label="Lock Vault for Privacy"
               style={{ padding: '0.75rem 1.1rem', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
@@ -381,6 +417,17 @@ const Vault = () => {
 
         {/* Document Expiration Warnings */}
         <ExpiringDocumentsAlert expiringList={expiringDocs} />
+
+        {/* Document Validity Calendar */}
+        <DocumentValidityCalendar
+          documentTypes={validityDocumentTypes}
+          issueDate={validityIssueDate}
+          stateKey={validityStateKey}
+          onReminderToggle={() => toast({ title: 'Reminder toggled', description: 'Reminder settings updated' })}
+          onEditDocument={() => setIsModalOpen(true)}
+          onOpenSource={() => toast({ title: 'Source info', description: 'Source rules referenced' })}
+          showAIExplanation={false}
+        />
 
         {/* Pre-flight Inspection & Format Check */}
         <DocumentPreflightChecker onAuditComplete={refreshVault} />
@@ -1030,12 +1077,26 @@ const Vault = () => {
           documents={documents}
         />
 
+        {/* Civic Evidence Graph & Cross-Document Contradiction Detector */}
+        <EvidenceGraphContradictionModal
+          isOpen={isEvidenceGraphOpen}
+          onClose={() => setIsEvidenceGraphOpen(false)}
+          documents={documents}
+          isLocked={isVaultLocked}
+        />
+
         {/* Document Renewal Digest & Expiry Alerts Modal */}
         <DocumentRenewalDigestModal
           isOpen={isRenewalDigestOpen}
           onClose={() => setIsRenewalDigestOpen(false)}
           documents={documents}
           onUpdated={refreshVault}
+        />
+
+        {/* Zero-Knowledge Attribute Proof Generator Modal (#1161) */}
+        <ZkProofGeneratorModal
+          isOpen={isZkProofModalOpen}
+          onClose={() => setIsZkProofModalOpen(false)}
         />
       </div>
     </div>
