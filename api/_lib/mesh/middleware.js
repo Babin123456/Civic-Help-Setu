@@ -23,6 +23,7 @@ import {
   DEFAULT_CLOCK_SKEW_SECONDS,
 } from './serviceIdentity.js';
 import { createDependencyPolicy, MeshResilienceError } from './resilience.js';
+import { createLoadShedder } from '../loadShedder.js';
 
 export const MESH_AUTH_MODES = Object.freeze({
   DISABLED: 'disabled',
@@ -129,6 +130,7 @@ export function createMeshReadinessLayer(options = {}) {
 
   const routePolicies = new Map();
   const routeScopes = config.routeScopes || {};
+  const loadShedder = config.loadShedder || createLoadShedder({ now });
 
   function getRoutePolicy(route) {
     if (!routePolicies.has(route)) {
@@ -316,13 +318,15 @@ export function createMeshReadinessLayer(options = {}) {
     let errorCode = null;
 
     try {
-      const outcome = await policy.execute(
-        async () => handlerFn(req, res),
-        {
-          idempotent: false,
-          deadlineMs: evaluation.context.trace.deadlineMs,
-          timeoutMs: options.timeoutMs ?? config.defaultTimeoutMs,
-        }
+      const outcome = await loadShedder.execute(req, res, route, () =>
+        policy.execute(
+          async () => handlerFn(req, res),
+          {
+            idempotent: false,
+            deadlineMs: evaluation.context.trace.deadlineMs,
+            timeoutMs: options.timeoutMs ?? config.defaultTimeoutMs,
+          }
+        )
       );
 
       const result = outcome.result;

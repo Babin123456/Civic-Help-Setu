@@ -1131,12 +1131,18 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
 
               {renderNavLink({
 
+                to: '/evidence-bundles',
+                label: 'Evidence Bundles',
+
+
                 to: '/data-clean-room',
                 label: 'Data Clean Room',
+
                 icon: Shield
               })}
 
               {renderNavLink({
+
                 to: '/up-jan-sunwai',
                 label: t('nav.upJanSunwai', 'UP Jan Sunwai & Hearings'),
                 icon: Calendar
@@ -1241,6 +1247,7 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
               })}
 
               {renderNavLink({
+
                 to: '/track',
                 label: t('nav.track', 'Track Status'),
                 icon: Settings
