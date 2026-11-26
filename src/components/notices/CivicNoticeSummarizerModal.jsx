@@ -452,7 +452,7 @@ const renderSideBySidePanel = () => {
                 <li key={i} style={{ borderBottom: '1px solid #e5e7eb', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
                   <strong>Date:</strong> {d.dateString}
                   <span style={{ fontSize: '0.68rem', color: 'var(--text-tertiary)', float: 'right' }}>
-                    Confidence: {clauseReferences.dates?.[i]?.confidence || 'N/A}%
+                    Confidence: {clauseReferences.dates?.[i]?.confidence || 'N/A'}%
                   </span>
                   <p style={{ margin: '0.1rem 0 0', fontSize: '0.68rem', color: 'var(--text-tertiary)', lineHeight: 1.3 }}>
                     {d.context || 'No context available'}
