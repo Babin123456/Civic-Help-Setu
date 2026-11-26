@@ -1,30 +1,32 @@
 {
   "mode": "implement",
-  "objective": "Build Model Gateway with Routing, Fallback and Civic Data Residency Policies (#1153)",
+  "objective": "Build Civic Agent Evaluation Harness with Scenario-Based Regression Suites (#1147)",
   "acceptance_criteria": [
-    "AC-1: Deliver documented architecture and threat model covering component boundaries, data flows, failure modes, and residency guarantees",
-    "AC-2: Implement core domain model, provider-neutral adapters, and typed contracts with input validation",
-    "AC-3: Implement civic data residency policies (local-only, sovereign national, cross-border with scrubbing) and enforcement engine",
-    "AC-4: Implement multi-criteria model router (task risk, language, latency SLA, cost limits) and circuit breaker with deterministic non-LLM fallback",
-    "AC-5: Implement gateway telemetry, token/cost estimation, and safe observability without exposing raw citizen data",
-    "AC-6: Integrate model gateway into Civic Help Setu Assistant and provide accessible Admin/Assistant UI controls",
-    "AC-7: Deliver comprehensive test suite (unit, integration, resilience, concurrency, synthetic fixtures) passing with zero security lint regressions"
+    "AC-1: Deliver documented architecture (ADR) and threat model including component boundaries, data-flow diagram, failure modes, operational ownership, performance/cost limits, accessibility, retention, licences, and migration/rollback guidance",
+    "AC-2: Implement core domain model and versioned API/event contracts under src/ai/evals/ and api/_lib/ with strict untrusted input validation at service boundaries",
+    "AC-3: Implement synthetic scenario suites (core, jurisdiction, refusal, adversarial, multilingual), deterministic scoring (task success, factuality, citation coverage, refusal correctness, prohibited outcomes, latency), redacted trace storage, model/version comparison, and release threshold gates",
+    "AC-4: Provide an end-to-end vertical slice integrated with Civic Help Setu's real agent/gateway pipelines, backend API (/api/civic-agent-eval), reproducible CLI command (npm run eval:harness), and evaluation report",
+    "AC-5: Provide an accessible Admin UI panel integrated into src/pages/Admin.jsx with human-approval boundary notices and zero-PII guarantees",
+    "AC-6: Deliver unit, integration, and E2E tests covering negative, concurrency, retry, redaction, and permission-boundary cases, passing ESLint/security lint and Vitest"
   ],
   "non_goals": [
     "Do not claim official government integration, verification, legal authority, or guaranteed outcomes",
-    "Do not store or leak raw citizen PII or credentials in logs, prompts, or analytics",
-    "No autonomous statutory actions, benefit denials, or filing"
+    "Do not store or expose real citizen records, PII, credentials, or private documents in logs, prompts, traces, or analytics",
+    "No autonomous filing, benefit denial, or official-status claims"
   ],
-  "risk": "medium",
-  "budget": "balanced",
+  "risk": "high",
+  "budget": "deep",
   "allowed_write_scope": [
-    "src/services/gateway/",
-    "src/ai/",
+    "src/ai/evals/",
     "src/components/admin/",
-    "src/components/assistant/",
-    "src/pages/",
+    "src/pages/Admin.jsx",
+    "api/_lib/",
+    "api/[...path].js",
+    "scripts/",
+    "package.json",
     "docs/",
+    "firebase/",
     ".gravitas/"
   ],
-  "verification": "impact"
+  "verification": "full"
 }

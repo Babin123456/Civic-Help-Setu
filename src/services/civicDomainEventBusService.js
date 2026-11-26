@@ -9,7 +9,6 @@
  * See docs/CIVIC_EVENT_CONTRACTS.md for migration, limits and operator recovery.
  */
 
-
 import registry from '../data/contracts/registry.json';
 import {
   CIVIC_EVENT_TYPE,
@@ -22,7 +21,6 @@ export { CIVIC_EVENT_TYPE };
 const eventContracts = structuredClone(registry.events);
 let contractRejectedCount = 0;
 let consumerContractFailureCount = 0;
-
 
 export const OUTBOX_STATUS = {
   PENDING_DELIVERY: 'PENDING_DELIVERY',
@@ -462,4 +460,11 @@ export function _resetEventBusInternalStores() {
   administrativeAuditLog.length = 0;
   contractRejectedCount = 0;
   consumerContractFailureCount = 0;
+}
+
+/**
+ * Retrieves all outbox events for inspection and testing.
+ */
+export function getOutboxEvents() {
+  return Array.from(outboxStore.values());
 }

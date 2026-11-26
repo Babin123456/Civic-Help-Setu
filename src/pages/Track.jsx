@@ -11,11 +11,11 @@ import {
   Copy,
   Plus,
   AlertTriangle,
-  ShieldCheck,
   MessageSquare,
   Send,
   Compass,
   Scale,
+  GitCompare,
 } from 'lucide-react';
 
 import { useToast } from '../context/ToastContext';
@@ -51,6 +51,9 @@ import StatutoryCompensationClaimModal from '../components/tracking/StatutoryCom
 import { calculateStatutoryCompensation } from '../services/statutoryCompensationService';
 import DeficiencyCureModal from '../components/tracking/DeficiencyCureModal';
 import RejectionNoticeExplainerModal from '../components/tracking/RejectionNoticeExplainerModal';
+import ReconciliationConflictBanner from '../components/tracking/ReconciliationConflictBanner';
+import StatusReconciliationModal from '../components/tracking/StatusReconciliationModal';
+import { getReconciliationRecord } from '../services/statusEvidenceStorage';
 import InlineStatusLegend from '../components/common/InlineStatusLegend';
 import './TrackSearch.css';
 
@@ -62,7 +65,10 @@ const Track = () => {
   const [metrics, setMetrics] = useState(() => getTrackingMetrics());
   const [appIdInput, setAppIdInput] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [activeApp, setActiveApp] = useState(null);
+  const [activeApp, setActiveApp] = useState(() => {
+    const apps = getApplications();
+    return apps.length > 0 ? apps[0] : null;
+  });
   const [notFound, setNotFound] = useState(false);
   const [searchError, setSearchError] = useState('');
   const [showReceipt, setShowReceipt] = useState(false);
@@ -75,6 +81,10 @@ const Track = () => {
   const [isCompensationModalOpen, setIsCompensationModalOpen] = useState(false);
   const [isCureModalOpen, setIsCureModalOpen] = useState(false);
   const [isExplainerModalOpen, setIsExplainerModalOpen] = useState(false);
+  const [isReconcileModalOpen, setIsReconcileModalOpen] = useState(false);
+  const [, setReconciliationRevision] = useState(0);
+
+  const reconciliationRecord = activeApp?.id ? getReconciliationRecord(activeApp.id) : null;
 
   useEffect(() => {
     const freshApps = getApplications();
@@ -312,6 +322,21 @@ const Track = () => {
                       >
                         <FileText size={16} /> Explain Rejection / Notice
                       </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => setIsReconcileModalOpen(true)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                          color: '#2563eb',
+                          borderColor: '#93c5fd',
+                          backgroundColor: 'rgba(37, 99, 235, 0.05)',
+                        }}
+                      >
+                        <GitCompare size={16} /> Reconcile Status
+                      </button>
                       <button type="button" className="btn btn-secondary" onClick={handleCopyId}>
                         <Copy size={16} /> Copy ID
                       </button>
@@ -365,6 +390,12 @@ const Track = () => {
                 )}
 
                 <GrievanceEscalationAlertBanner application={activeApp} />
+
+                <ReconciliationConflictBanner
+                  record={reconciliationRecord}
+                  onOpenModal={() => setIsReconcileModalOpen(true)}
+                  applicationId={activeApp.id}
+                />
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
                   <ApplicationTimeline stages={activeApp.stages || []} currentStageIndex={activeApp.currentStageIndex || 0} />
@@ -495,6 +526,13 @@ const Track = () => {
         onClose={() => setIsExplainerModalOpen(false)}
         application={activeApp}
         initialNotice={activeApp?.rejectionReason || activeApp?.pendingAction?.description || ''}
+      />
+
+      <StatusReconciliationModal
+        application={activeApp}
+        isOpen={isReconcileModalOpen}
+        onClose={() => setIsReconcileModalOpen(false)}
+        onRecordUpdated={() => setReconciliationRevision((c) => c + 1)}
       />
     </section>
   );

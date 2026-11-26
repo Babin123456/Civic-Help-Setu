@@ -52,9 +52,14 @@ import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
 
 
+
 import verifiablePresentations from "./_lib/handlers/verifiable-presentations.js";
 
+
+import temporalPolicy from "./_lib/handlers/temporal-policy.js";
+
 import agentReviewStudio from "./_lib/handlers/agent-review-studio.js";
+import civicAgentEval from "./_lib/handlers/civic-agent-eval.js";
 
 import verifiableEvidenceBundles from "./_lib/handlers/verifiable-evidence-bundles.js";
 
@@ -113,6 +118,7 @@ import { SUPPORTED_VERSIONS, DEFAULT_VERSION } from "./_lib/versioning/versionCo
 import { createIdempotencyLayer, resolveIdempotencyConfig } from "./_lib/idempotencyMiddleware.js";
 import { createCacheMiddleware, getCacheSystem } from "./_lib/cacheMiddleware.js";
 import { createCacheFeatureFlagEngine } from "../src/services/distributedCache/index.js";
+import { createDefaultBackpressureMiddleware } from "./_lib/backpressureMiddleware.js";
 
 
 const baseHandlers = {
@@ -133,6 +139,7 @@ const baseHandlers = {
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
   "agent-review-studio": agentReviewStudio,
+  "civic-agent-eval": civicAgentEval,
   "business-licence-feedback": businessLicence,
 
   "civic-data-clean-room": civicDataCleanRoom,
@@ -162,6 +169,7 @@ const baseHandlers = {
   "rental-checklist-corrections": rentalChecklist,
   "send-email": sendEmail,
   "share-by-email": shareByEmail,
+  "temporal-policy": temporalPolicy,
   "tender-corrections": tenderCorrections,
   "verifiable-presentations": verifiablePresentations,
   "verifiable-evidence-bundles": verifiableEvidenceBundles,
@@ -315,6 +323,7 @@ export function createApiDispatcher({
   idempotencyLayer = createIdempotencyLayer(resolveIdempotencyConfig()),
   extraHandlers = {},
   gatewayMiddleware = createDefaultGatewayMiddleware(),
+  backpressureMiddleware = createDefaultBackpressureMiddleware(),
 } = {}) {
   const openApiHandler = async (req, res) => {
     const rawRoute = getRoute(req) || "";
@@ -392,10 +401,42 @@ export function createApiDispatcher({
       if (res.writableEnded) return;
     }
 
+    // Backpressure middleware (after gateway, before route handler)
+    if (backpressureMiddleware) {
+      await new Promise((resolve, reject) => {
+        let settled = false;
+        const done = (err) => {
+          if (settled) return;
+          settled = true;
+          if (err) reject(err);
+          else resolve();
+        };
+
+        Promise.resolve(backpressureMiddleware(req, res, done))
+          .then(() => {
+            if (!settled) {
+              settled = true;
+              resolve();
+            }
+          })
+          .catch((err) => {
+            if (!settled) {
+              settled = true;
+              reject(err);
+            }
+          });
+      }).catch(() => {
+        return;
+      });
+
+      if (res.writableEnded) return;
+    }
+
     const delegatedApiRoutes = [
       "abuse-control-plane",
       "application-events",
       "civic-agent-cost-carbon",
+      "civic-agent-eval",
       "civic-agent-policy",
       "civic-contract-test-marketplace",
       "civic-recommendation-experimentation",
