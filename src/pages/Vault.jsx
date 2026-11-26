@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useId, useCallback } from 'react';
 import {
   FileBadge, ShieldCheck, CreditCard, Car, FileText,
-  Plus, Search, Eye, Download, Tag, Stamp, Calendar, Camera, KeyRound
+  Plus, Search, Eye, Download, Tag, Stamp, Calendar, Camera, KeyRound,
+  Lock, Unlock, GitCompare, ShieldAlert,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useConfirm } from '../context/ConfirmationDialogContext';
@@ -39,11 +40,9 @@ import DocumentRenewalDigestModal from '../components/vault/DocumentRenewalDiges
 import DocumentQualityOcrInspectorModal from '../components/vault/DocumentQualityOcrInspectorModal';
 
 import ZkProofGeneratorModal from '../components/vault/ZkProofGeneratorModal';
-import { Lock, Unlock } from 'lucide-react';
 
 
 import EvidenceGraphContradictionModal from '../components/vault/EvidenceGraphContradictionModal';
-import { Lock, Unlock, GitCompare, ShieldAlert } from 'lucide-react';
 
 import DocumentValidityCalendar from '../components/DocumentValidityCalendar';
 
