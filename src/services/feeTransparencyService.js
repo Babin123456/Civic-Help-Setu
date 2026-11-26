@@ -119,8 +119,14 @@ const createUnverifiedFallback = (serviceId, serviceName = null) => ({
   effectiveDate: null,
   expiryDate: null,
   lastReviewedDate: null,
+  verificationDate: null,
+  jurisdiction: null,
+  version: null,
+  versionHistory: [],
   officialSource: null,
   officialStatutoryFees: [],
+  portalConvenienceCharges: [],
+  authorizedServiceCentreCharges: [],
   conditionalTiers: [],
   optionalProviderCharges: [],
   acceptedPaymentMethods: [],
@@ -387,4 +393,29 @@ export const saveFeePreferences = (serviceId, prefs) => {
   } catch {
     // Non-fatal
   }
+};
+
+/**
+ * Retrieves the full historical fee version audit trail for a given service (#647).
+ *
+ * @param {string} serviceId - Civic service ID
+ * @returns {Array<Object>} Version history array with effective dates, verification dates, notes, and sources.
+ */
+export const getFeeVersionHistory = (serviceId) => {
+  if (!serviceId || typeof serviceId !== 'string') return [];
+  const rawRecord = SERVICE_FEE_BREAKDOWNS[serviceId];
+  if (!rawRecord || !Array.isArray(rawRecord.versionHistory)) return [];
+  return rawRecord.versionHistory;
+};
+
+/**
+ * Retrieves specific historical version details for a service (#647).
+ *
+ * @param {string} serviceId - Civic service ID
+ * @param {number} versionNumber - Version number to lookup
+ * @returns {Object|null} Version entry or null if not found
+ */
+export const getFeeHistoricalVersion = (serviceId, versionNumber) => {
+  const history = getFeeVersionHistory(serviceId);
+  return history.find((v) => v.version === Number(versionNumber)) || null;
 };

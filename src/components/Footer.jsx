@@ -142,6 +142,111 @@ const Footer = () => {
                   {t('nav.civicWorks', 'Ward Works Board')}
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/senior-citizen-tribunal"
+                  style={linkBaseStyle}
+                  onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyle)}
+                  onBlur={(e) => { e.currentTarget.style.outline = ''; e.currentTarget.style.outlineOffset = ''; }}
+                >
+                  Senior Citizen Tribunal
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/rera-dispute-workspace"
+                  style={linkBaseStyle}
+                  onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyle)}
+                  onBlur={(e) => { e.currentTarget.style.outline = ''; e.currentTarget.style.outlineOffset = ''; }}
+                >
+                  RERA Homebuyer Rights
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/stray-animal-workspace"
+                  to="/noise-pollution-workspace"
+                  style={linkBaseStyle}
+                  onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyle)}
+                  onBlur={(e) => { e.currentTarget.style.outline = ''; e.currentTarget.style.outlineOffset = ''; }}
+                >
+                  Stray Animals &amp; Rabies PEP
+                  Noise Pollution &amp; Curfew
+                </Link>
+                <Link
+                  to="/solid-waste-workspace"
+                  style={linkBaseStyle}
+                  onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyle)}
+                  onBlur={(e) => { e.currentTarget.style.outline = ''; e.currentTarget.style.outlineOffset = ''; }}
+                >
+                  Solid Waste &amp; NGT
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/clinical-establishment-workspace"
+                  style={linkBaseStyle}
+                  onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyle)}
+                  onBlur={(e) => { e.currentTarget.style.outline = ''; e.currentTarget.style.outlineOffset = ''; }}
+                >
+                  Clinical Establishment &amp; Patient Rights
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/electricity-consumer-workspace"
+                  style={linkBaseStyle}
+                  onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyle)}
+                  onBlur={(e) => { e.currentTarget.style.outline = ''; e.currentTarget.style.outlineOffset = ''; }}
+                >
+                  Electricity Rights &amp; CGRF
+                </Link>
+              </li>
+<li><Link to="/accessibility-audit-workspace" style={linkBaseStyle}>Universal Accessibility Audit</Link></li>
+<li><Link to="/accessibility-tracker" style={linkBaseStyle}>Accessibility Complaint Tracker</Link></li>
+<li><Link to="/dark-patterns-workspace">Dark Patterns &amp; Consumer Redressal</Link></li>
+<li>
+  <Link
+    to="/street-vendor-workspace"
+    style={linkBaseStyle}
+    onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyle)}
+    onBlur={(e) => { e.currentTarget.style.outline = ''; e.currentTarget.style.outlineOffset = ''; }}
+  >
+    Street Vendor Rights &amp; TVC
+  </Link>
+</li>
+<li>
+  <Link
+    to="/electricity-consumer-workspace"
+    style={linkBaseStyle}
+    onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyle)}
+    onBlur={(e) => { e.currentTarget.style.outline = ''; e.currentTarget.style.outlineOffset = ''; }}
+  >
+    Electricity Rights &amp; CGRF
+  </Link>
+</li>
+<li>
+  <Link
+    to="/rte-quota-workspace"
+    style={linkBaseStyle}
+    onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyle)}
+    onBlur={(e) => { e.currentTarget.style.outline = ''; e.currentTarget.style.outlineOffset = ''; }}
+  >
+    RTE Quota &amp; Child Rights
+  </Link>
+</li>
+<li>
+  <Link
+    to="/legal-sources"
+    to="/evidence-dossier"
+    style={linkBaseStyle}
+    onFocus={(e) => Object.assign(e.currentTarget.style, focusRingStyle)}
+    onBlur={(e) => { e.currentTarget.style.outline = ''; e.currentTarget.style.outlineOffset = ''; }}
+  >
+    Legal Source Review
+    Evidence Dossier &amp; Integrity
+  </Link>
+</li>
               {can('users.read', user) && (
                 <li>
                   <Link

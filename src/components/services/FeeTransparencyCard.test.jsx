@@ -96,4 +96,24 @@ describe('FeeTransparencyCard Component (#145)', () => {
     expect(html).toContain('Published Schedule Due for Review');
     expect(html).toContain('past its 365-day review window');
   });
+
+  it('renders jurisdiction, effective date, source, and verification date (#647)', () => {
+    const html = renderComponent({ serviceId: 'passport', serviceName: 'New Passport Application' });
+
+    expect(html).toContain('Jurisdiction:');
+    expect(html).toContain('All States / Union of India');
+    expect(html).toContain('Effective:');
+    expect(html).toContain('2024-01-01');
+    expect(html).toContain('Verified:');
+    expect(html).toContain('2026-07-10');
+    expect(html).toContain('Passport Rules 1980');
+    expect(html).toContain('Audit History');
+  });
+
+  it('renders protection notice ensuring disputed charges are not presented as official (#647)', () => {
+    const html = renderComponent({ serviceId: 'passport', serviceName: 'New Passport Application' });
+
+    expect(html).toContain('Official Fee Protection:');
+    expect(html).toContain('Disputed, unknown, or informal tout charges are never recognized as official statutory fees');
+  });
 });
