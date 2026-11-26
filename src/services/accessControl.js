@@ -18,6 +18,20 @@
  * enforcement for shared data needs a backend or Firebase rules (see docs/ACCESS_CONTROL.md).
  */
 
+/** Translation Memory privileged actions: who may do what. Add new features here. */
+export const TRANSLATION_MEMORY_PERMISSIONS = {
+  'civictranslationmemory.write': {
+    roles: ['admin'],
+    resource: 'civic_translation_memory',
+    description: 'Submit, rollback or manage translation memory entries',
+  },
+  'civictranslationmemory.review': {
+    roles: ['admin'],
+    resource: 'civic_translation_memory',
+    description: 'Approve or reject translation memory proposals',
+  },
+};
+
 /** Every privileged action: who may do it, and what it touches. Add new admin features here. */
 export const PERMISSIONS = {
   'services.write': { roles: ['admin'], resource: 'civicbridge_custom_services', description: 'Add or edit a service guide' },
@@ -47,6 +61,10 @@ export const PERMISSIONS = {
   'ownership.manage': { roles: ['admin'], resource: 'civicbridge_service_ownership_v1', description: 'Assign, reassign or clear the reviewer of a service guide' },
   'civicWorks.moderate': { roles: ['admin'], resource: 'civicbridge_civic_works_reports_v1', description: 'Moderate ward-level civic work reports, cluster duplicates, record official acknowledgements and verify completion evidence' },
 
+  'civictranslationmemory.write': { roles: ['admin'], resource: 'civic_translation_memory', description: 'Submit, rollback or manage translation memory entries' },
+  'civictranslationmemory.review': { roles: ['admin'], resource: 'civic_translation_memory', description: 'Approve or reject translation memory proposals' },
+
+
   'civicDataApi.use': { roles: ['admin', 'citizen'], resource: 'civicbridge_api_clients_v1', description: 'Create and use scoped developer sandbox credentials' },
   'civicDataApi.admin': { roles: ['admin'], resource: 'civicbridge_access_audits_v1', description: 'Approve production API clients, inspect usage anomalies and read API audit logs' },
 
@@ -72,6 +90,7 @@ export const PERMISSIONS = {
   'flood.admin': { roles: ['admin'], resource: 'civicbridge_flood_forecast_runs_v1', description: 'Configure flood intelligence parameters, trigger runs, and archive data' },
   'legalSources.manage': { roles: ['admin'], resource: 'civicbridge_legal_sources_v1', description: 'Create, edit, or supersede legal sources' },
   'legalSources.review': { roles: ['admin'], resource: 'civicbridge_legal_sources_v1', description: 'Review, approve, publish or roll back legal source versions' },
+
 
 };
 
