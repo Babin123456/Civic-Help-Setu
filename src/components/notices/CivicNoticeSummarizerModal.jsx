@@ -86,7 +86,7 @@ Official Source: ${summary.sourceUrl || 'Official Gazette / Bulletin'}
 
     return (
       <div key={fieldName} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-        <strong style={{ fontSize: '0.78rem', color: confidenceColor }}}>{confidenceLabel}</strong>
+        <strong style={{ fontSize: '0.78rem', color: confidenceColor }}>{confidenceLabel}</strong>
         {clauseRef && clauseRef.paragraph > 0 && (
           <span style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)' }}>
             Source: paragraph {clauseRef.paragraph}
@@ -324,7 +324,7 @@ const renderSideBySidePanel = () => {
             padding: '0.75rem 1rem',
             borderRadius: '8px',
             margin: '0.75rem 0',
-            backgroundStatusHasDateAmbiguity
+            background: hasDateAmbiguity
               ? 'rgba(245, 158, 11, 0.1)'
               : deadlineStatus === 'EXPLICIT_DEADLINE'
               ? 'rgba(22, 163, 74, 0.1)'
@@ -338,9 +338,9 @@ const renderSideBySidePanel = () => {
             {hasDateAmbiguity ? (
               <AlertTriangle size={16} color="#d97706" />
             ) : deadlineStatus === 'EXPLICIT_DEADLINE' ? (
-              <Calendar size={16} color="#16a34a"
+              <Calendar size={16} color="#16a34a" />
             ) : (
-              <AlertCircle size={16} color="#64748b"
+              <AlertCircle size={16} color="#64748b" />
             )}
             <strong style={{ fontSize: '0.85rem', color: hasDateAmbiguity ? '#b45309' : deadlineStatus === 'EXPLICIT_DEADLINE' ? '#15803d' : '#475569' }}>
               {hasDateAmbiguity ? 'Date Ambiguity' : 'Filing Deadline'}: {primaryDeadline}
