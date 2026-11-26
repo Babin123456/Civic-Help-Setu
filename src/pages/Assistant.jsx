@@ -120,15 +120,16 @@ const Assistant = () => {
       logDiagnostic('Grounded retrieval error, falling back to basic assistant:', groundingErr);
       response = await askCivicAssistant(safeQuery);
 
-      const gatewayRes = await executeModelGateway({ query: safeQuery });
-      gatewayMeta = gatewayRes.meta || null;
-      response = gatewayRes;
-    } catch (gatewayErr) {
-      logDiagnostic('Model Gateway error, falling back to civic agent pipeline:', gatewayErr);
-      response = await runCivicAgentPipeline(safeQuery, {
-        serviceContextId: currentServiceContextId,
-      });
-
+      try {
+        const gatewayRes = await executeModelGateway({ query: safeQuery });
+        gatewayMeta = gatewayRes.meta || null;
+        response = gatewayRes;
+      } catch (gatewayErr) {
+        logDiagnostic('Model Gateway error, falling back to civic agent pipeline:', gatewayErr);
+        response = await runCivicAgentPipeline(safeQuery, {
+          serviceContextId: currentServiceContextId,
+        });
+      }
     }
     return {
       id: `asst-${Date.now()}`,
