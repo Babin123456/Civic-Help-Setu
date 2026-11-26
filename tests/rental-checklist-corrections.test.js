@@ -3,7 +3,7 @@ import handler, {
   validateRentalCorrectionPayload,
   generateRentalCorrectionSeal,
   RENTAL_CORRECTION_QUEUE,
-} from './rental-checklist-corrections';
+} from '../api/rental-checklist-corrections.js';
 
 describe('api/rental-checklist-corrections (#726)', () => {
   beforeEach(() => {

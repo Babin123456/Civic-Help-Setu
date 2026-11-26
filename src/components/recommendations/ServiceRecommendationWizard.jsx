@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Sparkles, SlidersHorizontal, RefreshCw, X, Check, HelpCircle, Compass } from 'lucide-react';
+import { Sparkles, SlidersHorizontal, RefreshCw, X, Check, HelpCircle, Compass, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { rankCivicServices } from '../../services/recommendationEngine.js';
 import RecommendationExplanationCard from './RecommendationExplanationCard';
 
@@ -35,6 +35,10 @@ const ServiceRecommendationWizard = ({ isOpen, onClose }) => {
   const [ageInput, setAgeInput] = useState('');
   const [citizenship, setCitizenship] = useState('indian');
 
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState(null);
+  const [feedbackServiceId, setFeedbackServiceId] = useState(null);
+
   // Toggle goal selection
   const handleToggleGoal = (goalId) => {
     setSelectedGoals((prev) =>
@@ -57,6 +61,15 @@ const ServiceRecommendationWizard = ({ isOpen, onClose }) => {
     setMaxDays(60);
     setAgeInput('');
     setCitizenship('indian');
+    setShowFeedback(false);
+    setFeedbackRating(null);
+    setFeedbackServiceId(null);
+  };
+
+  // Toggle feedback for a specific service
+  const handleToggleFeedback = (serviceId) => {
+    setFeedbackServiceId(serviceId);
+    setShowFeedback(true);
   };
 
   // Compute recommendations reactively
@@ -330,7 +343,86 @@ const ServiceRecommendationWizard = ({ isOpen, onClose }) => {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
               {recommendations.slice(0, 4).map((rec) => (
-                <RecommendationExplanationCard key={rec.serviceId} recommendation={rec} />
+                <React.Fragment key={rec.serviceId}>
+                  <RecommendationExplanationCard
+                  key={rec.serviceId}
+                  recommendation={rec}
+                  onFeedbackToggle={handleToggleFeedback}
+                />
+                  {showFeedback && feedbackServiceId === rec.serviceId && (
+                    <div
+                      style={{
+                        padding: '0.875rem',
+                        borderRadius: '0.75rem',
+                        background: 'rgba(0,0,0,0.3)',
+                        border: '1px solid var(--border-light, rgba(255,255,255,0.08))',
+                        marginTop: '0.5rem',
+                        fontSize: '0.825rem',
+                        textAlign: 'center',
+                      }}
+                    >
+                      <div style={{ marginBottom: '0.5rem' }}>
+                        <span style={{ fontWeight: '700', color: 'var(--text-primary, #ffffff)' }}>Was this recommendation useful?</span>
+                        <div style={{ display: 'inline-flex', gap: '0.3rem' }}>
+                          <button
+                            type="button"
+                            onClick={() => setFeedbackRating(1)}
+                            style={{
+                              padding: '0.3rem 0.5rem',
+                              borderRadius: '0.5rem',
+                              background: feedbackRating === 1 ? 'rgba(34, 197, 94, 0.2)' : 'rgba(0,0,0,0.2)',
+                              border: `1px solid ${feedbackRating === 1 ? '#4ade80' : 'var(--border-light, rgba(255,255,255,0.1))'}`,
+                              color: feedbackRating === 1 ? '#4ade80' : 'var(--text-secondary, #cbd5e1)',
+                              cursor: 'pointer',
+                              fontWeight: '700',
+                              fontSize: '0.8rem',
+                            }}
+                            aria-pressed={feedbackRating === 1}
+                          >
+                            <ThumbsUp size={12} /> Useful
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setFeedbackRating(-1)}
+                            style={{
+                              padding: '0.3rem 0.5rem',
+                              borderRadius: '0.5rem',
+                              background: feedbackRating === -1 ? 'rgba(234, 179, 8, 0.2)' : 'rgba(0,0,0,0.2)',
+                              border: `1px solid ${feedbackRating === -1 ? '#facc15' : 'var(--border-light, rgba(255,255,255,0.1))'}`,
+                              color: feedbackRating === -1 ? '#facc15' : 'var(--text-secondary, #cbd5e1)',
+                              cursor: 'pointer',
+                              fontWeight: '700',
+                              fontSize: '0.8rem',
+                            }}
+                            aria-pressed={feedbackRating === -1}
+                          >
+                            <ThumbsDown size={12} /> Not useful
+                          </button>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowFeedback(false);
+                          setFeedbackRating(null);
+                          setFeedbackServiceId(null);
+                        }}
+                        style={{
+                          marginTop: '0.5rem',
+                          padding: '0.4rem 0.8rem',
+                          borderRadius: '0.375rem',
+                          background: 'var(--border-main, rgba(255,255,255,0.1))',
+                          border: '1px solid var(--border-light, rgba(255,255,255,0.15))',
+                          color: 'var(--text-secondary, #cbd5e1)',
+                          cursor: 'pointer',
+                          fontSize: '0.75rem',
+                        }}
+                      >
+                        Skip
+                      </button>
+                    </div>
+                  )}
+                </React.Fragment>
               ))}
             </div>
           </div>

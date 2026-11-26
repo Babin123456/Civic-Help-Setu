@@ -1,38 +1,14 @@
 /**
- * Civic Domain Event Bus and Transactional Outbox Service
+ * Process-local civic event staging and dispatch prototype.
  *
- * Implements a reliable internal event architecture and transactional outbox engine
- * for civic workflows (applications, grievances, notifications, and audits):
- *
- * 1. Versioned Event Contracts:
- *    - APPLICATION_SUBMITTED, APPLICATION_STATUS_CHANGED, GRIEVANCE_LODGED,
- *      GRIEVANCE_ESCALATED, DEFICIENCY_NOTICE_ISSUED, DOCUMENT_VERIFIED, FEE_RECEIPT_ISSUED.
- *    - Strict schema validation, semantic versioning (1.0.0), and producer ownership.
- *
- * 2. Transactional Outbox Pattern:
- *    - Stages domain events atomically alongside domain state writes.
- *    - Enforces idempotency keys to prevent duplicate publishing on client retry.
- *
- * 3. Observable Dispatcher with Retry Backoff:
- *    - Dispatches pending outbox events in chronological order.
- *    - Configurable retry policies (maxAttempts, backoffMs) with jitter support.
- *
- * 4. Consumer Subscriptions & Offset Tracking:
- *    - Registers domain subscribers by event type.
- *    - Tracks consumer offsets and prevents duplicate execution via consumer execution logs.
- *
- * 5. Dead-Letter Queue (DLQ) & Poison Message Isolation:
- *    - Isolates repeatedly failing events into dead_letter_events without stalling the queue.
- *    - Records comprehensive diagnostic traces and failure categories.
- *
- * 6. Administrative Replay & Audit Trail:
- *    - Allows authorized operators to replay dead-lettered events or re-dispatch by aggregateId.
- *    - Generates append-only administrative audit log for all replay actions.
- *
- * 7. Privacy & PII Scrubbing:
- *    - Enforces data minimization by scrubbing direct citizen PII (Aadhaar, PAN, phone, email)
- *      from event payloads, retaining only scoped reference tokens.
+ * Versioned admission uses the repository-reviewed event registry. Existing
+ * 1.0.0 releases preserve legacy JSON behavior; typed releases are explicit opt-ins.
+ * Maps, retry logs and replay audit are volatile: this module does not atomically
+ * commit domain state, authenticate callers or provide a durable database outbox.
+ * Producer/consumer ownership fields are declarations, not authorization proofs.
+ * See docs/CIVIC_EVENT_CONTRACTS.md for migration, limits and operator recovery.
  */
+
 
 export const CIVIC_EVENT_TYPE = {
   APPLICATION_SUBMITTED: 'APPLICATION_SUBMITTED',
@@ -47,6 +23,20 @@ export const CIVIC_EVENT_TYPE = {
   CASE_MEMORY_PURGED: 'CASE_MEMORY_PURGED',
   CASE_MEMORY_EXPIRED: 'CASE_MEMORY_EXPIRED',
 };
+
+import registry from '../data/contracts/registry.json';
+import {
+  CIVIC_EVENT_TYPE,
+  assertEventContract,
+  canonicalEventValue,
+  consumerContractVersions,
+} from '../data/contracts/eventCompatibility.js';
+
+export { CIVIC_EVENT_TYPE };
+const eventContracts = structuredClone(registry.events);
+let contractRejectedCount = 0;
+let consumerContractFailureCount = 0;
+
 
 export const OUTBOX_STATUS = {
   PENDING_DELIVERY: 'PENDING_DELIVERY',
@@ -70,7 +60,7 @@ export const DEFAULT_RETRY_CONFIG = {
   backoffMultiplier: 2,
 };
 
-// In-memory persistent stores
+// Volatile, process-local stores; restarting loses staged events and execution logs.
 const outboxStore = new Map();
 const deadLetterStore = new Map();
 const consumerRegistry = new Map();
@@ -117,7 +107,7 @@ export function stageOutboxEvent(input = {}) {
     tenantId = 'DEFAULT_TENANT',
   } = input;
 
-  if (!eventType || !CIVIC_EVENT_TYPE[eventType]) {
+  if (typeof eventType !== 'string' || !Object.hasOwn(CIVIC_EVENT_TYPE, eventType)) {
     throw new Error(`Invalid or unsupported eventType: '${eventType}'`);
   }
 
@@ -125,17 +115,29 @@ export function stageOutboxEvent(input = {}) {
     throw new Error('Valid aggregateId is required for event staging');
   }
 
-  // Idempotency check: prevent duplicate staging
+  // Validate admission before duplicate lookup, so retry keys cannot bypass a contract.
+  let sanitizedPayload;
+  try {
+    sanitizedPayload = sanitizeEventPayload(payload);
+    assertEventContract(eventContracts, eventType, schemaVersion, producerDomain, sanitizedPayload);
+    for (const consumer of consumerRegistry.values()) {
+      if (!consumer.enabled || (consumer.tenantScope && consumer.tenantScope !== tenantId) || !consumer.eventTypes.includes(eventType)) continue;
+      if (!consumer.contractVersions[eventType].includes(schemaVersion)) throw new Error(`Consumer '${consumer.consumerId}' does not accept ${eventType}@${schemaVersion}; migrate it before publishing`);
+    }
+  } catch (error) {
+    contractRejectedCount += 1;
+    throw error;
+  }
+
   if (idempotencyKey) {
     for (const existing of outboxStore.values()) {
-      if (existing.idempotencyKey === idempotencyKey) {
-        return existing; // Return existing event without creating duplicate
-      }
+      if (existing.idempotencyKey !== idempotencyKey || existing.tenantId !== tenantId || existing.producerDomain !== producerDomain) continue;
+      if (existing.eventType !== eventType || existing.schemaVersion !== schemaVersion || existing.aggregateId !== aggregateId || canonicalEventValue(existing.payload) !== canonicalEventValue(sanitizedPayload)) throw new Error('Idempotency key conflicts with the admitted event contract or payload');
+      return existing;
     }
   }
 
   const eventId = `evt_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  const sanitizedPayload = sanitizeEventPayload(payload);
 
   const outboxEntry = {
     eventId,
@@ -186,12 +188,21 @@ export function registerEventConsumer(consumerId, eventTypes, handlerFn, options
     throw new Error('handlerFn must be a valid executable function');
   }
 
+  if (new Set(eventTypes).size !== eventTypes.length || eventTypes.some(type => !Object.hasOwn(CIVIC_EVENT_TYPE, type))) throw new Error('Consumer subscriptions contain unknown or duplicate event types');
+  const declared = eventContracts.consumers.find(row => row.id === consumerId);
+  if (declared?.status === 'retired') throw new Error('Consumer is retired in the repository inventory');
+  if (declared && canonicalEventValue([...eventTypes].sort()) !== canonicalEventValue([...declared.eventTypes].sort())) throw new Error('Consumer subscriptions differ from the repository inventory');
+  const contractVersions = consumerContractVersions(eventContracts, eventTypes, options.contractVersions ?? declared?.contractVersions);
+  if (declared && canonicalEventValue(contractVersions) !== canonicalEventValue(consumerContractVersions(eventContracts, eventTypes, declared.contractVersions))) throw new Error('Consumer versions differ from the repository inventory');
   consumerRegistry.set(consumerId, {
     consumerId,
-    eventTypes,
+    eventTypes: [...eventTypes],
     handlerFn,
     tenantScope: options.tenantScope || null,
     enabled: options.enabled !== false,
+    contractVersions,
+    owner: declared?.owner ?? options.owner ?? null,
+    declared: Boolean(declared),
   });
 }
 
@@ -226,6 +237,9 @@ export async function dispatchPendingOutboxEvents(options = {}) {
       (event.status === OUTBOX_STATUS.FAILED_RETRYABLE && new Date(event.nextAttemptAt) <= now);
 
     if (isPending) {
+      // Reserve the whole batch before the first await; concurrent dispatchers cannot share it.
+      event.status = OUTBOX_STATUS.DISPATCHING;
+      event.deliveryAttempts += 1;
       pendingEvents.push(event);
       if (pendingEvents.length >= batchSize) break;
     }
@@ -246,9 +260,6 @@ export async function dispatchPendingOutboxEvents(options = {}) {
   let deadLetterCount = 0;
 
   for (const event of pendingEvents) {
-    event.status = OUTBOX_STATUS.DISPATCHING;
-    event.deliveryAttempts += 1;
-
     // Identify consumers for this event
     const applicableConsumers = [];
     for (const consumer of consumerRegistry.values()) {
@@ -271,6 +282,10 @@ export async function dispatchPendingOutboxEvents(options = {}) {
       }
 
       try {
+        if (!consumer.contractVersions[event.eventType].includes(event.schemaVersion)) {
+          consumerContractFailureCount += 1;
+          throw new Error(`Consumer '${consumer.consumerId}' no longer accepts the admitted contract`);
+        }
         await consumer.handlerFn(event);
         consumerExecutionLogs.set(execKey, {
           consumerId: consumer.consumerId,
@@ -426,6 +441,9 @@ export function getEventBusHealthMetrics() {
     deliveredCount,
     deadLetterCount,
     activeConsumersCount: consumerRegistry.size,
+    contractRejectedCount,
+    consumerContractFailureCount,
+    undeclaredConsumersCount: [...consumerRegistry.values()].filter(consumer => !consumer.declared).length,
     administrativeAuditEventsCount: administrativeAuditLog.length,
     status: deadLetterCount > 0 ? 'ATTENTION_REQUIRED' : 'HEALTHY',
   };
@@ -440,6 +458,13 @@ export function getAdministrativeAuditLog() {
   return [...administrativeAuditLog];
 }
 
+/** Metadata only; handler functions and citizen payloads are never included. */
+export function getEventConsumerInventory() {
+  return [...consumerRegistry.values()].map(({ consumerId, eventTypes, contractVersions, owner, declared, tenantScope, enabled }) => ({
+    consumerId, eventTypes: [...eventTypes], contractVersions: structuredClone(contractVersions), owner, declared, tenantScope, enabled,
+  })).sort((a, b) => a.consumerId.localeCompare(b.consumerId));
+}
+
 /**
  * Internal cleanup utility for unit tests.
  */
@@ -449,4 +474,6 @@ export function _resetEventBusInternalStores() {
   consumerRegistry.clear();
   consumerExecutionLogs.clear();
   administrativeAuditLog.length = 0;
+  contractRejectedCount = 0;
+  consumerContractFailureCount = 0;
 }
