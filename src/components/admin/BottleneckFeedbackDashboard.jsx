@@ -1,21 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  HelpCircle,
-  AlertTriangle,
-  CheckCircle2,
-  Filter,
   Eye,
   EyeOff,
-  Search,
   RefreshCw,
-  TrendingUp,
   Shield,
-  Layers,
 } from 'lucide-react';
 import {
   FEEDBACK_CATEGORIES,
   FEEDBACK_STATUSES,
-  getAllFeedback,
   getAggregateFrictionMetrics,
   reviewBottleneckFeedback,
   queryFeedbackForModeration,
@@ -23,54 +15,93 @@ import {
 } from '../../services/bottleneckFeedbackService';
 import { MOCK_SERVICES } from '../../data/services';
 
+import { useAuth } from '../../context/AuthContext';
+import { useModalKeyboard } from '../../hooks/useModalKeyboard.js';
+import { feedbackRequest } from '../../services/bottleneckFeedbackApi.js';
+
 const BottleneckFeedbackDashboard = () => {
+  const { isDemoMode, getSessionToken } = useAuth();
+  const localDemo = isDemoMode && import.meta.env.DEV && import.meta.env.VITE_SHARED_FEEDBACK !== 'true';
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [queue, setQueue] = useState('standard');
+  const [nextCursor, setNextCursor] = useState(null);
+  const [audit, setAudit] = useState([]);
   const [selectedService, setSelectedService] = useState('all');
   const [metrics, setMetrics] = useState(null);
   const [showIndividualReports, setShowIndividualReports] = useState(false);
   const [feedbackList, setFeedbackList] = useState([]);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('pending');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
   // Moderation modal / action state
   const [activeReviewItem, setActiveReviewItem] = useState(null);
   const [adminNote, setAdminNote] = useState('');
   const [reviewStatus, setReviewStatus] = useState(FEEDBACK_STATUSES.REVIEWED);
+  const reviewRequest = useRef(0);
+  const closeReview = useCallback(() => { reviewRequest.current += 1; setActiveReviewItem(null); }, []);
+  const modalRef = useModalKeyboard(Boolean(activeReviewItem), closeReview);
 
-  const refreshData = () => {
-    const agg = getAggregateFrictionMetrics(null, selectedService);
-    setMetrics(agg);
+  const loadData = useCallback(async (cursor, signal) => {
+    if (localDemo) return { metrics: getAggregateFrictionMetrics(null, selectedService),
+      items: queryFeedbackForModeration(null, { serviceId: selectedService, status: statusFilter,
+        category: categoryFilter, searchQuery: search }), nextCursor: null };
+    const params = new URLSearchParams({ view: 'moderation', queue, status: statusFilter });
+    if (cursor) params.set('cursor', cursor);
+    const [aggregate, page] = await Promise.all([
+      feedbackRequest({ signal }),
+      feedbackRequest({ query: `?${params}`, getToken: getSessionToken, signal }),
+    ]);
+    return { metrics: { ...aggregate, pendingCount: page.items.filter(item => item.status === 'pending').length,
+      reviewedCount: page.items.filter(item => item.status !== 'pending').length }, ...page };
+  }, [localDemo, getSessionToken, selectedService, statusFilter, categoryFilter, search, queue]);
 
-    const items = queryFeedbackForModeration(null, {
-      serviceId: selectedService,
-      status: statusFilter,
-      category: categoryFilter,
-      searchQuery: search,
-    });
-    setFeedbackList(items);
+  const applyData = useCallback((data, append = false) => {
+    setMetrics(data.metrics);
+    setFeedbackList(previous => append ? [...new Map([...previous, ...data.items].map(item => [item.id, item])).values()] : data.items);
+    setNextCursor(data.nextCursor);
+    setError(''); setBusy(false);
+  }, []);
+
+  const refreshData = async (cursor = null) => {
+    setBusy(true); setError('');
+    try { applyData(await loadData(cursor), Boolean(cursor)); }
+    catch (err) { setError(err.message); setBusy(false); }
   };
 
   useEffect(() => {
-    refreshData();
-  }, [selectedService, statusFilter, categoryFilter, search]);
+    const controller = new AbortController();
+    loadData(null, controller.signal).then(data => {
+      if (!controller.signal.aborted) applyData(data);
+    }).catch(err => { if (!controller.signal.aborted) { setError(err.message); setBusy(false); } });
+    return () => controller.abort();
+  }, [loadData, applyData]);
 
-  const handleOpenReview = (item) => {
-    setActiveReviewItem(item);
+  const handleOpenReview = async (item) => {
+    const request = ++reviewRequest.current;
+    setActiveReviewItem(item); setAudit([]);
     setAdminNote(item.adminNotes || '');
     setReviewStatus(item.status === FEEDBACK_STATUSES.PENDING ? FEEDBACK_STATUSES.REVIEWED : item.status);
+    if (!localDemo) {
+      try { const result = await feedbackRequest({ query: `?view=audit&id=${item.id}`, getToken: getSessionToken });
+        if (reviewRequest.current === request) setAudit(result.items); }
+      catch (err) { setError(err.message); }
+    }
   };
 
-  const handleSaveReview = (e) => {
+  const handleSaveReview = async (e) => {
     e.preventDefault();
-    if (!activeReviewItem) return;
-
+    if (!activeReviewItem || busy) return;
+    setBusy(true); setError('');
     try {
-      reviewBottleneckFeedback(activeReviewItem.id, reviewStatus, 'Admin Moderator', adminNote);
+      if (localDemo) reviewBottleneckFeedback(activeReviewItem.id, reviewStatus, 'Demo Moderator', adminNote);
+      else await feedbackRequest({ method: 'PATCH', getToken: getSessionToken,
+        body: { id: activeReviewItem.id, status: reviewStatus, revision: activeReviewItem.revision, notes: adminNote } });
       setActiveReviewItem(null);
-      refreshData();
-    } catch (err) {
-      alert(err.message);
-    }
+      await refreshData();
+    } catch (err) { setError(err.message); }
+    finally { setBusy(false); }
   };
 
   const handleReset = () => {
@@ -82,6 +113,14 @@ const BottleneckFeedbackDashboard = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <p role="status">{localDemo ? 'Local demonstration records; these have not been sent to maintainers.' :
+        'Shared queue, oldest first. Queue counters cover the loaded page; public analytics cover addressed reports in the last 7 days with small groups suppressed.'}</p>
+      {error && <p role="alert">{error}</p>}
+      {!localDemo && <label>Moderation queue <select value={queue} onChange={event => setQueue(event.target.value)}>
+        <option value="standard">Standard reports</option><option value="suspected_spam">Suspected spam</option>
+      </select></label>}
+      <label>Search loaded reports <input type="search" value={search} onChange={event => setSearch(event.target.value)} /></label>
+      {nextCursor && <button type="button" disabled={busy} onClick={() => refreshData(nextCursor)}>Load next oldest reports</button>}
       {/* Header and Controls */}
       <div
         style={{
@@ -126,12 +165,13 @@ const BottleneckFeedbackDashboard = () => {
 
           <button
             type="button"
-            onClick={handleReset}
+            onClick={localDemo ? handleReset : () => refreshData()}
+            disabled={busy}
             className="btn btn-secondary"
             style={{ padding: '0.5rem 0.85rem', fontSize: '0.85rem', display: 'flex', gap: '0.35rem' }}
-            title="Reset default feedback records"
+            title={localDemo ? "Reset local demonstration" : "Refresh shared queue"}
           >
-            <RefreshCw size={14} /> Reset Seed
+            <RefreshCw size={14} /> {localDemo ? "Reset Seed" : "Refresh"}
           </button>
         </div>
       </div>
@@ -170,7 +210,7 @@ const BottleneckFeedbackDashboard = () => {
 
         <div className="card" style={{ padding: '1.25rem', textAlign: 'center' }}>
           <div style={{ fontSize: '2rem', fontWeight: '800', color: '#f59e0b' }}>
-            {metrics ? metrics.pendingCount : 0}
+            {localDemo ? metrics?.pendingCount || 0 : feedbackList.filter(item => item.status === 'pending').length}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
             Awaiting Review
@@ -179,7 +219,7 @@ const BottleneckFeedbackDashboard = () => {
 
         <div className="card" style={{ padding: '1.25rem', textAlign: 'center' }}>
           <div style={{ fontSize: '2rem', fontWeight: '800', color: '#10b981' }}>
-            {metrics ? metrics.reviewedCount : 0}
+            {localDemo ? metrics?.reviewedCount || 0 : feedbackList.filter(item => item.status !== 'pending').length}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase' }}>
             Reviewed & Addressed
@@ -362,7 +402,7 @@ const BottleneckFeedbackDashboard = () => {
                   fontSize: '0.8rem',
                 }}
               >
-                <option value="all">All Review Statuses</option>
+                {localDemo && <option value="all">All Review Statuses</option>}
                 <option value={FEEDBACK_STATUSES.PENDING}>Pending</option>
                 <option value={FEEDBACK_STATUSES.REVIEWED}>Reviewed</option>
                 <option value={FEEDBACK_STATUSES.ADDRESSED}>Addressed</option>
@@ -398,7 +438,9 @@ const BottleneckFeedbackDashboard = () => {
                 No feedback reports match your current filter criteria.
               </div>
             ) : (
-              feedbackList.map((item) => (
+              feedbackList.filter(item => (selectedService === 'all' || item.serviceId === selectedService)
+                && (categoryFilter === 'all' || item.category === categoryFilter)
+                && (!search || `${item.serviceName} ${item.notes}`.toLowerCase().includes(search.toLowerCase()))).map((item) => (
                 <div
                   key={item.id}
                   style={{
@@ -494,6 +536,7 @@ const BottleneckFeedbackDashboard = () => {
       {/* Moderation Review Modal */}
       {activeReviewItem && (
         <div
+          ref={modalRef}
           role="dialog"
           aria-modal="true"
           aria-labelledby="feedback-review-title"
@@ -511,7 +554,11 @@ const BottleneckFeedbackDashboard = () => {
           <div
             className="glass-panel"
             style={{
+              background: 'var(--bg-secondary, #0a0a0a)',
+              color: 'var(--text-primary, #fff)',
               maxWidth: '520px',
+              maxHeight: 'calc(100dvh - 2rem)',
+              overflowY: 'auto',
               width: '100%',
               borderRadius: '1rem',
               padding: '1.5rem',
@@ -525,9 +572,19 @@ const BottleneckFeedbackDashboard = () => {
             </h3>
 
             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              {activeReviewItem.overdue && <strong>Moderation SLA overdue. </strong>}
               Reported issue: <strong>{activeReviewItem.category}</strong> (Friction: {activeReviewItem.rating}/5)
             </div>
 
+            {!localDemo && <div>
+              <p>Attachment: {activeReviewItem.attachment?.state || 'none'}</p>
+              {activeReviewItem.attachment?.state === 'clean' && <button type="button" onClick={async () => {
+                try { const result = await feedbackRequest({ query: `?view=attachment&id=${activeReviewItem.id}`, getToken: getSessionToken });
+                  window.location.assign(result.url); } catch (err) { setError(err.message); }
+              }}>Download scanner-approved attachment</button>}
+              <p>Audit history (up to 50 newest events):</p>
+              <ul>{audit.map(entry => <li key={entry.id}>{entry.status || entry.verdict} — {entry.reviewedBy || entry.scanner} — revision {entry.revision ?? 'scan'}</li>)}</ul>
+            </div>}
             {activeReviewItem.notes && (
               <div
                 style={{
@@ -542,6 +599,7 @@ const BottleneckFeedbackDashboard = () => {
               </div>
             )}
 
+            {error && <p role="alert">{error}</p>}
             <form onSubmit={handleSaveReview} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.35rem' }}>
@@ -571,6 +629,7 @@ const BottleneckFeedbackDashboard = () => {
                   Action / Resolution Notes
                 </label>
                 <textarea
+                  maxLength={1500}
                   rows={3}
                   value={adminNote}
                   onChange={(e) => setAdminNote(e.target.value)}
@@ -591,13 +650,13 @@ const BottleneckFeedbackDashboard = () => {
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
                 <button
                   type="button"
-                  onClick={() => setActiveReviewItem(null)}
+                  onClick={closeReview}
                   className="btn btn-secondary"
                   style={{ padding: '0.45rem 1rem' }}
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary" style={{ padding: '0.45rem 1.25rem' }}>
+                <button type="submit" disabled={busy} className="btn btn-primary" style={{ padding: '0.45rem 1.25rem' }}>
                   Save Resolution
                 </button>
               </div>

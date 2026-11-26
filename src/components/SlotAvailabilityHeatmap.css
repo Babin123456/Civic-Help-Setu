@@ -1,0 +1,203 @@
+/**
+ * Service Appointment Availability Heatmap Styles
+ *
+ * Colour-independent design ensuring accessibility for color-blind users.
+ * All status information is conveyed through text labels, not colours alone.
+ */
+
+/* Heatmap container */
+.slot-availability-heatmap {
+  width: 100%;
+  max-width: 100%;
+  font-size: 0.875rem;
+}
+
+/* Loading state */
+.slot-availability-loading {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* Error state */
+.slot-availability-error {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-error, #dc2626);
+  background: rgba(220, 38, 38, 0.05);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+}
+
+/* No feed state */
+.slot-availability-no-feed {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* Calendar navigation */
+.calendar-nav {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.calendar-nav-button {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Calendar grid */
+.calendar-wrapper {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.calendar-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.calendar-row {
+  display: flex;
+  width: 100%;
+}
+
+/* Calendar cell */
+.calendar-cell {
+  width: calc(100% / 7);
+  height: calc(100% / 7);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  border-radius: var(--radius-sm, 6px);
+  transition: background-color 0.2s ease;
+  outline: none;
+}
+
+.calendar-cell:focus-visible {
+  outline: 2px solid var(--accent-main);
+  outline-offset: 2px;
+}
+
+.calendar-cell:hover {
+  background: var(--glass-bg-subtle);
+}
+
+.calendar-cell.calendar-cell-focused {
+  outline: 2px solid var(--accent-main);
+  outline-offset: 2px;
+  background: var(--glass-bg);
+}
+
+.calendar-cell.calendar-cell-today {
+  font-weight: 600;
+}
+
+/* Empty cells */
+.calendar-cell-empty {
+  width: calc(100% / 7);
+  height: calc(100% / 7);
+  background: transparent;
+}
+
+/* Legend */
+.slot-availability-legend {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--glass-bg-subtle);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+}
+
+.slot-availability-legend p {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.slot-availability-legend dl {
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.slot-availability-legend dt {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.slot-availability-legend dd {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* List view */
+.slot-availability-list {
+  margin-top: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg-subtle);
+}
+
+.slot-availability-list h4 {
+  margin: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.slot-availability-list dl {
+  margin: 0 1rem 1rem;
+}
+
+.slot-availability-list dt {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.slot-availability-list dd {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* Footer */
+slot-availability-heatmap footer p {
+  margin: 0.25rem 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .calendar-cell {
+    transition: background-color 0s ease !important;
+  }
+  .slot-availability-heatmap footer p {
+    transition: none !important;
+  }
+}

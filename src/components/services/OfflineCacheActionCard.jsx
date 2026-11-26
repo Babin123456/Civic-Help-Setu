@@ -1,30 +1,25 @@
-import { useState, useEffect } from 'react';
-import { WifiOff, CheckCircle2, DownloadCloud, Clock, ShieldCheck, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { WifiOff, CheckCircle2, DownloadCloud, Trash2 } from 'lucide-react';
 import {
   isServiceCachedOffline,
   toggleServiceOffline,
-  getCachedService,
-  getOfflineSnapshotStats
+  getCachedService
 } from '../../services/offlineCacheService';
 
 export default function OfflineCacheActionCard({ service }) {
   if (!service || !service.id) return null;
 
+  return <ServiceCacheCard key={service.id} service={service} />;
+}
+
+function ServiceCacheCard({ service }) {
   const [isCached, setIsCached] = useState(() => isServiceCachedOffline(service.id));
   const [cachedDetails, setCachedDetails] = useState(() => getCachedService(service.id));
-  const [stats, setStats] = useState(() => getOfflineSnapshotStats());
-
-  useEffect(() => {
-    setIsCached(isServiceCachedOffline(service.id));
-    setCachedDetails(getCachedService(service.id));
-    setStats(getOfflineSnapshotStats());
-  }, [service.id]);
 
   const handleToggle = () => {
     const result = toggleServiceOffline(service);
     setIsCached(result.cached);
     setCachedDetails(getCachedService(service.id));
-    setStats(getOfflineSnapshotStats());
   };
 
   const formattedCachedTime = cachedDetails?.cachedAt
