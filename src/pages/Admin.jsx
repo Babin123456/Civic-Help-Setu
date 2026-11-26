@@ -1945,7 +1945,6 @@ const Admin = () => {
             {/* Import Console Tab */}
             {activeTab === 'imports' && <ImportConsole />}
           </div>
-        </div>
 
         {/* Modals */}
         <>
