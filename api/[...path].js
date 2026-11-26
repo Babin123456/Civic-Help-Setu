@@ -109,6 +109,7 @@ import { SUPPORTED_VERSIONS, DEFAULT_VERSION } from "./_lib/versioning/versionCo
 import { createIdempotencyLayer, resolveIdempotencyConfig } from "./_lib/idempotencyMiddleware.js";
 import { createCacheMiddleware, getCacheSystem } from "./_lib/cacheMiddleware.js";
 import { createCacheFeatureFlagEngine } from "../src/services/distributedCache/index.js";
+import { createDefaultBackpressureMiddleware } from "./_lib/backpressureMiddleware.js";
 
 
 const baseHandlers = {
@@ -317,6 +318,7 @@ export function createApiDispatcher({
   idempotencyLayer = createIdempotencyLayer(resolveIdempotencyConfig()),
   extraHandlers = {},
   gatewayMiddleware = createDefaultGatewayMiddleware(),
+  backpressureMiddleware = createDefaultBackpressureMiddleware(),
 } = {}) {
   const openApiHandler = async (req, res) => {
     const rawRoute = getRoute(req) || "";
@@ -375,6 +377,37 @@ export function createApiDispatcher({
         };
 
         Promise.resolve(gatewayMiddleware(req, res, done))
+          .then(() => {
+            if (!settled) {
+              settled = true;
+              resolve();
+            }
+          })
+          .catch((err) => {
+            if (!settled) {
+              settled = true;
+              reject(err);
+            }
+          });
+      }).catch(() => {
+        return;
+      });
+
+      if (res.writableEnded) return;
+    }
+
+    // Backpressure middleware (after gateway, before route handler)
+    if (backpressureMiddleware) {
+      await new Promise((resolve, reject) => {
+        let settled = false;
+        const done = (err) => {
+          if (settled) return;
+          settled = true;
+          if (err) reject(err);
+          else resolve();
+        };
+
+        Promise.resolve(backpressureMiddleware(req, res, done))
           .then(() => {
             if (!settled) {
               settled = true;
