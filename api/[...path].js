@@ -84,6 +84,9 @@ import cacheManagement from "./_lib/handlers/cache-management.js";
 import { withRequestSecurity } from "./_lib/requestSecurity.js";
 import { createMeshReadinessHandler } from "./_lib/handlers/mesh-readiness.js";
 import { createMeshReadinessLayer } from "./_lib/mesh/middleware.js";
+import { createDefaultGatewayMiddleware, getGatewayHealth, getGatewayMetrics } from "./_lib/gateway/gatewayMiddleware.js";
+import { getDefaultRegistry as getContractRegistry } from "./_lib/versioning/contractRegistry.js";
+import { SUPPORTED_VERSIONS, DEFAULT_VERSION } from "./_lib/versioning/versionConfig.js";
 import { createIdempotencyLayer, resolveIdempotencyConfig } from "./_lib/idempotencyMiddleware.js";
 import { createCacheMiddleware, getCacheSystem } from "./_lib/cacheMiddleware.js";
 import { createCacheFeatureFlagEngine } from "../src/services/distributedCache/index.js";
@@ -276,22 +279,90 @@ export function createApiDispatcher({
   meshLayer = createMeshReadinessLayer(),
   idempotencyLayer = createIdempotencyLayer(resolveIdempotencyConfig()),
   extraHandlers = {},
+  gatewayMiddleware = createDefaultGatewayMiddleware(),
 } = {}) {
+  const openApiHandler = async (req, res) => {
+    const rawRoute = getRoute(req) || "";
+    const routeParts = rawRoute.replace(/^(v\d+)\//, "").split("/");
+    const pathVersion = routeParts.length > 1 && routeParts[0] === "openapi" ? routeParts[1] : null;
+    const requestedVersion = req.query?.version || pathVersion || req.apiVersion || DEFAULT_VERSION;
+
+    if (!SUPPORTED_VERSIONS.includes(requestedVersion)) {
+      return res.status(400).json({
+        error: "unsupported_version",
+        code: "UNSUPPORTED_VERSION",
+        message: `Version ${requestedVersion} is not supported. Supported versions: ${SUPPORTED_VERSIONS.join(", ")}`,
+        supportedVersions: SUPPORTED_VERSIONS,
+      });
+    }
+
+    const registry = getContractRegistry();
+    const contract = await registry.getContract(requestedVersion);
+
+    if (req.headers?.["if-none-match"] && contract.etag && req.headers["if-none-match"] === contract.etag) {
+      return res.status(304).end();
+    }
+
+    res.setHeader("Content-Type", "application/json");
+    if (contract.etag) {
+      res.setHeader("ETag", contract.etag);
+    }
+    res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
+    return res.status(200).json(contract.spec);
+  };
+
   const handlers = {
     ...baseHandlers,
     "mesh-readiness": createMeshReadinessHandler({ meshLayer }),
+    "gateway-health": async (req, res) => res.json(getGatewayHealth()),
+    "gateway-metrics": async (req, res) => res.json(getGatewayMetrics()),
+    "openapi": openApiHandler,
+    "openapi/v1": openApiHandler,
+    "openapi/v2": openApiHandler,
     ...extraHandlers,
   };
 
   return async function handler(req, res) {
-    const route = getRoute(req);
+    const rawRoute = getRoute(req);
+    const versionPrefixMatch = rawRoute.match(/^(v\d+)\/(.*)$/);
+    const targetRoute = versionPrefixMatch ? versionPrefixMatch[2] : rawRoute;
+
+    if (gatewayMiddleware) {
+      await new Promise((resolve, reject) => {
+        let settled = false;
+        const done = (err) => {
+          if (settled) return;
+          settled = true;
+          if (err) reject(err);
+          else resolve();
+        };
+
+        Promise.resolve(gatewayMiddleware(req, res, done))
+          .then(() => {
+            if (!settled) {
+              settled = true;
+              resolve();
+            }
+          })
+          .catch((err) => {
+            if (!settled) {
+              settled = true;
+              reject(err);
+            }
+          });
+      }).catch(() => {
+        return;
+      });
+
+      if (res.writableEnded) return;
+    }
 
     const routeHandler =
-      graphRoutes[route] && req.method === "GET"
-        ? (r, s) => invokeGraphHandler(r, s, graphRoutes[route])
-        : graphPostRoutes[route] && req.method === "POST"
-          ? (r, s) => invokeGraphHandler(r, s, graphPostRoutes[route])
-          : handlers[route];
+      (graphRoutes[rawRoute] || graphRoutes[targetRoute]) && req.method === "GET"
+        ? (r, s) => invokeGraphHandler(r, s, graphRoutes[rawRoute] || graphRoutes[targetRoute])
+        : (graphPostRoutes[rawRoute] || graphPostRoutes[targetRoute]) && req.method === "POST"
+          ? (r, s) => invokeGraphHandler(r, s, graphPostRoutes[rawRoute] || graphPostRoutes[targetRoute])
+          : handlers[rawRoute] || handlers[targetRoute];
 
     if (!routeHandler) {
       return res.status(404).json({ error: "API route not found" });
@@ -309,11 +380,12 @@ export function createApiDispatcher({
         });
       });
 
-      const wrappedHandler = (r, s) => idempotencyLayer.execute(r, s, route, routeHandler);
-      const result = await meshLayer.executeRoute(req, res, route, wrappedHandler);
+      const effectiveRoute = targetRoute || rawRoute;
+      const wrappedHandler = (r, s) => idempotencyLayer.execute(r, s, effectiveRoute, routeHandler);
+      const result = await meshLayer.executeRoute(req, res, effectiveRoute, wrappedHandler);
       return normalizeLegacyResult(result, res);
     } catch (error) {
-      console.error(`API dispatcher error for "${route}":`, error);
+      console.error(`API dispatcher error for "${targetRoute}":`, error);
       if (!res.writableEnded) {
         return res.status(500).json({ error: "Internal Server Error" });
       }
