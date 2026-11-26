@@ -118,6 +118,50 @@ export const v2Spec = {
         },
       },
     },
+    '/civic-agent-eval': {
+      get: {
+        operationId: 'getCivicAgentEvalHealthV2',
+        summary: 'Retrieve civic agent evaluation harness schema version and observability status',
+        responses: {
+          '200': { description: 'Evaluation harness schema and observability metadata' },
+        },
+      },
+    },
+    '/civic-agent-eval/runs': {
+      get: {
+        operationId: 'listCivicAgentEvalRunsV2',
+        summary: 'List redacted civic agent evaluation runs',
+        parameters: [
+          { name: 'targetId', in: 'query', required: false, schema: { type: 'string' } },
+          { name: 'limit', in: 'query', required: false, schema: { type: 'integer', minimum: 1, maximum: 100 } },
+        ],
+        responses: {
+          '200': { description: 'Redacted evaluation run summaries' },
+          '400': { $ref: '#/components/schemas/ProblemDetails' },
+        },
+      },
+      post: {
+        operationId: 'createCivicAgentEvalRunV2',
+        summary: 'Execute scenario-based evaluation suite (operator-only)',
+        responses: {
+          '201': { description: 'Completed evaluation run with redacted traces and gate status' },
+          '400': { $ref: '#/components/schemas/ProblemDetails' },
+          '401': { $ref: '#/components/schemas/ProblemDetails' },
+          '403': { $ref: '#/components/schemas/ProblemDetails' },
+        },
+      },
+    },
+    '/civic-agent-eval/compare': {
+      post: {
+        operationId: 'compareCivicAgentEvalRunsV2',
+        summary: 'Compare baseline and candidate evaluation runs against release thresholds (operator-only)',
+        responses: {
+          '200': { description: 'Regression comparison report and gate decision' },
+          '400': { $ref: '#/components/schemas/ProblemDetails' },
+          '404': { $ref: '#/components/schemas/ProblemDetails' },
+        },
+      },
+    },
   },
   components: {
     schemas: {
