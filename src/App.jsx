@@ -20,6 +20,9 @@ import RouteErrorFallback from './components/common/RouteErrorFallback';
 import RouteErrorBoundary from './components/common/RouteErrorBoundary';
 import { ServiceCardSkeletonGrid } from './components/ServiceCardSkeleton';
 
+import VerifiableEvidenceBundleWorkspace from './pages/VerifiableEvidenceBundleWorkspace';
+
+
 import ZkAttributeVerifierView from './pages/ZkAttributeVerifierView';
 import FederatedQueryExplorer from './pages/FederatedQueryExplorer';
 import WardAnalyticsDashboard from './pages/WardAnalyticsDashboard';
@@ -135,7 +138,9 @@ const Services = lazy(() => import('./pages/Services'));
 const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
 const CostCarbonGovernorWorkspacePage = lazy(() => import('./pages/CostCarbonGovernorWorkspace'));
 const PolicyEngineWorkspacePage = lazy(() => import('./pages/PolicyEngineWorkspace'));
+const ContractTestMarketplaceWorkspacePage = lazy(() => import('./pages/ContractTestMarketplaceWorkspace'));
 const FreshnessPredictionWorkspacePage = lazy(() => import('./pages/FreshnessPredictionWorkspace'));
+const RecommendationExperimentationWorkspacePage = lazy(() => import('./pages/RecommendationExperimentationWorkspace'));
 
 const ServicesFallback = () => (
   <div className="section">
@@ -158,9 +163,8 @@ function AppRoot() {
                     <OfflineBanner />
                     <SkipToContent />
                     <Navbar />
-
-                  <main id="main-content" style={{ flex: 1, minWidth: 0, width: '100%' }} tabIndex="-1">
-                      <RouteErrorBoundary>
+                    <main id="main-content" style={{ flex: 1, minWidth: 0, width: '100%' }} tabIndex="-1">
+<RouteErrorBoundary>
                         <Suspense fallback={<div className="section" role="status" aria-live="polite"><div className="container">Loading page…</div></div>}>
                           <Routes>
                             <Route path="/" element={<Home />} />
@@ -436,8 +440,12 @@ function AppRoot() {
                             {/* Civic Agent Workflow Policy-as-Code Engine (public evaluation UI) */}
                             <Route path="/policy-engine" element={<PolicyEngineWorkspacePage />} />
 
+                            {/* Civic Service Integration Contract Test Marketplace (maintainer QA UI) */}
+                            <Route path="/contract-test-marketplace" element={<ContractTestMarketplaceWorkspacePage />} />
                             {/* Civic Information Freshness Prediction & Review Prioritization (maintainer triage UI) */}
                             <Route path="/freshness-prediction" element={<FreshnessPredictionWorkspacePage />} />
+                            {/* Civic Service Recommendation Experimentation Platform with Guardrails (#1193) */}
+                            <Route path="/recommendation-experimentation" element={<RecommendationExperimentationWorkspacePage />} />
 
                             <Route path="/tenants" element={<TenantAdministrationWorkspace />} />
                             <Route path="/tenants/:tenantId" element={<TenantAdministrationWorkspace />} />
@@ -456,8 +464,6 @@ function AppRoot() {
                 </ConfirmationDialogProvider>
               </NetworkProvider>
             </LanguageProvider>
-
-
           </AuthProvider>
         </ToastProvider>
       </AccessibilityProvider>

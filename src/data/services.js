@@ -1294,6 +1294,85 @@ export const MOCK_SERVICES = [
     lastVerified: '2026-11-15'
   },
   {
+
+    id: 'verifiable-evidence-bundles',
+    name: 'Verifiable Evidence Bundles for Civic Complaints',
+    category: 'Grievance Redressal & Legal Evidence',
+    icon: 'Shield',
+    shortDescription: 'Cryptographically protected, append-only evidence packaging for municipal grievances, RTI escalations, and administrative complaints.',
+    detailedDescription: 'Enables citizens to collect photographs, fee challans, postal receipts, and departmental correspondence over time into an append-only SHA-256 hash-chained ledger. Distinguishes unverified citizen assertions from independently verified government tokens and prevents file tampering, clock skew, and chain disruption.',
+    department: 'Public Grievance Redressal / Administrative Authorities',
+    type: 'Online / Offline Client Verification',
+    difficulty: 'Easy',
+    feeType: 'free',
+    speedDays: 1,
+    popularityScore: 95,
+    jurisdiction: {
+      level: 'national',
+      states: [],
+      districts: [],
+      localBody: ''
+    },
+    tags: ['Grievance', 'Evidence', 'CPGRAMS', 'RTI', 'Tamper-Proof', 'Provenance', 'Cryptography'],
+    processingTime: 'Instant / Client-Side Offline Verification',
+    fees: 'Free & Open Source (0 INR)',
+    eligibility: {
+      minAge: 0,
+      description: 'Any citizen, community group, or legal aid clinic assembling documentary proof for public service complaints.'
+    },
+    documents: {
+      'Incident Photographs or Video Captures': { type: 'optional' },
+      'Statutory Fee Payment Receipt / Challan Slip': { type: 'optional' },
+      'Official Acknowledgement Slip / Token Number': { type: 'optional' },
+      'Departmental Notice or Written Correspondence': { type: 'optional' }
+    },
+    steps: [
+      {
+        title: 'Create Evidence Bundle Manifest',
+        description: 'Initialize a new complaint ledger with title, target department, and official reference numbers.'
+      },
+      {
+        title: 'Append Evidence Items with Provenance Tiers',
+        description: 'Upload files and tag them as Citizen Assertion or Independently Verified Record with factual notes.'
+      },
+      {
+        title: 'Cryptographic Chain & Merkle Root Sealing',
+        description: 'Client runtime automatically hashes each payload, chains to the previous record, and seals the Merkle tree.'
+      },
+      {
+        title: 'Export Portable Archive & Dossier',
+        description: 'Generate portable verifiable JSON packages or Markdown complaint dossiers with statutory disclaimers.'
+      },
+      {
+        title: 'Lodge with Official Authorities',
+        description: 'Attach the verified bundle to CPGRAMS (pgportal.gov.in), State Jan Sunwai, or local municipal counters.'
+      }
+    ],
+    officialSources: [
+      {
+        name: 'CPGRAMS — Centralized Public Grievance Redress and Monitoring System',
+        url: 'https://pgportal.gov.in',
+        verified: true,
+        lastVerified: '2026-11-25'
+      },
+      {
+        name: 'RTI Online Portal — Government of India',
+        url: 'https://rtionline.gov.in',
+        verified: true,
+        lastVerified: '2026-11-25'
+      }
+    ],
+    warnings: [
+      'Civic Help Setu Verifiable Evidence Bundles establish mathematical data integrity and chronological provenance for citizen records.',
+      'This tool does NOT provide sovereign government attestation, legal advice, or guaranteed grievance resolution.',
+      'Citizen assertions remain subjective user claims until independently verified by statutory authorities.'
+    ],
+    contacts: [
+      { label: 'CPGRAMS Citizen Redressal Helpline', phone: '1800-11-4000', url: 'https://pgportal.gov.in' }
+    ],
+    lastVerified: '2026-11-25'
+  },
+  {
     id: 'public-toilet-directory',
     jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
     name: 'Public Toilet Availability, Accessibility & Maintenance Status',
@@ -1726,6 +1805,7 @@ export const MOCK_SERVICES = [
       { label: 'National Legal Services Authority (NALSA)', phone: '15100', url: 'https://nalsa.gov.in' }
     ],
     lastVerified: '2026-11-20'
+
   }
 ];
 
