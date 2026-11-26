@@ -1,19 +1,4 @@
-/**
- * src/services/wardIssueHeatmapService.js
- * Service layer for Anonymized Ward-Level Civic Issue Heatmap & Trend Explorer (#763).
- *
- * Implements:
- *  - Privacy-preserving aggregation with k-anonymity small-cell suppression (k >= 5)
- *  - Differential privacy bounded perturbation and public fields whitelisting
- *  - Time-windowed count and trend velocity calculations (rising, falling, stable)
- *  - Spatial join to ward geometries and category normalization
- *  - Explainable versioned intervention recommendations with human-in-the-loop controls
- *  - Domain state validation and audit event recording
- *  - Strict role-based jurisdiction access control (public vs operator vs admin)
- */
-
 import {
-  SCHEMA_VERSION,
   MUNICIPAL_WARDS,
   ISSUE_CATEGORIES,
   TIME_WINDOWS,
@@ -700,4 +685,5 @@ export const wardIssueHeatmapService = {
     }
     return JSON.stringify(data, null, 2);
   },
+
 };

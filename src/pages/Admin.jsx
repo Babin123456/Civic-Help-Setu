@@ -29,7 +29,7 @@ import {
   rejectServiceSubmission,
 } from '../services/adminService';
 
-import * as importBatchService from '../services/importBatchService';
+import importBatchService from '../services/importBatchService';
 import AdminStatsGrid from '../components/admin/AdminStatsGrid';
 import ServiceModal from '../components/admin/ServiceModal';
 import ReportResolutionModal from '../components/admin/ReportResolutionModal';
@@ -99,8 +99,12 @@ import RuleConflictInspectorModal from '../components/admin/RuleConflictInspecto
 import DuplicateServiceDetectorPanel from '../components/admin/DuplicateServiceDetectorPanel';
 import CatalogueConflictDetectorPanel from '../components/admin/CatalogueConflictDetectorPanel';
 import CivicWorksModeratorPanel from '../components/civicWorks/CivicWorksModeratorPanel';
+
+import WardIssueHeatmap from '../components/analytics/WardIssueHeatmap';
+
 import AccessibilityInspectorPanel from '../components/AccessibilityInspectorPanel';
 import MultiRegionHealthPanel from '../components/admin/MultiRegionHealthPanel';
+
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -764,11 +768,14 @@ const Admin = () => {
               { id: 'duplicates', label: 'Duplicate Detection', badge: null },
   {
     id: 'imports',
-    label: `Imports (${stats?.total || 0})`,
+    label: `Imports (${importBatchService.getStatistics().total})`,
     badge: null,
   },
               { id: 'conflicts', label: 'Requirement Conflicts', badge: null },
               { id: 'civic-works', label: 'Ward Public Works', badge: null },
+
+              { id: 'ward-analytics', label: 'Ward Civic Analytics', badge: null },
+
               { id: 'pedestrian-barriers', label: 'Pedestrian Route Barriers', badge: null },
               { id: 'public-projects', label: 'Public Project Timeline', badge: null },
               { id: 'provenance-reviews', label: 'Knowledge Provenance', badge: null },
@@ -776,6 +783,7 @@ const Admin = () => {
               { id: 'chaos-resilience', label: 'Chaos & Resilience Suite', badge: null },
               { id: 'counter-demand', label: 'Counter Demand & Staffing', badge: null },
               { id: 'multi-region', label: 'Multi-Region Topology & Lag', badge: null },
+
               { id: 'audit', label: 'Audit Trail Logs', badge: null },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
@@ -1825,6 +1833,14 @@ const Admin = () => {
               </div>
             )}
 
+
+            {/* Differentially Private Ward Civic Analytics Tab */}
+            {activeTab === 'ward-analytics' && (
+              <div style={{ backgroundColor: '#ffffff', padding: '1.5rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
+                <WardIssueHeatmap clientId="admin-analytics-session" />
+              </div>
+            )}
+
             {/* Pedestrian Route Barrier Moderation Tab */}
             {activeTab === 'pedestrian-barriers' && (
               <div>
@@ -1903,6 +1919,7 @@ const Admin = () => {
             {activeTab === 'multi-region' && (
               <div>
                 <MultiRegionHealthPanel />
+
               </div>
             )}
 
@@ -1914,13 +1931,12 @@ const Admin = () => {
             )}
 
             {/* Import Console Tab */}
-            {activeTab === 'imports' && (
-              <ImportConsole />
-            )}
+            {activeTab === 'imports' && <ImportConsole />}
           </div>
         </div>
 
         {/* Modals */}
+        <>
         <ConfirmationDialog
           isOpen={Boolean(pendingAction)}
           title={pendingAction?.dialog.title}
@@ -1979,6 +1995,7 @@ const Admin = () => {
           onApprove={handleApproveSubmission}
           onReject={handleRejectSubmission}
         />
+        </>
       </div>
     </div>
   );

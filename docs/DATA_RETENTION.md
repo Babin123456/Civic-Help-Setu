@@ -72,6 +72,9 @@ Retention for all of these: until deleted by the person (no automatic expiry).
 | `civic_journey_progress_<journeyId>` (one per journey) | `journeyDependencyEngine.js` | Completed tasks of a journey plan | Drafts and in-progress work |
 | `civic_accessibility_visit_plans` | `accessibilityPlannerService.js` | Optional visit preferences saved only after explicit consent; kept on this device, not cloud-synced or used in analytics | Drafts and in-progress work |
 | `civic_grievance_evidence_drafts` | `grievanceEvidenceService.js` | Private user-controlled grievance preparation drafts and timelines | Drafts and in-progress work |
+| `civic_evidence_bundles_v1` | `verifiableEvidenceBundleStorage.js` | Append-only verifiable evidence bundle manifests with Merkle roots and hash chains | Drafts and in-progress work |
+| `civic_evidence_bundle_files_v1` | `verifiableEvidenceBundleStorage.js` | Local raw file payloads and byte representations for evidence items | Drafts and in-progress work |
+| `civic_evidence_bundle_audits_v1` | `verifiableEvidenceBundleStorage.js` | Verification audit history and cryptographic check logs | Drafts and in-progress work |
 | `civic_grievance_drafts_v1` | `civicGrievanceDraftingService.js` | User-controlled formal civic grievance drafts and facts | Drafts and in-progress work |
 | `civic_life_event_journeys` | `lifeEventNavigatorService.js` | Saved life-event roadmap progress, hidden tasks and regional selections | Drafts and in-progress work |
 | `civicbridge_eligibility_assessments` | `assessmentStorage.js` | Answers and results of eligibility checks | Drafts and in-progress work |
@@ -263,3 +266,10 @@ The **Clear my data** screen says this next to the button:
 - `CONSENT_CATEGORIES[*].retentionDays` (14, 30, 60, 90, 365) is shown in the Privacy Center but nothing in the code enforces it. Real expiry would need a timestamp on every record and a cleanup on load. Not done here.
 - Records are not encrypted in `localStorage`. The wording on the Privacy page about encrypted web storage does not match the code.
 - `civicbridge_vault_pin` is reserved and nothing writes it, so the vault has no lock today.
+
+## Federated Civic Data Query Layer (#1162)
+
+- **Zero Client-Side Persistence**: Federated queries execute across department adapters and return aggregate metrics only. Neither query inputs nor analytical result sets are ever stored in `localStorage` or `sessionStorage`.
+- **In-Memory Lifecycle**: Query responses exist strictly in React memory state and are discarded upon navigating away or closing the browser tab.
+- **Differential Privacy & Anonymity**: Cohorts with fewer than 10 events ($k < 10$) are automatically suppressed before being displayed to prevent inference or re-identification.
+

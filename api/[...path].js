@@ -1,4 +1,6 @@
+/* global process */
 import { withApiErrorContract } from './_lib/errorContract.js';
+import fairScheduler from "./_lib/fairSchedulerRoute.js";
 /**
  * Single Vercel serverless entry point for all Civic Help Setu API routes.
  * Keeping handlers under api/_lib prevents Vercel from deploying each file
@@ -10,6 +12,7 @@ import { withApiErrorContract } from './_lib/errorContract.js';
  *   APP_ORIGIN, APP_ALLOWED_ORIGINS, APP_CORS_ALLOW_CREDENTIALS,
  *   CSRF_COOKIE_NAME, CSRF_HEADER_NAME, APP_REQUIRE_ORIGIN, APP_ALLOW_MISSING_ORIGIN
  */
+import bottleneckFeedback from "./_lib/handlers/bottleneck-feedback.js";
 import addressChange from "./_lib/handlers/address-change-corrections.js";
 import businessLicence from "./_lib/handlers/business-licence-feedback.js";
 import catalogueVisualQa from "./_lib/handlers/catalogue-visual-qa.js";
@@ -31,8 +34,15 @@ import tenderCorrections from "./_lib/handlers/tender-corrections.js";
 import transitConcessions from "./_lib/handlers/transit-concessions.js";
 import openContractingAnalytics from "./_lib/handlers/open-contracting-analytics.js";
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
+import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+
+import verifiableEvidenceBundles from "./_lib/handlers/verifiable-evidence-bundles.js";
+
+import zkAttributeProofVerify from "./_lib/handlers/zk-attribute-proof-verify.js";
+import federatedCivicQuery from "./_lib/handlers/federated-civic-query.js";
+
 
 import civicDataCleanRoom from "./_lib/handlers/civic-data-clean-room.js";
 
@@ -74,13 +84,21 @@ import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
 import multiRegionStatus from "./_lib/handlers/multi-region-status.js";
 import caseCollaboration from "./_lib/handlers/case-collaboration.js";
 import syntheticDatasets from "./_lib/syntheticDatasets.js";
+import cacheManagement from "./_lib/handlers/cache-management.js";
 import { withRequestSecurity } from "./_lib/requestSecurity.js";
 import { createMeshReadinessHandler } from "./_lib/handlers/mesh-readiness.js";
 import { createMeshReadinessLayer } from "./_lib/mesh/middleware.js";
+import { createDefaultGatewayMiddleware, getGatewayHealth, getGatewayMetrics } from "./_lib/gateway/gatewayMiddleware.js";
+import { getDefaultRegistry as getContractRegistry } from "./_lib/versioning/contractRegistry.js";
+import { SUPPORTED_VERSIONS, DEFAULT_VERSION } from "./_lib/versioning/versionConfig.js";
 import { createIdempotencyLayer, resolveIdempotencyConfig } from "./_lib/idempotencyMiddleware.js";
+import { createCacheMiddleware, getCacheSystem } from "./_lib/cacheMiddleware.js";
+import { createCacheFeatureFlagEngine } from "../src/services/distributedCache/index.js";
 
 
 const baseHandlers = {
+  "bottleneck-feedback": bottleneckFeedback,
+  "fair-scheduler": fairScheduler,
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
   "business-licence-feedback": businessLicence,
@@ -96,6 +114,7 @@ const baseHandlers = {
   "crematorium-corrections": crematorium,
   "email/preferences": emailPreferences,
   "email/verify": emailVerify,
+  "federated-civic-query": federatedCivicQuery,
   "fire-compliance-feedback": fireCompliance,
   "flood-incident-reports": floodIncidentReports,
   "heat-relief-observations": heatReliefObservations,
@@ -112,11 +131,22 @@ const baseHandlers = {
   "send-email": sendEmail,
   "share-by-email": shareByEmail,
   "tender-corrections": tenderCorrections,
+
+  "verifiable-evidence-bundles": verifiableEvidenceBundles,
+
+
+  "ward-analytics": wardAnalytics,
+
   "transit-concessions": transitConcessions,
+
+
   "ward-budget-proposals": wardBudgetProposals,
   "water-quality-register": waterQualityRegister,
   "ward-issue-heatmap": wardIssueHeatmap,
   "water-tanker-reports": waterTankerReports,
+
+  "zk-attribute-proof-verify": zkAttributeProofVerify,
+
   "school-zone-audits": schoolZoneAudits,
   "public-projects": publicProjects,
   "tenant-administration": tenantAdministration,
@@ -139,6 +169,13 @@ const baseHandlers = {
   "multi-region-metrics": multiRegionStatus,
   "case-collaboration": caseCollaboration,
   "synthetic-datasets": syntheticDatasets,
+  "cache": cacheManagement,
+  "cache/status": cacheManagement,
+  "cache/metrics": cacheManagement,
+  "cache/invalidate": cacheManagement,
+  "cache/flush": cacheManagement,
+  "cache/health": cacheManagement,
+  "cache-management": cacheManagement,
 };
 
 // Adapt Fetch-style graph handlers to Vercel's Node request/response API.
@@ -177,6 +214,7 @@ const graphPostRoutes = {
   "graph/review": reviewPOST,
   "graph/review/approve": approvePOST,
   "graph/review/reject": rejectPOST,
+
 };
 
 function getRoute(req) {
@@ -207,37 +245,155 @@ function normalizeLegacyResult(result, res) {
   return result;
 }
 
+// Cache system singleton for the dispatcher
+let cacheSystemPromise = null;
+let cacheMiddleware = null;
+
+/**
+ * Initialize the cache system and middleware.
+ */
+async function initializeCacheSystem() {
+  if (cacheSystemPromise) return cacheSystemPromise;
+
+  cacheSystemPromise = (async () => {
+    // Create feature flag engine for cache rollout
+    const ffEngine = createCacheFeatureFlagEngine({
+      initialFlags: {
+        'civic.cache.distributed': { defaultEnabled: true, rolloutPercentage: 100, killSwitch: false, exposure: 'server' },
+        'civic.cache.invalidation': { defaultEnabled: true, rolloutPercentage: 100, killSwitch: false, exposure: 'server' },
+      },
+    });
+
+    const cacheSystem = await getCacheSystem({
+      featureFlagEngine: ffEngine,
+      featureFlagContext: {}, // Will be populated per-request
+      onMetric: (metric) => {
+        // In production, send to metrics system
+        if (process.env.NODE_ENV !== 'test') {
+          console.debug('[Cache Metric]', JSON.stringify(metric));
+        }
+      },
+      onError: (err) => console.error('[Cache System]', err),
+    });
+
+    cacheMiddleware = createCacheMiddleware(cacheSystem);
+    return cacheSystem;
+  })();
+
+  return cacheSystemPromise;
+}
+
 export function createApiDispatcher({
   meshLayer = createMeshReadinessLayer(),
   idempotencyLayer = createIdempotencyLayer(resolveIdempotencyConfig()),
   extraHandlers = {},
+  gatewayMiddleware = createDefaultGatewayMiddleware(),
 } = {}) {
+  const openApiHandler = async (req, res) => {
+    const rawRoute = getRoute(req) || "";
+    const routeParts = rawRoute.replace(/^(v\d+)\//, "").split("/");
+    const pathVersion = routeParts.length > 1 && routeParts[0] === "openapi" ? routeParts[1] : null;
+    const requestedVersion = req.query?.version || pathVersion || req.apiVersion || DEFAULT_VERSION;
+
+    if (!SUPPORTED_VERSIONS.includes(requestedVersion)) {
+      return res.status(400).json({
+        error: "unsupported_version",
+        code: "UNSUPPORTED_VERSION",
+        message: `Version ${requestedVersion} is not supported. Supported versions: ${SUPPORTED_VERSIONS.join(", ")}`,
+        supportedVersions: SUPPORTED_VERSIONS,
+      });
+    }
+
+    const registry = getContractRegistry();
+    const contract = await registry.getContract(requestedVersion);
+
+    if (req.headers?.["if-none-match"] && contract.etag && req.headers["if-none-match"] === contract.etag) {
+      return res.status(304).end();
+    }
+
+    res.setHeader("Content-Type", "application/json");
+    if (contract.etag) {
+      res.setHeader("ETag", contract.etag);
+    }
+    res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
+    return res.status(200).json(contract.spec);
+  };
+
   const handlers = {
     ...baseHandlers,
     "mesh-readiness": createMeshReadinessHandler({ meshLayer }),
+    "gateway-health": async (req, res) => res.json(getGatewayHealth()),
+    "gateway-metrics": async (req, res) => res.json(getGatewayMetrics()),
+    "openapi": openApiHandler,
+    "openapi/v1": openApiHandler,
+    "openapi/v2": openApiHandler,
     ...extraHandlers,
   };
 
   return async function handler(req, res) {
-    const route = getRoute(req);
+    const rawRoute = getRoute(req);
+    const versionPrefixMatch = rawRoute.match(/^(v\d+)\/(.*)$/);
+    const targetRoute = versionPrefixMatch ? versionPrefixMatch[2] : rawRoute;
+
+    if (gatewayMiddleware) {
+      await new Promise((resolve, reject) => {
+        let settled = false;
+        const done = (err) => {
+          if (settled) return;
+          settled = true;
+          if (err) reject(err);
+          else resolve();
+        };
+
+        Promise.resolve(gatewayMiddleware(req, res, done))
+          .then(() => {
+            if (!settled) {
+              settled = true;
+              resolve();
+            }
+          })
+          .catch((err) => {
+            if (!settled) {
+              settled = true;
+              reject(err);
+            }
+          });
+      }).catch(() => {
+        return;
+      });
+
+      if (res.writableEnded) return;
+    }
 
     const routeHandler =
-      graphRoutes[route] && req.method === "GET"
-        ? (r, s) => invokeGraphHandler(r, s, graphRoutes[route])
-        : graphPostRoutes[route] && req.method === "POST"
-          ? (r, s) => invokeGraphHandler(r, s, graphPostRoutes[route])
-          : handlers[route];
+      (graphRoutes[rawRoute] || graphRoutes[targetRoute]) && req.method === "GET"
+        ? (r, s) => invokeGraphHandler(r, s, graphRoutes[rawRoute] || graphRoutes[targetRoute])
+        : (graphPostRoutes[rawRoute] || graphPostRoutes[targetRoute]) && req.method === "POST"
+          ? (r, s) => invokeGraphHandler(r, s, graphPostRoutes[rawRoute] || graphPostRoutes[targetRoute])
+          : handlers[rawRoute] || handlers[targetRoute];
 
     if (!routeHandler) {
       return res.status(404).json({ error: "API route not found" });
     }
 
     try {
-      const wrappedHandler = (r, s) => idempotencyLayer.execute(r, s, route, routeHandler);
-      const result = await meshLayer.executeRoute(req, res, route, wrappedHandler);
+      // Initialize cache system on first request
+      await initializeCacheSystem();
+
+      // Apply cache middleware to attach cache helpers to request
+      await new Promise((resolve, reject) => {
+        cacheMiddleware(req, res, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+
+      const effectiveRoute = targetRoute || rawRoute;
+      const wrappedHandler = (r, s) => idempotencyLayer.execute(r, s, effectiveRoute, routeHandler);
+      const result = await meshLayer.executeRoute(req, res, effectiveRoute, wrappedHandler);
       return normalizeLegacyResult(result, res);
     } catch (error) {
-      console.error(`API dispatcher error for "${route}":`, error);
+      console.error(`API dispatcher error for "${targetRoute}":`, error);
       if (!res.writableEnded) {
         return res.status(500).json({ error: "Internal Server Error" });
       }

@@ -49,6 +49,7 @@ import {
   GraduationCap,
   FolderLock,
   ClipboardList,
+
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -166,6 +167,14 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
         );
       }
 
+
+      if (normalizedTarget === '/federated-data') {
+        return (
+          normalizedPath === '/federated-data' ||
+          normalizedPath === '/federated-civic-data'
+        );
+      }
+
       if (normalizedTarget === '/up-jan-sunwai') {
         return (
           normalizedPath === '/up-jan-sunwai' ||
@@ -189,6 +198,7 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
           normalizedPath === '/open-contracting' ||
           normalizedPath === '/procurement-analytics' ||
           normalizedPath.startsWith('/open-contracting/')
+
         );
       }
 
@@ -1117,12 +1127,18 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
 
               {renderNavLink({
 
+                to: '/evidence-bundles',
+                label: 'Evidence Bundles',
+
+
                 to: '/data-clean-room',
                 label: 'Data Clean Room',
+
                 icon: Shield
               })}
 
               {renderNavLink({
+
                 to: '/up-jan-sunwai',
                 label: t('nav.upJanSunwai', 'UP Jan Sunwai & Hearings'),
                 icon: Calendar
@@ -1227,6 +1243,7 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
               })}
 
               {renderNavLink({
+
                 to: '/track',
                 label: t('nav.track', 'Track Status'),
                 icon: Settings
@@ -1262,6 +1279,13 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 to: '/ward-budget',
                 label: t('nav.wardBudget', 'Ward Budget & Deliberation'),
                 icon: Users
+              })}
+
+              {renderNavLink({
+                to: '/federated-data',
+                activeTarget: '/federated-data',
+                label: t('nav.federatedData', 'Federated Civic Data'),
+                icon: Database
               })}
 
               {renderNavLink({

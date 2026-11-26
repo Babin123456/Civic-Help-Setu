@@ -5,7 +5,7 @@ import ServiceDetails from './ServiceDetails.jsx';
 import { MOCK_SERVICES } from '../data/services';
 import { LanguageProvider } from '../context/LanguageContext';
 
-vi.mock('../context/AuthContext', () => ({ useAuth: () => ({ user: null }) }));
+vi.mock('../context/AuthContext', () => ({ useAuth: () => ({ user: null }), useOptionalAuth: () => null }));
 vi.mock('../context/ToastContext', () => ({ useToast: () => ({ toast: { success: vi.fn(), error: vi.fn() } }) }));
 
 const render = (path) =>
@@ -100,6 +100,13 @@ describe('ServiceDetails', () => {
     expect(html).toContain('/surveys');
   });
 
+
+  it('renders the dedicated Verifiable Evidence Bundles entry card when viewing verifiable-evidence-bundles (#1160)', () => {
+    const html = render('/services/verifiable-evidence-bundles');
+    expect(html).toContain('Verifiable Evidence Bundles for Civic Complaints');
+    expect(html).toContain('Dedicated Verifiable Evidence Bundles &amp; Cryptographic Ledger Hub');
+    expect(html).toContain('Launch Evidence Workspace');
+
   it('renders the dedicated Public Toilet Directory entry card when viewing the public-toilet-directory service (#758)', () => {
     const html = render('/services/public-toilet-directory');
     expect(html).toContain('Public Toilet Availability, Accessibility &amp; Maintenance Status');
@@ -145,5 +152,6 @@ describe('ServiceDetails', () => {
     expect(html).toContain('Multi-Authority Jurisdiction Hand-off Map');
     expect(html).toContain(`/services/${service.id}/jurisdiction-map`);
     expect(html).toContain(`/jurisdiction-handoff?service=${service.id}`);
+
   });
 });

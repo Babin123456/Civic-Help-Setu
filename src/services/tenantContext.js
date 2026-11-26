@@ -12,7 +12,13 @@
  * - DEPARTMENT (e.g., "IN-KA-BLR-BBMP-WATER" for Water Department)
  */
 
-import { getCurrentActor, resolveActorJurisdictions } from './accessControl.js';
+import { getCurrentActor } from './accessControl.js';
+import * as accessControl from './accessControl.js';
+
+// The fallback branches below support deployments without a jurisdiction resolver.
+// A missing named export must not prevent every API route from loading first.
+const resolveActorJurisdictions = Object.hasOwn(accessControl, 'resolveActorJurisdictions')
+  ? accessControl.resolveActorJurisdictions : undefined;
 
 export const TenantLevel = Object.freeze({
   STATE: 'state',

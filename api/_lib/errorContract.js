@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { API_ERROR_VERSION, describeApiFailure, boundedRetryDelay } from '../../src/utils/civicErrorContract.js';
+import { createScrubbingLogger } from './piiScrubber.js';
 
 /** Adapt the existing Node response boundary; authorization and successful payloads stay in the handler. */
-export function withApiErrorContract(handler, { log = event => console.error(event) } = {}) {
+export function withApiErrorContract(handler, { log = createScrubbingLogger(event => console.error(event)) } = {}) {
   return async function contractedHandler(req, res) {
     const correlationId = randomUUID();
     res.setHeader('X-Correlation-ID', correlationId);
