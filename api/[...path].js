@@ -1,5 +1,6 @@
 /* global process */
 import { withApiErrorContract } from './_lib/errorContract.js';
+import fairScheduler from "./_lib/fairSchedulerRoute.js";
 /**
  * Single Vercel serverless entry point for all Civic Help Setu API routes.
  * Keeping handlers under api/_lib prevents Vercel from deploying each file
@@ -85,6 +86,7 @@ import { createCacheFeatureFlagEngine } from "../src/services/distributedCache/i
 
 
 const baseHandlers = {
+  "fair-scheduler": fairScheduler,
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
   "business-licence-feedback": businessLicence,
