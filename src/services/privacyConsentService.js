@@ -226,6 +226,10 @@ export const RETAINED_STORAGE_KEYS = [
   'civicbridge_tree_rate_limit_v1',
   'civicbridge_tree_migration_backup_v1',
   'civicbridge_trees_v1',
+  // Civic Workflow Digital Twin simulation twin and maintainer audit logs (#1157)
+  'civicbridge_digital_twin_workflows_v1',
+  'civicbridge_digital_twin_simulations_v1',
+  'civicbridge_digital_twin_audit_logs_v1',
   // Handled by purge itself: consents are reset, the audit log keeps the deletion receipt
   CONSENT_STORAGE_KEY,
   AUDIT_STORAGE_KEY,

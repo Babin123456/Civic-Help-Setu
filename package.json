@@ -12,6 +12,7 @@
     "headers:check": "node scripts/generateVercelHeaders.js --check",
     "preview": "vite preview",
     "test": "vitest run",
+    "digital-twin:eval": "vitest run src/data/digitalTwinContract.test.js src/services/civicWorkflowDigitalTwinService.test.js src/services/digitalTwinStorage.test.js src/pages/CivicWorkflowDigitalTwinWorkspace.test.jsx tests/digital-twin-simulations.test.js",
     "rules:test": "npm --prefix firebase/emulator install --no-audit --no-fund && npm --prefix firebase/emulator test"
   },
   "dependencies": {

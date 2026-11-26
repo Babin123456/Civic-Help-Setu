@@ -58,6 +58,7 @@ import {
 import StaleRecordsReviewQueue from '../components/admin/StaleRecordsReviewQueue';
 import LinkHealthPanel from '../components/admin/LinkHealthPanel';
 import ServiceDraftsPanel from '../components/admin/ServiceDraftsPanel';
+import CivicWorkflowDigitalTwinWorkspace from './CivicWorkflowDigitalTwinWorkspace';
 import { getDraftForService, listDrafts, saveDraft } from '../services/serviceDrafts';
 import CatalogueMigrationPanel from '../components/admin/CatalogueMigrationPanel';
 import CatalogueCoveragePanel from '../components/admin/CatalogueCoveragePanel';
@@ -736,6 +737,7 @@ const Admin = () => {
               { id: 'conflicts', label: 'Requirement Conflicts', badge: null },
               { id: 'civic-works', label: 'Ward Public Works', badge: null },
               { id: 'audit', label: 'Audit Trail Logs', badge: null },
+              { id: 'digital-twin', label: 'Digital Twin Simulation', badge: null },
             ].map((tab) => {
               const isActive = activeTab === tab.id;
 
@@ -1775,6 +1777,13 @@ const Admin = () => {
             {activeTab === 'audit' && (
               <div>
                 <AuditLogViewer auditLogs={auditLogs} />
+              </div>
+            )}
+
+            {/* Civic Workflow Digital Twin Simulation Tab (#1157) */}
+            {activeTab === 'digital-twin' && (
+              <div>
+                <CivicWorkflowDigitalTwinWorkspace />
               </div>
             )}
           </div>

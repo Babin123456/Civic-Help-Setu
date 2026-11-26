@@ -20,6 +20,7 @@ import tenderCorrections from "./_lib/handlers/tender-corrections.js";
 import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import digitalTwinSimulations from "./_lib/handlers/digital-twin-simulations.js";
 
 const handlers = {
   "address-change-corrections": addressChange,
@@ -27,6 +28,7 @@ const handlers = {
   "civic-surveys": civicSurveys,
   "community-facility-corrections": communityFacility,
   "crematorium-corrections": crematorium,
+  "digital-twin-simulations": digitalTwinSimulations,
   "email/preferences": emailPreferences,
   "email/verify": emailVerify,
   "fire-compliance-feedback": fireCompliance,
