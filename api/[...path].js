@@ -52,6 +52,7 @@ import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
 import temporalPolicy from "./_lib/handlers/temporal-policy.js";
 import agentReviewStudio from "./_lib/handlers/agent-review-studio.js";
+import agentApprovalInbox from "./_lib/handlers/agent-approval-inbox.js";
 import civicAgentEval from "./_lib/handlers/civic-agent-eval.js";
 
 import verifiableEvidenceBundles from "./_lib/handlers/verifiable-evidence-bundles.js";
@@ -131,6 +132,7 @@ const baseHandlers = {
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
   "agent-review-studio": agentReviewStudio,
+  "agent-approval-inbox": agentApprovalInbox,
   "civic-agent-eval": civicAgentEval,
   "business-licence-feedback": businessLicence,
 
@@ -434,6 +436,7 @@ export function createApiDispatcher({
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-eval",
+      "agent-approval-inbox",
       "civic-agent-policy",
       "civic-contract-test-marketplace",
       "civic-recommendation-experimentation",
