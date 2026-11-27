@@ -69,6 +69,7 @@ import civicDataCleanRoom from "./_lib/handlers/civic-data-clean-room.js";
 
 import floodIncidentReports from "./_lib/handlers/flood-incident-reports.js";
 import schoolZoneAudits from "./_lib/handlers/school-zone-audits.js";
+import civicDraftSync from "./_lib/handlers/civic-draft-sync.js";
 import schoolDefectRegister from "./_lib/handlers/school-defect-register.js";
 import heatReliefObservations from "./_lib/handlers/heat-relief-observations.js";
 
@@ -192,6 +193,7 @@ const baseHandlers = {
   "zk-attribute-proof-verify": zkAttributeProofVerify,
 
   "school-zone-audits": schoolZoneAudits,
+  "civic-draft-sync": civicDraftSync,
   "school-defect-register": schoolDefectRegister,
   "public-projects": publicProjects,
   "tenant-administration": tenantAdministration,
