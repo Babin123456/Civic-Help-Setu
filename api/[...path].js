@@ -86,6 +86,7 @@ import ghgInventory from "./_lib/handlers/ghg-inventory.js";
 import microVolunteer from "./_lib/handlers/micro-volunteer.js";
 import reliefOperations from "./_lib/handlers/relief-operations.js";
 import jurisdictionHandoff from "./_lib/handlers/jurisdiction-handoff.js";
+import redactedSharingRoom from "./_lib/handlers/redacted-sharing-room.js";
 
 import agentSandbox from "./_lib/handlers/agent-sandbox.js";
 import agentIncidentResponse from "./_lib/handlers/agent-incident-response.js";
@@ -200,6 +201,7 @@ const baseHandlers = {
   "multi-region-status": multiRegionStatus,
   "multi-region-metrics": multiRegionStatus,
   "case-collaboration": caseCollaboration,
+  "redacted-sharing-room": redactedSharingRoom,
   "synthetic-datasets": syntheticDatasets,
   "cache": cacheManagement,
   "cache/status": cacheManagement,
