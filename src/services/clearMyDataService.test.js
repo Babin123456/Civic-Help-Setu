@@ -273,6 +273,7 @@ describe('registry covers the keys the app writes', () => {
     ...RETAINED_STORAGE_KEYS,
     'civic_journey_progress_', // prefix, handled by USER_DATA_PREFIX_STORES
     'civicbridge_location_denied', // sessionStorage flag: only records that a permission was refused
+    'civicbridge_voice_consent', // sessionStorage flag: remembers voice privacy acknowledgement in this tab
     'civicbridge_email_verification_pending',
     'civicbridge_verified_emails',
     'civicbridge_email_resend_attempts',
