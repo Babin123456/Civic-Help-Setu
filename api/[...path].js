@@ -61,6 +61,7 @@ import temporalPolicy from "./_lib/handlers/temporal-policy.js";
 import treePlantationSurvival from "./_lib/handlers/tree-plantation-survival.js";
 import portalChangeMonitor from "./_lib/handlers/portal-change-monitor.js";
 import agentReviewStudio from "./_lib/handlers/agent-review-studio.js";
+import agentMemoryScope from "./_lib/handlers/agent-memory-scope.js";
 import agentApprovalInbox from "./_lib/handlers/agent-approval-inbox.js";
 import civicAgentEval from "./_lib/handlers/civic-agent-eval.js";
 
@@ -152,6 +153,7 @@ const baseHandlers = {
   "address-change-corrections": addressChange,
   "anganwadi-calendar": anganwadiCalendar,
   "agent-review-studio": agentReviewStudio,
+  "agent-memory-scope": agentMemoryScope,
   "agent-approval-inbox": agentApprovalInbox,
   "civic-agent-eval": civicAgentEval,
   "business-licence-feedback": businessLicence,
@@ -471,6 +473,7 @@ export function createApiDispatcher({
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-eval",
+      "agent-memory-scope",
       "agent-approval-inbox",
       "grievance-department-routing",
       "grievance-completeness-coach",
