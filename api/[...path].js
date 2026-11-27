@@ -8,6 +8,7 @@ import civicAgentCostCarbon from "./_lib/civic-agent-cost-carbon.js";
 import civicAgentPolicy from "./_lib/civic-agent-policy.js";
 import civicContractTestMarketplace from "./_lib/civic-contract-test-marketplace.js";
 import civicRecommendationExperimentation from "./_lib/civic-recommendation-experimentation.js";
+import recommendationFairnessAudit from "./_lib/handlers/recommendation-fairness-audit.js";
 import explainableServiceRanker from "./_lib/handlers/explainable-service-ranker.js";
 import civicSourceFreshnessPrediction from "./_lib/civic-source-freshness-prediction.js";
 import counterJourney from "./_lib/counter-journey.js";
@@ -144,6 +145,7 @@ const baseHandlers = {
   "civic-agent-policy": civicAgentPolicy,
   "civic-contract-test-marketplace": civicContractTestMarketplace,
   "civic-recommendation-experimentation": civicRecommendationExperimentation,
+  "recommendation-fairness-audit": recommendationFairnessAudit,
   "explainable-service-ranker": explainableServiceRanker,
   "civic-source-freshness-prediction": civicSourceFreshnessPrediction,
   "counter-journey": counterJourney,
@@ -490,6 +492,7 @@ export function createApiDispatcher({
       "civic-agent-policy",
       "civic-contract-test-marketplace",
       "civic-recommendation-experimentation",
+      "recommendation-fairness-audit",
       "civic-source-freshness-prediction",
       "counter-journey",
       "import-batches",

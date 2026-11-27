@@ -150,6 +150,7 @@ const PolicyEngineWorkspacePage = lazy(() => import('./pages/PolicyEngineWorkspa
 const ContractTestMarketplaceWorkspacePage = lazy(() => import('./pages/ContractTestMarketplaceWorkspace'));
 const FreshnessPredictionWorkspacePage = lazy(() => import('./pages/FreshnessPredictionWorkspace'));
 const RecommendationExperimentationWorkspacePage = lazy(() => import('./pages/RecommendationExperimentationWorkspace'));
+const RecommendationFairnessAuditWorkspace = lazy(() => import('./pages/RecommendationFairnessAuditWorkspace'));
 const AiHallucinationReportWorkspace = lazy(() => import('./pages/AiHallucinationReportWorkspace'));
 const AgentMemoryScopeWorkspace = lazy(() => import('./pages/AgentMemoryScopeWorkspace'));
 const AgentApprovalInboxWorkspace = lazy(() => import('./pages/AgentApprovalInboxWorkspace'));
@@ -459,6 +460,8 @@ function AppRoot() {
 
                             <Route path="/open-source" element={<OpenSource />} />
                             <Route path="/privacy" element={<Privacy />} />
+                            <Route path="/recommendation-fairness-audit" element={<RecommendationFairnessAuditWorkspace />} />
+                            <Route path="/fairness-audit" element={<RecommendationFairnessAuditWorkspace />} />
                             <Route path="/ai-hallucination-reports" element={<AiHallucinationReportWorkspace />} />
                             <Route path="/report-ai-claim" element={<AiHallucinationReportWorkspace />} />
                             <Route path="/agent-memory-scope" element={<AgentMemoryScopeWorkspace />} />
