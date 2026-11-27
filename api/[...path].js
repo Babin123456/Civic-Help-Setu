@@ -53,6 +53,7 @@ import civicSurveys from "./_lib/handlers/civic-surveys.js";
 import temporalPolicy from "./_lib/handlers/temporal-policy.js";
 import agentReviewStudio from "./_lib/handlers/agent-review-studio.js";
 import civicAgentEval from "./_lib/handlers/civic-agent-eval.js";
+import aiHallucinationReports from "./_lib/handlers/ai-hallucination-reports.js";
 
 import verifiableEvidenceBundles from "./_lib/handlers/verifiable-evidence-bundles.js";
 
@@ -132,6 +133,7 @@ const baseHandlers = {
   "address-change-corrections": addressChange,
   "agent-review-studio": agentReviewStudio,
   "civic-agent-eval": civicAgentEval,
+  "ai-hallucination-reports": aiHallucinationReports,
   "business-licence-feedback": businessLicence,
 
   "civic-data-clean-room": civicDataCleanRoom,
@@ -434,6 +436,7 @@ export function createApiDispatcher({
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-eval",
+      "ai-hallucination-reports",
       "civic-agent-policy",
       "civic-contract-test-marketplace",
       "civic-recommendation-experimentation",
