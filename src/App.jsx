@@ -124,6 +124,7 @@ const LegalSourceReviewWorkspace = lazy(() => import('./pages/LegalSourceReviewW
 const RteAdmissionWorkspace = lazy(() => import('./pages/RteAdmissionWorkspace'));
 const EvidenceDossierWorkspace = lazy(() => import('./pages/EvidenceDossierWorkspace'));
 const ChangeFeedPage = lazy(() => import('./pages/ChangeFeedPage'));
+const PortalChangeMonitorWorkspace = lazy(() => import('./pages/PortalChangeMonitorWorkspace'));
 const FeeEvidenceAssistant = lazy(() => import('./pages/FeeEvidenceAssistant'));
 const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHandoffWorkspace'));
 const AgentSandboxWorkspace = lazy(() => import('./pages/AgentSandboxWorkspace'));
@@ -218,6 +219,8 @@ function AppRoot() {
                             <Route path="/knowledge-graph-query" element={<KnowledgeGraphQueryWorkspace />} />
                             <Route path="/services/change-feed" element={<ChangeFeedPage />} />
                             <Route path="/change-feed" element={<ChangeFeedPage />} />
+                            <Route path="/portal-monitor" element={<PortalChangeMonitorWorkspace />} />
+                            <Route path="/broken-link-monitor" element={<PortalChangeMonitorWorkspace />} />
                             <Route path="/services/ward-budget-proposal" element={<WardBudgetWorkspace />} />
                             <Route path="/ward-budget" element={<WardBudgetWorkspace />} />
                             <Route path="/ward-budget/:id" element={<WardBudgetWorkspace />} />
