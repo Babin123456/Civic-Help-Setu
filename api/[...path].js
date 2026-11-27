@@ -64,6 +64,7 @@ import civicDataCleanRoom from "./_lib/handlers/civic-data-clean-room.js";
 
 import floodIncidentReports from "./_lib/handlers/flood-incident-reports.js";
 import schoolZoneAudits from "./_lib/handlers/school-zone-audits.js";
+import civicDraftSync from "./_lib/handlers/civic-draft-sync.js";
 import heatReliefObservations from "./_lib/handlers/heat-relief-observations.js";
 
 import { GET as graphGET, POST as graphPOST } from "./_lib/graphRoute.js";
@@ -180,6 +181,7 @@ const baseHandlers = {
   "zk-attribute-proof-verify": zkAttributeProofVerify,
 
   "school-zone-audits": schoolZoneAudits,
+  "civic-draft-sync": civicDraftSync,
   "public-projects": publicProjects,
   "tenant-administration": tenantAdministration,
   "ghg-inventory": ghgInventory,
