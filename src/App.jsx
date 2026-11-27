@@ -137,6 +137,7 @@ const ChaosResilienceWorkspace = lazy(() => import('./pages/ChaosResilienceWorks
 const ComplaintQualityCoachWorkspace = lazy(() => import('./pages/ComplaintQualityCoachWorkspace'));
 const ServiceChangeSandboxWorkspace = lazy(() => import('./pages/ServiceChangeSandboxWorkspace'));
 const DigitalEvidenceLockerWorkspace = lazy(() => import('./pages/DigitalEvidenceLockerWorkspace'));
+const RedactedSharingRoomWorkspace = lazy(() => import('./pages/RedactedSharingRoomWorkspace'));
 const CaseCollaborationWorkspace = lazy(() => import('./components/caseCollaboration/CaseCollaborationWorkspace'));
 const JourneyBenchmarkPage = lazy(() => import('./pages/JourneyBenchmarkPage'));
 const Services = lazy(() => import('./pages/Services'));
@@ -419,6 +420,8 @@ function AppRoot() {
                             <Route path="/shared-directory/:token" element={<SharedDirectoryView />} />
                             <Route path="/app-status/:token" element={<PublicApplicationStatusView />} />
                             <Route path="/shared-profile/:token" element={<SharedProfileView />} />
+                            <Route path="/redacted-sharing-room" element={<RedactedSharingRoomWorkspace />} />
+                            <Route path="/sharing-room" element={<RedactedSharingRoomWorkspace />} />
 
                             <Route path="/saved" element={
                               <ProtectedRoute>
