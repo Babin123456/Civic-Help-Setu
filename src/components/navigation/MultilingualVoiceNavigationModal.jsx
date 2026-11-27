@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Mic,
   MicOff,
@@ -8,9 +8,10 @@ import {
   ArrowRight,
   Sparkles,
   AlertCircle,
-  HelpCircle,
   X,
   Search,
+  ShieldCheck,
+  Info,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
@@ -19,9 +20,16 @@ import {
   generateSpokenServiceSummary,
   speakTextAloud,
   stopSpeaking,
-  isSpeechRecognitionSupported,
-  isSpeechSynthesisSupported,
 } from '../../services/multilingualVoiceNavigationService';
+import {
+  VOICE_PERMISSION_EXPLANATION,
+  VOICE_LIMITATIONS_NOTICE,
+  readVoiceConsent,
+  writeVoiceConsent,
+  queryMicrophonePermission,
+  classifyRecognitionError,
+  extractSpeechTranscript,
+} from '../../utils/voiceSearch';
 
 export default function MultilingualVoiceNavigationModal({ isOpen, onClose }) {
   const [selectedLanguage, setSelectedLanguage] = useState('hi-IN');
@@ -30,6 +38,9 @@ export default function MultilingualVoiceNavigationModal({ isOpen, onClose }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speakingServiceId, setSpeakingServiceId] = useState(null);
   const [recognitionError, setRecognitionError] = useState('');
+  const [hasConsent, setHasConsent] = useState(() => readVoiceConsent());
+  const [showConsentPrompt, setShowConsentPrompt] = useState(false);
+  const [showLimitations, setShowLimitations] = useState(false);
 
   const recognitionRef = useRef(null);
 
@@ -51,23 +62,39 @@ export default function MultilingualVoiceNavigationModal({ isOpen, onClose }) {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort?.();
+        } catch {
+          // Ignore
+        }
+      }
+      stopSpeaking();
+    };
+  }, []);
+
   if (!isOpen) return null;
 
   const results = resolveMultilingualVoiceQuery(transcript, selectedLanguage);
 
-  const startListening = () => {
+  const beginListening = () => {
     setRecognitionError('');
+    setShowConsentPrompt(false);
     const SpeechRecognition =
       typeof window !== 'undefined'
         ? window.SpeechRecognition || window.webkitSpeechRecognition
         : null;
 
     if (!SpeechRecognition) {
-      setRecognitionError(
-        'Speech recognition is not supported in this browser. Please use the text input below.'
-      );
+      setRecognitionError(classifyRecognitionError('unsupported').message);
       return;
     }
+
+    let gotTranscript = false;
+    let hadError = false;
+    let stoppedManually = false;
 
     try {
       const recognition = new SpeechRecognition();
@@ -80,39 +107,76 @@ export default function MultilingualVoiceNavigationModal({ isOpen, onClose }) {
       };
 
       recognition.onresult = (event) => {
-        let currentTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          currentTranscript += event.results[i][0].transcript;
+        const extracted = extractSpeechTranscript(event);
+        if (!extracted.isEmpty) {
+          gotTranscript = true;
+          setTranscript(extracted.transcript);
+        } else if (extracted.isFinal && !gotTranscript) {
+          setRecognitionError(classifyRecognitionError('no-speech').message);
         }
-        setTranscript(currentTranscript);
       };
 
       recognition.onerror = (event) => {
+        hadError = true;
         setIsListening(false);
-        if (event.error === 'not-allowed') {
-          setRecognitionError(
-            'Microphone access denied. Please check your browser microphone permissions.'
-          );
-        } else if (event.error !== 'no-speech') {
-          setRecognitionError(`Voice input error: ${event.error}`);
-        }
+        setRecognitionError(classifyRecognitionError(event?.error).message);
       };
 
       recognition.onend = () => {
         setIsListening(false);
+        if (!gotTranscript && !hadError && !stoppedManually) {
+          setRecognitionError(classifyRecognitionError('no-speech').message);
+        }
+      };
+
+      recognition._markManualStop = () => {
+        stoppedManually = true;
       };
 
       recognitionRef.current = recognition;
       recognition.start();
     } catch {
-      setRecognitionError('Failed to initialize microphone.');
+      setRecognitionError('Failed to initialize microphone. Please check browser settings or type manually.');
       setIsListening(false);
     }
+  };
+
+  const startListening = async () => {
+    setRecognitionError('');
+    const SpeechRecognition =
+      typeof window !== 'undefined'
+        ? window.SpeechRecognition || window.webkitSpeechRecognition
+        : null;
+
+    if (!SpeechRecognition) {
+      setRecognitionError(classifyRecognitionError('unsupported').message);
+      return;
+    }
+
+    const perm = await queryMicrophonePermission();
+    if (perm.state === 'denied') {
+      setRecognitionError(classifyRecognitionError('not-allowed').message);
+      return;
+    }
+
+    if (!hasConsent) {
+      setShowConsentPrompt(true);
+      return;
+    }
+
+    beginListening();
+  };
+
+  const confirmConsentAndStart = () => {
+    writeVoiceConsent(true);
+    setHasConsent(true);
+    beginListening();
   };
 
   const stopListening = () => {
     if (recognitionRef.current) {
       try {
+        recognitionRef.current._markManualStop?.();
         recognitionRef.current.stop();
       } catch {
         // Safe ignore
@@ -157,6 +221,12 @@ export default function MultilingualVoiceNavigationModal({ isOpen, onClose }) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="voice-nav-title"
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          if (isListening) stopListening();
+          else onClose();
+        }
+      }}
     >
       <div
         className="modal-container w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
@@ -212,24 +282,81 @@ export default function MultilingualVoiceNavigationModal({ isOpen, onClose }) {
               <Languages size={16} className="text-blue-600" />
               <span>Select Spoken Language:</span>
             </div>
-            <select
-              value={selectedLanguage}
-              onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="text-xs p-2 rounded-lg border bg-white border-slate-300 font-medium text-slate-800"
-            >
-              {SUPPORTED_VOICE_LANGUAGES.map((lang) => (
-                <option key={lang.code} value={lang.code}>
-                  {lang.label}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center gap-2 flex-wrap">
+              <select
+                aria-label="Select Spoken Language"
+                value={selectedLanguage}
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+                disabled={isListening}
+                className="text-xs p-2 rounded-lg border bg-white border-slate-300 font-medium text-slate-800"
+              >
+                {SUPPORTED_VOICE_LANGUAGES.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.label}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => setShowLimitations((prev) => !prev)}
+                aria-expanded={showLimitations}
+                className="text-xs px-2.5 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-medium flex items-center gap-1 hover:bg-slate-100"
+              >
+                <Info size={14} aria-hidden="true" />
+                <span>Limits</span>
+              </button>
+            </div>
           </div>
+
+          {showLimitations && (
+            <div className="p-3.5 rounded-xl border bg-slate-50 text-xs text-slate-700 space-y-1.5">
+              <div className="font-bold text-slate-900">{VOICE_LIMITATIONS_NOTICE.title}</div>
+              <p>{VOICE_LIMITATIONS_NOTICE.summary}</p>
+              <ul className="list-disc pl-4 space-y-1 text-slate-600">
+                {VOICE_LIMITATIONS_NOTICE.limitations.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {showConsentPrompt && (
+            <div
+              role="region"
+              aria-label={VOICE_PERMISSION_EXPLANATION.title}
+              className="p-4 rounded-xl border border-sky-200 bg-sky-50 space-y-2"
+            >
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
+                <ShieldCheck size={16} className="text-sky-600" aria-hidden="true" />
+                <span>{VOICE_PERMISSION_EXPLANATION.title}</span>
+              </div>
+              <p className="text-xs text-slate-700">{VOICE_PERMISSION_EXPLANATION.summary}</p>
+              <p className="text-[11px] text-slate-600">{VOICE_PERMISSION_EXPLANATION.browserDisclosure}</p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={confirmConsentAndStart}
+                  className="px-3 py-1.5 rounded-lg bg-sky-600 text-white text-xs font-semibold hover:bg-sky-700"
+                >
+                  {VOICE_PERMISSION_EXPLANATION.confirmLabel}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowConsentPrompt(false)}
+                  className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-100"
+                >
+                  {VOICE_PERMISSION_EXPLANATION.cancelLabel}
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Voice Microphone Center Section */}
           <div className="flex flex-col items-center justify-center p-6 rounded-2xl border text-center space-y-3 bg-gradient-to-b from-slate-50 to-white">
             <button
               type="button"
               onClick={handleToggleListening}
+              aria-pressed={isListening}
               className={`w-20 h-20 rounded-full flex items-center justify-center transition-all shadow-lg ${
                 isListening
                   ? 'bg-red-500 text-white animate-pulse ring-8 ring-red-200'
@@ -240,9 +367,9 @@ export default function MultilingualVoiceNavigationModal({ isOpen, onClose }) {
               {isListening ? <MicOff size={32} /> : <Mic size={32} />}
             </button>
 
-            <span className="text-xs font-bold text-slate-700">
+            <span className="text-xs font-bold text-slate-700" role="status" aria-live="polite">
               {isListening
-                ? 'Listening... Speak clearly into your microphone'
+                ? 'Listening... Speak clearly, then review your text below'
                 : 'Tap to speak your civic requirement'}
             </span>
             <p className="text-[11px] text-slate-500 max-w-sm">
@@ -250,7 +377,7 @@ export default function MultilingualVoiceNavigationModal({ isOpen, onClose }) {
             </p>
 
             {recognitionError && (
-              <div className="text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-200 flex items-center gap-1.5 mt-2">
+              <div role="alert" className="text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-200 flex items-center gap-1.5 mt-2">
                 <AlertCircle size={14} className="shrink-0" />
                 <span>{recognitionError}</span>
               </div>
@@ -258,12 +385,13 @@ export default function MultilingualVoiceNavigationModal({ isOpen, onClose }) {
           </div>
 
           {/* Transcript / Text Input Fallback */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700 block">
-              Spoken Transcript (or type manually):
+          <div className="space-y-2">
+            <label htmlFor="voice-modal-transcript" className="text-xs font-semibold text-slate-700 block">
+              Spoken Transcript (review or edit manually before searching):
             </label>
             <div className="relative">
               <input
+                id="voice-modal-transcript"
                 type="text"
                 value={transcript}
                 onChange={(e) => setTranscript(e.target.value)}
@@ -273,6 +401,7 @@ export default function MultilingualVoiceNavigationModal({ isOpen, onClose }) {
               {transcript && (
                 <button
                   type="button"
+                  aria-label="Clear transcript"
                   onClick={() => setTranscript('')}
                   className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
                 >
@@ -280,6 +409,26 @@ export default function MultilingualVoiceNavigationModal({ isOpen, onClose }) {
                 </button>
               )}
             </div>
+            {transcript.trim() && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Link
+                  to={`/services?q=${encodeURIComponent(transcript.trim())}`}
+                  onClick={onClose}
+                  className="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 hover:bg-blue-700"
+                >
+                  <Search size={12} aria-hidden="true" />
+                  <span>Search Services</span>
+                </Link>
+                <Link
+                  to={`/assistant?q=${encodeURIComponent(transcript.trim())}`}
+                  onClick={onClose}
+                  className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 text-xs font-semibold inline-flex items-center gap-1.5 hover:bg-slate-100"
+                >
+                  <span>Ask AI Assistant</span>
+                  <ArrowRight size={12} aria-hidden="true" />
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Matched Services List */}
@@ -378,7 +527,7 @@ export default function MultilingualVoiceNavigationModal({ isOpen, onClose }) {
           style={{ borderColor: 'var(--border-color, #e2e8f0)' }}
         >
           <p className="text-[11px] text-slate-500">
-            Powered by standard browser Web Speech API. Audio is never stored or transmitted.
+            Civic Help Setu never stores raw audio. Browser Web Speech API may send transient speech to your browser&apos;s speech service.
           </p>
           <button
             type="button"

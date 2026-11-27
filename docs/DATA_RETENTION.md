@@ -129,6 +129,7 @@ After clearing, the sample reviews, sample audit reports and the sample vault do
 | `civicbridge_barrier_audit_logs`, `civicbridge_freshness_trust_reviews_v1`, `civicbridge_public_notices_digest_v1`, `civicbridge_service_availability_notices_v1`, `civicbridge_source_conflicts`, `civicbridge_conflict_audit_logs` | Admin barrier moderation, freshness reviews, public gazette digest cache, and source conflict audit queues | Admin portal moderation and public digest cache |
 | `civicbridge_barrier_audit_logs`, `civicbridge_freshness_trust_reviews_v1`, `civicbridge_service_ownership_v1`, `civicbridge_public_notices_digest_v1`, `civicbridge_source_conflicts`, `civicbridge_conflict_audit_logs` | Admin barrier moderation, freshness reviews, service reviewer assignments, public gazette digest cache, and source conflict audit queues | Admin portal moderation and public digest cache |
 | `civicbridge_location_denied` (sessionStorage) | A flag that the location permission was refused in this tab | No personal data, gone when the tab closes |
+| `civicbridge_voice_consent` (sessionStorage) | A flag that voice permission disclosure was acknowledged in this tab | No audio or personal data, gone when the tab closes |
 | `civicbridge_app_status_qr_tokens` | QR tokens for application status sharing | Shared feature data |
 | `civicbridge_app_status_qr_rate_limits` | Rate limits for application status QR generation | Shared feature data |
 | `civicbridge_catalogue_auditor_dismissals_v2` | Dismissed catalogue auditor review items | Admin moderation state |
