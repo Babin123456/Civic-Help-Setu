@@ -42,6 +42,7 @@ import knowledgeProvenance from "./_lib/handlers/knowledge-provenance.js";
 import libraryCorrections from "./_lib/handlers/library-corrections.js";
 import libraryResourceDirectory from "./_lib/handlers/library-resource-directory.js";
 import pdsObservations from "./_lib/handlers/pds-observations.js";
+import parkMaintenanceSchedule from "./_lib/handlers/park-maintenance-schedule.js";
 import officeComparison from "./_lib/handlers/office-comparison.js";
 import officeVerificationCampaigns from "./_lib/handlers/office-verification-campaigns.js";
 import privacyExports from "./_lib/handlers/privacy-exports.js";
@@ -173,6 +174,7 @@ const baseHandlers = {
   "office-verification-campaigns": officeVerificationCampaigns,
   "open-contracting-analytics": openContractingAnalytics,
   "pds-observations": pdsObservations,
+  "park-maintenance-schedule": parkMaintenanceSchedule,
   "pedestrian-barriers": pedestrianBarriers,
   "privacy-exports": privacyExports,
   "public-toilets": publicToilets,
@@ -457,6 +459,7 @@ export function createApiDispatcher({
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-eval",
+      "park-maintenance-schedule",
       "library-resource-directory",
       "anganwadi-calendar",
       "school-defect-register",
