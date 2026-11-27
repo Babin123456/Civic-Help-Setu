@@ -115,7 +115,6 @@ const Assistant = () => {
     saveChatHistory(messages);
   }, [messages]);
 
-  const getAnswer = async (query, history, externalDocument = null) => {
   useEffect(() => {
     return () => {
       try {
