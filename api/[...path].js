@@ -51,6 +51,7 @@ import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
 import temporalPolicy from "./_lib/handlers/temporal-policy.js";
+import portalChangeMonitor from "./_lib/handlers/portal-change-monitor.js";
 import agentReviewStudio from "./_lib/handlers/agent-review-studio.js";
 import civicAgentEval from "./_lib/handlers/civic-agent-eval.js";
 
@@ -163,6 +164,7 @@ const baseHandlers = {
   "send-email": sendEmail,
   "share-by-email": shareByEmail,
   "temporal-policy": temporalPolicy,
+  "portal-change-monitor": portalChangeMonitor,
   "tender-corrections": tenderCorrections,
 
   "verifiable-evidence-bundles": verifiableEvidenceBundles,
