@@ -36,10 +36,17 @@ import {
   deleteExistingBundle,
   addEvidenceEntry,
   verifyExistingBundle,
-  exportBundleAsJson,
   exportBundleAsMarkdownDossier,
-  importBundleArchive,
 } from '../services/verifiableEvidenceBundleService.js';
+import {
+  CUSTODY_EVENT_TYPES,
+  recordCustodyEvent,
+  getCustodyLedger,
+  verifyCustodyLedger,
+  applySelectiveRedaction,
+  exportBundleWithCustody,
+  importBundleWithCustodyVerification,
+} from '../services/evidenceCustodyLedgerExtension.js';
 
 export default function VerifiableEvidenceBundleWorkspace() {
   let user;
@@ -69,6 +76,9 @@ export default function VerifiableEvidenceBundleWorkspace() {
   });
   const [verificationReport, setVerificationReport] = useState(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [custodyLedger, setCustodyLedger] = useState([]);
+  const [custodyVerification, setCustodyVerification] = useState(null);
+  const [redactingEntryId, setRedactingEntryId] = useState(null);
 
   // Modals & Panels
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -130,6 +140,11 @@ export default function VerifiableEvidenceBundleWorkspace() {
     try {
       const rep = await verifyExistingBundle(targetId, userId);
       setVerificationReport(rep);
+      const ledger = getCustodyLedger(targetId);
+      setCustodyLedger(ledger);
+      const bundleObj = getBundle(targetId, userId);
+      const custVer = await verifyCustodyLedger(bundleObj, ledger);
+      setCustodyVerification(custVer);
       setAnnouncement(`Integrity verification complete: status is ${rep.status}`);
     } catch (err) {
       setVerificationReport({
@@ -245,7 +260,19 @@ export default function VerifiableEvidenceBundleWorkspace() {
           : null,
       };
 
-      await addEvidenceEntry(activeBundle.bundleId, entryData, userId, entryFilePayload);
+      const added = await addEvidenceEntry(activeBundle.bundleId, entryData, userId, entryFilePayload);
+      await recordCustodyEvent({
+        bundleId: activeBundle.bundleId,
+        entryId: added.addedEntry.entryId,
+        eventType: CUSTODY_EVENT_TYPES.CAPTURED,
+        actorId: userId,
+        rationale: `Captured ${entryData.source} evidence item`,
+        originalHash: added.addedEntry.entryHash,
+        resultingHash: added.addedEntry.entryHash,
+        metadata: {
+          originalAttachmentSha256: added.addedEntry.attachment?.sha256 || null,
+        },
+      });
 
       // Reset form
       setEntryTitle('');
@@ -275,10 +302,10 @@ export default function VerifiableEvidenceBundleWorkspace() {
     setAnnouncement('Evidence bundle deleted.');
   };
 
-  // Handle Export JSON
-  const handleExportJson = () => {
+  // Handle Export JSON (with Chain-of-Custody Ledger)
+  const handleExportJson = async () => {
     if (!activeBundle) return;
-    const { jsonString, fileName } = exportBundleAsJson(activeBundle.bundleId, userId, true);
+    const { jsonString, fileName } = await exportBundleWithCustody(activeBundle.bundleId, userId, true);
 
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -287,7 +314,8 @@ export default function VerifiableEvidenceBundleWorkspace() {
     link.download = fileName;
     link.click();
     URL.revokeObjectURL(url);
-    setAnnouncement(`Exported JSON archive ${fileName}.`);
+    await runVerification(activeBundle.bundleId);
+    setAnnouncement(`Exported JSON archive ${fileName} with Chain-of-Custody ledger.`);
   };
 
   // Handle Export Markdown Dossier
@@ -314,19 +342,43 @@ export default function VerifiableEvidenceBundleWorkspace() {
     }
 
     try {
-      const res = await importBundleArchive(importJsonText.trim(), userId);
+      const res = await importBundleWithCustodyVerification(importJsonText.trim(), userId);
       if (res.success && res.bundle) {
         setImportJsonText('');
         setShowImportModal(false);
         setImportError('');
         refreshBundles();
         setSelectedBundleId(res.bundle.bundleId);
-        setAnnouncement('Bundle archive imported and verified successfully.');
+        setAnnouncement('Bundle archive and custody ledger imported and verified successfully.');
       } else {
-        setImportError(`Verification Failed: ${res.verification.errors.join('; ')}`);
+        const custErrors = res.custodyVerification?.errors || [];
+        const allErrors = [...(res.verification?.errors || []), ...custErrors];
+        setImportError(`Verification Failed: ${allErrors.join('; ')}`);
       }
     } catch (err) {
       setImportError(`Import error: ${err.message}`);
+    }
+  };
+
+  // Handle Selective Redaction (preserves original hash)
+  const handleSelectiveRedaction = async (entryId, redactFields = ['pii_auto', 'userAnnotation']) => {
+    if (!activeBundle) return;
+    setRedactingEntryId(entryId);
+    try {
+      await applySelectiveRedaction({
+        bundleId: activeBundle.bundleId,
+        entryId,
+        redactFields,
+        redactionReason: 'Selective privacy redaction prior to external sharing',
+        actorId: userId,
+      });
+      refreshBundles();
+      await runVerification(activeBundle.bundleId);
+      setAnnouncement(`Selective redaction recorded for entry ${entryId}; original hash preserved.`);
+    } catch (err) {
+      setFormError(err.message || 'Selective redaction failed.');
+    } finally {
+      setRedactingEntryId(null);
     }
   };
 
@@ -807,10 +859,91 @@ export default function VerifiableEvidenceBundleWorkspace() {
                           >
                             <span>Prev: {entry.previousEntryHash?.slice(0, 12)}...</span>
                             <span>Entry Hash: {entry.entryHash?.slice(0, 16)}...</span>
+                            <button
+                              type="button"
+                              onClick={() => handleSelectiveRedaction(entry.entryId, ['pii_auto', 'userAnnotation'])}
+                              disabled={redactingEntryId === entry.entryId}
+                              style={{
+                                background: 'none',
+                                border: '1px solid var(--border-light, #cbd5e1)',
+                                borderRadius: '0.25rem',
+                                padding: '0.1rem 0.45rem',
+                                fontSize: '0.7rem',
+                                cursor: 'pointer',
+                                color: 'var(--text-secondary)',
+                              }}
+                              title="Apply selective redaction while preserving original hash"
+                            >
+                              {redactingEntryId === entry.entryId
+                                ? 'Redacting...'
+                                : activeBundle.redactedViews?.[entry.entryId]
+                                  ? 'Redacted (Original Preserved)'
+                                  : 'Selective Redact'}
+                            </button>
                           </div>
                         </div>
                       );
                     })}
+                  </div>
+                )}
+              </div>
+
+              {/* Chain-of-Custody Ledger Panel (#1425) */}
+              <div
+                style={{
+                  padding: '1.25rem',
+                  borderRadius: '0.75rem',
+                  background: 'var(--bg-card, #fff)',
+                  border: '1px solid var(--border-light, #e2e8f0)',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>
+                    Chain-of-Custody Ledger ({custodyLedger.length} events)
+                  </h3>
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: '999px',
+                      background: custodyVerification?.isValid ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
+                      color: custodyVerification?.isValid ? '#15803d' : '#b91c1c',
+                    }}
+                  >
+                    {custodyVerification?.status || 'CUSTODY_UNINITIALIZED'}
+                  </span>
+                </div>
+                <p style={{ margin: '0 0 0.75rem 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  Every capture, transformation, selective redaction, import, and export is hash-chained while preserving original digests. Integrity logs do not constitute legal authenticity certification.
+                </p>
+                {custodyLedger.length === 0 ? (
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-tertiary)' }}>
+                    No custody events recorded yet. Add an entry, redact a field, or export an archive to append to the ledger.
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {custodyLedger.map((ev) => (
+                      <div
+                        key={ev.custodyEventId}
+                        style={{
+                          padding: '0.6rem 0.85rem',
+                          borderRadius: '0.5rem',
+                          border: '1px solid var(--border-light, #e2e8f0)',
+                          fontSize: '0.78rem',
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
+                          <span>#{ev.sequence} &bull; {ev.eventType}</span>
+                          <span style={{ color: 'var(--text-secondary)' }}>{new Date(ev.timestamp).toLocaleString()}</span>
+                        </div>
+                        {ev.rationale && <div style={{ color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{ev.rationale}</div>}
+                        <div style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
+                          Event Hash: {ev.custodyEventHash?.slice(0, 16)}...
+                          {ev.originalHash ? ` | Original Preserved: ${ev.originalHash.slice(0, 12)}...` : ''}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

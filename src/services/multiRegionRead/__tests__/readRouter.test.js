@@ -14,7 +14,12 @@ import {
 } from '../readRouter.js';
 import { createReplicaHealthMonitor, processHeartbeat } from '../replicaHealthMonitor.js';
 import { createSessionTokenStore, issueToken } from '../sessionTokenStore.js';
-import { DEFAULT_CONFIG, CONSISTENCY_LEVEL, ROUTING_REASON } from '../types.js';
+import {
+  DEFAULT_CONFIG,
+  CONSISTENCY_LEVEL,
+  ROUTING_REASON,
+  requiresIndiaResidency,
+} from '../types.js';
 
 describe('Read Router', () => {
   let router;
