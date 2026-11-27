@@ -150,6 +150,7 @@ const PolicyEngineWorkspacePage = lazy(() => import('./pages/PolicyEngineWorkspa
 const ContractTestMarketplaceWorkspacePage = lazy(() => import('./pages/ContractTestMarketplaceWorkspace'));
 const FreshnessPredictionWorkspacePage = lazy(() => import('./pages/FreshnessPredictionWorkspace'));
 const RecommendationExperimentationWorkspacePage = lazy(() => import('./pages/RecommendationExperimentationWorkspace'));
+const AgentApprovalInboxWorkspace = lazy(() => import('./pages/AgentApprovalInboxWorkspace'));
 const GrievanceDepartmentRoutingWorkspace = lazy(() => import('./pages/GrievanceDepartmentRoutingWorkspace'));
 const GrievanceCompletenessCoachWorkspace = lazy(() => import('./pages/GrievanceCompletenessCoachWorkspace'));
 const AccessibilityBarrierSlaDashboard = lazy(() => import('./pages/AccessibilityBarrierSlaDashboard'));
@@ -456,6 +457,8 @@ function AppRoot() {
 
                             <Route path="/open-source" element={<OpenSource />} />
                             <Route path="/privacy" element={<Privacy />} />
+                            <Route path="/agent-approval-inbox" element={<AgentApprovalInboxWorkspace />} />
+                            <Route path="/approval-inbox" element={<AgentApprovalInboxWorkspace />} />
                             <Route path="/grievance-department-routing" element={<GrievanceDepartmentRoutingWorkspace />} />
                             <Route path="/department-routing" element={<GrievanceDepartmentRoutingWorkspace />} />
                             <Route path="/grievance-completeness-coach" element={<GrievanceCompletenessCoachWorkspace />} />
