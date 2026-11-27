@@ -962,6 +962,7 @@ const Assistant = () => {
               />
             </div>
           )}
+        </div>
         {/* Voice Input Feedback (placed directly above the input bar so it stays in view) */}
         <VoiceInputStatus
           isListening={isListening}
