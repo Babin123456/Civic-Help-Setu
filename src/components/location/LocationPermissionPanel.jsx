@@ -67,6 +67,10 @@ const LocationPermissionPanel = ({
     }
   };
 
+  const manualSearchPrompt = isDenied
+    ? 'Enter your locality, area, or PIN code to search offices without location.'
+    : 'Enter a locality, area, or PIN code as an alternative to location.';
+
   return (
     <section
       className="location-permission-panel location-permission glass-panel"
@@ -85,7 +89,7 @@ const LocationPermissionPanel = ({
         <div style={{ flex: '1 1 500px' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', color: isDenied ? '#d97706' : 'var(--accent-main)', fontWeight: '700', fontSize: '0.85rem', marginBottom: '0.35rem' }}>
             {isDenied ? <AlertCircle size={16} aria-hidden="true" /> : <Compass size={16} aria-hidden="true" />}
-            <span>{isDenied ? 'Manual Search Active' : 'Automatic Office Proximity'}</span>
+            <span>{isDenied ? 'Manual Search' : 'Automatic Office Proximity'}</span>
           </div>
           <h2
             id="location-permission-title"
@@ -101,7 +105,7 @@ const LocationPermissionPanel = ({
             }}
           >
             <ShieldCheck size={20} color="var(--accent-main)" aria-hidden="true" />
-            {isDenied ? 'Location access was not granted — you can still find any office' : 'Find offices near you'}
+            {isDenied ? 'Manual Search Active' : 'Find offices near you'}
           </h2>
           <p
             className="location-permission__text"
@@ -114,8 +118,19 @@ const LocationPermissionPanel = ({
             }}
           >
             {isDenied
-              ? 'Permission was denied or blocked in your browser. No problem: Civic Help Setu never blocks you from using the directory. Simply select your State and District or search by landmark, area, or PIN code below.'
+              ? 'Permission was denied or blocked in your browser. No problem: Civic Help Setu never blocks you from using the directory. You can search by State and District, or enter a locality, area, or PIN code below.'
               : 'If you choose to share your location, we use it only in this browser to sort offices by distance. It is not sent anywhere and is forgotten when you close the tab. Sharing is optional: you can always search by city, area or PIN code instead.'}
+          </p>
+          <p
+            className="location-permission__text"
+            style={{
+              fontSize: '0.875rem',
+              color: 'var(--text-tertiary)',
+              margin: '0 0 1rem 0',
+              fontStyle: 'italic',
+            }}
+          >
+            {manualSearchPrompt}
           </p>
 
           <button
@@ -162,6 +177,7 @@ const LocationPermissionPanel = ({
                 <li>No profile tracking or location logging occurs.</li>
                 <li>You can reset or clear cached coordinates at any time with one click.</li>
                 <li>Every office in all 28 states and 8 union territories is fully searchable without location permission.</li>
+                <li>Manual locality, area, or PIN searches are never linked to your identity or stored.</li>
               </ul>
             </div>
           )}
