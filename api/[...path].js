@@ -78,6 +78,7 @@ import accessibilityInspector from "./_lib/handlers/accessibility-inspector.js";
 
 import publicToilets from "./_lib/handlers/public-toilets.js";
 import pedestrianBarriers from "./_lib/handlers/pedestrian-barriers.js";
+import accessibilityBarrierSla from "./_lib/handlers/accessibility-barrier-sla.js";
 import waterQualityRegister from "./_lib/handlers/water-quality-register.js";
 import publicProjects from "./_lib/handlers/public-projects.js";
 import wardIssueHeatmap from "./_lib/handlers/ward-issue-heatmap.js";
@@ -156,6 +157,7 @@ const baseHandlers = {
   "open-contracting-analytics": openContractingAnalytics,
   "pds-observations": pdsObservations,
   "pedestrian-barriers": pedestrianBarriers,
+  "accessibility-barrier-sla": accessibilityBarrierSla,
   "privacy-exports": privacyExports,
   "public-toilets": publicToilets,
   "rental-checklist-corrections": rentalChecklist,
@@ -434,6 +436,7 @@ export function createApiDispatcher({
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-eval",
+      "accessibility-barrier-sla",
       "civic-agent-policy",
       "civic-contract-test-marketplace",
       "civic-recommendation-experimentation",
