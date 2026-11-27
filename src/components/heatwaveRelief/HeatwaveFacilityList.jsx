@@ -104,6 +104,34 @@ export default function HeatwaveFacilityList({
                     {RELIEF_FACILITY_TYPE_LABELS[facility.facilityType] || facility.facilityType}
                   </span>
 
+                  <span
+                    style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 600,
+                      padding: '0.18rem 0.48rem',
+                      borderRadius: '999px',
+                      background: 'rgba(16, 185, 129, 0.12)',
+                      color: '#047857',
+                    }}
+                  >
+                    Official Verified Source
+                  </span>
+
+                  {facility.isTemporary && (
+                    <span
+                      style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 600,
+                        padding: '0.18rem 0.48rem',
+                        borderRadius: '999px',
+                        background: facility.isExpired ? 'rgba(220, 38, 38, 0.12)' : 'rgba(245, 158, 11, 0.15)',
+                        color: facility.isExpired ? '#dc2626' : '#b45309',
+                      }}
+                    >
+                      {facility.isExpired ? 'Expired Temporary Facility' : 'Temporary Cooling / Water Point'}
+                    </span>
+                  )}
+
                   {facility.distanceKm !== null && (
                     <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-main)' }}>
                       📍 {facility.distanceKm} km away

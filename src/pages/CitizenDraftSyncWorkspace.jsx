@@ -31,6 +31,47 @@ import {
   CONFLICT_STATUS,
   RULESET_VERSION,
 } from '../services/citizenDraftSyncEngine';
+import {
+  recoverInterruptedUploads,
+  getPendingOperationsSummary,
+  getProvenanceLabel,
+  PROVENANCE_TYPES,
+  migrateAllLocalDrafts,
+} from '../services/civicDraftSyncExtension';
+
+// ---------------------------------------------------------------------------
+// PROVENANCE BADGE COMPONENT
+// Keeps citizen-entered, official, AI, and community data visibly distinct.
+// ---------------------------------------------------------------------------
+const ProvenanceBadge = ({ provenanceType }) => {
+  const label = getProvenanceLabel(provenanceType);
+  const colorMap = {
+    [PROVENANCE_TYPES.CITIZEN]: { bg: '#e8f5e9', text: '#2e7d32', border: '#a5d6a7' },
+    [PROVENANCE_TYPES.OFFICIAL]: { bg: '#e3f2fd', text: '#1565c0', border: '#90caf9' },
+    [PROVENANCE_TYPES.AI_SUGGESTION]: { bg: '#fff8e1', text: '#f57f17', border: '#ffe082' },
+    [PROVENANCE_TYPES.COMMUNITY]: { bg: '#f3e5f5', text: '#6a1b9a', border: '#ce93d8' },
+  };
+  const style = colorMap[provenanceType] || { bg: '#f5f5f5', text: '#616161', border: '#e0e0e0' };
+  return (
+    <span
+      aria-label={`Data source: ${label}`}
+      style={{
+        display: 'inline-block',
+        fontSize: '0.7rem',
+        fontWeight: '600',
+        padding: '0.15rem 0.5rem',
+        borderRadius: '1rem',
+        background: style.bg,
+        color: style.text,
+        border: `1px solid ${style.border}`,
+        marginLeft: '0.4rem',
+        verticalAlign: 'middle',
+      }}
+    >
+      {label}
+    </span>
+  );
+};
 
 const CitizenDraftSyncWorkspace = () => {
   const { user } = useAuth();
@@ -39,6 +80,30 @@ const CitizenDraftSyncWorkspace = () => {
   // Connectivity override for testing offline transitions
   const [offlineSimulated, setOfflineSimulated] = useState(false);
   const effectiveOnline = networkIsOnline && !offlineSimulated;
+
+  // Interrupted-upload recovery & schema migration on mount
+  useEffect(() => {
+    try {
+      migrateAllLocalDrafts();
+      const rescued = recoverInterruptedUploads();
+      if (rescued > 0) {
+        // Will be announced when pendingOps refresh picks them up
+        setPendingOps(getPendingOperations() || []);
+      }
+    } catch {
+      // Non-fatal: continue without recovery
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Interrupted-upload summary (drives the "Interrupted uploads" banner)
+  const [interruptedSummary, setInterruptedSummary] = useState(() => {
+    try {
+      return getPendingOperationsSummary();
+    } catch {
+      return { pendingCount: 0, inFlightCount: 0, failedCount: 0, hasInterrupted: false, total: 0 };
+    }
+  });
 
   // Tabs & Views (Automatically activates conflicts tab if unresolved conflicts exist)
   const [activeTab, setActiveTab] = useState(() => {
@@ -151,6 +216,13 @@ const CitizenDraftSyncWorkspace = () => {
 
       const ops = getPendingOperations();
       setPendingOps(ops);
+
+      // Refresh interrupted-upload summary
+      try {
+        setInterruptedSummary(getPendingOperationsSummary());
+      } catch {
+        // non-fatal
+      }
 
       if (conflictList.length > 0) {
         setSelectedConflict((current) => {
@@ -557,6 +629,44 @@ const CitizenDraftSyncWorkspace = () => {
             >
               Retry
             </button>
+          </div>
+        )}
+
+        {/* TABS NAVIGATION */}
+        {/* INTERRUPTED UPLOAD RECOVERY BANNER */}
+        {interruptedSummary.hasInterrupted && (
+          <div
+            role="status"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1rem',
+              padding: '0.75rem 1.25rem',
+              borderRadius: '0.5rem',
+              background: 'rgba(234, 179, 8, 0.1)',
+              border: '1px solid rgba(234, 179, 8, 0.4)',
+              color: '#854d0e',
+              marginBottom: '1rem',
+              fontSize: '0.875rem',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Clock size={16} aria-hidden="true" />
+              <span>
+                <strong>Interrupted uploads detected.</strong> {interruptedSummary.inFlightCount} upload(s) were interrupted when you last closed this page and have been reset for retry.
+              </span>
+            </div>
+            {effectiveOnline && (
+              <button
+                type="button"
+                onClick={handleSyncNow}
+                disabled={isSyncing}
+                style={{ padding: '0.25rem 0.75rem', borderRadius: '0.4rem', border: 'none', background: '#b45309', color: '#fff', fontSize: '0.8rem', cursor: 'pointer', fontWeight: '600' }}
+              >
+                Retry Now
+              </button>
+            )}
           </div>
         )}
 
