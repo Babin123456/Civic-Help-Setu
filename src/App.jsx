@@ -102,6 +102,7 @@ const AccessibleRouteBarrierWorkspace = lazy(() => import('./pages/AccessibleRou
 const StreetlightOutageWorkspace = lazy(() => import('./pages/StreetlightOutageWorkspace'));
 const ReliefOperationsWorkspace = lazy(() => import('./pages/ReliefOperationsWorkspace'));
 const GhgInventoryWorkspace = lazy(() => import('./pages/GhgInventoryWorkspace'));
+const OfflineEmergencyCardWorkspace = lazy(() => import('./pages/OfflineEmergencyCardWorkspace'));
 const WaterQualityRegister = lazy(() => import('./pages/WaterQualityRegister'));
 const PublicProjectsWorkspace = lazy(() => import('./pages/PublicProjectsWorkspace'));
 const WardIssueHeatmapWorkspace = lazy(() => import('./pages/WardIssueHeatmapWorkspace'));
@@ -124,6 +125,7 @@ const LegalSourceReviewWorkspace = lazy(() => import('./pages/LegalSourceReviewW
 const RteAdmissionWorkspace = lazy(() => import('./pages/RteAdmissionWorkspace'));
 const EvidenceDossierWorkspace = lazy(() => import('./pages/EvidenceDossierWorkspace'));
 const ChangeFeedPage = lazy(() => import('./pages/ChangeFeedPage'));
+const PortalChangeMonitorWorkspace = lazy(() => import('./pages/PortalChangeMonitorWorkspace'));
 const FeeEvidenceAssistant = lazy(() => import('./pages/FeeEvidenceAssistant'));
 const JurisdictionHandoffWorkspace = lazy(() => import('./pages/JurisdictionHandoffWorkspace'));
 const AgentSandboxWorkspace = lazy(() => import('./pages/AgentSandboxWorkspace'));
@@ -137,12 +139,14 @@ const CaseCollaborationWorkspace = lazy(() => import('./components/caseCollabora
 const JourneyBenchmarkPage = lazy(() => import('./pages/JourneyBenchmarkPage'));
 const Services = lazy(() => import('./pages/Services'));
 const SearchQueryRecoveryWorkspace = lazy(() => import('./pages/SearchQueryRecoveryWorkspace'));
+const ExplainableServiceRankerWorkspace = lazy(() => import('./pages/ExplainableServiceRankerWorkspace'));
 const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
 const CostCarbonGovernorWorkspacePage = lazy(() => import('./pages/CostCarbonGovernorWorkspace'));
 const PolicyEngineWorkspacePage = lazy(() => import('./pages/PolicyEngineWorkspace'));
 const ContractTestMarketplaceWorkspacePage = lazy(() => import('./pages/ContractTestMarketplaceWorkspace'));
 const FreshnessPredictionWorkspacePage = lazy(() => import('./pages/FreshnessPredictionWorkspace'));
 const RecommendationExperimentationWorkspacePage = lazy(() => import('./pages/RecommendationExperimentationWorkspace'));
+const SchoolDefectRegisterWorkspace = lazy(() => import('./pages/SchoolDefectRegisterWorkspace'));
 
 const ServicesFallback = () => (
   <div className="section">
@@ -181,6 +185,8 @@ function AppRoot() {
                             <Route path="/services" element={<Suspense fallback={<ServicesFallback />}><Services /></Suspense>} />
                             <Route path="/search-recovery" element={<SearchQueryRecoveryWorkspace />} />
                             <Route path="/query-understanding" element={<SearchQueryRecoveryWorkspace />} />
+                            <Route path="/service-ranker" element={<ExplainableServiceRankerWorkspace />} />
+                            <Route path="/explainable-recommendations" element={<ExplainableServiceRankerWorkspace />} />
                             <Route path="/services/aadhaar-guide" element={<AadhaarGuidePage />} />
                             <Route path="/aadhaar-guide" element={<AadhaarGuidePage />} />
 
@@ -221,6 +227,8 @@ function AppRoot() {
                             <Route path="/knowledge-graph-query" element={<KnowledgeGraphQueryWorkspace />} />
                             <Route path="/services/change-feed" element={<ChangeFeedPage />} />
                             <Route path="/change-feed" element={<ChangeFeedPage />} />
+                            <Route path="/portal-monitor" element={<PortalChangeMonitorWorkspace />} />
+                            <Route path="/broken-link-monitor" element={<PortalChangeMonitorWorkspace />} />
                             <Route path="/services/ward-budget-proposal" element={<WardBudgetWorkspace />} />
                             <Route path="/ward-budget" element={<WardBudgetWorkspace />} />
                             <Route path="/ward-budget/:id" element={<WardBudgetWorkspace />} />
@@ -398,6 +406,9 @@ function AppRoot() {
                             <Route path="/ghg-inventory" element={<GhgInventoryWorkspace />} />
                             <Route path="/emissions-inventory" element={<GhgInventoryWorkspace />} />
                             <Route path="/services/ghg-inventory" element={<GhgInventoryWorkspace />} />
+                            <Route path="/offline-emergency-card" element={<OfflineEmergencyCardWorkspace />} />
+                            <Route path="/emergency-card" element={<OfflineEmergencyCardWorkspace />} />
+                            <Route path="/services/offline-emergency-card" element={<OfflineEmergencyCardWorkspace />} />
                             <Route path="/shared-checklist/:token" element={<SharedChecklistView />} />
                             <Route path="/shared-directory/:token" element={<SharedDirectoryView />} />
                             <Route path="/app-status/:token" element={<PublicApplicationStatusView />} />
@@ -423,6 +434,8 @@ function AppRoot() {
 
                             <Route path="/open-source" element={<OpenSource />} />
                             <Route path="/privacy" element={<Privacy />} />
+                            <Route path="/school-defect-register" element={<SchoolDefectRegisterWorkspace />} />
+                            <Route path="/school-infrastructure-register" element={<SchoolDefectRegisterWorkspace />} />
 
                             <Route path="/admin/imports" element={
                               <ProtectedRoute requiredRole="admin">

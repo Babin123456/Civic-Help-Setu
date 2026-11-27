@@ -20,9 +20,13 @@ import {
   GRAPH_EDGE_TYPES,
   PUBLICATION_STATUSES,
 } from '../../../src/data/civicKnowledgeGraphContract.js';
+import {
+  proposeDependencyEdge,
+  reviewAndPublishEdge,
+  listEdgeAuditLog,
+} from '../../../src/services/civicKnowledgeGraphEdgeWorkflow.js';
 
 const addressLimiter = createRateLimiter({ limit: 45, windowMs: 60 * 1000 });
-const privilegedLimiter = createRateLimiter({ limit: 20, windowMs: 60 * 1000 });
 
 const json = (status, body, extraHeaders = {}) => ({
   status,
@@ -84,6 +88,17 @@ export default async function handler(req, res) {
         maxTraversalDepth: 3,
         defaultLimit: 20,
       };
+      if (res && typeof res.status === 'function') return res.status(200).json(payload);
+      return json(200, payload);
+    }
+
+    if (action === 'edge_audit_log') {
+      if (role !== 'admin' && role !== 'reviewer' && role !== 'maintainer') {
+        const payload = { error: 'forbidden', message: 'Admin or reviewer role required for edge audit log.' };
+        if (res && typeof res.status === 'function') return res.status(403).json(payload);
+        return json(403, payload);
+      }
+      const payload = { ok: true, items: listEdgeAuditLog() };
       if (res && typeof res.status === 'function') return res.status(200).json(payload);
       return json(200, payload);
     }
@@ -161,6 +176,65 @@ export default async function handler(req, res) {
       const payload = { ok: true, message: 'Cache successfully invalidated', details: invResult };
       if (res && typeof res.status === 'function') return res.status(200).json(payload);
       return json(200, payload);
+    }
+
+    if (action === 'propose_edge') {
+      if (!userId) {
+        const payload = { error: 'unauthorized', message: 'Authentication required to propose graph edges.' };
+        if (res && typeof res.status === 'function') return res.status(401).json(payload);
+        return json(401, payload);
+      }
+      try {
+        const proposal = proposeDependencyEdge({
+          sourceNodeId: body.sourceNodeId,
+          targetNodeId: body.targetNodeId,
+          edgeType: body.edgeType,
+          jurisdiction: body.jurisdiction,
+          effectiveFrom: body.effectiveFrom,
+          effectiveTo: body.effectiveTo,
+          officialUrl: body.officialUrl,
+          statutoryAct: body.statutoryAct,
+          provenanceKind: body.provenanceKind || 'community_suggestion',
+          proposedBy: userId,
+        });
+        const payload = { ok: true, proposal };
+        if (res && typeof res.status === 'function') return res.status(201).json(payload);
+        return json(201, payload);
+      } catch (err) {
+        const payload = { error: 'validation_error', message: err.message };
+        if (res && typeof res.status === 'function') return res.status(400).json(payload);
+        return json(400, payload);
+      }
+    }
+
+    if (action === 'review_edge') {
+      if (!userId) {
+        const payload = { error: 'unauthorized', message: 'Authentication required.' };
+        if (res && typeof res.status === 'function') return res.status(401).json(payload);
+        return json(401, payload);
+      }
+      if (role !== 'admin' && role !== 'reviewer') {
+        const payload = { error: 'forbidden', message: 'Reviewer or admin role required.' };
+        if (res && typeof res.status === 'function') return res.status(403).json(payload);
+        return json(403, payload);
+      }
+      try {
+        const result = reviewAndPublishEdge({
+          proposalId: body.proposalId,
+          reviewerId: userId,
+          reviewerRole: role,
+          decision: body.decision,
+          rejectionReason: body.rejectionReason || '',
+        });
+        const status = result.status || 200;
+        if (res && typeof res.status === 'function') return res.status(status).json(result);
+        return json(status, result);
+      } catch (err) {
+        const status = err.message.includes('Role separation') ? 403 : 400;
+        const payload = { error: status === 403 ? 'forbidden' : 'validation_error', message: err.message };
+        if (res && typeof res.status === 'function') return res.status(status).json(payload);
+        return json(status, payload);
+      }
     }
 
     if (action === 'query') {

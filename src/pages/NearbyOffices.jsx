@@ -46,6 +46,7 @@ const NearbyOffices = () => {
   // Search & Filter State
   const initialParams = useMemo(() => new URLSearchParams(routerLocation.search), [routerLocation.search]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [manualLocalityQuery, setManualLocalityQuery] = useState('');
   const [selectedState, setSelectedState] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedChannel, setSelectedChannel] = useState('all');
@@ -197,13 +198,14 @@ const NearbyOffices = () => {
       offices: baseOffices,
       requiredFacilities: selectedFacilities,
       requiredLanguages: selectedLanguages,
-      localityQuery: searchQuery,
+      localityQuery: manualLocalityQuery || searchQuery,
       state: selectedState,
       district: selectedDistrict,
     });
   }, [
     userCoords,
     searchQuery,
+    manualLocalityQuery,
     selectedState,
     selectedDistrict,
     selectedChannel,
@@ -272,6 +274,11 @@ const NearbyOffices = () => {
                 }}
               >
                 Service: {serviceFilter}
+              </span>
+            )}
+            {manualLocalityQuery && (
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginLeft: '0.5rem' }}>
+                • Searching: {manualLocalityQuery}
               </span>
             )}
           </div>
@@ -378,6 +385,66 @@ const NearbyOffices = () => {
               <List size={15} /> Directory List
             </button>
           </div>
+          </div>
+        </div>
+
+        {/* Manual Locality / PIN Search */}
+        <div
+          style={{
+            marginBottom: '1rem',
+            padding: '0.5rem',
+            background: 'var(--bg-main)',
+            borderRadius: '0.6rem',
+            border: '1px solid var(--border-light)',
+            fontSize: '0.9rem',
+          }}
+        >
+          <label
+            style={{
+              fontSize: '0.85rem',
+              fontWeight: '700',
+              color: 'var(--text-tertiary)',
+              textTransform: 'uppercase',
+              marginBottom: '0.35rem',
+              display: 'block',
+            }}
+          >
+            Search by locality, area, or PIN code
+          </label>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <input
+              type="text"
+              id="office-locality-manual-search"
+              aria-label="Search offices by locality, area, or PIN code"
+              placeholder="e.g. 'Janakpuri', '110058', 'Vasant Vihar'"
+              value={manualLocalityQuery}
+              onChange={(e) => setManualLocalityQuery(e.target.value)}
+              style={{
+                flex: '1',
+                borderRadius: '0.5rem',
+                padding: '0.5rem 0.75rem',
+                background: 'var(--bg-subtle)',
+                border: '1px solid var(--border-light)',
+                fontSize: '0.95rem',
+                color: 'var(--text-primary)',
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setManualLocalityQuery('')}
+              style={{
+                borderRadius: '0.5rem',
+                padding: '0.5rem 0.75rem',
+                background: 'var(--accent-main)',
+                border: 'none',
+                color: '#ffffff',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+              }}
+            >
+              Go
+            </button>
           </div>
         </div>
 
