@@ -20,6 +20,11 @@ import {
   verifyBundleIntegrity,
   validateBundleManifest,
 } from '../../../src/data/verifiableEvidenceBundleContract.js';
+import {
+  CUSTODY_SCHEMA_VERSION,
+  verifyCustodyLedger,
+  detectForbiddenPII,
+} from '../../../src/services/evidenceCustodyLedgerExtension.js';
 
 const rateLimiter = createRateLimiter({ limit: 30, windowMs: 60 * 1000 });
 const singleFlight = createSingleFlight();
@@ -42,8 +47,9 @@ export default async function handler(req, res) {
       service: 'civic-verifiable-evidence-verifier',
       status: 'OPERATIONAL',
       supportedSchemaVersions: [BUNDLE_SCHEMA_VERSION],
+      custodySchemaVersion: CUSTODY_SCHEMA_VERSION,
       disclaimer: STATUTORY_EVIDENCE_DISCLAIMER,
-      documentationUrl: 'https://github.com/GoldRay19/Civic-Help-Setu/issues/1160',
+      documentationUrl: 'https://github.com/GoldRay19/Civic-Help-Setu/issues/1425',
     });
   }
 
@@ -83,6 +89,18 @@ export default async function handler(req, res) {
 
     const manifest = rawBody.manifest || rawBody;
     const enclosedFiles = rawBody.enclosedFiles || {};
+    const custodyLedger = Array.isArray(rawBody.custodyLedger) ? rawBody.custodyLedger : null;
+
+    if (custodyLedger) {
+      const pii = detectForbiddenPII(custodyLedger);
+      if (pii) {
+        return res.status(400).json({
+          error: 'Privacy Policy Violation',
+          message: `Custody ledger contains forbidden personal data (${pii.join(', ')}). Logs must exclude Aadhaar, PAN, and personal phone numbers.`,
+          disclaimer: STATUTORY_EVIDENCE_DISCLAIMER,
+        });
+      }
+    }
 
     const manifestValidation = validateBundleManifest(manifest);
     if (!manifestValidation.isValid) {
@@ -103,10 +121,15 @@ export default async function handler(req, res) {
         });
 
         const verification = await verifyBundleIntegrity(manifest, rawFiles);
+        const custodyVerification = custodyLedger
+          ? await verifyCustodyLedger(manifest, custodyLedger)
+          : null;
+
+        const allValid = verification.isValid && (custodyVerification ? custodyVerification.isValid : true);
 
         const responsePayload = {
-          success: verification.isValid,
-          verified: verification.isValid,
+          success: allValid,
+          verified: allValid,
           bundleId: manifest.bundleId,
           complaintId: manifest.complaintId,
           status: verification.status,
@@ -115,10 +138,11 @@ export default async function handler(req, res) {
           errors: verification.errors,
           warnings: verification.warnings,
           verifiedAt: verification.verifiedAt,
+          custodyVerification,
           disclaimer: STATUTORY_EVIDENCE_DISCLAIMER,
         };
 
-        if (verification.isValid) {
+        if (allValid) {
           return res.status(200).json(responsePayload);
         } else {
           return res.status(422).json(responsePayload);

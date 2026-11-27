@@ -1,3 +1,18 @@
+// Fine-Grained Consent Policy Engine Services
+// -------------------------------------------
+// Purpose-limited data sharing consent management and boundary enforcement.
+
+export {
+  createFineGrainedConsentEngine,
+  fineGrainedConsentEngine,
+  FG_CONSENT_FIXTURES,
+  FG_ACTIVE_GRANTS,
+  FG_PURPOSE_REGISTRY,
+  FGConsentGrant,
+  FGPolicyRule,
+  FGConsentPolicy,
+} from './fineGrainedConsentPolicyEngine.js';
+
 // Volunteer Coordination and Skill-Matching Services
 // --------------------------------------------------
 // Re-exports all services for the verified civic volunteer coordination

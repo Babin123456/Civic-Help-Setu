@@ -8,6 +8,7 @@ import civicAgentCostCarbon from "./_lib/civic-agent-cost-carbon.js";
 import civicAgentPolicy from "./_lib/civic-agent-policy.js";
 import civicContractTestMarketplace from "./_lib/civic-contract-test-marketplace.js";
 import civicRecommendationExperimentation from "./_lib/civic-recommendation-experimentation.js";
+import explainableServiceRanker from "./_lib/handlers/explainable-service-ranker.js";
 import civicSourceFreshnessPrediction from "./_lib/civic-source-freshness-prediction.js";
 import counterJourney from "./_lib/counter-journey.js";
 import importBatches from "./_lib/import-batches.js";
@@ -27,9 +28,11 @@ import roadHazards from "./_lib/road-hazards.js";
  */
 import bottleneckFeedback from "./_lib/handlers/bottleneck-feedback.js";
 import addressChange from "./_lib/handlers/address-change-corrections.js";
+import anganwadiCalendar from "./_lib/handlers/anganwadi-calendar.js";
 import businessLicence from "./_lib/handlers/business-licence-feedback.js";
 import catalogueVisualQa from "./_lib/handlers/catalogue-visual-qa.js";
 import communityFacility from "./_lib/handlers/community-facility-corrections.js";
+import civicContributionPipeline from "./_lib/handlers/civic-contribution-pipeline.js";
 import counterDemandReports from "./_lib/handlers/counter-demand-reports.js";
 import crematorium from "./_lib/handlers/crematorium-corrections.js";
 import emailPreferences from "./_lib/handlers/email/preferences.js";
@@ -37,8 +40,11 @@ import emailVerify from "./_lib/handlers/email/verify.js";
 import fireCompliance from "./_lib/handlers/fire-compliance-feedback.js";
 import knowledgeProvenance from "./_lib/handlers/knowledge-provenance.js";
 import libraryCorrections from "./_lib/handlers/library-corrections.js";
+import libraryResourceDirectory from "./_lib/handlers/library-resource-directory.js";
 import pdsObservations from "./_lib/handlers/pds-observations.js";
+import parkMaintenanceSchedule from "./_lib/handlers/park-maintenance-schedule.js";
 import officeComparison from "./_lib/handlers/office-comparison.js";
+import officeVerificationCampaigns from "./_lib/handlers/office-verification-campaigns.js";
 import privacyExports from "./_lib/handlers/privacy-exports.js";
 import rentalChecklist from "./_lib/handlers/rental-checklist-corrections.js";
 import sendEmail from "./_lib/handlers/send-email.js";
@@ -51,6 +57,8 @@ import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
 import temporalPolicy from "./_lib/handlers/temporal-policy.js";
+import treePlantationSurvival from "./_lib/handlers/tree-plantation-survival.js";
+import portalChangeMonitor from "./_lib/handlers/portal-change-monitor.js";
 import agentReviewStudio from "./_lib/handlers/agent-review-studio.js";
 import civicAgentEval from "./_lib/handlers/civic-agent-eval.js";
 
@@ -58,12 +66,15 @@ import verifiableEvidenceBundles from "./_lib/handlers/verifiable-evidence-bundl
 
 import zkAttributeProofVerify from "./_lib/handlers/zk-attribute-proof-verify.js";
 import federatedCivicQuery from "./_lib/handlers/federated-civic-query.js";
+import searchQueryRecovery from "./_lib/handlers/search-query-recovery.js";
 
 
 import civicDataCleanRoom from "./_lib/handlers/civic-data-clean-room.js";
 
 import floodIncidentReports from "./_lib/handlers/flood-incident-reports.js";
 import schoolZoneAudits from "./_lib/handlers/school-zone-audits.js";
+import civicDraftSync from "./_lib/handlers/civic-draft-sync.js";
+import schoolDefectRegister from "./_lib/handlers/school-defect-register.js";
 import heatReliefObservations from "./_lib/handlers/heat-relief-observations.js";
 
 import { GET as graphGET, POST as graphPOST } from "./_lib/graphRoute.js";
@@ -86,7 +97,9 @@ import tenantAdministration from "./_lib/handlers/tenant-administration.js";
 import ghgInventory from "./_lib/handlers/ghg-inventory.js";
 import microVolunteer from "./_lib/handlers/micro-volunteer.js";
 import reliefOperations from "./_lib/handlers/relief-operations.js";
+import disasterReliefBoard from "./_lib/handlers/disaster-relief-board.js";
 import jurisdictionHandoff from "./_lib/handlers/jurisdiction-handoff.js";
+import redactedSharingRoom from "./_lib/handlers/redacted-sharing-room.js";
 
 import agentSandbox from "./_lib/handlers/agent-sandbox.js";
 import agentIncidentResponse from "./_lib/handlers/agent-incident-response.js";
@@ -124,6 +137,7 @@ const baseHandlers = {
   "civic-agent-policy": civicAgentPolicy,
   "civic-contract-test-marketplace": civicContractTestMarketplace,
   "civic-recommendation-experimentation": civicRecommendationExperimentation,
+  "explainable-service-ranker": explainableServiceRanker,
   "civic-source-freshness-prediction": civicSourceFreshnessPrediction,
   "counter-journey": counterJourney,
   "import-batches": importBatches,
@@ -131,6 +145,7 @@ const baseHandlers = {
   "road-hazards": roadHazards,
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
+  "anganwadi-calendar": anganwadiCalendar,
   "agent-review-studio": agentReviewStudio,
   "civic-agent-eval": civicAgentEval,
   "business-licence-feedback": businessLicence,
@@ -142,20 +157,26 @@ const baseHandlers = {
   "civic-surveys": civicSurveys,
   "accessibility-inspector": accessibilityInspector,
   "community-facility-corrections": communityFacility,
+  "civic-contribution-pipeline": civicContributionPipeline,
   "counter-demand-reports": counterDemandReports,
   "crematorium-corrections": crematorium,
   "email/preferences": emailPreferences,
   "email/verify": emailVerify,
   "federated-civic-query": federatedCivicQuery,
+  "search-query-recovery": searchQueryRecovery,
   "fire-compliance-feedback": fireCompliance,
   "flood-incident-reports": floodIncidentReports,
   "heat-relief-observations": heatReliefObservations,
+  "heatwave-cooling-directory": heatReliefObservations,
   "knowledge-provenance": knowledgeProvenance,
   "civic-release-ledger": civicReleaseLedger,
   "library-corrections": libraryCorrections,
+  "library-resource-directory": libraryResourceDirectory,
   "office-comparison": officeComparison,
+  "office-verification-campaigns": officeVerificationCampaigns,
   "open-contracting-analytics": openContractingAnalytics,
   "pds-observations": pdsObservations,
+  "park-maintenance-schedule": parkMaintenanceSchedule,
   "pedestrian-barriers": pedestrianBarriers,
   "privacy-exports": privacyExports,
   "public-toilets": publicToilets,
@@ -163,6 +184,8 @@ const baseHandlers = {
   "send-email": sendEmail,
   "share-by-email": shareByEmail,
   "temporal-policy": temporalPolicy,
+  "tree-plantation-survival": treePlantationSurvival,
+  "portal-change-monitor": portalChangeMonitor,
   "tender-corrections": tenderCorrections,
 
   "verifiable-evidence-bundles": verifiableEvidenceBundles,
@@ -182,12 +205,15 @@ const baseHandlers = {
   "zk-attribute-proof-verify": zkAttributeProofVerify,
 
   "school-zone-audits": schoolZoneAudits,
+  "civic-draft-sync": civicDraftSync,
+  "school-defect-register": schoolDefectRegister,
   "public-projects": publicProjects,
   "tenant-administration": tenantAdministration,
   "ghg-inventory": ghgInventory,
   "micro-volunteer": microVolunteer,
   "micro-volunteer-board": microVolunteer,
   "relief-operations": reliefOperations,
+  "disaster-relief-board": disasterReliefBoard,
   "jurisdiction-handoff": jurisdictionHandoff,
   "agent-sandbox": agentSandbox,
   "policy-simulation": policySimulation,
@@ -202,6 +228,7 @@ const baseHandlers = {
   "multi-region-status": multiRegionStatus,
   "multi-region-metrics": multiRegionStatus,
   "case-collaboration": caseCollaboration,
+  "redacted-sharing-room": redactedSharingRoom,
   "synthetic-datasets": syntheticDatasets,
   "cache": cacheManagement,
   "cache/status": cacheManagement,
@@ -437,6 +464,11 @@ export function createApiDispatcher({
       "civic-agent-cost-carbon",
       "civic-agent-eval",
       "waterbody-restoration",
+      "tree-plantation-survival",
+      "park-maintenance-schedule",
+      "library-resource-directory",
+      "anganwadi-calendar",
+      "school-defect-register",
       "civic-agent-policy",
       "civic-contract-test-marketplace",
       "civic-recommendation-experimentation",

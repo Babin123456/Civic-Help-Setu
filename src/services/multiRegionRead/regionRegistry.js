@@ -50,6 +50,7 @@ export const REGION_REGISTRY = Object.freeze({
     maxLagMs: 2000,
     maxLagCriticalMs: 10000,
     readOnly: true,
+    capacityPercent: 100,
   }),
 
   'europe-west1': createRegionConfig({
@@ -62,6 +63,7 @@ export const REGION_REGISTRY = Object.freeze({
     maxLagMs: 2000,
     maxLagCriticalMs: 10000,
     readOnly: true,
+    capacityPercent: 100,
   }),
 
   'asia-southeast1': createRegionConfig({
@@ -74,6 +76,7 @@ export const REGION_REGISTRY = Object.freeze({
     maxLagMs: 2000,
     maxLagCriticalMs: 10000,
     readOnly: true,
+    capacityPercent: 100,
   }),
 
   'australia-southeast1': createRegionConfig({
@@ -86,6 +89,7 @@ export const REGION_REGISTRY = Object.freeze({
     maxLagMs: 3000,
     maxLagCriticalMs: 15000,
     readOnly: true,
+    capacityPercent: 100,
   }),
 
   // FUTURE: India secondary region for DR (read-only, India residency)
