@@ -8,18 +8,30 @@
 
 ## 1. Architecture Overview
 
-The Multi-Region Read Layer provides region-aware read routing for high-traffic public catalogues and citizen dashboards with **read-your-writes consistency**.
+The Regional Traffic Steering Layer extends the Multi-Region Read Layer with health-based,
+latency-aware, capacity-aware routing and fail-closed residency enforcement.
 
 ### Key Components
 
 | Component | Purpose |
 |-----------|---------|
-| **RegionRegistry** | Declares approved regions, residency, and Firestore connections |
-| **ReplicaHealthMonitor** | Tracks per-replica lag, errors, and health |
-| **ReadRouter** | Selects optimal replica per request |
+| **RegionRegistry** | Declares approved regions, residency, capacity, and Firestore connections |
+| **ReplicaHealthMonitor** | Tracks per-replica lag, errors, latency, capacity, and health |
+| **ReadRouter** | Selects optimal replica per request using multi-criteria decision |
 | **SessionTokenStore** | Issues/validates RYW tokens (JWS HS256) |
-| **FailoverController** | Manages draining, failover, and recovery |
-| **ResponseDecorator** | Injects `x-stale-read`, `x-replica-lag-ms` headers |
+| **FailoverController** | Manages draining, failover, controlled recovery, and failback |
+| **ResponseDecorator** | Injects `x-stale-read`, `x-replica-lag-ms`, new steering headers |
+| **TrafficSteeringLayer** | Core routing logic with health, latency, capacity, residency, sticky sessions |
+
+### Data Classification
+
+| Category | Collections | Replication |
+|----------|-------------|-------------|
+| **Public Reference** | `services`, `notices`, `micro_tasks`, `publicToiletSubmissions` | ✅ All regions |
+| **Anonymized Submissions** | `errorReports`, `barrierReports` | ✅ All regions |
+| **Sensitive Citizen Data** | `users/*`, `applications`, `grievanceTickets`, `privacyExports` | ❌ **Never** — primary only (fail-closed) |
+| **Admin/Operator** | `roles`, `reviewOverrides`, `auditLogs` | ❌ Primary only |
+| **Stateful / Sticky** | `users`, `applications`, `drafts`, `settings`, `checklists`, `assessments`, `saved` | ✅ With sticky session support |
 
 ### Data Classification
 
@@ -95,6 +107,9 @@ gcloud firestore databases list
 | `stale_read_rate` | < 5% | > 20% |
 | `ryw_validation_routed_to_primary` | < 1% | > 5% |
 | `failover_duration` (p99) | < 5s | > 15s |
+| `replica_capacity_percent` (p95) | > 30% | < 20% |
+| `replica_latency_ms` (p95) | < 200ms | > 500ms |
+| `residency_violation_count` | 0 | > 0 |
 
 ### 3.2 Dashboards
 
@@ -112,6 +127,8 @@ gcloud firestore databases list
 | `AllReplicasDown` | No healthy replicas | P0 | §4.3 |
 | `RYWValidationSpike` | > 5% routed_to_primary | P2 | §4.4 |
 | `StaleReadSpike` | > 20% stale reads | P2 | §4.5 |
+| `CapacityExhausted` | `capacityPercent < 20%` for 5m | P2 | §4.6 |
+| `ResidencyRuleViolation` | Non-India region serving India-resident data | P0 | §4.7 |
 
 ---
 
@@ -203,6 +220,47 @@ curl https://api.civichelp.org/multi-region/health | jq '.replicas["us-central1"
 2. Check geo-routing logic
 3. Temporarily increase `rolloutPercent` to 0 if primary overloaded
 
+### 4.6 Capacity Exhausted
+
+**Symptoms:** `CapacityExhausted` alert, replica `capacityPercent < 20%` sustained for 5 minutes, increased error rates, timeouts
+
+**Diagnosis:**
+1. Check replica metrics: `capacityPercent`, `errorRate5m`, `consecutiveErrors`
+2. Verify no resource leaks or sudden traffic spikes
+3. Check Firestore quota limits and read/write throughput
+4. Verify replication lag is not contributing to perceived slowness
+
+**Actions:**
+1. Deprioritize exhausted replica: router automatically reduces weight via capacity-aware routing
+2. Scale replica resources (Firestore capacity, compute resources)
+3. If persistent: consider adding additional replica region
+4. Monitor `replica_capacity_percent` trend over 30 minutes
+5. If capacity does not recover: open P2 ticket for infrastructure review
+
+### 4.7 Residency Rule Violation
+
+**Symptoms:** `ResidencyRuleViolation` alert, non-India region serving India-resident citizen data, potential data governance breach
+
+**Diagnosis:**
+1. Check routing decisions: `x-residency-enforced` and `x-residency-compliant` headers
+2. Verify collection path requires India residency: `requiresIndiaResidency(collectionPath)`
+3. Check if region residency matches: `getRegion(regionId).residency === RESIDENCY_CLASS.INDIA`
+4. Review recent failover events that may have shifted routing
+
+**Actions:**
+1. **Immediate**: Trigger manual failover to primary or healthy India-resident replica
+   ```bash
+   curl -X POST https://api.civichelp.org/multi-region/failover \
+     -H "Authorization: Bearer $ADMIN_TOKEN" \
+     -d '{"regionId": "us-central1", "reason": "residency_violation"}'
+   ```
+2. Route all sensitive reads to primary until root cause resolved
+3. Investigate why non-India region was selected: routing logic bug, config drift, or replica health misreporting
+4. Apply fix and re-deploy if code/config change required
+5. Review audit logs for data access during violation window
+6. File P0 security incident if citizen data was potentially exposed
+7. Post-incident: update residency enforcement tests and monitoring thresholds
+
 ---
 
 ## 5. Operational Procedures
@@ -259,6 +317,80 @@ MULTI_REGION_READS_ENABLED=false
 4. RYW tokens auto-expire (1h TTL)
 5. Investigate and fix before re-enabling
 
+### 5.5 Traffic Steering Layer Operations
+
+#### 5.5.1 Monitor Steering Decisions
+
+Track the new routing metadata headers in production:
+- `x-latency-ms`: Observed latency at served replica
+- `x-capacity-percent`: Available capacity percentage
+- `x-residency-compliant`: Residency rule compliance status
+- `x-residency-enforced`: Whether fail-closed residency was applied
+- `x-sticky-session`: Whether sticky session was established
+
+**Healthy signs**: Diversified routing across regions, latency within thresholds, capacity > 30%, residency compliance 100% for sensitive data.
+
+**Warning signs**: Concentration of traffic in single region, latency spikes, capacity < 20%, residency violations.
+
+#### 5.5.2 Controlled Failback
+
+To initiate controlled failback for a recovered replica:
+
+```bash
+# Check current failover status
+curl https://api.civichelp.org/multi-region/failover-status
+
+# Initiate controlled failback
+curl -X POST https://api.civichelp.org/multi-region/controlled-failback \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -d '{"regionId": "us-central1"}'
+```
+
+**Failback process**:
+1. Replica transitions to RECOVERING state if currently HEALTHY
+2. Weight ramped from 10% → 100% over recovery ramp steps (5 min total)
+3. Full weight applied when observation window (60s) passes
+4. Router uses normal weights; replica back in rotation
+
+#### 5.5.3 Emergency Sticky Session Reset
+
+If sticky sessions are causing issues (pinning to degraded replica):
+
+```bash
+# Force expiry of sticky session markers
+# This is handled automatically by session TTL (1 hour max)
+# Or manually by clearing user session cache
+
+# Route specific user to fresh replica
+curl -X POST https://api.civichelp.org/multi-region/reset-sticky \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -d '{"userId": "user-12345"}'
+```
+
+#### 5.5.4 Add New Replica with Capacity Tracking
+
+1. Provision Firestore read-only replica
+2. Add to `RegionRegistry` in `src/services/multiRegionRead/regionRegistry.js` with `capacityPercent: 100`
+3. Deploy replication pipeline for new region
+4. Verify heartbeat publishing with latency and capacity metrics:
+   ```bash
+   curl https://api.civichelp.org/multi-region/health | jq '.replicas["new-region"]'
+   ```
+5. Wait for lag < 1s and capacity > 50% for 10 minutes
+6. Enable in router; weight will ramp via normal recovery process
+7. Monitor for 24h at each rollout stage
+
+#### 5.5.5 Remove Replica Region
+
+1. Set weight to 0 via runtime config or `MULTI_REGION_REPLICA_WEIGHT_old-region=0`
+2. Wait for drain (max 30s, tracked by drain timeout)
+3. Verify no traffic to replica (`x-served-by-region` no longer includes region)
+4. Remove from `RegionRegistry`
+5. Deprovision Firestore replica
+6. Remove replication pipeline
+
+---
+
 ---
 
 ## 6. Capacity Planning
@@ -298,8 +430,11 @@ MULTI_REGION_READS_ENABLED=false
 - [ ] Integration tests pass: `npm test -- multiRegionReadIntegration`
 - [ ] Failure injection tests pass: `npm test -- multiRegionReadFailureInjection`
 - [ ] Load tests pass: `npm test -- multiRegionReadLoad`
+- [ ] **Steering layer tests pass**: `npm test -- multiRegionReadSteering`
 - [ ] Firestore rules test: `npm run rules:test`
 - [ ] Synthetic data validation: no real PII in test fixtures
+- [ ] Concurrency tests: simultaneous routing decisions under load
+- [ ] Failover/fallback round-trip tests: complete recovery cycle verification
 
 ---
 

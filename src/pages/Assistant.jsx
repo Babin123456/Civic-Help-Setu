@@ -1,8 +1,19 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import { parseAssistantQuery, parseSlugParam } from '../utils/searchParams';
 import { useLocation, Link } from 'react-router-dom';
-import { Send, AlertCircle, Loader2, Sparkles, Mic, MicOff, BookOpen, RefreshCw, Pencil, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { Send, AlertCircle, Loader2, Sparkles, Mic, MicOff, BookOpen, RefreshCw, Pencil, ShieldCheck, ShieldAlert, Info } from 'lucide-react';
+import { LanguageContext } from '../context/LanguageContext';
+import {
+  VOICE_SUPPORTED_LANGUAGES,
+  voiceLangFromAppLocale,
+  readVoiceConsent,
+  writeVoiceConsent,
+  queryMicrophonePermission,
+  classifyRecognitionError,
+  extractSpeechTranscript,
+} from '../utils/voiceSearch';
 import { runPreInferenceGuardrails } from '../ai/aiGuardrailPipeline';
+import { askGroundedCivicAssistant } from '../ai/groundedCivicAssistant';
 import { runCivicAgentPipeline } from '../ai/agents/agentOrchestrator';
 import AgentContractBadge from '../components/assistant/AgentContractBadge';
 import SourceGroundedBadge from '../components/assistant/SourceGroundedBadge';
@@ -42,9 +53,11 @@ import {
 
 import CaseMemoryInspectionModal from '../components/assistant/CaseMemoryInspectionModal';
 import { caseMemoryEngine } from '../services/agentMemory/caseMemoryEngine';
+import GovernedToolActionsPanel from '../components/assistant/GovernedToolActionsPanel';
 
 
 const Assistant = () => {
+  const languageContext = useContext(LanguageContext);
   const [messages, setMessages] = useState(() => loadChatHistory());
   const [flaggedReviewIds, setFlaggedReviewIds] = useState({});
 
@@ -65,6 +78,13 @@ const Assistant = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [voiceError, setVoiceError] = useState('');
+  const [voiceLanguage, setVoiceLanguage] = useState(() =>
+    voiceLangFromAppLocale(languageContext?.language || 'en')
+  );
+  const [hasVoiceConsent, setHasVoiceConsent] = useState(() => readVoiceConsent());
+  const [showVoiceConsent, setShowVoiceConsent] = useState(false);
+  const [showVoiceLimitations, setShowVoiceLimitations] = useState(false);
+  const [hasVoiceTranscript, setHasVoiceTranscript] = useState(false);
   const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -91,6 +111,16 @@ const Assistant = () => {
   useEffect(() => {
     saveChatHistory(messages);
   }, [messages]);
+
+  useEffect(() => {
+    return () => {
+      try {
+        recognitionRef.current?.abort?.();
+      } catch {
+        // Safe ignore on unmount
+      }
+    };
+  }, []);
 
   const getAnswer = async (query, history) => {
     // Short follow-ups like "what are the fees?" reuse the service from the last answer
@@ -128,8 +158,7 @@ const Assistant = () => {
         jurisdictionCode: jurisdictionParam,
       });
     } catch (groundingErr) {
-      logDiagnostic('Grounded retrieval error, falling back to basic assistant:', groundingErr);
-      response = await askCivicAssistant(safeQuery);
+      logDiagnostic('Grounded retrieval error, falling back to model gateway:', groundingErr);
 
       try {
         const gatewayRes = await executeModelGateway({ query: safeQuery });
@@ -197,6 +226,7 @@ const Assistant = () => {
       setMessages((prev) => [...prev, userMessage]);
     }
     setInput('');
+    setHasVoiceTranscript(false);
     setIsLoading(true);
     setError(null);
     setFailedQuery(null);
@@ -276,27 +306,26 @@ const Assistant = () => {
     inputRef.current?.focus();
   };
 
-  const toggleVoiceInput = () => {
+  const startVoiceRecognition = () => {
     setVoiceError('');
+    setShowVoiceConsent(false);
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      setVoiceError('Speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge.');
+      setVoiceError(classifyRecognitionError('unsupported').message);
       return;
     }
 
-    if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
-      return;
-    }
+    let gotTranscript = false;
+    let hadError = false;
+    let stoppedManually = false;
 
     try {
       const recognition = new SpeechRecognition();
       recognitionRef.current = recognition;
       recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = 'en-IN';
+      recognition.lang = voiceLanguage || 'en-IN';
 
       recognition.onstart = () => {
         setIsListening(true);
@@ -304,32 +333,80 @@ const Assistant = () => {
       };
 
       recognition.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map((result) => result[0].transcript)
-          .join('');
-        setInput(transcript);
+        const extracted = extractSpeechTranscript(event);
+        if (!extracted.isEmpty) {
+          gotTranscript = true;
+          setInput(extracted.transcript);
+          setHasVoiceTranscript(true);
+        } else if (extracted.isFinal && !gotTranscript) {
+          setVoiceError(classifyRecognitionError('no-speech').message);
+        }
       };
 
       recognition.onerror = (event) => {
         console.error('Speech error:', event.error);
-        if (event.error === 'not-allowed') {
-          setVoiceError('Microphone permission was denied. Please allow microphone access in your browser.');
-        } else if (event.error !== 'no-speech') {
-          setVoiceError(`Voice recognition error: ${event.error}`);
-        }
+        hadError = true;
+        const classified = classifyRecognitionError(event.error);
+        setVoiceError(classified.message);
         setIsListening(false);
       };
 
       recognition.onend = () => {
         setIsListening(false);
+        if (!gotTranscript && !hadError && !stoppedManually) {
+          setVoiceError(classifyRecognitionError('no-speech').message);
+        }
+        if (gotTranscript) {
+          inputRef.current?.focus();
+        }
+      };
+
+      recognition._markManualStop = () => {
+        stoppedManually = true;
       };
 
       recognition.start();
     } catch (err) {
       logDiagnostic('Failed to initialize speech recognition:', err);
-      setVoiceError('Could not start microphone recording. Please check browser settings.');
+      setVoiceError('Could not start microphone recording. Please check browser settings or type manually.');
       setIsListening(false);
     }
+  };
+
+  const toggleVoiceInput = async () => {
+    setVoiceError('');
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setVoiceError(classifyRecognitionError('unsupported').message);
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current?._markManualStop?.();
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const perm = await queryMicrophonePermission();
+    if (perm.state === 'denied') {
+      setVoiceError(classifyRecognitionError('not-allowed').message);
+      return;
+    }
+
+    if (!hasVoiceConsent) {
+      setShowVoiceConsent(true);
+      return;
+    }
+
+    startVoiceRecognition();
+  };
+
+  const handleConfirmVoiceConsent = () => {
+    writeVoiceConsent(true);
+    setHasVoiceConsent(true);
+    startVoiceRecognition();
   };
 
   const handleNewConversationClick = () => {
@@ -544,6 +621,14 @@ const Assistant = () => {
         {msg.ragResult && <SourceTraceabilityPanel ragResult={msg.ragResult} />}
         <SourcesAndLimitations message={msg} />
 
+        {/* Capability-governed tool actions (#1146) */}
+        <GovernedToolActionsPanel
+          serviceId={msg.serviceId}
+          title={data.title}
+          officialSources={data.officialSources}
+          sessionId={currentCaseId}
+        />
+
         {/* Suggested Follow-up Questions */}
         {msg.suggestions && msg.suggestions.length > 0 && (
           <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px dashed var(--border-light)' }}>
@@ -621,13 +706,6 @@ const Assistant = () => {
           canReset={needsResetConfirmation(messages)}
           isLoading={isLoading}
           onOpenCaseMemory={() => setShowCaseMemoryModal(true)}
-        />
-
-        {/* Voice Input Feedback */}
-        <VoiceInputStatus
-          isListening={isListening}
-          voiceError={voiceError}
-          onDismissError={() => setVoiceError('')}
         />
 
         {/* Personalized Civic Recommendations based on User Profile Context */}
@@ -822,11 +900,100 @@ const Assistant = () => {
           />
         )}
 
+        {/* Voice Input Feedback (placed directly above the input bar so it stays in view) */}
+        <VoiceInputStatus
+          isListening={isListening}
+          voiceError={voiceError}
+          onDismissError={() => setVoiceError('')}
+          onStopListening={() => {
+            recognitionRef.current?._markManualStop?.();
+            recognitionRef.current?.stop();
+            setIsListening(false);
+          }}
+          showConsentPrompt={showVoiceConsent}
+          onConfirmConsent={handleConfirmVoiceConsent}
+          onDismissConsent={() => setShowVoiceConsent(false)}
+          voiceLanguage={voiceLanguage}
+          onVoiceLanguageChange={setVoiceLanguage}
+          showLimitations={showVoiceLimitations}
+          onToggleLimitations={() => setShowVoiceLimitations((prev) => !prev)}
+          hasEditableTranscript={hasVoiceTranscript && Boolean(input.trim())}
+        />
+
+        {/* Voice Language & Limitations Bar */}
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.5rem',
+            marginBottom: '0.5rem',
+            fontSize: '0.78rem',
+            color: 'var(--text-secondary)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+            <label htmlFor="assistant-voice-lang" style={{ fontWeight: '600' }}>
+              Voice language:
+            </label>
+            <select
+              id="assistant-voice-lang"
+              aria-label="Voice recognition language"
+              value={voiceLanguage}
+              onChange={(e) => setVoiceLanguage(e.target.value)}
+              disabled={isListening}
+              style={{
+                padding: '0.25rem 0.55rem',
+                borderRadius: '99px',
+                border: '1px solid var(--border-main)',
+                background: 'var(--bg-secondary)',
+                color: 'var(--text-primary)',
+                fontSize: '0.78rem',
+                cursor: isListening ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {VOICE_SUPPORTED_LANGUAGES.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowVoiceLimitations((prev) => !prev)}
+            aria-expanded={showVoiceLimitations}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              padding: '0.25rem 0.6rem',
+              borderRadius: '99px',
+              border: '1px solid var(--border-light)',
+              background: 'var(--glass-bg)',
+              color: 'var(--text-secondary)',
+              fontSize: '0.75rem',
+              cursor: 'pointer',
+            }}
+          >
+            <Info size={13} aria-hidden="true" />
+            <span>Voice languages &amp; limits</span>
+          </button>
+        </div>
+
         {/* Input Bar */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSendMessage();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape' && isListening) {
+              recognitionRef.current?._markManualStop?.();
+              recognitionRef.current?.stop();
+              setIsListening(false);
+            }
           }}
           style={{
             position: 'sticky',
@@ -845,8 +1012,9 @@ const Assistant = () => {
           <button
             type="button"
             onClick={toggleVoiceInput}
+            aria-pressed={isListening}
             aria-label={isListening ? 'Stop listening' : 'Start voice typing'}
-            title="Voice typing uses your browser's speech service. In Chrome the audio is processed by Google."
+            title="Voice typing (optional; asks permission first). In Chrome/Edge, transient audio is processed by the browser speech service."
             style={{
               padding: '0.65rem',
               flexShrink: 0,
@@ -870,7 +1038,10 @@ const Assistant = () => {
             aria-label="Ask a civic question"
             placeholder='Ask e.g. "Documents for Birth Certificate"'
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              if (!e.target.value.trim()) setHasVoiceTranscript(false);
+            }}
             disabled={isLoading}
             style={{
               flex: 1,

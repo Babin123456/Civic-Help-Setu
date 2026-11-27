@@ -3,20 +3,24 @@
  *
  * Implements a deterministic, policy-governed tool registry and execution router:
  * - Decouples LLM tool suggestions from direct execution:
- *   * Typed input/output schemas
- *   * Strict permission tiers: READ_ONLY_CATALOGUE, CITIZEN_CONFIRMED_ACTION, ADMIN_RESTRICTED
+ *   * Typed JSON Schemas & permission tiers: READ_ONLY_CATALOGUE, CITIZEN_CONFIRMED_ACTION, ADMIN_RESTRICTED
  * - Validates service IDs against the live civic catalogue
  * - Fail-closed security architecture:
  *   * Unknown tool names fail closed
  *   * Malformed or unauthorized parameters trigger immediate abort
  *   * Injection attempts or vault access attempts are rejected
- * - Enforces per-turn execution budgets:
- *   * Max tool calls per turn (default: 3)
- *   * Execution timeout boundary (default: 5000ms)
- * - State-changing operations require explicit citizen confirmation payload
+ * - Integrates with the GovernedToolRegistry capability engine (#1146) for
+ *   short-lived scoped capabilities, replay prevention, and admin revocation.
  */
 
 import { civicAgentIncidentResponse, REGISTERED_AGENTS } from '../services/incidentResponse/civicAgentIncidentResponseService';
+import {
+  REGISTERED_TOOLS,
+  inspectSensitiveArguments,
+  validateAgainstJsonSchema,
+} from '../services/toolRegistry/toolContracts.js';
+import { createGovernedToolRegistry } from '../services/toolRegistry/governedToolRegistry.js';
+import { generateNonceId } from '../services/toolRegistry/capabilityService.js';
 
 export const TOOL_PERMISSION_TIERS = Object.freeze({
   READ_ONLY_CATALOGUE: 'READ_ONLY_CATALOGUE',
@@ -39,6 +43,7 @@ export const TOOL_DEFINITIONS = Object.freeze({
     permission: TOOL_PERMISSION_TIERS.READ_ONLY_CATALOGUE,
     description: 'Fetches verified requirements and eligibility criteria for a service',
     requiresConfirmation: false,
+    inputSchema: REGISTERED_TOOLS.lookupServiceDetails.inputSchema,
     validateArgs: (args) => {
       if (!args || typeof args.serviceId !== 'string') return false;
       return KNOWN_VALID_SERVICE_IDS.includes(args.serviceId);
@@ -49,6 +54,7 @@ export const TOOL_DEFINITIONS = Object.freeze({
     permission: TOOL_PERMISSION_TIERS.READ_ONLY_CATALOGUE,
     description: 'Searches public frequently asked questions across verified portals',
     requiresConfirmation: false,
+    inputSchema: REGISTERED_TOOLS.searchCivicFaq.inputSchema,
     validateArgs: (args) => Boolean(args && typeof args.query === 'string' && args.query.trim())
   },
   saveApplicationDraft: {
@@ -56,6 +62,7 @@ export const TOOL_DEFINITIONS = Object.freeze({
     permission: TOOL_PERMISSION_TIERS.CITIZEN_CONFIRMED_ACTION,
     description: 'Saves citizen progress draft to local storage or user profile',
     requiresConfirmation: true,
+    inputSchema: REGISTERED_TOOLS.saveApplicationDraft.inputSchema,
     validateArgs: (args) => Boolean(args && args.serviceId && args.formData)
   },
   scheduleGrievanceFollowUp: {
@@ -63,6 +70,7 @@ export const TOOL_DEFINITIONS = Object.freeze({
     permission: TOOL_PERMISSION_TIERS.CITIZEN_CONFIRMED_ACTION,
     description: 'Schedules automated notification reminder for grievance resolution',
     requiresConfirmation: true,
+    inputSchema: REGISTERED_TOOLS.scheduleGrievanceFollowUp.inputSchema,
     validateArgs: (args) => Boolean(args && args.grievanceId && args.reminderDate)
   }
 });
@@ -73,6 +81,12 @@ export class PolicyControlledToolRouter {
     this.timeoutMs = options.timeoutMs || 5000;
     this.toolRegistry = new Map(Object.entries(TOOL_DEFINITIONS));
     this.executionLog = [];
+    // Ephemeral session-only key for local sandbox capability routing when no backend is attached.
+    this._localSessionSecret = options.sessionSecret || `local-sandbox-${generateNonceId('sec')}`;
+    this.governedRegistry = options.governedRegistry || createGovernedToolRegistry({
+      secret: this._localSessionSecret,
+      incidentResponse: civicAgentIncidentResponse,
+    });
   }
 
   /**
@@ -117,9 +131,21 @@ export class PolicyControlledToolRouter {
       };
     }
 
+    if (context.strictJsonSchema && tool.inputSchema) {
+      const schemaResult = validateAgainstJsonSchema(tool.inputSchema, args);
+      if (!schemaResult.valid) {
+        return {
+          allowed: false,
+          reason: `Schema validation failed for ${toolName}: ${schemaResult.errors.join('; ')}`,
+          code: 'INVALID_ARGUMENTS'
+        };
+      }
+    }
+
     // 3. Vault & Private access check (Prohibited without explicit elevation)
+    const sensitiveCheck = inspectSensitiveArguments(args);
     const rawArgsString = JSON.stringify(args || {}).toLowerCase();
-    if (rawArgsString.includes('vault') || rawArgsString.includes('aadhaar') || rawArgsString.includes('password')) {
+    if (!sensitiveCheck.safe || rawArgsString.includes('vault') || rawArgsString.includes('aadhaar') || rawArgsString.includes('password')) {
       return {
         allowed: false,
         reason: 'Security violation: Tool arguments attempt unauthorized vault or sensitive access',
@@ -180,10 +206,39 @@ export class PolicyControlledToolRouter {
         output: { status: 'executed', timestamp: Date.now(), data: call.args }
       };
 
-      this.executionLog.push({ ...call, timestamp: Date.now() });
+      this.executionLog.push({ toolName: call.toolName, timestamp: Date.now() });
       results.push(executionResult);
     }
 
     return results;
+  }
+
+  /**
+   * Executes a single tool call through the capability-governed registry.
+   */
+  async executeWithCapability({
+    capabilityToken,
+    toolName,
+    args,
+    actorUserId,
+    actorRole = 'citizen',
+    sessionId = 'default-session',
+    correlationId,
+    citizenConfirmed = false,
+    humanApproved = false,
+    provenance = null,
+  }) {
+    return this.governedRegistry.invokeTool({
+      capabilityToken,
+      toolName,
+      args,
+      actorUserId,
+      actorRole,
+      sessionId,
+      correlationId,
+      citizenConfirmed,
+      humanApproved,
+      provenance,
+    });
   }
 }

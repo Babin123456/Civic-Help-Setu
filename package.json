@@ -19,6 +19,7 @@
     "eval:contracts": "node scripts/evaluateAgentContracts.mjs",
     "eval:harness": "node scripts/runCivicAgentEvalHarness.mjs",
     "eval:gateway": "vitest run src/services/gateway/gatewayEvaluationReport.test.js",
+    "eval:tool-registry": "node scripts/evaluateToolRegistry.mjs",
     "lhci:collect": "lhci collect",
     "lhci:assert": "lhci assert",
     "contracts:check": "node scripts/contracts/check.mjs",

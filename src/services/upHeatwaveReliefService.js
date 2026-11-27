@@ -13,10 +13,14 @@ import {
   HEAT_ALERT_LEVELS,
   calculateFacilityFreshness,
   validateCommunityObservation,
+  validateFacilityRecord,
+  isVerifiedMunicipalOrDisasterSource,
+  isTemporaryFacilityExpired,
   sanitizeAndRedactText,
   snapCoordinates,
   isCoordinateWithinUP,
 } from '../data/upHeatwaveReliefContract';
+import { inspectStringForPII } from './piiLeakageGuardService';
 import { SEED_HEATWAVE_FACILITIES } from '../data/upHeatwaveReliefSeed';
 
 const STORAGE_KEY = 'civicbridge_up_heat_relief_facilities_v1';
@@ -217,14 +221,21 @@ export function resolveFacilityDynamicStatus(facility, observations = [], curren
     }
   }
 
+  if (freshness.isExpired) {
+    effectiveStatus = OPERATIONAL_STATUS.TEMPORARILY_CLOSED;
+    temporaryReason = facility.temporaryClosureReason || 'Temporary facility expired automatically after scheduled end date.';
+  }
+
   return {
     ...facility,
     freshness,
+    originClassification: 'official_record',
     effectiveOperationalStatus: effectiveStatus,
     effectiveCapacityStatus: effectiveCapacity,
     temporaryClosureReason: temporaryReason,
     isDisputed,
     disputeDetails,
+    isExpired: freshness.isExpired,
     isStale: freshness.isStale,
     isSeasonActive: freshness.isSeasonActive,
     recentObservationsCount: recentObservations.length,
@@ -253,12 +264,23 @@ export function listHeatReliefFacilities(filters = {}, currentTime = new Date())
     onlyOrsAvailable = false,
     onlyDrinkingWater = false,
     searchQuery = '',
+    includeExpired = false,
     userCoordinates = null,
     locationConsentGranted = false, // Strictly gate GPS distance on explicit consent
   } = filters;
 
   return rawFacilities
     .filter((facility) => {
+      // Directory must be populated strictly from verified municipal or disaster-management sources
+      if (!isVerifiedMunicipalOrDisasterSource(facility)) {
+        return false;
+      }
+
+      // Automatic expiry of temporary facilities unless explicitly requested
+      if (!includeExpired && isTemporaryFacilityExpired(facility, currentTime)) {
+        return false;
+      }
+
       // District filter (case-insensitive)
       if (district && facility.district.toLowerCase() !== district.toLowerCase()) {
         return false;
@@ -633,4 +655,78 @@ export function syncOfflineDrafts(currentTime = new Date()) {
   }
 
   return results;
+}
+
+function findPiiViolationsInValue(node) {
+  if (typeof node === 'string') {
+    const check = inspectStringForPII(node);
+    return check.clean ? [] : check.violations;
+  }
+  if (Array.isArray(node)) {
+    return node.flatMap(findPiiViolationsInValue);
+  }
+  if (node && typeof node === 'object') {
+    return Object.values(node).flatMap(findPiiViolationsInValue);
+  }
+  return [];
+}
+
+/**
+ * Registers a verified municipal or disaster-management cooling/water facility (#1436).
+ * Enforces verified source provenance, jurisdiction, effectiveDate, zero PII, and optional temporary expiry.
+ */
+export function registerVerifiedCoolingFacility(payload, currentTime = new Date()) {
+  if (!payload || typeof payload !== 'object') {
+    return { success: false, errors: ['Facility payload must be an object.'] };
+  }
+
+  const piiViolations = findPiiViolationsInValue(payload);
+  if (piiViolations.length > 0) {
+    return {
+      success: false,
+      errors: piiViolations.map((v) => `Prohibited PII detected (${v.type}).`),
+    };
+  }
+
+  if (/\b(?:aadhaar|otp|password|biometric|fingerprint|iris)\b/i.test(Object.keys(payload).join(' '))) {
+    return {
+      success: false,
+      errors: ['Sensitive personal fields (Aadhaar, OTP, password, biometrics) are strictly prohibited.'],
+    };
+  }
+
+  if (!isVerifiedMunicipalOrDisasterSource(payload)) {
+    return {
+      success: false,
+      errors: ['Facility must come from a verified municipal or disaster-management source (responsibleAuthority, sourceUrl, verifiedAt).'],
+    };
+  }
+
+  const validation = validateFacilityRecord(payload);
+  if (!validation.isValid) {
+    return { success: false, errors: validation.errors };
+  }
+
+  if (payload.isTemporary) {
+    if (!payload.expiresAt || Number.isNaN(new Date(payload.expiresAt).getTime())) {
+      return { success: false, errors: ['Temporary facilities must specify a valid expiresAt ISO timestamp.'] };
+    }
+    if (isTemporaryFacilityExpired(payload, currentTime)) {
+      return { success: false, errors: ['Temporary facility expiresAt is already in the past.'] };
+    }
+  }
+
+  const record = {
+    ...payload,
+    jurisdiction: payload.jurisdiction || payload.district,
+    effectiveDate: payload.effectiveDate || payload.verifiedAt,
+    originClassification: 'official_record',
+    unknownRulesStatus: payload.jurisdiction && payload.effectiveDate ? 'verified' : 'unverified',
+  };
+
+  const existing = loadRawFacilities();
+  const next = [record, ...existing.filter((f) => f.id !== record.id)];
+  saveFacilities(next);
+
+  return { success: true, facility: record };
 }
