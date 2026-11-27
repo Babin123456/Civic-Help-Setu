@@ -40,6 +40,7 @@ import emailVerify from "./_lib/handlers/email/verify.js";
 import fireCompliance from "./_lib/handlers/fire-compliance-feedback.js";
 import knowledgeProvenance from "./_lib/handlers/knowledge-provenance.js";
 import libraryCorrections from "./_lib/handlers/library-corrections.js";
+import libraryResourceDirectory from "./_lib/handlers/library-resource-directory.js";
 import pdsObservations from "./_lib/handlers/pds-observations.js";
 import officeComparison from "./_lib/handlers/office-comparison.js";
 import officeVerificationCampaigns from "./_lib/handlers/office-verification-campaigns.js";
@@ -167,6 +168,7 @@ const baseHandlers = {
   "knowledge-provenance": knowledgeProvenance,
   "civic-release-ledger": civicReleaseLedger,
   "library-corrections": libraryCorrections,
+  "library-resource-directory": libraryResourceDirectory,
   "office-comparison": officeComparison,
   "office-verification-campaigns": officeVerificationCampaigns,
   "open-contracting-analytics": openContractingAnalytics,
@@ -455,6 +457,7 @@ export function createApiDispatcher({
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-eval",
+      "library-resource-directory",
       "anganwadi-calendar",
       "school-defect-register",
       "civic-agent-policy",
