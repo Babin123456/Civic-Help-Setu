@@ -97,6 +97,7 @@ const UpJanSunwaiWorkspace = lazy(() => import('./pages/UpJanSunwaiWorkspace'));
 const UpHeatwaveReliefMap = lazy(() => import('./pages/UpHeatwaveReliefMap'));
 const ComparisonWorkspace = lazy(() => import('./pages/ComparisonWorkspace'));
 const OfficeComparisonDetail = lazy(() => import('./pages/OfficeComparisonDetail'));
+const OfficeVerificationCampaignWorkspace = lazy(() => import('./pages/OfficeVerificationCampaignWorkspace'));
 const PublicToiletDirectory = lazy(() => import('./pages/PublicToiletDirectory'));
 const AccessibleRouteBarrierWorkspace = lazy(() => import('./pages/AccessibleRouteBarrierWorkspace'));
 const StreetlightOutageWorkspace = lazy(() => import('./pages/StreetlightOutageWorkspace'));
@@ -230,6 +231,8 @@ function AppRoot() {
                             <Route path="/nearby-offices" element={<NearbyOffices />} />
                             <Route path="/comparison" element={<ComparisonWorkspace />} />
                             <Route path="/office/:officeId" element={<OfficeComparisonDetail />} />
+                            <Route path="/office-verification-campaigns" element={<OfficeVerificationCampaignWorkspace />} />
+                            <Route path="/office-campaigns" element={<OfficeVerificationCampaignWorkspace />} />
                             <Route path="/crematorium-directory" element={<CrematoriumDirectory />} />
                             <Route path="/crematoriums" element={<CrematoriumDirectory />} />
                             <Route path="/pds-shops" element={<FairPriceShopBoard />} />

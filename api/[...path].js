@@ -39,6 +39,7 @@ import knowledgeProvenance from "./_lib/handlers/knowledge-provenance.js";
 import libraryCorrections from "./_lib/handlers/library-corrections.js";
 import pdsObservations from "./_lib/handlers/pds-observations.js";
 import officeComparison from "./_lib/handlers/office-comparison.js";
+import officeVerificationCampaigns from "./_lib/handlers/office-verification-campaigns.js";
 import privacyExports from "./_lib/handlers/privacy-exports.js";
 import rentalChecklist from "./_lib/handlers/rental-checklist-corrections.js";
 import sendEmail from "./_lib/handlers/send-email.js";
@@ -153,6 +154,7 @@ const baseHandlers = {
   "civic-release-ledger": civicReleaseLedger,
   "library-corrections": libraryCorrections,
   "office-comparison": officeComparison,
+  "office-verification-campaigns": officeVerificationCampaigns,
   "open-contracting-analytics": openContractingAnalytics,
   "pds-observations": pdsObservations,
   "pedestrian-barriers": pedestrianBarriers,
