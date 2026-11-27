@@ -7,6 +7,7 @@ import {
   ChevronRight,
   BookOpen,
   RefreshCw,
+  Clock,
 } from 'lucide-react';
 import {
   CONSENT_CATEGORIES,
@@ -17,8 +18,10 @@ import {
   verifyPrivacyAuditLogIntegrity,
 } from '../services/privacyConsentService.js';
 import PrivacyConsentCenterModal from '../components/privacy/PrivacyConsentCenterModal';
+import CitizenRetentionLedgerModal from '../components/privacy/CitizenRetentionLedgerModal';
 import PrivacyExportCentre from '../components/privacy/PrivacyExportCentre';
 import ClearMyDataPanel from '../components/privacy/ClearMyDataPanel';
+import { useToast } from '../context/ToastContext';
 
 const POLICY_SECTIONS = [
   { id: 'data-minimization', title: '1. Principles of Data Minimization' },
@@ -29,7 +32,9 @@ const POLICY_SECTIONS = [
 ];
 
 const Privacy = () => {
+  const { toast } = useToast();
   const [isCenterOpen, setIsCenterOpen] = useState(false);
+  const [isLedgerOpen, setIsLedgerOpen] = useState(false);
   const [preferences, setPreferences] = useState(() => getConsentPreferences());
   const [auditLogs, setAuditLogs] = useState(() => getPrivacyAuditLogs());
   const [retentionStatus, setRetentionStatus] = useState(() => getRetentionPolicyStatus());
@@ -67,32 +72,6 @@ const Privacy = () => {
       }
     } catch (err) {
       toast?.error?.(`Retention check failed: ${err.message}`);
-    }
-  };
-
-  const handleQuickExport = () => {
-    try {
-      const data = exportUserData();
-      const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
-        JSON.stringify(data, null, 2)
-      )}`;
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute('href', jsonString);
-      downloadAnchor.setAttribute(
-        'download',
-        `civicbridge_user_data_export_${new Date().toISOString().slice(0, 10)}.json`
-      );
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-
-      refreshPrivacyOverview();
-      const digestPreview = data?.exportMetadata?.integrityDigest
-        ? ` (SHA-256: ${data.exportMetadata.integrityDigest.slice(0, 12)}...)`
-        : '';
-      toast?.success?.(`Personal data exported successfully${digestPreview}.`);
-    } catch (err) {
-      toast?.error?.(`Export failed: ${err.message}`);
     }
   };
 
@@ -164,6 +143,26 @@ const Privacy = () => {
           </div>
 
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => setIsLedgerOpen(true)}
+              className="btn btn-secondary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.55rem 1.25rem',
+                fontSize: '0.875rem',
+                fontWeight: '700',
+                borderRadius: '99px',
+                border: '1px solid rgba(56, 189, 248, 0.4)',
+                color: 'var(--accent-main, #38bdf8)',
+              }}
+            >
+              <Clock size={16} />
+              <span>Purpose &amp; Retention Ledger</span>
+            </button>
+
             <button
               type="button"
               onClick={handleOpenConsentCenter}
@@ -491,11 +490,19 @@ const Privacy = () => {
         <ClearMyDataPanel />
       </div>
 
-      {/* Modal */}
+      {/* Modals */}
       <PrivacyConsentCenterModal
         isOpen={isCenterOpen}
         onClose={handleCloseConsentCenter}
         onPrivacyDataChanged={refreshPrivacyOverview}
+      />
+
+      <CitizenRetentionLedgerModal
+        isOpen={isLedgerOpen}
+        onClose={() => {
+          setIsLedgerOpen(false);
+          refreshPrivacyOverview();
+        }}
       />
     </div>
   );

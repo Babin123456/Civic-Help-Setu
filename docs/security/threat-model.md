@@ -14,7 +14,7 @@ Facts checked in the source:
 
 - There is **no backend and no database** in this repo. A search of `src/` finds no `fetch`, `axios`, `XMLHttpRequest`, `WebSocket` or `sendBeacon` call. All citizen records live in the browser (`localStorage`, one key in `sessionStorage`).
 - There is **no Firebase or Firestore** code or dependency. Issue #220 talks about Firebase rules, so that issue only becomes relevant once a Firestore (or other) backend is added.
-- The **Civic Assistant does not call an LLM**. `askGroundedCivicAssistant` and `askCivicAssistant` (`src/ai/`) search the bundled data in `src/data/` in the browser. `VITE_OPENAI_API_KEY` in `.env.example` is not read anywhere in `src/`.
+- The **Civic Assistant and Model Gateway**: The assistant supports local in-browser inference (`LOCAL_BROWSER_ONLY`) and sovereign/external model routing via the Civic Model Gateway (`src/services/gateway/`). All model calls are governed by strict data residency policies. Any external routing requires pre-inference scrubbing via `aiGuardrailPipeline.js` (stripping Aadhaar, PAN, phone, IFSC, account numbers) and deterministic non-LLM fallback upon outage, timeout, or policy block. VITE_OPENAI_API_KEY in `.env.example` is only consumed via configured gateway adapters when explicitly enabled by user policy.
 - **Login** is Clerk when `VITE_CLERK_PUBLISHABLE_KEY` is set at build time (`src/main.jsx`, `src/context/AuthContext.jsx`). Without that key the app falls back to a "demo" sign-in that is stored in `localStorage`.
 - **No analytics, error tracking or telemetry** package is installed (`package.json`). The "Anonymous Search & Feature Telemetry" consent category in `privacyConsentService.js` has no code behind it.
 - There is **no CI** (no `.github/workflows`), no Content Security Policy and no security headers (`vercel.json` only has the SPA rewrite, `index.html` has no CSP meta tag).
@@ -46,13 +46,14 @@ Sensitivity: **High** means identity or contact data, or free text that people t
 | Applicant name, guardian name, address, PIN code, phone, age, occupation, income, BPL card number, RTI questions | RTI builder (`RtiBuilderModal.jsx`) and the form templates in `civicFormTemplates.js` | In component state only. Printed or copied by the user | No. The letter goes to the print window or clipboard | High |
 | Saved services with folder, priority, target date and a free-text note | `savedStorage.js`, `ServiceNoteModal.jsx` | `civicbridge_saved_rich`, `civicbridge_saved` | No | Medium |
 | Reminders with a free-text note and deadline | `reminderNotificationService.js` | `civicbridge_reminders`, `civicbridge_notification_settings` | No | Medium |
-| Assistant questions and answers | `Assistant.jsx`, `chatStorage.js` | `civicbridge_chat_history` | No | Medium to High (people type their situation) |
+| Assistant questions and answers | `Assistant.jsx`, `chatStorage.js`, `modelGatewayService.js` | `civicbridge_chat_history` | **Conditional**: Default is No (`LOCAL_BROWSER_ONLY`). If citizen/admin enables sovereign or external tier, only pre-scrubbed queries leave the browser. Sensitive identifiers are replaced with `[REDACTED_*]` placeholders before transmission. | Medium to High (people type their situation) |
 | Spoken questions | Mic buttons in `Assistant.jsx` and `VoiceSearchInput.jsx` (browser Web Speech API) | Not stored by the app | **Yes**. Chrome and Edge send the audio to the browser vendor's speech service | Medium |
 | Approximate GPS position | `locationService.js` (`navigator.geolocation`, only after the user presses the button) | `civicbridge_user_coords` (sessionStorage) | No. Used to sort offices by distance in the browser | High |
 | Denied-location flag | `locationPermission.js` | `civicbridge_location_denied` | No | Low |
 | Compared services, FAQ votes, journey progress, offline cache of guides | `comparisonService.js`, `faqService.js`, `journeyDependencyEngine.js`, `offlineCacheService.js` | `civic_compared_services`, `civicbridge_faq_votes`, `civic_journey_progress_<id>`, `civicbridge_offline_cache` | No | Low |
 | Theme, language, accessibility settings | `preferencesStorage.js`, `languagePreference.js` | `civicbridge_theme`, `civicbridge_lang`, `civicbridge_plain_lang`, `civicbridge_a11y_prefs`, `civicbridge_focus_mode` | No | Low |
 | Consent choices and a privacy audit log | `privacyConsentService.js` | `civicbridge_consent_preferences`, `civicbridge_privacy_audit_log` | No | Low |
+| Case-isolated agent memory (facts and AI proposals) | `caseMemoryEngine.js`, `caseMemoryStorage.js` | `chsetu:mem:<tenantId>:<caseId>:<entryId>` (localStorage, encrypted via Web Crypto AES-GCM-256) | No | High (encrypted at rest; per-case isolated; explicit TTL and deletion) |
 
 Other things worth knowing about the inventory:
 
@@ -232,6 +233,19 @@ Likelihood and impact are rough: Low, Medium, High. Status is what the code does
 ### T11: Tampering with local data
 
 - A person can edit their own `localStorage`. The services parse with `try/catch`, check types (for example `isValidVaultRecord` on import) and fall back to defaults, so a broken value does not crash the app. This only affects that person. Low risk, listed for completeness.
+
+### T12: Explainable eligibility simulation and counterfactual generation (Issue #1156)
+
+- **What:** The simulation engine allows citizens to test hypothetical "what-if" input scenarios and generates counterfactual suggestions (e.g. acquiring an income certificate or adjusting family income thresholds). Three distinct risks exist:
+  1. *Deceptive Authority & False Reliance:* Citizens could mistake simulated hypothetical outcomes for formal government benefit grants or binding denials.
+  2. *Algorithmic / Combinatorial Denial-of-Service:* Malformed rule graphs with cyclic dependencies or unbounded perturbation matrices could exhaust browser CPU cycles.
+  3. *PII Leakage in Simulation Payloads:* Passing raw personal identifiers or identity documents into the simulator could expose them to memory dumps or unintended persistence.
+  4. *Rule Hallucination / Drift:* Fabricating rules or criteria without official gazette or circular backing.
+- **Mitigation:**
+  - Mandatory un-dismissible administrative banner: *"Informational Guidance Only — Not an Official Legal Determination"*. No autonomous filing or official claims.
+  - Strict cycle detection in rule graph validation (`ruleGraphRegistry.js`) and bounded search depth ($\le 3$) with a 25ms computational budget in `counterfactualEngine.js`.
+  - Input sanitizer rejecting forbidden PII keys (`FORBIDDEN_FIELDS` from `serviceContract.js`), running entirely client-side without network egress.
+  - Deterministic typed rule graphs with mandatory statutory citations (`authority`, `circularNo`, `orderDate`).
 
 ## 6. Proposed follow ups
 

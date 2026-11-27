@@ -1,16 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { parseSlugParam } from '../utils/searchParams';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import StandardPageHeader from '../components/common/StandardPageHeader';
 import {
-  MapPin,
   Compass,
   Layers,
   List,
   Map as MapIcon,
-  ShieldCheck,
-  Building2,
-  CalendarCheck,
   Accessibility,
   CheckSquare,
 } from 'lucide-react';
@@ -20,7 +16,6 @@ import {
   filterCivicOffices,
   requestUserCoordinates,
   getCachedUserCoordinates,
-  formatDistance,
 } from '../services/locationService';
 import InteractiveOfficeMap from '../components/location/InteractiveOfficeMap';
 import LocationFilterToolbar from '../components/location/LocationFilterToolbar';
@@ -85,9 +80,12 @@ const NearbyOffices = () => {
     const params = new URLSearchParams(routerLocation.search);
     const sId = parseSlugParam(params.get('service'));
     if (sId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setServiceFilter(sId);
       toast?.info?.(`Filtering facilitation centers for ${sId.replace(/-/g, ' ')}`);
     }
+    // Toast helpers are recreated whenever toasts change; depending on them would re-fire this effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routerLocation.search]);
 
   // Read the browser's permission state without prompting. Geolocation itself is only ever
@@ -219,12 +217,6 @@ const NearbyOffices = () => {
     selectedLanguages,
   ]);
 
-  // Tailored empty-state hint: which next step actually helps
-  const emptyHint = userCoords || manualLocalityQuery
-    ? manualLocalityQuery && !userCoords
-      ? `No offices found matching "${manualLocalityQuery}". Try a different locality, PIN code, or increase the search radius.`
-      : `Nothing found within ${maxRadiusKm} km of you. Try increasing the radius or clearing a filter.`
-    : 'Location is off, and no locality or PIN code entered. Pick a state or district, or enter a locality/PIN code to see offices near you.';
   const hasAccuracyNote = userCoords && Number.isFinite(userCoords.accuracy) && userCoords.accuracy > 1000;
 
   return (
@@ -240,7 +232,14 @@ const NearbyOffices = () => {
           title="Find Nearby Public Offices & Seva Kendras"
           subtitle="Locate official government facilitation centers, RTOs, Passport Seva Kendras, and Aadhaar centers. Check live operating hours, directions, and book electronic visit tokens."
           maxWidth="750px"
-        />
+        >
+          <Link
+            className="btn btn-secondary"
+            to={serviceFilter ? `/comparison?service=${encodeURIComponent(serviceFilter)}` : '/comparison'}
+          >
+            Compare offices side by side
+          </Link>
+        </StandardPageHeader>
 
         {/* View Mode Switcher & Counter Strip */}
         <div

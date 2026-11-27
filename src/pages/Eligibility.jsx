@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Sparkles, ShieldCheck, Bookmark, HelpCircle, Calculator } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Sparkles, ShieldCheck, Calculator, Clock, Sliders } from 'lucide-react';
 import UniversalEligibilityWizard from '../components/eligibility/UniversalEligibilityWizard';
 import SavedAssessmentsList from '../components/eligibility/SavedAssessmentsList';
 import EntitlementCalculatorModal from '../components/eligibility/EntitlementCalculatorModal';
 import UnsavedChangesDialog from '../components/common/UnsavedChangesDialog';
 import ApplicantProfileSwitcher from '../components/eligibility/ApplicantProfileSwitcher';
 import WelfareEligibilityMatrixTable from '../components/eligibility/WelfareEligibilityMatrixTable';
+import EligibilitySimulationWorkspace from '../components/eligibility/EligibilitySimulationWorkspace';
 import { getActiveApplicantProfile } from '../services/applicantProfileService';
 
 const Eligibility = () => {
@@ -127,6 +129,27 @@ const Eligibility = () => {
           </button>
           <button
             type="button"
+            onClick={() => requestTab('simulation')}
+            style={{
+              padding: '0.6rem 1.5rem',
+              borderRadius: '99px',
+              fontWeight: '700',
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              border: activeTab === 'simulation' ? '1px solid var(--accent-main)' : '1px solid var(--border-light)',
+              background: activeTab === 'simulation' ? 'var(--accent-main)' : 'var(--glass-bg)',
+              color: activeTab === 'simulation' ? 'var(--bg-main)' : 'var(--text-secondary)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.2s',
+            }}
+          >
+            <Sliders size={16} aria-hidden="true" />
+            <span>Simulation &amp; Counterfactuals</span>
+          </button>
+          <button
+            type="button"
             onClick={() => requestTab('saved')}
             style={{
               padding: '0.6rem 1.5rem',
@@ -163,6 +186,27 @@ const Eligibility = () => {
             <Calculator size={16} />
             <span>Welfare Subsidy Maximizer</span>
           </button>
+          <Link
+            to="/temporal-policy"
+            style={{
+              padding: '0.6rem 1.5rem',
+              borderRadius: '99px',
+              fontWeight: '700',
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              border: '1px solid var(--accent-main)',
+              background: 'var(--bg-secondary)',
+              color: 'var(--accent-main)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              textDecoration: 'none',
+              transition: 'all 0.2s',
+            }}
+          >
+            <Clock size={16} />
+            <span>As-Of Policy Simulator</span>
+          </Link>
         </div>
 
         {/* Transparent logic privacy banner */}
@@ -199,6 +243,9 @@ const Eligibility = () => {
         )}
         {activeTab === 'matrix' && (
           <WelfareEligibilityMatrixTable />
+        )}
+        {activeTab === 'simulation' && (
+          <EligibilitySimulationWorkspace initialProfile={applicant} />
         )}
         {activeTab === 'saved' && (
           <SavedAssessmentsList
