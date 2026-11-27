@@ -140,18 +140,8 @@ const Assistant = () => {
 
     let response;
     let gatewayMeta = null;
+
     try {
-
-      const gatewayRes = await executeModelGateway({ query: safeQuery });
-      gatewayMeta = gatewayRes.meta || null;
-      response = gatewayRes;
-    } catch (gatewayErr) {
-      logDiagnostic('Model Gateway error, falling back to civic agent pipeline:', gatewayErr);
-      response = await runCivicAgentPipeline(safeQuery, {
-        serviceContextId: currentServiceContextId,
-      });
-
-
       const searchParams = new URLSearchParams(location.search);
       const jurisdictionParam = searchParams.get('state') || searchParams.get('jurisdiction') || null;
       response = await askGroundedCivicAssistant(safeQuery, {
@@ -170,8 +160,8 @@ const Assistant = () => {
           serviceContextId: currentServiceContextId,
         });
       }
-
     }
+
     return {
       id: `asst-${Date.now()}`,
       role: 'assistant',
