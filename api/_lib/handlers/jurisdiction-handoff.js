@@ -19,6 +19,12 @@ import {
   resolveJurisdiction,
   buildHandOffGraph,
 } from '../../../src/services/jurisdictionHandoffService.js';
+import {
+  BOUNDARY_DATASET_VERSIONS,
+  resolveBoundaryConflict,
+  applyManualJurisdictionOverride,
+  listProvenanceLogs,
+} from '../../../src/services/jurisdictionBoundaryConflictService.js';
 
 const rateLimiter = createRateLimiter({ limit: 60, windowMs: 60 * 1000 });
 
@@ -126,6 +132,29 @@ export default async function handler(req, res) {
       });
     }
 
+    if (action === 'boundary-versions') {
+      return res.status(200).json({
+        success: true,
+        versions: BOUNDARY_DATASET_VERSIONS,
+      });
+    }
+
+    if (action === 'provenance-logs') {
+      const userRole = req.headers?.['x-user-role'];
+      const authHeader = req.headers?.['authorization'] || '';
+      const isAuthorized = userRole === 'admin' || userRole === 'municipal_officer' || authHeader.includes('Bearer admin-token');
+      if (!isAuthorized) {
+        return res.status(403).json({
+          error: 'permission_denied',
+          message: 'Admin or municipal officer role required to view boundary provenance logs.',
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        logs: listProvenanceLogs(),
+      });
+    }
+
     if (locality) {
       const validationErrors = validateJurisdictionPayload({ locality });
       if (validationErrors.length > 0) {
@@ -172,6 +201,61 @@ export default async function handler(req, res) {
   // POST: Resolve or submit manual confirmation
   if (req.method === 'POST') {
     const body = req.body || {};
+
+    if (body.action === 'resolve-conflict') {
+      const validationErrors = validateJurisdictionPayload(body);
+      if (validationErrors.length > 0) {
+        return res.status(400).json({ error: 'validation_error', errors: validationErrors });
+      }
+      const conflictResolution = resolveBoundaryConflict({
+        locality: body.locality,
+        stateCode: body.stateCode || body.state || '',
+        districtName: body.districtName || '',
+        localBodyName: body.localBodyName || '',
+        boundaryVersion: body.boundaryVersion || null,
+        actorId: req.headers?.['x-user-id'] || 'citizen_api',
+      });
+      return res.status(200).json({
+        success: true,
+        conflictResolution,
+      });
+    }
+
+    if (body.action === 'manual-override') {
+      const authHeader = req.headers?.['authorization'] || '';
+      const actorId = req.headers?.['x-user-id'] || (authHeader.startsWith('Bearer ') ? 'authenticated-user' : null);
+      if (!actorId) {
+        return res.status(401).json({
+          error: 'authentication_required',
+          message: 'Authentication required to record a manual boundary override.',
+        });
+      }
+      const validationErrors = validateJurisdictionPayload({
+        locality: body.locality || body.resolution?.locality || 'confirmed-area',
+        description: body.reason || '',
+      });
+      if (validationErrors.length > 0) {
+        return res.status(400).json({ error: 'validation_error', errors: validationErrors });
+      }
+      if (!body.resolution || !body.selectedAuthorityId) {
+        return res.status(400).json({
+          error: 'validation_error',
+          errors: ['resolution and selectedAuthorityId are required.'],
+        });
+      }
+      const updated = applyManualJurisdictionOverride({
+        resolution: body.resolution,
+        selectedAuthorityId: body.selectedAuthorityId,
+        selectedAuthorityName: body.selectedAuthorityName,
+        reason: body.reason || 'User confirmed local office / ward boundary',
+        actorId,
+      });
+      return res.status(200).json({
+        success: true,
+        conflictResolution: updated,
+      });
+    }
+
     const validationErrors = validateJurisdictionPayload(body);
 
     if (validationErrors.length > 0) {

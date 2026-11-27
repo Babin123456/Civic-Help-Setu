@@ -8,6 +8,8 @@ import {
   CONSISTENCY_LEVEL,
   REPLICA_HEALTH,
   ROUTING_REASON,
+  ROUTING_CONSIDERATION,
+  ROUTING_META,
   RYW_TOKEN_CLAIMS,
   RYW_VALIDATION_RESULT,
   HTTP_HEADERS,
@@ -82,12 +84,37 @@ describe('Multi-Region Read Types', () => {
       expect(config.weight).toBe(100);
     });
 
+    it('creates region config with capacityPercent', () => {
+      const config = createRegionConfig({ id: 'test-region', capacityPercent: 80 });
+      expect(config.capacityPercent).toBe(80);
+
+      const configDefault = createRegionConfig({ id: 'test-region-default' });
+      expect(configDefault.capacityPercent).toBe(100);
+    });
+
     it('creates replica state with defaults', () => {
       const state = createReplicaState({ regionId: 'test' });
       expect(state.regionId).toBe('test');
       expect(state.health).toBe(REPLICA_HEALTH.HEALTHY);
       expect(state.lagMs).toBe(0);
       expect(state.weight).toBe(100);
+      expect(state.latencyMs).toBe(0);
+      expect(state.capacityPercent).toBe(100);
+    });
+
+    it('creates replica state with custom values', () => {
+      const state = createReplicaState({
+        regionId: 'test',
+        health: REPLICA_HEALTH.DEGRADED,
+        latencyMs: 250,
+        capacityPercent: 60,
+      });
+      expect(state.regionId).toBe('test');
+      expect(state.health).toBe(REPLICA_HEALTH.DEGRADED);
+      expect(state.lagMs).toBe(0);
+      expect(state.weight).toBe(100);
+      expect(state.latencyMs).toBe(250);
+      expect(state.capacityPercent).toBe(60);
     });
 
     it('creates RYW token payload', () => {
@@ -220,6 +247,24 @@ describe('Multi-Region Read Types', () => {
       expect(DEFAULT_CONFIG.MAX_ERROR_RATE_5M).toBe(0.05);
       expect(DEFAULT_CONFIG.RYW_TOKEN_TTL_MS).toBe(3600000);
       expect(DEFAULT_CONFIG.PRIMARY_REGION_ID).toBe('asia-south1');
+    });
+  });
+
+  describe('New Constants', () => {
+    it('defines routing consideration constants', () => {
+      expect(ROUTING_CONSIDERATION.HEALTH).toBe('health');
+      expect(ROUTING_CONSIDERATION.LATENCY).toBe('latency');
+      expect(ROUTING_CONSIDERATION.CAPACITY).toBe('capacity');
+      expect(ROUTING_CONSIDERATION.RESIDENCY).toBe('residency');
+      expect(ROUTING_CONSIDERATION.STICKY_SESSION).toBe('sticky_session');
+    });
+
+    it('defines routing meta constants', () => {
+      expect(ROUTING_META.LATENCY_MS).toBe('latency_ms');
+      expect(ROUTING_META.CAPACITY_PERCENT).toBe('capacity_percent');
+      expect(ROUTING_META.STICKY_SESSION).toBe('sticky_session');
+      expect(ROUTING_META.RESIDENCY_COMPLIANT).toBe('residency_compliant');
+      expect(ROUTING_META.RESIDENCY_ENFORCED).toBe('residency_enforced');
     });
   });
 });

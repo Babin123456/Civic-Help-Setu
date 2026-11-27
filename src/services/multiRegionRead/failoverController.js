@@ -299,6 +299,94 @@ export const manualRecovery = (controller, regionId) => {
   return { success: true };
 };
 
+/** Controlled failback — gradually restore a previously-failing replica */
+export const controlledFailback = (controller, regionId) => {
+  const state = controller.healthMonitor.state.get(regionId);
+  if (!state) return { success: false, reason: 'Replica not found' };
+
+  // Only attempt failback from RECOVERING or HEALTHY states
+  if (state.health !== REPLICA_HEALTH.RECOVERING && state.health !== REPLICA_HEALTH.HEALTHY) {
+    return { success: false, reason: 'Replica not in recovering or healthy state' };
+  }
+
+  // Check that the replica has been healthy/stable for minimum observation window
+  const { RECOVERY_OBSERVATION_MS } = controller.config;
+  const now = Date.now();
+
+  // If recently failed, wait for observation window before attempting full failback
+  if (state.health === REPLICA_HEALTH.RECOVERING && state.recoveringSince) {
+    const elapsed = now - state.recoveringSince;
+    if (elapsed < RECOVERY_OBSERVATION_MS) {
+      // Still within observation window — continue existing ramp, don't force
+      return { success: false, reason: 'Within recovery observation window', waiting: true, elapsed };
+    }
+  }
+
+  // Initiate recovery ramp-up (if currently healthy, transition to recovering)
+  if (state.health === REPLICA_HEALTH.HEALTHY) {
+    setRecovering(controller.healthMonitor, regionId);
+  }
+
+  // Advance the recovery ramp for this specific region
+  const result = advanceRecoveryRamp(controller.healthMonitor, regionId, { now });
+
+  if (result.success && result.recovered) {
+    // Fully recovered — update router weight
+    const runtimeConfig = getRuntimeConfig(controller.router);
+    const newOverrides = setRegionWeightOverride({ ...runtimeConfig.weightOverrides }, regionId, result.weight);
+    updateRuntimeConfig(controller.router, { weightOverrides: newOverrides });
+
+    if (controller.callbacks.onConfigChange) {
+      controller.callbacks.onConfigChange(getRuntimeConfig(controller.router));
+    }
+
+    if (controller.callbacks.onAlert) {
+      controller.callbacks.onAlert({
+        type: 'recovery_complete',
+        regionId,
+        finalWeight: result.weight,
+        timestamp: now,
+      });
+    }
+  }
+
+  return result;
+};
+
+/** Advance recovery ramp for a specific region (throttled call) */
+export const advanceRecoveryForRegion = (controller, regionId, { now = Date.now() } = {}) => {
+  const state = controller.healthMonitor.state.get(regionId);
+  if (!state) return { success: false, reason: 'Region not found' };
+
+  if (state.health !== REPLICA_HEALTH.RECOVERING) {
+    return { success: false, reason: 'Region not in recovering state' };
+  }
+
+  const result = advanceRecoveryRamp(controller.healthMonitor, regionId, { now });
+
+  if (result.success && result.recovered) {
+    // Update router weight when fully recovered
+    const runtimeConfig = getRuntimeConfig(controller.router);
+    const newOverrides = setRegionWeightOverride({ ...runtimeConfig.weightOverrides }, regionId, result.weight);
+    updateRuntimeConfig(controller.router, { weightOverrides: newOverrides });
+
+    if (controller.callbacks.onConfigChange) {
+      controller.callbacks.onConfigChange(getRuntimeConfig(controller.router));
+    }
+
+    if (controller.callbacks.onAlert) {
+      controller.callbacks.onAlert({
+        type: 'recovery_complete',
+        regionId,
+        finalWeight: result.weight,
+        timestamp: now,
+      });
+    }
+  }
+
+  return result;
+};
+
 /** Disable multi-region reads entirely (emergency kill switch) */
 export const disableMultiRegionReads = (controller, reason = 'emergency_disable') => {
   updateRuntimeConfig(controller.router, { enabled: false });

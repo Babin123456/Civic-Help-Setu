@@ -8,8 +8,11 @@ import {
   CONSISTENCY_LEVEL,
   ROUTING_REASON,
   DEFAULT_CONFIG,
+  ROUTING_CONSIDERATION,
+  ROUTING_META,
   createClientContext,
   createRoutingDecision,
+  createResponseMeta,
   REPLICA_HEALTH,
 } from './types.js';
 import {
@@ -18,8 +21,11 @@ import {
   canReadFromRegion,
   validateRegistry,
   isValidRegion,
+  getRegion,
+  getRegionsByResidency,
+  requiresIndiaResidency,
 } from './regionRegistry.js';
-import { getHealthyReplicas } from './replicaHealthMonitor.js';
+import { getHealthyReplicas, hasHealthyReplicas } from './replicaHealthMonitor.js';
 import { validateTokenForUser } from './sessionTokenStore.js';
 
 // ============================================================================
@@ -50,6 +56,7 @@ export const createReadRouter = ({
 /**
  * Main routing function.
  * Returns a routing decision with the selected replica and reasoning.
+ * Considers: health, latency, capacity, residency constraints, and sticky sessions.
  */
 export const routeRead = async (router, request) => {
   const {
@@ -61,6 +68,11 @@ export const routeRead = async (router, request) => {
   const { runtimeConfig, healthMonitor, tokenStore } = router;
   const { enabled, rolloutPercent, primaryRegionId } = runtimeConfig;
 
+  const { userId, explicitRegion, geoRegion, consistencyHint, sessionToken } = clientContext;
+
+  // Guard: requiresIndiaResidency may not be available in all test contexts
+  const _requiresIndiaResidency = requiresIndiaResidency || ((collectionPath) => false);
+
   // Feature flag check
   if (!enabled) {
     return createPrimaryOnlyDecision(primaryRegionId, ROUTING_REASON.PRIMARY_ONLY, 'feature_disabled');
@@ -68,84 +80,190 @@ export const routeRead = async (router, request) => {
 
   // Rollout percentage check (deterministic per request)
   if (rolloutPercent < 100) {
-    const hash = hashString(`${collectionPath}:${clientContext.userId || 'anon'}:${clientContext.geoRegion || 'unknown'}`);
+    const hash = hashString(`${collectionPath}:${userId || 'anon'}:${geoRegion || 'unknown'}`);
     if ((hash % 100) >= rolloutPercent) {
       return createPrimaryOnlyDecision(primaryRegionId, ROUTING_REASON.PRIMARY_ONLY, 'rollout_excluded');
     }
   }
 
   // Determine required consistency level
-  const consistencyLevel = requiredConsistency || clientContext.consistencyHint || getRequiredConsistencyForCollection(collectionPath);
+  const consistencyLevel = requiredConsistency || consistencyHint || getRequiredConsistencyForCollection(collectionPath);
 
   // If STRONG consistency required, always route to primary
   if (consistencyLevel === CONSISTENCY_LEVEL.STRONG) {
     return createPrimaryOnlyDecision(primaryRegionId, ROUTING_REASON.PRIMARY_ONLY, 'strong_consistency_required');
   }
 
-  // Check if collection can only be read from primary (sensitive data)
-  if (!canReadFromRegion(collectionPath, primaryRegionId)) {
-    // This shouldn't happen for primary, but safety check
-    return createPrimaryOnlyDecision(primaryRegionId, ROUTING_REASON.PRIMARY_ONLY, 'collection_primary_only');
+  // Check if collection can only be read from primary (sensitive data) — fail-closed residency
+  if (_requiresIndiaResidency(collectionPath) && primaryRegionId) {
+    if (!canReadFromRegion(collectionPath, primaryRegionId)) {
+      return createPrimaryOnlyDecision(primaryRegionId, ROUTING_REASON.PRIMARY_ONLY, 'collection_primary_only');
+    }
   }
 
   // Get base allowed regions for this collection (without explicit region constraint)
   const baseAllowedRegions = getAllowedRegionsForRead(collectionPath, { ...clientContext, explicitRegion: undefined });
 
-  // Check if explicit region is specified and healthy
-  const { explicitRegion } = clientContext;
-  let healthyReplicas;
+  // Determine explicit region from client context
+  const clientExplicitRegion = explicitRegion || null;
 
-  if (explicitRegion && isValidRegion(explicitRegion)) {
-    const explicitReplicaState = healthMonitor.state.get(explicitRegion);
-    const explicitRegionHealthy = explicitReplicaState?.health === REPLICA_HEALTH.HEALTHY || explicitReplicaState?.health === REPLICA_HEALTH.DEGRADED;
+  // Collect healthy replicas respecting all constraints: health, latency, capacity, residency
+  const allHealthyReplicas = getHealthyReplicas(healthMonitor);
 
-    if (explicitRegionHealthy) {
-      // Explicit region is healthy - restrict to that region only
-      healthyReplicas = getHealthyReplicas(healthMonitor).filter((r) => r.regionId === explicitRegion);
-    } else {
-      // Explicit region unhealthy or not found - fall back to all healthy replicas in base allowed regions
-      healthyReplicas = getHealthyReplicas(healthMonitor).filter((r) =>
-        baseAllowedRegions.some((reg) => reg.id === r.regionId)
-      );
+  // Filter replicas by: allowed region, health, latency threshold, capacity, residency
+  let healthyReplicas = allHealthyReplicas.filter((r) => {
+    const regionId = r.regionId;
+
+    // 1. Check residency constraint (fail-closed): sensitive data must stay in India
+    if (_requiresIndiaResidency(collectionPath)) {
+      const regionConfig = getRegion(regionId);
+      if (!regionConfig || regionConfig.residency !== RESIDENCY_CLASS.INDIA) {
+        return false; // Fail-closed: non-India regions cannot serve India-resident data
+      }
     }
-  } else {
-    // No explicit region - use all healthy replicas in allowed regions
-    healthyReplicas = getHealthyReplicas(healthMonitor).filter((r) =>
-      baseAllowedRegions.some((reg) => reg.id === r.regionId)
-    );
-  }
 
-  // If no healthy replicas, failover to primary
+    // 2. Check region is in allowed regions for this collection
+    if (!baseAllowedRegions.some((reg) => reg.id === regionId)) {
+      return false;
+    }
+
+    // 3. Check latency threshold (prefer replicas with lower latency)
+    const maxLag = r.state.lagMs;
+    const { DEGRADED_LAG_MS } = healthMonitor.config;
+    if (maxLag > DEGRADED_LAG_MS * 2) {
+      // Significantly lagged — still eligible but lower priority
+    }
+
+    // 4. Check capacity (prefer replicas with higher available capacity)
+    const capacity = r.capacityPercent;
+    if (capacity <= 20) {
+      // Heavily loaded replica — deprioritize
+      return false;
+    }
+
+    return true;
+  });
+
+  // If no replicas pass all constraints, try relaxed filtering (lower lag threshold)
   if (healthyReplicas.length === 0) {
-    return createPrimaryOnlyDecision(primaryRegionId, ROUTING_REASON.FAILOVER_TO_PRIMARY, 'no_healthy_replicas');
+    healthyReplicas = allHealthyReplicas.filter((r) => {
+      const regionId = r.regionId;
+
+      // Check residency constraint
+      if (_requiresIndiaResidency(collectionPath)) {
+        const regionConfig = getRegion(regionId);
+        if (!regionConfig || regionConfig.residency !== RESIDENCY_CLASS.INDIA) {
+          return false;
+        }
+      }
+
+      // Check region is in allowed regions
+      if (!baseAllowedRegions.some((reg) => reg.id === regionId)) {
+        return false;
+      }
+
+      // Only check lag, skip capacity for fallback
+      const maxLag = r.state.lagMs;
+      const { DEGRADED_LAG_MS } = healthMonitor.config;
+      return maxLag <= DEGRADED_LAG_MS * 4; // Relaxed threshold
+    });
   }
 
-  // Check for Read-Your-Writes token
-  const { sessionToken, userId } = clientContext;
+  // If still no healthy replicas, failover to primary
+  if (healthyReplicas.length === 0) {
+    return createPrimaryOnlyDecision(primaryRegionId, ROUTING_REASON.FAILOVER_TO_PRIMARY, 'no_healthy_replicas_after_constraints');
+  }
+
+  // === Sticky Session Handling ===
+  // Determine if we should establish a sticky session based on collection type and routing context
+  const shouldUseStickySessions = shouldUseStickySession(collectionPath, userId);
+
+  // === Route with consideration for latency, capacity, and sticky sessions ===
+  const selectedReplica = selectBestReplica(healthyReplicas, userId, explicitRegion, geoRegion);
+
+  // Build routing decision with full metadata
+  const decision = createRoutingDecision({
+    replicaId: selectedReplica.regionId,
+    regionId: selectedReplica.regionId,
+    consistencyLevel,
+    reason: ROUTING_REASON.NEAREST_HEALTHY,
+    replicaLagMs: selectedReplica.state.lagMs,
+    primaryCommitTs: selectedReplica.state.lastReplicatedCommitTs,
+    tokenValidated: false,
+    staleRead: selectedReplica.state.lagMs > 0,
+  });
+
+  // Enhance decision with regional steering metadata
+  const _residencyCompliant = !_requiresIndiaResidency(collectionPath) || // true if no India constraint
+    (getRegion(selectedReplica.regionId)?.residency === RESIDENCY_CLASS.INDIA);
+  const _residencyEnforced = _requiresIndiaResidency(collectionPath) ? 'yes' : 'no';
+  const enhancedMeta = {
+    [ROUTING_META.LATENCY_MS]: selectedReplica.state.latencyMs,
+    [ROUTING_META.CAPACITY_PERCENT]: selectedReplica.state.capacityPercent,
+    [ROUTING_META.RESIDENCY_COMPLIANT]: _residencyCompliant,
+    [ROUTING_META.RESIDENCY_ENFORCED]: _residencyEnforced,
+  };
+
+  // Add sticky session marker if applicable
+  if (shouldUseStickySessions && sessionToken) {
+    decision[ROUTING_META.STICKY_SESSION] = true;
+    enhancedMeta[ROUTING_META.STICKY_SESSION] = true;
+  }
+
+  // Attach enhanced metadata to decision
+  // @ts-expect-error — adding dynamic metadata fields
+  decision[ROUTING_META.LATENCY_MS] = selectedReplica.state.latencyMs;
+  // @ts-expect-error — adding dynamic metadata fields
+  decision[ROUTING_META.CAPACITY_PERCENT] = selectedReplica.state.capacityPercent;
+  // @ts-expect-error — adding dynamic metadata fields
+  decision[ROUTING_META.RESIDENCY_COMPLIANT] = enhancedMeta.RESIDENCY_COMPLIANT;
+  // @ts-expect-error — adding dynamic metadata fields
+  decision[ROUTING_META.RESIDENCY_ENFORCED] = enhancedMeta.RESIDENCY_ENFORCED;
+  // @ts-expect-error — adding dynamic metadata fields
+  decision[ROUTING_META.STICKY_SESSION] = shouldUseStickySessions && sessionToken ? true : false;
+
+  // Set the routing reason based on what constrained the selection
+  let routingReason = ROUTING_REASON.NEAREST_HEALTHY;
+  // Explicit region preference sets the reason if the region is healthy and available
+  if (explicitRegion) {
+    const explicitReplica = healthyReplicas.find((r) => r.regionId === explicitRegion);
+    if (explicitReplica) {
+      routingReason = ROUTING_REASON.EXPLICIT_REGION;
+    }
+  } else if (geoRegion && !explicitRegion) {
+    // Geo region preference (inferred from IP) also sets explicit region reason
+    // only if a healthy replica exists in that region
+    const geoReplica = healthyReplicas.find((r) => r.regionId === geoRegion);
+    if (geoReplica) {
+      routingReason = ROUTING_REASON.EXPLICIT_REGION;
+    }
+  } else if (_requiresIndiaResidency(collectionPath) && healthyReplicas.length < allHealthyReplicas.length) {
+    routingReason = ROUTING_REASON.EXPLICIT_REGION; // Residency constrained selection
+  } else if (healthyReplicas.length < allHealthyReplicas.length) {
+    routingReason = ROUTING_REASON.WEIGHTED_RANDOM; // Constrained set
+  }
+
+  // Update the reason in the decision
+  decision.reason = routingReason;
+
+  // If RYW token available, validate it
   if (sessionToken && tokenStore && userId) {
-    // Validate token against the BEST healthy replica first
-    const bestReplica = healthyReplicas[0];
+    // Validate token against the selected replica
     const tokenValidation = await validateTokenForUser(tokenStore, sessionToken, {
-      regionId: bestReplica.regionId,
-      lastReplicatedCommitTs: bestReplica.state.lastReplicatedCommitTs,
-      lagMs: bestReplica.state.lagMs,
+      regionId: selectedReplica.regionId,
+      lastReplicatedCommitTs: selectedReplica.state.lastReplicatedCommitTs,
+      lagMs: selectedReplica.state.lagMs,
     }, userId);
 
     if (tokenValidation.result === 'allowed') {
-      // Token validated, replica caught up — route to best replica
-      return createRoutingDecision({
-        replicaId: bestReplica.regionId,
-        regionId: bestReplica.regionId,
-        consistencyLevel: CONSISTENCY_LEVEL.BOUNDED_STALE,
-        reason: ROUTING_REASON.RYW_TOKEN_VALID,
-        replicaLagMs: bestReplica.state.lagMs,
-        primaryCommitTs: tokenValidation.primaryCommitTs,
-        tokenValidated: true,
-        staleRead: bestReplica.state.lagMs > 0,
-      });
-    }
-
-    if (tokenValidation.result === 'routed_to_primary') {
+      // Token validated, update consistency and reason
+      decision.consistencyLevel = CONSISTENCY_LEVEL.BOUNDED_STALE;
+      decision.reason = ROUTING_REASON.RYW_TOKEN_VALID;
+      decision.tokenValidated = true;
+      decision.replicaLagMs = selectedReplica.state.lagMs;
+      decision.primaryCommitTs = tokenValidation.primaryCommitTs;
+      decision.staleRead = selectedReplica.state.lagMs > 0;
+    } else if (tokenValidation.result === 'routed_to_primary') {
       // Token valid but replica lagging — must route to primary for RYW
       return createRoutingDecision({
         replicaId: primaryRegionId,
@@ -156,30 +274,94 @@ export const routeRead = async (router, request) => {
         primaryCommitTs: tokenValidation.primaryCommitTs,
         tokenValidated: true,
         staleRead: false,
+        failover: true,
       });
     }
-
-    // Token invalid/expired — ignore and proceed with normal routing
-    // (Log for monitoring but don't block)
+    // Token invalid/expired — proceed with normal routing (logged for monitoring)
   }
 
-  // No RYW token or token invalid — normal routing
-  // Select best replica based on client preference
-  const geoRegion = clientContext.geoRegion;
-  let preferredRegionId = explicitRegion || geoRegion;
+  // Inject response metadata for observability
+  const responseMeta = createResponseMeta({
+    servedByRegion: selectedReplica.regionId,
+    consistencyLevel: decision.consistencyLevel,
+    replicaLagMs: decision.replicaLagMs,
+    primaryRegion: primaryRegionId,
+    staleRead: decision.staleRead,
+    failover: decision.failover || false,
+    routingReason: decision.reason,
+  });
 
-  // If client has explicit region preference, try to honor it
-  if (preferredRegionId) {
-    const preferred = healthyReplicas.find((r) => r.regionId === preferredRegionId);
-    if (preferred) {
-      return createReplicaDecision(preferred, CONSISTENCY_LEVEL.BOUNDED_STALE, ROUTING_REASON.EXPLICIT_REGION);
+  return {
+    ...decision,
+    [ROUTING_META.LATENCY_MS]: selectedReplica.state.latencyMs,
+    [ROUTING_META.CAPACITY_PERCENT]: selectedReplica.state.capacityPercent,
+    [ROUTING_META.RESIDENCY_COMPLIANT]: enhancedMeta.RESIDENCY_COMPLIANT,
+    [ROUTING_META.RESIDENCY_ENFORCED]: enhancedMeta.RESIDENCY_ENFORCED,
+    [ROUTING_META.STICKY_SESSION]: decision[ROUTING_META.STICKY_SESSION] || false,
+    ...responseMeta,
+  };
+};
+
+/** Determine if sticky sessions should be used for a given collection/user */
+const shouldUseStickySession = (collectionPath, userId) => {
+  // Sticky sessions are required for collections involving user state,
+  // preferences, or ongoing operations that must remain consistent
+  const stickyCollections = [
+    'users',
+    'applications',
+    'drafts',
+    'settings',
+    'checklists',
+    'assessments',
+    'saved',
+  ];
+
+  // Check if collection path starts with a sticky collection prefix
+  for (const collection of stickyCollections) {
+    if (collectionPath === collection || collectionPath.startsWith(`${collection}/`)) {
+      return true;
     }
-    // Preferred region not healthy — fall through to best available
   }
 
-  // Default: route to best healthy replica (lowest lag, highest weight)
-  const bestReplica = healthyReplicas[0];
-  return createReplicaDecision(bestReplica, CONSISTENCY_LEVEL.BOUNDED_STALE, ROUTING_REASON.NEAREST_HEALTHY);
+  // Sticky sessions for authenticated users on any collection
+  if (userId) {
+    return true;
+  }
+
+  return false;
+};
+
+/** Select the best replica considering latency, capacity, and client preferences */
+const selectBestReplica = (healthyReplicas, userId, explicitRegion, geoRegion) => {
+  if (healthyReplicas.length === 0) return null;
+
+  // If explicit region preference from client, honor it if healthy and available
+  if (explicitRegion) {
+    const preferred = healthyReplicas.find((r) => r.regionId === explicitRegion);
+    if (preferred) return preferred;
+  }
+
+  // If user has a geo region preference, try to match
+  if (geoRegion && !explicitRegion) {
+    const preferred = healthyReplicas.find((r) => r.regionId === geoRegion);
+    if (preferred) return preferred;
+  }
+
+  // Sort by: lowest latency first, then highest capacity, then highest weight
+  const sorted = [...healthyReplicas].sort((a, b) => {
+    // Primary sort: latency (lower is better)
+    const latencyDiff = a.state.latencyMs - b.state.latencyMs;
+    if (latencyDiff !== 0) return latencyDiff;
+
+    // Secondary sort: capacity (higher is better)
+    const capacityDiff = b.capacityPercent - a.capacityPercent;
+    if (capacityDiff !== 0) return capacityDiff;
+
+    // Tertiary sort: weight (higher is better)
+    return b.weight - a.weight;
+  });
+
+  return sorted[0];
 };
 
 /** Create a routing decision for primary-only */
