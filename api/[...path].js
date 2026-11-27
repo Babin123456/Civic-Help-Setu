@@ -161,6 +161,7 @@ const baseHandlers = {
   "fire-compliance-feedback": fireCompliance,
   "flood-incident-reports": floodIncidentReports,
   "heat-relief-observations": heatReliefObservations,
+  "heatwave-cooling-directory": heatReliefObservations,
   "knowledge-provenance": knowledgeProvenance,
   "civic-release-ledger": civicReleaseLedger,
   "library-corrections": libraryCorrections,

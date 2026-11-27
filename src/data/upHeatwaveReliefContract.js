@@ -75,6 +75,53 @@ export const SOURCE_TIER_LABELS = {
 };
 
 /**
+ * Verified Municipal and Disaster-Management Source Categories (#1436)
+ */
+export const VERIFIED_DIRECTORY_SOURCES = [
+  'municipal_corporation',
+  'ddma',
+  'up_jal_nigam',
+  'cmo_health',
+  'state_disaster_management',
+];
+
+/**
+ * Checks whether a facility record is backed by a verified municipal or disaster-management source.
+ */
+export function isVerifiedMunicipalOrDisasterSource(facility) {
+  if (!facility || typeof facility !== 'object') return false;
+  if (!facility.responsibleAuthority || typeof facility.responsibleAuthority !== 'string' || facility.responsibleAuthority.trim().length < 3) {
+    return false;
+  }
+  if (!facility.sourceUrl || typeof facility.sourceUrl !== 'string' || !/^https?:\/\//i.test(facility.sourceUrl)) {
+    return false;
+  }
+  if (!facility.verifiedAt || Number.isNaN(new Date(facility.verifiedAt).getTime())) {
+    return false;
+  }
+  if (facility.sourceCategory && !VERIFIED_DIRECTORY_SOURCES.includes(facility.sourceCategory)) {
+    return false;
+  }
+  if (facility.sourceTier && facility.sourceTier === SOURCE_TIERS.CITIZEN_OBSERVATION) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Checks whether a temporary heat-relief facility has passed its automatic expiry timestamp (#1436).
+ */
+export function isTemporaryFacilityExpired(facility, referenceDate = new Date()) {
+  if (!facility || typeof facility !== 'object') return false;
+  if (!facility.isTemporary && !facility.expiresAt) return false;
+  if (!facility.expiresAt) return false;
+  const expiryMs = new Date(facility.expiresAt).getTime();
+  if (Number.isNaN(expiryMs)) return false;
+  const nowMs = new Date(referenceDate).getTime();
+  return expiryMs <= nowMs;
+}
+
+/**
  * Official Heat Alert Levels (aligned with IMD / UPSDMA Heat Action Plans)
  */
 export const HEAT_ALERT_LEVELS = {
@@ -231,11 +278,15 @@ export function calculateFacilityFreshness(facility, referenceDate = new Date())
   const isVerificationStale = daysSinceVerification > FRESHNESS_POLICIES_HOURS.FACILITY_REVERIFICATION_DAYS;
   const isDynamicReportStale = hoursSinceLastReport > FRESHNESS_POLICIES_HOURS.CITIZEN_OBSERVATION_VALIDITY_HOURS;
   const isSeasonActive = isFacilitySeasonallyActive(facility, referenceDate);
+  const isExpired = isTemporaryFacilityExpired(facility, referenceDate);
 
   let statusBadge = 'fresh';
   let verificationNote = 'Verified & Current';
 
-  if (!isSeasonActive) {
+  if (isExpired) {
+    statusBadge = 'expired_temporary';
+    verificationNote = 'Expired Temporary Facility (Auto-archived after expiry timestamp)';
+  } else if (!isSeasonActive) {
     statusBadge = 'seasonal_inactive';
     verificationNote = 'Inactive (Outside March-July Heatwave Season)';
   } else if (!facility.verifiedAt || !facility.sourceUrl || !facility.responsibleAuthority) {
@@ -250,7 +301,8 @@ export function calculateFacilityFreshness(facility, referenceDate = new Date())
   }
 
   return {
-    isStale: isVerificationStale || statusBadge === 'stale_verification',
+    isStale: isVerificationStale || isExpired || statusBadge === 'stale_verification',
+    isExpired,
     isSeasonActive,
     statusBadge,
     verificationNote,
