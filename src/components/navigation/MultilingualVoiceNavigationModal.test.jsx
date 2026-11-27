@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import MultilingualVoiceNavigationModal from './MultilingualVoiceNavigationModal';
@@ -27,6 +26,8 @@ describe('MultilingualVoiceNavigationModal', () => {
     expect(html).toContain('हिन्दी (Hindi)');
     expect(html).toContain('English (India)');
     expect(html).toContain('Start voice search');
-    expect(html).toContain('Spoken Transcript');
+    expect(html).toContain('Limits');
+    expect(html).toContain('Spoken Transcript (review or edit manually before searching):');
+    expect(html).toContain('Civic Help Setu never stores raw audio');
   });
 });

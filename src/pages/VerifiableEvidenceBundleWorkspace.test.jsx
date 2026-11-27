@@ -80,5 +80,7 @@ describe('VerifiableEvidenceBundleWorkspace (#1160)', () => {
     expect(html).toContain('Export JSON');
     expect(html).toContain('Export Dossier');
     expect(html).toContain('CPGRAMS Central Redressal');
+    expect(html).toContain('Chain-of-Custody Ledger');
+    expect(html).toContain('Selective Redact');
   });
 });
