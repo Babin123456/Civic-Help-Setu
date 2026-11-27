@@ -22,6 +22,7 @@ const INITIAL_FILTERS = {
   onlyWheelchair: false,
   onlyOrsAvailable: false,
   onlyDrinkingWater: false,
+  includeExpired: false,
   searchQuery: '',
 };
 
@@ -185,13 +186,23 @@ export default function UpHeatwaveReliefMap() {
 
         {/* Accessible Text-Only Facilities Directory List */}
         <div style={{ marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.85rem' }}>
             <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
               Verified Relief Facilities ({facilities.length})
             </h3>
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-              District: <strong>{filters.district}</strong>
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={Boolean(filters.includeExpired)}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, includeExpired: e.target.checked }))}
+                />
+                Show Expired Temporary Facilities
+              </label>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                District: <strong>{filters.district}</strong>
+              </span>
+            </div>
           </div>
 
           <HeatwaveFacilityList
