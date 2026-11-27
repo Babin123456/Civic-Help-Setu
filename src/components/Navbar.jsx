@@ -27,6 +27,8 @@ import {
   KeyRound,
   Store,
   Trees,
+  FileBadge,
+  GitCompare,
   Calendar,
   HelpCircle,
   School,
@@ -38,6 +40,7 @@ import {
   Lightbulb,
   Leaf,
   ShieldAlert,
+  ShieldCheck,
   GitFork,
   Scale,
   BarChart2,
@@ -49,7 +52,6 @@ import {
   GraduationCap,
   FolderLock,
   ClipboardList,
-
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -998,6 +1000,13 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
               })}
 
               {renderNavLink({
+                to: '/offline-emergency-card',
+                activeTarget: '/offline-emergency-card',
+                label: t('nav.offlineEmergencyCard', 'Offline Emergency Card'),
+                icon: ShieldCheck
+              })}
+
+              {renderNavLink({
                 to: '/acronyms',
                 label: 'Acronyms',
                 icon: FileText
@@ -1326,6 +1335,13 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
               })}
 
               {renderNavLink({
+                to: '/digital-twin',
+                activeTarget: '/digital-twin',
+                label: t('nav.digitalTwin', 'Digital Twin Simulator'),
+                icon: GitCompare
+              })}
+
+              {renderNavLink({
                 to: '/streetlights',
                 activeTarget: '/streetlights',
                 label: t('nav.streetlights', 'Streetlight Outages'),
@@ -1388,6 +1404,12 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                   to: '/vault',
                   label: t('nav.vault', 'Document Vault'),
                   icon: Shield
+                })}
+
+                {renderNavLink({
+                  to: '/wallet',
+                  label: 'Citizen Data Wallet',
+                  icon: FileBadge
                 })}
 
                 {renderNavLink({

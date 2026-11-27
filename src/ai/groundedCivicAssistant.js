@@ -11,6 +11,11 @@ import {
   evaluateGroundedAnswerEntailment,
   stripRedactionPlaceholders,
 } from './aiGuardrailPipeline.js';
+import {
+  scanRetrievedDocument,
+  evaluateAssistantProposal,
+  FIREWALL_DECISION,
+} from './promptInjectionFirewall.js';
 import { generateGuidanceWithProvenance } from '../services/civicGuidanceProvenanceService.js';
 
 export const MANDATORY_LEGAL_DISCLAIMER =
@@ -61,6 +66,47 @@ export async function askGroundedCivicAssistant(query, options = {}) {
 
   const sanitizedQuery = preGuardrail.sanitizedQuery;
   const retrievalQuery = stripRedactionPlaceholders(sanitizedQuery);
+
+  // 0b. Scan optional untrusted external document / web content through Prompt-Injection Firewall
+  let firewallResult = null;
+  if (options.externalDocument) {
+    firewallResult = scanRetrievedDocument(options.externalDocument);
+    if (!firewallResult.valid || firewallResult.decision === FIREWALL_DECISION.BLOCK) {
+      return {
+        status: 'blocked',
+        grounded: false,
+        confidenceScore: 0,
+        firewall: {
+          ...firewallResult,
+          proposalCheck: evaluateAssistantProposal({ summary: '', citations: [] }),
+        },
+        guardrail: {
+          decision: preGuardrail.decision,
+          pii: preGuardrail.pii,
+          injection: preGuardrail.injection,
+        },
+        data: {
+          title: 'Untrusted External Content Blocked by Firewall',
+          summary:
+            'The retrieved external document or web content contained unsafe instructions or malicious links and was quarantined before synthesis.',
+          officialSources: [
+            {
+              name: 'National Government Services Portal (Direct Directory)',
+              url: 'https://services.india.gov.in',
+              verified: true,
+            },
+          ],
+          disclaimer: MANDATORY_LEGAL_DISCLAIMER,
+        },
+        serviceId: null,
+        suggestions: [
+          'How to apply for a Passport?',
+          'What documents are needed for Driving License?',
+          'How to register a Birth Certificate?',
+        ],
+      };
+    }
+  }
 
   // 1. Perform Source-Grounded Retrieval without biasing BM25 on redaction tag labels
   const retrieval = retrieveGroundedChunks(retrievalQuery, options);
@@ -140,6 +186,12 @@ export async function askGroundedCivicAssistant(query, options = {}) {
     retrieval.retrievedChunks
   );
 
+  const proposalCheck = evaluateAssistantProposal({
+    summary: primarySummary,
+    citations: retrieval.sources,
+    humanApproved: options.humanApproved === true,
+  });
+
   // Generate high-precision claim-level provenance
   let provenance;
   try {
@@ -165,6 +217,20 @@ export async function askGroundedCivicAssistant(query, options = {}) {
     grounded: retrieval.grounded && entailment.contradictedCount === 0,
     confidenceScore: retrieval.confidenceScore,
     entailment,
+    firewall: firewallResult
+      ? {
+          contractVersion: firewallResult.contractVersion,
+          sourceId: firewallResult.sourceId,
+          sourceType: firewallResult.sourceType,
+          decision: firewallResult.decision,
+          counts: firewallResult.counts,
+          threatClasses: firewallResult.threatClasses,
+          redactedCategories: firewallResult.redactedCategories,
+          isolatedEvidenceEnvelope: firewallResult.isolatedEvidenceEnvelope,
+          telemetryEvent: firewallResult.telemetryEvent,
+          proposalCheck,
+        }
+      : null,
     provenance,
     claims: provenance?.claims || entailment.claims || [],
     unsupportedClaims: provenance?.unsupportedClaims || [],

@@ -1,6 +1,22 @@
 {
   "indexes": [
     {
+      "collectionGroup": "agentWorkflows",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "agentWorkflowDeadLetters",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "shelter_sites",
       "fields": [
         {
@@ -822,6 +838,12 @@
     {
       "collectionGroup": "privacyExports",
       "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "agentWorkflows",
+      "fieldPath": "retentionExpiresAt",
       "ttl": true,
       "indexes": []
     },
