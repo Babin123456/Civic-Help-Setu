@@ -64,6 +64,7 @@ import agentReviewStudio from "./_lib/handlers/agent-review-studio.js";
 import agentMemoryScope from "./_lib/handlers/agent-memory-scope.js";
 import agentApprovalInbox from "./_lib/handlers/agent-approval-inbox.js";
 import civicAgentEval from "./_lib/handlers/civic-agent-eval.js";
+import aiHallucinationReports from "./_lib/handlers/ai-hallucination-reports.js";
 
 import verifiableEvidenceBundles from "./_lib/handlers/verifiable-evidence-bundles.js";
 
@@ -156,6 +157,7 @@ const baseHandlers = {
   "agent-memory-scope": agentMemoryScope,
   "agent-approval-inbox": agentApprovalInbox,
   "civic-agent-eval": civicAgentEval,
+  "ai-hallucination-reports": aiHallucinationReports,
   "business-licence-feedback": businessLicence,
 
   "civic-data-clean-room": civicDataCleanRoom,
@@ -473,6 +475,7 @@ export function createApiDispatcher({
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-eval",
+      "ai-hallucination-reports",
       "agent-memory-scope",
       "agent-approval-inbox",
       "grievance-department-routing",
