@@ -90,6 +90,7 @@ import accessibilityInspector from "./_lib/handlers/accessibility-inspector.js";
 import publicToilets from "./_lib/handlers/public-toilets.js";
 import pedestrianBarriers from "./_lib/handlers/pedestrian-barriers.js";
 import waterQualityRegister from "./_lib/handlers/water-quality-register.js";
+import waterbodyRestoration from "./_lib/handlers/waterbody-restoration.js";
 import publicProjects from "./_lib/handlers/public-projects.js";
 import wardIssueHeatmap from "./_lib/handlers/ward-issue-heatmap.js";
 import tenantAdministration from "./_lib/handlers/tenant-administration.js";
@@ -197,6 +198,7 @@ const baseHandlers = {
 
   "ward-budget-proposals": wardBudgetProposals,
   "water-quality-register": waterQualityRegister,
+  "waterbody-restoration": waterbodyRestoration,
   "ward-issue-heatmap": wardIssueHeatmap,
   "water-tanker-reports": waterTankerReports,
 
@@ -461,6 +463,7 @@ export function createApiDispatcher({
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-eval",
+      "waterbody-restoration",
       "tree-plantation-survival",
       "park-maintenance-schedule",
       "library-resource-directory",
