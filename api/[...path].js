@@ -89,6 +89,7 @@ import accessibilityInspector from "./_lib/handlers/accessibility-inspector.js";
 
 import publicToilets from "./_lib/handlers/public-toilets.js";
 import pedestrianBarriers from "./_lib/handlers/pedestrian-barriers.js";
+import accessibilityBarrierSla from "./_lib/handlers/accessibility-barrier-sla.js";
 import waterQualityRegister from "./_lib/handlers/water-quality-register.js";
 import waterbodyRestoration from "./_lib/handlers/waterbody-restoration.js";
 import publicProjects from "./_lib/handlers/public-projects.js";
@@ -178,6 +179,7 @@ const baseHandlers = {
   "pds-observations": pdsObservations,
   "park-maintenance-schedule": parkMaintenanceSchedule,
   "pedestrian-barriers": pedestrianBarriers,
+  "accessibility-barrier-sla": accessibilityBarrierSla,
   "privacy-exports": privacyExports,
   "public-toilets": publicToilets,
   "rental-checklist-corrections": rentalChecklist,
@@ -463,6 +465,7 @@ export function createApiDispatcher({
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-eval",
+      "accessibility-barrier-sla",
       "waterbody-restoration",
       "tree-plantation-survival",
       "park-maintenance-schedule",
