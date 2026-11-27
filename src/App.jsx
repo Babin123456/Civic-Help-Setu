@@ -150,6 +150,7 @@ const PolicyEngineWorkspacePage = lazy(() => import('./pages/PolicyEngineWorkspa
 const ContractTestMarketplaceWorkspacePage = lazy(() => import('./pages/ContractTestMarketplaceWorkspace'));
 const FreshnessPredictionWorkspacePage = lazy(() => import('./pages/FreshnessPredictionWorkspace'));
 const RecommendationExperimentationWorkspacePage = lazy(() => import('./pages/RecommendationExperimentationWorkspace'));
+const GrievanceCompletenessCoachWorkspace = lazy(() => import('./pages/GrievanceCompletenessCoachWorkspace'));
 const AccessibilityBarrierSlaDashboard = lazy(() => import('./pages/AccessibilityBarrierSlaDashboard'));
 const WaterbodyRestorationWorkspace = lazy(() => import('./pages/WaterbodyRestorationWorkspace'));
 const TreePlantationSurvivalWorkspace = lazy(() => import('./pages/TreePlantationSurvivalWorkspace'));
@@ -454,6 +455,8 @@ function AppRoot() {
 
                             <Route path="/open-source" element={<OpenSource />} />
                             <Route path="/privacy" element={<Privacy />} />
+                            <Route path="/grievance-completeness-coach" element={<GrievanceCompletenessCoachWorkspace />} />
+                            <Route path="/grievance-coach" element={<GrievanceCompletenessCoachWorkspace />} />
                             <Route path="/accessibility-barrier-sla" element={<AccessibilityBarrierSlaDashboard />} />
                             <Route path="/barrier-sla-dashboard" element={<AccessibilityBarrierSlaDashboard />} />
                             <Route path="/waterbody-restoration" element={<WaterbodyRestorationWorkspace />} />

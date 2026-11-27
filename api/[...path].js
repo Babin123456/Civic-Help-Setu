@@ -109,6 +109,7 @@ import serviceChangeSandbox from "./_lib/handlers/service-change-sandbox.js";
 import civicReleaseLedger from "./_lib/handlers/civic-release-ledger.js";
 import civicChaosEngineering from "./_lib/handlers/civic-chaos-engineering.js";
 import complaintQualityCoach from "./_lib/handlers/complaint-quality-coach.js";
+import grievanceCompletenessCoach from "./_lib/handlers/grievance-completeness-coach.js";
 import civicEvidenceLocker from "./_lib/handlers/civic-evidence-locker.js";
 import journeyBenchmark from "./_lib/handlers/journey-benchmark.js";
 import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
@@ -221,6 +222,7 @@ const baseHandlers = {
   "policy-simulation": policySimulation,
   "civic-chaos-engineering": civicChaosEngineering,
   "complaint-quality-coach": complaintQualityCoach,
+  "grievance-completeness-coach": grievanceCompletenessCoach,
   "civic-evidence-locker": civicEvidenceLocker,
   "service-change-sandbox": serviceChangeSandbox,
   "journey-benchmark": journeyBenchmark,
@@ -465,6 +467,7 @@ export function createApiDispatcher({
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-eval",
+      "grievance-completeness-coach",
       "accessibility-barrier-sla",
       "waterbody-restoration",
       "tree-plantation-survival",
