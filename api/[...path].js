@@ -85,6 +85,7 @@ import tenantAdministration from "./_lib/handlers/tenant-administration.js";
 import ghgInventory from "./_lib/handlers/ghg-inventory.js";
 import microVolunteer from "./_lib/handlers/micro-volunteer.js";
 import reliefOperations from "./_lib/handlers/relief-operations.js";
+import disasterReliefBoard from "./_lib/handlers/disaster-relief-board.js";
 import jurisdictionHandoff from "./_lib/handlers/jurisdiction-handoff.js";
 
 import agentSandbox from "./_lib/handlers/agent-sandbox.js";
@@ -186,6 +187,7 @@ const baseHandlers = {
   "micro-volunteer": microVolunteer,
   "micro-volunteer-board": microVolunteer,
   "relief-operations": reliefOperations,
+  "disaster-relief-board": disasterReliefBoard,
   "jurisdiction-handoff": jurisdictionHandoff,
   "agent-sandbox": agentSandbox,
   "policy-simulation": policySimulation,
