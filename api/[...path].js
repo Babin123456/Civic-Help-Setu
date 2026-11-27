@@ -60,6 +60,7 @@ import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
 import firewallScan from "./_lib/handlers/firewall-scan.js";
+import pmKisanExceptionGuide from "./_lib/handlers/pm-kisan-exception-guide.js";
 
 
 
@@ -209,6 +210,7 @@ const baseHandlers = {
   "pedestrian-barriers": pedestrianBarriers,
   "accessibility-barrier-sla": accessibilityBarrierSla,
   "privacy-exports": privacyExports,
+  "pm-kisan-exception-guide": pmKisanExceptionGuide,
   "public-toilets": publicToilets,
   "rental-checklist-corrections": rentalChecklist,
   "send-email": sendEmail,
