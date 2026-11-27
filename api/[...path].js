@@ -37,6 +37,7 @@ import emailVerify from "./_lib/handlers/email/verify.js";
 import fireCompliance from "./_lib/handlers/fire-compliance-feedback.js";
 import knowledgeProvenance from "./_lib/handlers/knowledge-provenance.js";
 import libraryCorrections from "./_lib/handlers/library-corrections.js";
+import formFieldTranslationMemory from "./_lib/handlers/form-field-translation-memory.js";
 import pdsObservations from "./_lib/handlers/pds-observations.js";
 import officeComparison from "./_lib/handlers/office-comparison.js";
 import privacyExports from "./_lib/handlers/privacy-exports.js";
@@ -152,6 +153,7 @@ const baseHandlers = {
   "knowledge-provenance": knowledgeProvenance,
   "civic-release-ledger": civicReleaseLedger,
   "library-corrections": libraryCorrections,
+  "form-field-translation-memory": formFieldTranslationMemory,
   "office-comparison": officeComparison,
   "open-contracting-analytics": openContractingAnalytics,
   "pds-observations": pdsObservations,

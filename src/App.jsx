@@ -84,6 +84,7 @@ const TransitConcessionsDirectory = lazy(() => import('./pages/TransitConcession
 const WaterTankerTracker = lazy(() => import('./pages/WaterTankerTracker'));
 const AddressChangePlanner = lazy(() => import('./pages/AddressChangePlanner'));
 const FormFieldExplainerAssistant = lazy(() => import('./pages/FormFieldExplainerAssistant'));
+const FormFieldTranslationMemoryWorkspace = lazy(() => import('./pages/FormFieldTranslationMemoryWorkspace'));
 const RentalTransitionWorkspace = lazy(() => import('./pages/RentalTransitionWorkspace'));
 const CitizenDraftSyncWorkspace = lazy(() => import('./pages/CitizenDraftSyncWorkspace'));
 const CivicDataApi = lazy(() => import('./pages/CivicDataApi'));
@@ -290,6 +291,8 @@ function AppRoot() {
                             <Route path="/form-field-explainer" element={<FormFieldExplainerAssistant />} />
                             <Route path="/up-form-explainer" element={<FormFieldExplainerAssistant />} />
                             <Route path="/form-explainer" element={<FormFieldExplainerAssistant />} />
+                            <Route path="/form-translation-memory" element={<FormFieldTranslationMemoryWorkspace />} />
+                            <Route path="/translation-memory" element={<FormFieldTranslationMemoryWorkspace />} />
                             <Route path="/citizen-drafts" element={<CitizenDraftSyncWorkspace />} />
                             <Route path="/draft-sync" element={<CitizenDraftSyncWorkspace />} />
 
