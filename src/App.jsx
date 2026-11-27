@@ -138,6 +138,7 @@ const DigitalEvidenceLockerWorkspace = lazy(() => import('./pages/DigitalEvidenc
 const CaseCollaborationWorkspace = lazy(() => import('./components/caseCollaboration/CaseCollaborationWorkspace'));
 const JourneyBenchmarkPage = lazy(() => import('./pages/JourneyBenchmarkPage'));
 const Services = lazy(() => import('./pages/Services'));
+const SearchQueryRecoveryWorkspace = lazy(() => import('./pages/SearchQueryRecoveryWorkspace'));
 const ExplainableServiceRankerWorkspace = lazy(() => import('./pages/ExplainableServiceRankerWorkspace'));
 const AbuseDashboardPage = lazy(() => import('./components/abuse-control-plane/AbuseDashboard'));
 const CostCarbonGovernorWorkspacePage = lazy(() => import('./pages/CostCarbonGovernorWorkspace'));
@@ -182,6 +183,8 @@ function AppRoot() {
                             <Route path="/verify-email" element={<VerifyEmail />} />
                             <Route path="/assistant" element={<Assistant />} />
                             <Route path="/services" element={<Suspense fallback={<ServicesFallback />}><Services /></Suspense>} />
+                            <Route path="/search-recovery" element={<SearchQueryRecoveryWorkspace />} />
+                            <Route path="/query-understanding" element={<SearchQueryRecoveryWorkspace />} />
                             <Route path="/service-ranker" element={<ExplainableServiceRankerWorkspace />} />
                             <Route path="/explainable-recommendations" element={<ExplainableServiceRankerWorkspace />} />
                             <Route path="/services/aadhaar-guide" element={<AadhaarGuidePage />} />

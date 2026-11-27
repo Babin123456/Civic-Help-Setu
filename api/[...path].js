@@ -60,6 +60,7 @@ import verifiableEvidenceBundles from "./_lib/handlers/verifiable-evidence-bundl
 
 import zkAttributeProofVerify from "./_lib/handlers/zk-attribute-proof-verify.js";
 import federatedCivicQuery from "./_lib/handlers/federated-civic-query.js";
+import searchQueryRecovery from "./_lib/handlers/search-query-recovery.js";
 
 
 import civicDataCleanRoom from "./_lib/handlers/civic-data-clean-room.js";
@@ -150,6 +151,7 @@ const baseHandlers = {
   "email/preferences": emailPreferences,
   "email/verify": emailVerify,
   "federated-civic-query": federatedCivicQuery,
+  "search-query-recovery": searchQueryRecovery,
   "fire-compliance-feedback": fireCompliance,
   "flood-incident-reports": floodIncidentReports,
   "heat-relief-observations": heatReliefObservations,
