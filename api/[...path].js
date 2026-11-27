@@ -27,6 +27,7 @@ import roadHazards from "./_lib/road-hazards.js";
  */
 import bottleneckFeedback from "./_lib/handlers/bottleneck-feedback.js";
 import addressChange from "./_lib/handlers/address-change-corrections.js";
+import anganwadiCalendar from "./_lib/handlers/anganwadi-calendar.js";
 import businessLicence from "./_lib/handlers/business-licence-feedback.js";
 import catalogueVisualQa from "./_lib/handlers/catalogue-visual-qa.js";
 import communityFacility from "./_lib/handlers/community-facility-corrections.js";
@@ -130,6 +131,7 @@ const baseHandlers = {
   "road-hazards": roadHazards,
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
+  "anganwadi-calendar": anganwadiCalendar,
   "agent-review-studio": agentReviewStudio,
   "civic-agent-eval": civicAgentEval,
   "business-licence-feedback": businessLicence,
@@ -434,6 +436,7 @@ export function createApiDispatcher({
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-eval",
+      "anganwadi-calendar",
       "civic-agent-policy",
       "civic-contract-test-marketplace",
       "civic-recommendation-experimentation",
