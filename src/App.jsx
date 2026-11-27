@@ -51,6 +51,7 @@ const Eligibility = lazy(() => import('./pages/Eligibility'));
 const TemporalPolicyWorkspace = lazy(() => import('./pages/TemporalPolicyWorkspace'));
 const NearbyOffices = lazy(() => import('./pages/NearbyOffices'));
 const Track = lazy(() => import('./pages/Track'));
+const DuplicateCaseDetectorWorkspace = lazy(() => import('./pages/DuplicateCaseDetectorWorkspace'));
 const Saved = lazy(() => import('./pages/Saved'));
 const Vault = lazy(() => import('./pages/Vault'));
 const Profile = lazy(() => import('./pages/Profile'));
@@ -372,6 +373,8 @@ function AppRoot() {
                             <Route path="/evidence-locker" element={<DigitalEvidenceLockerWorkspace />} />
                             <Route path="/encrypted-locker" element={<DigitalEvidenceLockerWorkspace />} />
                             <Route path="/track" element={<Track />} />
+                            <Route path="/duplicate-case-detector" element={<DuplicateCaseDetectorWorkspace />} />
+                            <Route path="/related-cases" element={<DuplicateCaseDetectorWorkspace />} />
                             <Route path="/civic-works" element={<CivicWorksBoard />} />
                             <Route path="/micro-volunteer-board" element={<MicroVolunteerTaskBoard />} />
                             <Route path="/micro-volunteer" element={<MicroVolunteerTaskBoard />} />
