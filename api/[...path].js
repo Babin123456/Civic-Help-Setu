@@ -38,6 +38,7 @@ import fireCompliance from "./_lib/handlers/fire-compliance-feedback.js";
 import knowledgeProvenance from "./_lib/handlers/knowledge-provenance.js";
 import libraryCorrections from "./_lib/handlers/library-corrections.js";
 import pdsObservations from "./_lib/handlers/pds-observations.js";
+import parkMaintenanceSchedule from "./_lib/handlers/park-maintenance-schedule.js";
 import officeComparison from "./_lib/handlers/office-comparison.js";
 import privacyExports from "./_lib/handlers/privacy-exports.js";
 import rentalChecklist from "./_lib/handlers/rental-checklist-corrections.js";
@@ -155,6 +156,7 @@ const baseHandlers = {
   "office-comparison": officeComparison,
   "open-contracting-analytics": openContractingAnalytics,
   "pds-observations": pdsObservations,
+  "park-maintenance-schedule": parkMaintenanceSchedule,
   "pedestrian-barriers": pedestrianBarriers,
   "privacy-exports": privacyExports,
   "public-toilets": publicToilets,
@@ -434,6 +436,7 @@ export function createApiDispatcher({
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-eval",
+      "park-maintenance-schedule",
       "civic-agent-policy",
       "civic-contract-test-marketplace",
       "civic-recommendation-experimentation",
