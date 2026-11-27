@@ -230,6 +230,7 @@ export const MOCK_SERVICES = [
       'UIDAI strictly caps official fees at ₹0 for enrolment, ₹50 for demographic updates, and ₹100 for biometrics. If any centre overcharges, demand a computer receipt and escalate to 1947 or helpdesk@uidai.gov.in.',
       'Never laminate or purchase unauthorized plastic smart cards from local cyber cafes. Order the official ₹50 PVC card exclusively on myAadhaar.'
     ],
+    lineageRecordId: 'aadhaar-card',
     lastVerified: '2026-11-12'
   },
   {
@@ -684,6 +685,94 @@ export const MOCK_SERVICES = [
     lastVerified: '2026-11-05'
   },
   {
+    id: 'business-licence-checklist',
+    name: 'Small-Business Licence Renewal & Closure Checklist Centre',
+    title: 'Small-Business Licence Renewal & Closure Checklist Centre',
+    shortDescription: 'Lifecycle compliance tracker for small enterprises across municipal trade licences, Shops & Establishments registrations, FSSAI, SPCB consents, and statutory surrender acknowledgement archiving (#721).',
+    description: 'Lifecycle compliance tracker for small enterprises across municipal trade licences, Shops & Establishments registrations, FSSAI, SPCB consents, and statutory surrender acknowledgement archiving (#721).',
+    department: 'Urban Local Bodies (Municipal Corporations) & Directorate of Commercial Licencing',
+    category: 'Business',
+    type: 'Online / Offline',
+    difficulty: 'Medium',
+    feeType: 'paid',
+    speedDays: 30,
+    popularityScore: 94,
+    eligibility: [
+      'Micro, Small and Medium Enterprises (MSMEs)',
+      'Retail shops, commercial establishments, eateries, and service firms',
+      'Proprietors, partners, or corporate entities holding active or expiring commercial registrations'
+    ],
+    documents: [
+      'Existing Trade Licence / Municipal Enlistment Certificate',
+      'Shops and Establishments Registration Certificate',
+      'Commercial Lease Agreement & Landlord NOC (for premises relocation)',
+      'Electricity / Utility Commercial Meter Zero Dues Bill',
+      'Municipal Property Tax Paid Receipts',
+      'Deed of Dissolution / Partnership Transfer Deed (for constitution amendment)',
+      'Stamped Surrender Acknowledgement Order (for formal closure & deregistration)'
+    ],
+    steps: [
+      { title: 'Select Establishment & Jurisdiction', description: 'Configure branch details, municipal corporation (e.g. MCD, BMC, BBMP), and business category.' },
+      { title: 'Track Dual-Track Licences', description: 'Monitor municipal trade licences and sector-specific registrations (FSSAI, SPCB, Labour) independently.' },
+      { title: 'Monitor Expiry Reminders', description: 'Set 60/30/15-day renewal alert windows and download standard calendar reminders (.ics).' },
+      { title: 'Execute Amendments with Evidence', description: 'Follow structured admissible evidence checklists for address shifts or partner constitution changes.' },
+      { title: 'Execute Closure & Archive Acknowledgements', description: 'Clear municipal and utility final dues, submit surrender applications, and permanently archive the dated surrender acknowledgement receipt.' }
+    ],
+    validityNote: 'Trade licences operate strictly on the financial year basis (expiring 31 March) across most Indian urban local bodies. FSSAI food business licences operate on 1 to 5 year validity. Shops & Establishments registrations may be perpetual or require periodic intimation depending on state rules.',
+    fees: 'Assessed dynamically by local municipal corporations based on covered carpet area, street category, and electric motor horsepower. Sector-specific fees vary by turnover and hazard class. Do not pay unofficial facilitation agents.',
+    processingTime: '7 to 30 working days depending on jurisdiction citizen charters. Instant provisional certificates available under Ease of Doing Business self-certification in select municipalities.',
+    officialSources: [
+      {
+        name: 'Municipal Corporation of Delhi (MCD) Online Portal',
+        url: 'https://mcdonline.nic.in',
+        verified: true,
+        lastVerified: '2026-11-05'
+      },
+      {
+        name: 'Brihanmumbai Municipal Corporation (BMC) Citizen Portal',
+        url: 'https://portal.mcgm.gov.in',
+        verified: true,
+        lastVerified: '2026-11-05'
+      },
+      {
+        name: 'Bruhat Bengaluru Mahanagara Palike (BBMP) Portal',
+        url: 'https://bbmptax.karnataka.gov.in',
+        verified: true,
+        lastVerified: '2026-11-05'
+      },
+      {
+        name: 'Greater Chennai Corporation (GCC) Portal',
+        url: 'https://chennaicorporation.gov.in',
+        verified: true,
+        lastVerified: '2026-11-05'
+      },
+      {
+        name: 'Food Safety and Standards Authority of India (FoSCoS)',
+        url: 'https://foscos.fssai.gov.in',
+        verified: true,
+        lastVerified: '2026-11-05'
+      },
+      {
+        name: 'GST Portal (CBIC)',
+        url: 'https://www.gst.gov.in',
+        verified: true,
+        lastVerified: '2026-11-05'
+      }
+    ],
+    warnings: [
+      'A Municipal Trade Licence DOES NOT confer title or ownership of property, nor does it regularize unauthorized construction.',
+      'Always secure a formal, stamped or digitally signed Surrender Acknowledgement Receipt when closing down a business to defend against trailing tax demands.',
+      'Shifting premises without filing an address amendment is treated as operating without an authorized licence.',
+      'Keep personal identifiers (GSTIN, PAN, Aadhaar) confidential. Never expose them in public links or shared dossiers.'
+    ],
+    contacts: [
+      { label: 'MCD Citizen Helpline', phone: '155305', url: 'https://mcdonline.nic.in' },
+      { label: 'BMC Central Control Room', phone: '1916', url: 'https://portal.mcgm.gov.in' },
+      { label: 'FSSAI National Toll-Free Helpline', phone: '1800112100', url: 'https://foscos.fssai.gov.in' }
+    ],
+    lastVerified: '2026-11-05'
+  },
+  {
     id: 'fire-noc',
     jurisdiction: {
       level: 'state',
@@ -757,6 +846,13 @@ export const MOCK_SERVICES = [
         description: 'Remediate any inspection deficiencies within 15 days to secure the final Fire Safety Certificate required for occupancy.'
       }
     ],
+    fees: 'Varies by state, building category and built-up area. Check the fee schedule on your state fire service portal.',
+    processingTime: 'Around 30 days, varies by state and occupancy',
+    officialSources: [
+      { name: 'Delhi Fire Service', url: 'https://dfs.delhigovt.nic.in' },
+      { name: 'Maharashtra Fire Services', url: 'https://mahafireservice.gov.in' },
+      { name: 'Karnataka State Fire Services', url: 'https://ksfes.karnataka.gov.in' }
+    ],
     warnings: [
       'Procedural guidance only. This guide does NOT replace certified fire safety auditors or fire-protection engineering calculations.',
       'Operating commercial premises or assembly halls without a valid Fire Safety Certificate is punishable with closure notices and penal action under State Fire Acts.'
@@ -777,7 +873,7 @@ export const MOCK_SERVICES = [
     department: 'State Forest Departments & Municipal Tree Authorities',
     type: 'Online (e-Forest / Single Window) / In-person Inspection',
     difficulty: 'Medium',
-    feeType: 'variable',
+    feeType: 'paid',
     speedDays: 21,
     popularityScore: 88,
     eligibility: [
@@ -836,6 +932,8 @@ export const MOCK_SERVICES = [
         description: 'Execute approved work strictly conforming to permit conditions and plant/nurture required replacement saplings.'
       }
     ],
+    fees: 'Varies by state and by the work approved (pruning, lopping, transplanting or felling). Check the notice of your state Tree Officer.',
+    processingTime: 'Around 21 days, varies by state',
     officialSources: [
       {
         name: 'Delhi e-Forest Online Citizen Services Portal',
@@ -868,7 +966,846 @@ export const MOCK_SERVICES = [
       { label: 'BMC Disaster Management Helpline (Mumbai)', phone: '1916', url: 'https://www.mcgm.gov.in' },
       { label: 'National Forest Vigilance Helpline', phone: '1926', url: 'https://forests.telangana.gov.in' }
     ],
+    lineageRecordId: 'tree-pruning-permission',
     lastVerified: '2026-10-25'
+  },
+  {
+    id: 'counter-demand-forecasting',
+    name: 'Civic Service Counter Demand & Queue Staffing Forecast',
+    category: 'Complaints',
+    type: 'Online',
+    difficulty: 'Medium',
+    feeType: 'free',
+    speedDays: 1,
+    department: 'Department of Administrative Reforms & Public Grievances / Municipal Administration',
+    shortDescription: 'Statistical estimation of daily and hourly civic service counter footfall from appointment and visit aggregates, combined with Erlang-C queue capacity staffing optimization for municipal facilitation centres.',
+    processingTime: '1 business day (planning cycle)',
+    fees: 'Free / Internal Operational Planning Tool',
+    eligibility: [
+      'Municipal Facilitation Centre Managers and Supervisors',
+      'Civic Centre Shift Officers and Desk Dispatchers',
+      'Urban Local Body Public Delivery Administrative Reviewers'
+    ],
+    documents: [
+      'Historical hourly appointment and walk-in footfall aggregates',
+      'Office physical counter capacity inventory',
+      'Jurisdiction gazetted and emergency holiday calendar',
+      'Statutory service duration and benchmark wait-time standards'
+    ],
+    documentRequirements: {
+      'Historical hourly appointment and walk-in footfall aggregates': { type: 'mandatory' },
+      'Office physical counter capacity inventory': { type: 'mandatory' },
+      'Jurisdiction gazetted and emergency holiday calendar': { type: 'mandatory' },
+      'Statutory service duration and benchmark wait-time standards': { type: 'mandatory' }
+    },
+    steps: [
+      {
+        title: 'Ingest Anonymized Footfall & Appointment Aggregates',
+        description: 'Aggregate historical daily and hourly arrivals excluding citizen names and application numbers.'
+      },
+      {
+        title: 'Compute Seasonal & Diurnal Demand Baseline',
+        description: 'Calculate day-of-week and hour-of-day seasonal weights, holiday impact multipliers, and 80%/95% prediction intervals.'
+      },
+      {
+        title: 'Run Erlang-C Queue Staffing Optimization',
+        description: 'Solve for minimal counter staffing keeping utilization <= 0.85 and wait exceedance probability within statutory targets.'
+      },
+      {
+        title: 'Draft & Review Capacity Plan with Human-in-the-Loop',
+        description: 'Adjust shift staffing allocations with mandatory justification for >=20% variance.'
+      },
+      {
+        title: 'Authorize & Land Shift Plan',
+        description: 'Centre manager reviews and authorizes final staffing with append-only audit trail.'
+      }
+    ],
+    officialSources: [
+      {
+        name: 'DARPG Citizen-Centric Governance Guidelines',
+        url: 'https://darpg.gov.in',
+        verified: true,
+        lastVerified: '2026-11-15'
+      },
+      {
+        name: 'National e-Governance Division (NeGD) Service Delivery Norms',
+        url: 'https://negd.gov.in',
+        verified: true,
+        lastVerified: '2026-11-15'
+      }
+    ],
+    warnings: [
+      'Operational planning model only. This service does NOT provide guaranteed individual waiting times or token queue promises to citizens.',
+      'All historical training inputs must strictly exclude citizen names, phone numbers, Aadhaar numbers, and application identifiers.'
+    ],
+    contacts: [
+      { label: 'DARPG Helpdesk', url: 'https://darpg.gov.in' },
+      { label: 'National e-Governance Service Support', url: 'https://negd.gov.in' }
+    ],
+    lastVerified: '2026-11-15'
+  },
+  {
+    id: 'ward-budget-proposal',
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
+    name: 'Participatory Ward Budget Proposal & Public Deliberation',
+    shortDescription: 'Submit, deliberate, and track citizen-initiated ward budget proposals for local public infrastructure improvements, pedestrian footpaths, drainage, and parks.',
+    category: 'Complaints',
+    department: 'Urban Local Bodies / Ward Committees / Municipal Corporation Directorate',
+    type: 'Online / Ward Sabha',
+    difficulty: 'Easy',
+    feeType: 'free',
+    speedDays: 45,
+    popularityScore: 95,
+    eligibility: [
+      'Must be a resident, property owner, trader, or registered Resident Welfare Association (RWA) member within the designated municipal ward.',
+      'Proposed works must fall within municipal jurisdiction (roads, footpaths, stormwater drainage, public lighting, parks, or community reading centers).',
+      'Cost estimate must fall within the ward budget ceiling (up to ₹5 Crore per ward envelope).',
+      'Works must not duplicate ongoing capital tenders or encroach upon private property.'
+    ],
+    documents: [
+      'Proof of ward residency or voter registration (Electors Photo Identity Card / utility bill / property tax receipt)',
+      'Photographic evidence or survey notes of location defect / required civic improvement',
+      'Preliminary itemized cost estimate or municipal schedule of rates reference (optional but recommended)'
+    ],
+    documentRequirements: {
+      'Proof of ward residency or voter registration (Electors Photo Identity Card / utility bill / property tax receipt)': {
+        type: 'mandatory'
+      },
+      'Photographic evidence or survey notes of location defect / required civic improvement': {
+        type: 'mandatory'
+      },
+      'Preliminary itemized cost estimate or municipal schedule of rates reference (optional but recommended)': {
+        type: 'optional'
+      }
+    },
+    steps: [
+      {
+        title: 'Check Ward Budget Cycle Timeline',
+        description: 'Verify that your municipal ward has an open intake or public deliberation cycle active.'
+      },
+      {
+        title: 'Formulate Proposal & Cost Estimate',
+        description: 'Specify the exact street or landmark location, select category, and provide realistic cost estimates within the statutory cap.'
+      },
+      {
+        title: 'Review Automated Duplicate Suggestions',
+        description: 'Inspect duplicate candidate clusters to consolidate repetitive requests with neighbors and build collective support.'
+      },
+      {
+        title: 'Public Neighborhood Deliberation',
+        description: 'Engage with fellow residents, answer municipal engineer queries, and refine specifications during the deliberation window.'
+      },
+      {
+        title: 'Cast Advisory Citizen Vote',
+        description: 'Participate in the advisory ward ballot to signal priority to the Ward Committee.'
+      },
+      {
+        title: 'Track Social Audit & Ground Execution',
+        description: 'Follow milestone updates, tender issuance, contractor assignment, and ground inspection photos.'
+      }
+    ],
+    fees: 'Free',
+    processingTime: 'Around 45 days',
+    officialSources: [
+      {
+        name: 'Ministry of Housing and Urban Affairs (MoHUA) Citizen Participation Guidelines',
+        url: 'https://mohua.gov.in',
+        verified: true,
+        lastVerified: '2026-11-01'
+      },
+      {
+        name: 'National Urban Governance Platform',
+        url: 'https://smartnet.niua.org',
+        verified: true,
+        lastVerified: '2026-11-05'
+      }
+    ],
+    warnings: [
+      'Citizen deliberation and advisory voting are non-statutory or advisory unless explicitly mandated by state municipal law.',
+      'Proposals proposing works on private property, gated layout internal private alleys, or national highways will be disqualified during technical review.',
+      'Do not include personal contact details, phone numbers, or identity numbers in public proposals or discussion comments.'
+    ],
+    contacts: [
+      { label: 'Central Urban Citizen Helpline', phone: '14420', url: 'https://mohua.gov.in' },
+      { label: 'Local Ward Committee Secretariat', phone: '1912', url: 'https://smartnet.niua.org' }
+    ],
+    lastVerified: '2026-11-15'
+  },
+  {
+    id: 'water-quality-register',
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
+    name: 'Community Water-Quality Sampling & Laboratory Result Register',
+    shortDescription: 'Search public drinking water points, view verified laboratory test parameters against Bureau of Indian Standards IS 10500:2012, and track municipal corrective actions.',
+    category: 'Health',
+    department: 'Public Health Engineering Department (PHED) / Municipal Water Supply & Sewerage Board',
+    type: 'Public Register / Surveillance',
+    difficulty: 'Easy',
+    feeType: 'free',
+    speedDays: 3,
+    popularityScore: 92,
+    eligibility: [
+      'Open to all residents, community organizations, and public health monitors.',
+      'Public drinking water points include municipal taps, public standposts, community RO purification kiosks, and public borewells.',
+      'Field sampling submissions must be accompanied by certified container bar code identifiers.'
+    ],
+    documents: [
+      'Accredited NABL laboratory report certificate (for laboratory analysts and officials)',
+      'Sealed container identification code and chain-of-custody log (for field samplers)'
+    ],
+    documentRequirements: {
+      'Accredited NABL laboratory report certificate (for laboratory analysts and officials)': {
+        type: 'mandatory'
+      },
+      'Sealed container identification code and chain-of-custody log (for field samplers)': {
+        type: 'mandatory'
+      }
+    },
+    steps: [
+      {
+        title: 'Locate Community Water Point',
+        description: 'Search nearby municipal taps, public borewells, or community RO kiosks by ward or landmark.'
+      },
+      {
+        title: 'Inspect Verified IS 10500 Parameters',
+        description: 'Review physical, chemical, and bacteriological test values (pH, TDS, turbidity, hardness, E. coli) against statutory limits.'
+      },
+      {
+        title: 'Check Cryptographic Verification Seal',
+        description: 'Verify tamper-evident hash seal issued by accredited NABL state water testing laboratory.'
+      },
+      {
+        title: 'Monitor Remedial Corrective Interventions',
+        description: 'Track municipal pipeline repairs, super-chlorination disinfections, or filtration membrane replacements for out-of-range water points.'
+      }
+    ],
+    fees: 'Free',
+    processingTime: 'Around 3 days',
+    officialSources: [
+      {
+        name: 'Bureau of Indian Standards (BIS) IS 10500:2012 Drinking Water Specification',
+        url: 'https://www.services.bis.gov.in',
+        verified: true,
+        lastVerified: '2026-11-01'
+      },
+      {
+        name: 'National Accreditation Board for Testing and Calibration Laboratories (NABL)',
+        url: 'https://nabl-india.org',
+        verified: true,
+        lastVerified: '2026-11-05'
+      },
+      {
+        name: 'Jal Jeevan Mission (JJM) Water Quality Management Information System',
+        url: 'https://ejalshakti.gov.in/wqmis/',
+        verified: true,
+        lastVerified: '2026-11-10'
+      }
+    ],
+    warnings: [
+      'Water surveillance parameter comparisons are deterministic rule evaluations against IS 10500:2012; they do not constitute medical or clinical diagnoses.',
+      'If bacteriological pathogens (Total Coliform / E. coli) are detected, observe precautionary boiling instructions while municipal disinfection is underway.',
+      'Do not disclose private residential door or flat numbers in public field observations.'
+    ],
+    contacts: [
+      { label: 'National Jal Jeevan Mission Helpline', phone: '1800-180-1551', url: 'https://jaljeevanmission.gov.in' },
+      { label: 'Central Public Health Engineering (CPHEEO)', phone: '011-23062331', url: 'https://cpheeo.gov.in' }
+    ],
+    lastVerified: '2026-11-16'
+  },
+  {
+    id: 'civic-survey-builder',
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
+    name: 'Civic Survey Builder & Sampling Diagnostics',
+    shortDescription: 'Design structured public surveys, manage sample representation targets, review question missingness, and inspect response-bias diagnostics with anonymous response protection.',
+    category: 'Complaints',
+    department: 'Directorate of Public Consultation & Urban Planning',
+    type: 'Online',
+    difficulty: 'Easy',
+    feeType: 'free',
+    speedDays: 1,
+    popularityScore: 91,
+    eligibility: [
+      'Accessible to municipal department officers, approved public interest researchers, and community planning teams.',
+      'Public responses are open to all citizens within the specified local ward or urban jurisdiction.',
+      'Anonymous response mode ensures individual submissions cannot be correlated with citizen identification accounts.'
+    ],
+    documents: [
+      'Departmental consultation authorization and gazette topic brief',
+      'Statutory informed consent text with explicit voluntary participation rights',
+      'Sampling quota design specifying minimum target respondents and voluntary strata'
+    ],
+    documentRequirements: {
+      'Departmental consultation authorization and gazette topic brief': {
+        type: 'mandatory'
+      },
+      'Statutory informed consent text with explicit voluntary participation rights': {
+        type: 'mandatory'
+      },
+      'Sampling quota design specifying minimum target respondents and voluntary strata': {
+        type: 'mandatory'
+      }
+    },
+    steps: [
+      {
+        title: 'Draft Survey Scope & Sampling Target',
+        description: 'Specify consultation objectives, target jurisdiction (ward/city), collection timeline, and minimum demographic representation quotas.'
+      },
+      {
+        title: 'Author Questions & Dynamic Branching Rules',
+        description: 'Configure typed questions, variable names, validation rules, and conditional logic to prevent irrelevant question burden.'
+      },
+      {
+        title: 'Incorporate Informed Consent & Anonymous Protection',
+        description: 'Provide clear consent disclosures and ensure consent tokens remain separated from answer vectors.'
+      },
+      {
+        title: 'Publish Consultation & Monitor Quality Metrics',
+        description: 'Track response intake against sampling targets, evaluate item missingness rates, and inspect demographic balance.'
+      },
+      {
+        title: 'Inspect Diagnostics & Export Open Codebooks',
+        description: 'Review ruleset-versioned recommendations and export data dictionaries for transparent statistical analysis.'
+      }
+    ],
+    fees: 'Free',
+    processingTime: 'Around 1 day',
+    officialSources: [
+      {
+        name: 'Ministry of Housing and Urban Affairs — Citizen Engagement Guidelines',
+        url: 'https://mohua.gov.in',
+        verified: true,
+        lastVerified: '2026-11-15'
+      },
+      {
+        name: 'National Urban Digital Mission — Public Consultation Standards',
+        url: 'https://nudm.mohua.gov.in',
+        verified: true,
+        lastVerified: '2026-11-15'
+      }
+    ],
+    warnings: [
+      'Demographic imbalance diagnostics only evaluate voluntary self-reported strata and do not guarantee probabilistic census representativeness.',
+      'Personal identifiers (Aadhaar, PAN, phone numbers) must never be requested or stored in public survey response vectors.',
+      'Small demographic groups with fewer than 5 respondents are suppressed under k-anonymity privacy safeguards.'
+    ],
+    contacts: [
+      { label: 'Citizen Consultation Helpdesk', phone: '1800-11-0033', url: 'https://mohua.gov.in' },
+      { label: 'Urban Analytics & Diagnostics Cell', phone: '011-23061111', url: 'https://nudm.mohua.gov.in' }
+    ],
+    lastVerified: '2026-11-15'
+  },
+  {
+
+    id: 'verifiable-evidence-bundles',
+    name: 'Verifiable Evidence Bundles for Civic Complaints',
+    category: 'Grievance Redressal & Legal Evidence',
+    icon: 'Shield',
+    shortDescription: 'Cryptographically protected, append-only evidence packaging for municipal grievances, RTI escalations, and administrative complaints.',
+    detailedDescription: 'Enables citizens to collect photographs, fee challans, postal receipts, and departmental correspondence over time into an append-only SHA-256 hash-chained ledger. Distinguishes unverified citizen assertions from independently verified government tokens and prevents file tampering, clock skew, and chain disruption.',
+    department: 'Public Grievance Redressal / Administrative Authorities',
+    type: 'Online / Offline Client Verification',
+    difficulty: 'Easy',
+    feeType: 'free',
+    speedDays: 1,
+    popularityScore: 95,
+    jurisdiction: {
+      level: 'national',
+      states: [],
+      districts: [],
+      localBody: ''
+    },
+    tags: ['Grievance', 'Evidence', 'CPGRAMS', 'RTI', 'Tamper-Proof', 'Provenance', 'Cryptography'],
+    processingTime: 'Instant / Client-Side Offline Verification',
+    fees: 'Free & Open Source (0 INR)',
+    eligibility: {
+      minAge: 0,
+      description: 'Any citizen, community group, or legal aid clinic assembling documentary proof for public service complaints.'
+    },
+    documents: {
+      'Incident Photographs or Video Captures': { type: 'optional' },
+      'Statutory Fee Payment Receipt / Challan Slip': { type: 'optional' },
+      'Official Acknowledgement Slip / Token Number': { type: 'optional' },
+      'Departmental Notice or Written Correspondence': { type: 'optional' }
+    },
+    steps: [
+      {
+        title: 'Create Evidence Bundle Manifest',
+        description: 'Initialize a new complaint ledger with title, target department, and official reference numbers.'
+      },
+      {
+        title: 'Append Evidence Items with Provenance Tiers',
+        description: 'Upload files and tag them as Citizen Assertion or Independently Verified Record with factual notes.'
+      },
+      {
+        title: 'Cryptographic Chain & Merkle Root Sealing',
+        description: 'Client runtime automatically hashes each payload, chains to the previous record, and seals the Merkle tree.'
+      },
+      {
+        title: 'Export Portable Archive & Dossier',
+        description: 'Generate portable verifiable JSON packages or Markdown complaint dossiers with statutory disclaimers.'
+      },
+      {
+        title: 'Lodge with Official Authorities',
+        description: 'Attach the verified bundle to CPGRAMS (pgportal.gov.in), State Jan Sunwai, or local municipal counters.'
+      }
+    ],
+    officialSources: [
+      {
+        name: 'CPGRAMS — Centralized Public Grievance Redress and Monitoring System',
+        url: 'https://pgportal.gov.in',
+        verified: true,
+        lastVerified: '2026-11-25'
+      },
+      {
+        name: 'RTI Online Portal — Government of India',
+        url: 'https://rtionline.gov.in',
+        verified: true,
+        lastVerified: '2026-11-25'
+      }
+    ],
+    warnings: [
+      'Civic Help Setu Verifiable Evidence Bundles establish mathematical data integrity and chronological provenance for citizen records.',
+      'This tool does NOT provide sovereign government attestation, legal advice, or guaranteed grievance resolution.',
+      'Citizen assertions remain subjective user claims until independently verified by statutory authorities.'
+    ],
+    contacts: [
+      { label: 'CPGRAMS Citizen Redressal Helpline', phone: '1800-11-4000', url: 'https://pgportal.gov.in' }
+    ],
+    lastVerified: '2026-11-25'
+  },
+  {
+    id: 'public-toilet-directory',
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
+    name: 'Public Toilet Availability, Accessibility & Maintenance Status',
+    shortDescription: 'Searchable public sanitation facility directory with operating hours, wheelchair accessibility, sanitary amenities, cleaning logs, and verified maintenance status.',
+    category: 'Health',
+    department: 'Municipal Corporation / Urban Local Bodies — Sanitation Wing',
+    type: 'Online',
+    difficulty: 'Easy',
+    feeType: 'free',
+    speedDays: 1,
+    popularityScore: 94,
+    eligibility: [
+      'Open to all residents, commuters, and visitors requiring municipal sanitation facilities.',
+      'Accessible features (wheelchair ramps, grab bars, diaper changing, all-gender cabins) are available at verified municipal complexes.',
+      'Facility operators and sanitation supervisors have dedicated access to update temporary closures and log cleaning events.'
+    ],
+    documents: [
+      'No documents required for citizen public access or issue reporting'
+    ],
+    documentRequirements: {},
+    steps: [
+      {
+        title: 'Locate Nearest Facility',
+        description: 'Filter verified public toilets by city, ward, wheelchair ramp, running water, or 24/7 operating hours.'
+      },
+      {
+        title: 'Verify Operating Hours & Live Status',
+        description: 'Inspect real-time open/closed calculations, schedule windows, and active temporary closure notices.'
+      },
+      {
+        title: 'Inspect Audited Cleanliness & Amenities',
+        description: 'Review the latest supervisor cleaning timestamp, sanitary napkin availability, and audit score.'
+      },
+      {
+        title: 'Report Issues or Submit Feedback',
+        description: 'Submit maintenance tickets or hygiene observations with instant cryptographic tracking receipts.'
+      }
+    ],
+    fees: 'Free',
+    processingTime: 'Around 1 day',
+    officialSources: [
+      {
+        name: 'Ministry of Housing and Urban Affairs — Swachh Bharat Mission (Urban)',
+        url: 'https://swachhbharaturban.gov.in',
+        verified: true,
+        lastVerified: '2026-11-16'
+      }
+    ],
+    warnings: [
+      'Never include personal identifiers (Aadhaar, PAN, phone numbers) when submitting public issue reports.',
+      'Emergency plumbing or sewer overhauls may cause temporary closures as declared by authorized municipal operators.'
+    ],
+    contacts: [
+      { label: 'Swachhata Citizen Helpline', phone: '1969', url: 'https://swachhbharaturban.gov.in' }
+    ],
+    lastVerified: '2026-11-16'
+  },
+  {
+    id: 'pedestrian-barrier-map',
+    name: 'Accessible Pedestrian Route & Barrier Map',
+    shortDescription: 'Plan accessible pedestrian routes avoiding broken footpaths, missing curb ramps, steep gradients, and temporary obstructions with community reporting and official municipal audits.',
+    category: 'Transport',
+    department: 'Municipal Corporation / Directorate of Urban Land Transport (DULT)',
+    type: 'Online Tool / Civic Audit',
+    difficulty: 'Easy',
+    feeType: 'free',
+    speedDays: 1,
+    popularityScore: 94,
+    jurisdiction: {
+      level: 'local',
+      states: ['Karnataka'],
+      districts: ['Bengaluru Urban'],
+      localBody: 'Bruhat Bengaluru Mahanagara Palike (BBMP)'
+    },
+    eligibility: [
+      'Open to all residents, wheelchair users, senior citizens, parents with strollers, and pedestrians.',
+      'Community obstacle reporting is open to all citizens without requiring personal medical or health disclosure.',
+      'Ground verification and resolution updates are performed by authorized municipal engineers and ward reviewers.'
+    ],
+    documents: [
+      'No documents required for route planning or obstacle reporting.',
+      'Optional photographic evidence of physical barriers or missing curb ramps.'
+    ],
+    documentRequirements: {
+      'No documents required for route planning or obstacle reporting.': {
+        type: 'none'
+      },
+      'Optional photographic evidence of physical barriers or missing curb ramps.': {
+        type: 'optional'
+      }
+    },
+    steps: [
+      {
+        title: 'Select Origin and Destination Nodes',
+        description: 'Choose your start and destination points on the pedestrian network map or directory dropdown.'
+      },
+      {
+        title: 'Configure Functional Mobility Constraints',
+        description: 'Toggle constraints such as avoiding stairs/steps, requiring dropped curb ramps, or setting maximum gradient thresholds without disclosing personal diagnoses.'
+      },
+      {
+        title: 'Inspect Scoring Provenance & Alternative Route Tables',
+        description: 'Review the calculated route, audit freshness indicators, active obstacles, or switch to the screen-reader accessible table view.'
+      },
+      {
+        title: 'Report New Obstacles for Municipal Scrutiny',
+        description: 'Submit geo-tagged descriptions of missing curb cuts, broken pavers, or temporary roadwork to update the routing graph for all citizens.'
+      }
+    ],
+    fees: 'Free',
+    processingTime: 'Around 1 day',
+    officialSources: [
+      {
+        name: 'Harmonised Guidelines and Standards for Universal Accessibility in India (MoHUA)',
+        url: 'https://mohua.gov.in',
+        verified: true,
+        lastVerified: '2026-11-16'
+      },
+      {
+        name: 'Rights of Persons with Disabilities Act (Section 40 & 44 — Public Infrastructure Accessibility)',
+        url: 'https://disabilityaffairs.gov.in',
+        verified: true,
+        lastVerified: '2026-11-16'
+      }
+    ],
+    warnings: [
+      'No route is described as fully accessible unless all traversed segments have undergone verified municipal ground inspection within the last 30 days.',
+      'Personal contact details (Aadhaar, phone, email) must never be submitted in public barrier descriptions.',
+      'Route preferences remain local to your browser and are not linked to citizen profiles.'
+    ],
+    contacts: [
+      { label: 'Pedestrian Infrastructure Helpline', phone: '1533', url: 'https://bbmp.gov.in' },
+      { label: 'Universal Accessibility Cell', phone: '080-22660000', url: 'https://dult.karnataka.gov.in' }
+    ],
+    lastVerified: '2026-11-16'
+  },
+  {
+    id: 'open-contracting-red-flags',
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
+    name: 'Open Contracting Red-Flag Analytics & Audit Workspace',
+    shortDescription: 'Audit public procurement records across tender notice, bid, award, and amendment stages using explainable anomaly detection and OCDS red-flag benchmarks without declaring wrongdoing.',
+    category: 'Complaints',
+    department: 'Central Vigilance Commission & State Public Procurement Oversight Authorities',
+    type: 'Online',
+    difficulty: 'Medium',
+    feeType: 'free',
+    speedDays: 1,
+    popularityScore: 94,
+    tags: [
+      'Procurement',
+      'Tenders',
+      'Auditing',
+      'Red Flags',
+      'Open Contracting',
+      'OCDS',
+      'Contract Amendments',
+      'Single Bid',
+      'Price Outlier'
+    ],
+    summary: 'Auditors, researchers, and citizens can review public procurement notices, detect statistical anomalies (repeated single-bid awards, unusual amendments, price creep, abbreviated notice periods), inspect linked procurement lifecycles, and document reasoned human review outcomes.',
+    eligibility: [
+      'Municipal and state auditors conducting procurement reviews',
+      'Civil society oversight researchers and transparency watchdogs',
+      'Citizen observers reviewing local public works and goods tenders',
+      'Procurement analysts verifying supplier concentrations',
+      'Public procurement records published under Open Contracting Data Standard (OCDS) or state e-Procurement portals',
+      'Auditors must provide statutory justifications when recording review decisions or clearing flags'
+    ],
+    documents: [
+      'Published Tender Notice & Corrigenda (Official tender advertisement with dates and criteria)',
+      'Technical & Financial Bid Evaluation Sheets (Documenting received quotes and bidder rankings)',
+      'Contract Award Order & Amendments (Documenting awarded amount and variation orders)'
+    ],
+    fees: 'Free',
+    processingTime: 'Around 1 day',
+    steps: [
+      {
+        title: 'Import & Harmonize Procurement Records',
+        description: 'Tender notices, bids, award details, and contract amendments are normalized under Open Contracting schemas.'
+      },
+      {
+        title: 'Run Explainable Anomaly Analytics',
+        description: 'Deterministic rulesets detect single-bid awards, short turnaround windows, excessive amendments, and price outliers with comparison cohorts.'
+      },
+      {
+        title: 'Inspect Linked Lifecycle Stages',
+        description: 'Reviewers explore the timeline connecting notice to bids, award to amendments, and compare against category cohort benchmarks.'
+      },
+      {
+        title: 'Record Human Audit Review & Issue Seal',
+        description: 'Authorized auditors examine file records, mark false positives with documented reasons or escalate for formal audit with cryptographic seals.'
+      }
+    ],
+    officialSources: [
+      {
+        name: 'Government e-Marketplace (GeM)',
+        url: 'https://gem.gov.in',
+        verified: true,
+        lastVerified: '2026-11-16'
+      },
+      {
+        name: 'Central Public Procurement Portal (CPPP)',
+        url: 'https://eprocure.gov.in',
+        verified: true,
+        lastVerified: '2026-11-16'
+      },
+      {
+        name: 'Open Contracting Partnership (OCDS)',
+        url: 'https://www.open-contracting.org',
+        verified: true,
+        lastVerified: '2026-11-16'
+      }
+    ],
+    warnings: [
+      'Red-flag anomaly indicators are statistical and procedural prompts for auditor review; they do not declare wrongdoing or legal liability.',
+      'Auditors must review the complete procurement file before taking formal administrative or investigative actions.',
+      'Personal identifiers (Aadhaar, PAN, phone numbers, private emails) must never be entered into public audit review notes.'
+    ],
+    contacts: [
+      { label: 'Central Vigilance Commission Helpline', phone: '1800-11-5555', url: 'https://cvc.gov.in' },
+      { label: 'State Public Procurement Authority Helpdesk', phone: '080-22250000', url: 'https://kppp.karnataka.gov.in' }
+    ],
+    lastVerified: '2026-11-16'
+  },
+  {
+    id: 'ward-issue-heatmap',
+    jurisdiction: { level: 'national', states: [], districts: [], localBody: '' },
+    name: 'Anonymized Ward-Level Civic Issue Heatmap & Trend Explorer',
+    shortDescription: 'Aggregate analytics view for understanding recurring civic issues across municipal wards without exposing individual complainants or exact private locations.',
+    category: 'Complaints',
+    department: 'Directorate of Municipal Administration & Urban Data Governance Cell',
+    type: 'Online Analytics & Public Dashboard',
+    difficulty: 'Easy',
+    feeType: 'free',
+    speedDays: 1,
+    popularityScore: 96,
+    eligibility: [
+      'Accessible to all citizens, community researchers, Resident Welfare Associations (RWAs), and municipal ward committees.',
+      'Public view enforces k-anonymity (k >= 5) small-cell suppression: sparse cohorts are withheld from public display to prevent complainant re-identification.',
+      'Municipal operators and administrators have authorized access to triage intervention recommendations and view aggregate trends across jurisdictions.'
+    ],
+    documents: [
+      'Factual observation or geo-tagged location landmark for eligible civic defects',
+      'No personal identity documents (Aadhaar/PAN) or private contact details required or permitted'
+    ],
+    documentRequirements: {
+      'Factual observation or geo-tagged location landmark for eligible civic defects': {
+        type: 'mandatory'
+      }
+    },
+    steps: [
+      {
+        title: 'Explore Ward Heatmap & Issue Densities',
+        description: 'Review ward-level distribution of recurring civic issues including road damage, water supply, solid waste, and waterlogging.'
+      },
+      {
+        title: 'Inspect k-Anonymity & Suppression Safeguards',
+        description: 'Verify active privacy rules (k >= 5) where cohorts with fewer than 5 events are suppressed to safeguard complainant confidentiality.'
+      },
+      {
+        title: 'Compare Multi-Ward Trend Velocities',
+        description: 'Evaluate reporting velocities across consecutive time windows to identify emerging hotspots and seasonal patterns.'
+      },
+      {
+        title: 'Review Explainable Municipal Interventions',
+        description: 'Inspect automated, ruleset-versioned recommendations with explainable data signals and human-in-the-loop review actions.'
+      },
+      {
+        title: 'Submit Anonymized Civic Observation',
+        description: 'Contribute ground observations with coordinates snapped strictly to the municipal ward centroid.'
+      }
+    ],
+    fees: 'Free',
+    processingTime: 'Around 1 day',
+    officialSources: [
+      {
+        name: 'Ministry of Housing and Urban Affairs (MoHUA) — Urban Data Guidelines',
+        url: 'https://mohua.gov.in',
+        verified: true,
+        lastVerified: '2026-11-15'
+      },
+      {
+        name: 'National Urban Digital Mission — Open Urban Analytics Standards',
+        url: 'https://nudm.mohua.gov.in',
+        verified: true,
+        lastVerified: '2026-11-15'
+      }
+    ],
+    warnings: [
+      'Exact residential door numbers, private coordinates, and complainant identities are never published or retained in heatmap analytics.',
+      'Small cohorts with fewer than 5 reports are suppressed under k-anonymity privacy safeguards to prevent deanonymization.',
+      'Automated recommendations are advisory and require human-in-the-loop validation by authorized municipal engineers.'
+    ],
+    contacts: [
+      { label: 'Urban Analytics & Diagnostics Helpline', phone: '1800-11-4455', url: 'https://mohua.gov.in' },
+      { label: 'Municipal Control Room', phone: '1916', url: 'https://nudm.mohua.gov.in' }
+    ],
+    lastVerified: '2026-11-15'
+  },
+  {
+    id: 'property-tax-no-dues',
+    name: 'Property Tax No-Dues Certificate & Payment Receipt Guide',
+    title: 'Property Tax No-Dues Certificate & Payment Receipt Guide',
+    shortDescription: 'Authoritative citizen guide for checking property tax dues, downloading official payment receipts, and securing a Municipal No-Dues Certificate across Indian Urban Local Bodies (#531).',
+    description: 'Comprehensive, jurisdiction-aware citizen guide for checking municipal property tax dues, downloading official payment receipts, and obtaining certified Property Tax No-Dues Certificates across Indian municipal corporations and municipalities (MCD, BBMP, BMC, GCC, KMC, GHMC, AMC, PMC). Clearly differentiates payment receipts from No-Dues Certificates and explains that neither document confers legal ownership or title.',
+    department: 'Urban Local Bodies (Municipal Corporations, Councils & Nagar Palikas) — Revenue & Assessment Department',
+    category: 'Certificates',
+    type: 'Online / Offline',
+    difficulty: 'Easy',
+    feeType: 'free',
+    speedDays: 1,
+    popularityScore: 97,
+    eligibility: [
+      'Registered property owners, co-owners, or recorded occupiers in municipal records',
+      'Authorized family members, power of attorney (POA) holders, or legal representatives',
+      'All property tax dues, solid waste management cesses, arrears, and penalties cleared in full'
+    ],
+    documents: [
+      'Property Identification Number (UPIC, SAS/PID, SAC, Bill No, PTIN, or Tenement No)',
+      'Latest Property Tax Paid Receipt / Bank Challan',
+      'Government Photo Identity Proof of Applicant (Aadhaar, Voter ID, PAN, Passport)',
+      'Registered Sale Deed / Title Deed (conditional, if mutation or name transfer is pending)',
+      'Power of Attorney or Owner Authorization Letter (conditional, if representative applies)',
+      'Death Certificate & Legal Heir Certificate (conditional, if registered owner is deceased)'
+    ],
+    steps: [
+      { title: 'Identify Municipal Authority', description: 'Determine the competent Urban Local Body (e.g. MCD, BBMP, BMC, GCC, KMC, GHMC) holding territorial jurisdiction.' },
+      { title: 'Locate Property in Ledger', description: 'Search using your city-specific Property ID, UPIC, SAS number, SAC, or PTIN on the official municipal revenue portal.' },
+      { title: 'Inspect Demands & Arrears', description: 'Review current assessment year demand, accumulated arrears, cess line-items, and statutory penal interest.' },
+      { title: 'Remit Pending Dues & Save Receipt', description: 'Clear all outstanding amounts via official payment gateways or bank challan and download the digitally signed payment receipt.' },
+      { title: 'Apply & Download No-Dues Certificate', description: 'Generate the certified No-Dues Certificate online or submit a clearance application at the zonal revenue office.' }
+    ],
+    validityNote: 'Payment receipts verify a single transaction. No-Dues Certificates certify zero outstanding dues and are valid for the ongoing assessment cycle (typically ending 31 March) or until the next statutory demand is raised.',
+    fees: 'No government fee for online No-Dues Certificate generation in most major ULBs; all assessed tax dues, cesses, and accumulated arrears must be cleared in full.',
+    processingTime: 'Instant online download upon ledger zero-balance; 3 to 15 working days for manual zonal revenue office applications under State Right to Services Acts.',
+    officialSources: [
+      {
+        name: 'Municipal Corporation of Delhi (MCD) Property Tax Portal',
+        url: 'https://mcdonline.nic.in',
+        verified: true,
+        lastVerified: '2026-11-18'
+      },
+      {
+        name: 'Bruhat Bengaluru Mahanagara Palike (BBMP) Property Tax System',
+        url: 'https://bbmptax.karnataka.gov.in',
+        verified: true,
+        lastVerified: '2026-11-18'
+      },
+      {
+        name: 'Brihanmumbai Municipal Corporation (BMC) Citizen Portal',
+        url: 'https://ptaxportal.mcgm.gov.in',
+        verified: true,
+        lastVerified: '2026-11-18'
+      },
+      {
+        name: 'Greater Chennai Corporation (GCC) Property Tax Portal',
+        url: 'https://chennaicorporation.gov.in',
+        verified: true,
+        lastVerified: '2026-11-18'
+      }
+    ],
+    warnings: [
+      'A Property Tax Payment Receipt or No-Dues Certificate does NOT confer or prove legal ownership, title, or proprietary right over real estate.',
+      'Payment of property tax does NOT regularize unauthorized constructions or shield them from municipal enforcement action.',
+      'Never remit property taxes on unverified third-party websites or search engine advertisements. Verify that the portal URL ends with .gov.in or .nic.in.'
+    ],
+    contacts: [
+      { label: 'Delhi MCD Helpline', phone: '155304', url: 'https://mcdonline.nic.in' },
+      { label: 'Bengaluru BBMP Control Room', phone: '080-22660000', url: 'https://bbmptax.karnataka.gov.in' },
+      { label: 'Mumbai BMC Helpline', phone: '1916', url: 'https://ptaxportal.mcgm.gov.in' },
+      { label: 'Chennai GCC Helpline', phone: '1913', url: 'https://chennaicorporation.gov.in' }
+    ],
+    lastVerified: '2026-11-18'
+  },
+  {
+    id: 'transgender-certificate-welfare',
+    name: 'Transgender Identity Certificate & Welfare Navigator',
+    shortDescription: 'Privacy-first guide to official certificate application routes, medical affirmation revisions, welfare schemes, and verified support resources under the Transgender Persons Act, 2019 (#1104).',
+    description: 'Statutory guide to official transgender identity certificate application routes under Section 5 and gender affirmation revisions under Section 7 of the Transgender Persons (Protection of Rights) Act, 2019. Covers the National Portal (transgender.dosje.gov.in), 30-day DM turnaround, zero-fee mandate, SMILE scheme, Ayushman Bharat TG Plus, Garima Greh, and state-aware verified support resources with zero identity document collection and client-side privacy.',
+    department: 'Ministry of Social Justice and Empowerment / State Transgender Welfare Boards',
+    category: 'Certificates',
+    type: 'Online / Citizen Guide',
+    difficulty: 'Easy',
+    feeType: 'free',
+    speedDays: 30,
+    popularityScore: 98,
+    path: '/services/transgender-certificate-welfare',
+    eligibility: [
+      'Any transgender person residing in India',
+      'At least one year of continuous residence within the jurisdiction of the District Magistrate',
+      'Self-perceived gender identity declared via Form 2 affidavit (no medical exam permitted)'
+    ],
+    documents: [
+      'Self-declaration Affidavit in Form 2 on non-judicial stamp paper',
+      'Recent colour passport-size photograph',
+      'Proof of residence of at least 1 year (utility bill, voter ID, ration card, rent agreement)',
+      'For revised certificate (Section 7): Form 3 Certificate from Medical Superintendent / CMO'
+    ],
+    steps: [
+      { title: 'Register on National Portal', description: 'Create an account on transgender.dosje.gov.in without mandatory Aadhaar linkage.' },
+      { title: 'Submit Form 1 & Form 2 Affidavit', description: 'Upload self-perceived identity affidavit and address proof.' },
+      { title: 'District Magistrate Review', description: 'Statutory 30-day timeline for issuance; physical examination is legally prohibited.' },
+      { title: 'Digital Download & Revision Access', description: 'Download the Certificate of Identity and barcoded card; apply for revisions post-medical affirmation under Section 7.' }
+    ],
+    validityNote: 'Certificate of Identity is valid across all Union and State Government departments nationwide with lifetime validity, subject to statutory revision under Section 7 upon medical intervention.',
+    fees: 'Nil (Completely free of cost as mandated under Central Rules)',
+    processingTime: '30 statutory days from receipt of application under Rule 6(1)',
+    officialSources: [
+      {
+        name: 'National Portal for Transgender Persons (MoSJE)',
+        url: 'https://transgender.dosje.gov.in',
+        verified: true,
+        lastVerified: '2026-11-20'
+      },
+      {
+        name: 'Ministry of Social Justice and Empowerment',
+        url: 'https://socialjustice.gov.in',
+        verified: true,
+        lastVerified: '2026-11-20'
+      }
+    ],
+    warnings: [
+      'Under Section 5 of the Transgender Persons Act, 2019, requiring an applicant to undergo any physical or medical examination for an initial Certificate of Identity is strictly illegal.',
+      'Never share your barcoded Certificate of Identity or QR code on unverified websites or public social media.',
+      'Official applications are completely free on transgender.dosje.gov.in; do not pay middlemen or unofficial agents.'
+    ],
+    contacts: [
+      { label: 'National Tele-Counselling Helpline', phone: '14567', url: 'https://transgender.dosje.gov.in' },
+      { label: 'Emergency Helpline for Women & TG', phone: '181', url: 'https://wcd.nic.in' },
+      { label: 'National Legal Services Authority (NALSA)', phone: '15100', url: 'https://nalsa.gov.in' }
+    ],
+    lastVerified: '2026-11-20'
+
   }
 ];
 

@@ -1,0 +1,7 @@
+.dark-workspace { max-width: 1000px; margin: 2rem auto; padding: 1rem; color: var(--text-primary, #172033); }
+.dark-workspace section { border: 1px solid #94a3b8; border-radius: .7rem; padding: 1.2rem; margin: 1rem 0; }
+.dark-workspace label { display: block; margin: .6rem 0; }
+.dark-workspace input:not([type=checkbox]), .dark-workspace textarea, .dark-workspace select { display: block; width: 100%; padding: .6rem; color: #172033; background: #fff; border: 1px solid #64748b; border-radius: .3rem; }
+.dark-workspace button { padding: .55rem .8rem; margin: .25rem 0; cursor: pointer; }
+.dark-workspace pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 1rem; background: #edf2f7; color: #172033; }
+.pattern-grid, .price-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .5rem; }

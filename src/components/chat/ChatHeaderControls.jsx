@@ -1,7 +1,13 @@
-import { Download, MessageSquarePlus, Printer } from 'lucide-react';
+import { Download, MessageSquarePlus, Printer, ShieldCheck } from 'lucide-react';
 import { exportChatAsMarkdown } from '../../services/chatStorage';
 
-const ChatHeaderControls = ({ messages = [], onNewConversation, canReset = true, isLoading = false }) => {
+const ChatHeaderControls = ({
+  messages = [],
+  onNewConversation,
+  canReset = true,
+  isLoading = false,
+  onOpenCaseMemory,
+}) => {
   const messageCount = messages.filter((m) => m.role === 'user').length;
 
   const handleExport = () => {
@@ -83,6 +89,26 @@ const ChatHeaderControls = ({ messages = [], onNewConversation, canReset = true,
         >
           <Printer size={14} /> Print
         </button>
+
+        {onOpenCaseMemory && (
+          <button
+            type="button"
+            onClick={onOpenCaseMemory}
+            className="btn"
+            style={{
+              padding: '0.35rem 0.75rem',
+              fontSize: '0.8rem',
+              background: 'rgba(16, 185, 129, 0.1)',
+              border: '1px solid rgba(16, 185, 129, 0.25)',
+              color: '#10b981',
+              borderRadius: '99px',
+              gap: '0.35rem',
+            }}
+            title="Inspect and manage privacy-isolated case memory"
+          >
+            <ShieldCheck size={14} /> Case Memory
+          </button>
+        )}
 
         <button
           type="button"
