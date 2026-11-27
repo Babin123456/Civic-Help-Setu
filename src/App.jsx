@@ -102,6 +102,7 @@ const PublicToiletDirectory = lazy(() => import('./pages/PublicToiletDirectory')
 const AccessibleRouteBarrierWorkspace = lazy(() => import('./pages/AccessibleRouteBarrierWorkspace'));
 const StreetlightOutageWorkspace = lazy(() => import('./pages/StreetlightOutageWorkspace'));
 const ReliefOperationsWorkspace = lazy(() => import('./pages/ReliefOperationsWorkspace'));
+const DisasterReliefBoardWorkspace = lazy(() => import('./pages/DisasterReliefBoardWorkspace'));
 const GhgInventoryWorkspace = lazy(() => import('./pages/GhgInventoryWorkspace'));
 const OfflineEmergencyCardWorkspace = lazy(() => import('./pages/OfflineEmergencyCardWorkspace'));
 const WaterQualityRegister = lazy(() => import('./pages/WaterQualityRegister'));
@@ -410,6 +411,8 @@ function AppRoot() {
                             <Route path="/relief-operations" element={<ReliefOperationsWorkspace />} />
                             <Route path="/disaster-relief" element={<ReliefOperationsWorkspace />} />
                             <Route path="/services/relief-operations" element={<ReliefOperationsWorkspace />} />
+                            <Route path="/disaster-relief-board" element={<DisasterReliefBoardWorkspace />} />
+                            <Route path="/relief-camp-board" element={<DisasterReliefBoardWorkspace />} />
                             <Route path="/ghg-inventory" element={<GhgInventoryWorkspace />} />
                             <Route path="/emissions-inventory" element={<GhgInventoryWorkspace />} />
                             <Route path="/services/ghg-inventory" element={<GhgInventoryWorkspace />} />
