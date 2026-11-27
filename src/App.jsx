@@ -317,6 +317,8 @@ function AppRoot() {
                             <Route path="/up-heatwave-relief" element={<UpHeatwaveReliefMap />} />
                             <Route path="/heatwave-relief" element={<UpHeatwaveReliefMap />} />
                             <Route path="/cooling-relief" element={<UpHeatwaveReliefMap />} />
+                            <Route path="/heatwave-cooling-directory" element={<UpHeatwaveReliefMap />} />
+                            <Route path="/cooling-directory" element={<UpHeatwaveReliefMap />} />
                             <Route path="/public-toilets" element={<PublicToiletDirectory />} />
                             <Route path="/toilet-directory" element={<PublicToiletDirectory />} />
                             <Route path="/toilets" element={<PublicToiletDirectory />} />
