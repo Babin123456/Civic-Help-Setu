@@ -122,6 +122,7 @@ const DarkPatternsWorkspace = lazy(() => import('./pages/DarkPatternsWorkspace')
 const AccessibilityAuditWorkspace = lazy(() => import('./pages/AccessibilityAuditWorkspace'));
 const AccessibilityComplaintTrackerWorkspace = lazy(() => import('./pages/AccessibilityComplaintTrackerWorkspace'));
 const LegalSourceReviewWorkspace = lazy(() => import('./pages/LegalSourceReviewWorkspace'));
+const CivicContributionPipelineWorkspace = lazy(() => import('./pages/CivicContributionPipelineWorkspace'));
 const RteAdmissionWorkspace = lazy(() => import('./pages/RteAdmissionWorkspace'));
 const EvidenceDossierWorkspace = lazy(() => import('./pages/EvidenceDossierWorkspace'));
 const ChangeFeedPage = lazy(() => import('./pages/ChangeFeedPage'));
@@ -374,6 +375,8 @@ function AppRoot() {
                             <Route path="/rte-screening-redressal" element={<RteAdmissionWorkspace />} />
                             <Route path="/legal-sources" element={<LegalSourceReviewWorkspace />} />
                             <Route path="/legal-source-review" element={<LegalSourceReviewWorkspace />} />
+                            <Route path="/civic-contributions" element={<CivicContributionPipelineWorkspace />} />
+                            <Route path="/contribution-pipeline" element={<CivicContributionPipelineWorkspace />} />
                             <Route path="/workspace-template-sources" element={<LegalSourceReviewWorkspace />} />
                             <Route path="/evidence-dossier" element={<EvidenceDossierWorkspace />} />
                             <Route path="/verify-evidence" element={<EvidenceDossierWorkspace />} />
