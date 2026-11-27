@@ -51,6 +51,7 @@ import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
 import temporalPolicy from "./_lib/handlers/temporal-policy.js";
+import treePlantationSurvival from "./_lib/handlers/tree-plantation-survival.js";
 import agentReviewStudio from "./_lib/handlers/agent-review-studio.js";
 import civicAgentEval from "./_lib/handlers/civic-agent-eval.js";
 
@@ -162,6 +163,7 @@ const baseHandlers = {
   "send-email": sendEmail,
   "share-by-email": shareByEmail,
   "temporal-policy": temporalPolicy,
+  "tree-plantation-survival": treePlantationSurvival,
   "tender-corrections": tenderCorrections,
 
   "verifiable-evidence-bundles": verifiableEvidenceBundles,
@@ -434,6 +436,7 @@ export function createApiDispatcher({
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-eval",
+      "tree-plantation-survival",
       "civic-agent-policy",
       "civic-contract-test-marketplace",
       "civic-recommendation-experimentation",
