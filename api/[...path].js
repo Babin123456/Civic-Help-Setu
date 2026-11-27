@@ -59,6 +59,7 @@ import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import digitalTwinSimulations from "./_lib/handlers/digital-twin-simulations.js";
 import temporalPolicy from "./_lib/handlers/temporal-policy.js";
 import treePlantationSurvival from "./_lib/handlers/tree-plantation-survival.js";
 import portalChangeMonitor from "./_lib/handlers/portal-change-monitor.js";
@@ -176,6 +177,7 @@ const baseHandlers = {
   "civic-contribution-pipeline": civicContributionPipeline,
   "counter-demand-reports": counterDemandReports,
   "crematorium-corrections": crematorium,
+  "digital-twin-simulations": digitalTwinSimulations,
   "email/preferences": emailPreferences,
   "email/verify": emailVerify,
   "federated-civic-query": federatedCivicQuery,

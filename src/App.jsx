@@ -150,6 +150,7 @@ const PolicyEngineWorkspacePage = lazy(() => import('./pages/PolicyEngineWorkspa
 const ContractTestMarketplaceWorkspacePage = lazy(() => import('./pages/ContractTestMarketplaceWorkspace'));
 const FreshnessPredictionWorkspacePage = lazy(() => import('./pages/FreshnessPredictionWorkspace'));
 const RecommendationExperimentationWorkspacePage = lazy(() => import('./pages/RecommendationExperimentationWorkspace'));
+const CivicWorkflowDigitalTwinWorkspace = lazy(() => import('./pages/CivicWorkflowDigitalTwinWorkspace'));
 const RecommendationFairnessAuditWorkspace = lazy(() => import('./pages/RecommendationFairnessAuditWorkspace'));
 const AiHallucinationReportWorkspace = lazy(() => import('./pages/AiHallucinationReportWorkspace'));
 const AgentMemoryScopeWorkspace = lazy(() => import('./pages/AgentMemoryScopeWorkspace'));
@@ -248,6 +249,8 @@ function AppRoot() {
                             <Route path="/services/ward-budget-proposal" element={<WardBudgetWorkspace />} />
                             <Route path="/ward-budget" element={<WardBudgetWorkspace />} />
                             <Route path="/ward-budget/:id" element={<WardBudgetWorkspace />} />
+                            <Route path="/digital-twin" element={<CivicWorkflowDigitalTwinWorkspace />} />
+                            <Route path="/admin/digital-twin" element={<CivicWorkflowDigitalTwinWorkspace />} />
                             <Route path="/services/:id" element={<ServiceDetails />} />
                             <Route path="/acronyms" element={<Acronyms />} />
                             <Route path="/eligibility" element={<Eligibility />} />

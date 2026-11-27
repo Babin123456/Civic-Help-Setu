@@ -27,6 +27,7 @@ import {
   KeyRound,
   Store,
   Trees,
+  GitCompare,
   Calendar,
   HelpCircle,
   School,
@@ -50,7 +51,6 @@ import {
   GraduationCap,
   FolderLock,
   ClipboardList,
-
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -1331,6 +1331,13 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 activeTarget: '/tree-health',
                 label: t('nav.treeHealth', 'Tree Health Inventory'),
                 icon: Trees
+              })}
+
+              {renderNavLink({
+                to: '/digital-twin',
+                activeTarget: '/digital-twin',
+                label: t('nav.digitalTwin', 'Digital Twin Simulator'),
+                icon: GitCompare
               })}
 
               {renderNavLink({
