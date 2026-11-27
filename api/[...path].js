@@ -60,6 +60,7 @@ import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
 import firewallScan from "./_lib/handlers/firewall-scan.js";
+import mgnregaEvidenceBuilder from "./_lib/handlers/mgnrega-evidence-builder.js";
 
 
 
@@ -202,6 +203,7 @@ const baseHandlers = {
   "library-corrections": libraryCorrections,
   "library-resource-directory": libraryResourceDirectory,
   "office-comparison": officeComparison,
+  "mgnrega-evidence-builder": mgnregaEvidenceBuilder,
   "office-verification-campaigns": officeVerificationCampaigns,
   "open-contracting-analytics": openContractingAnalytics,
   "pds-observations": pdsObservations,
