@@ -142,6 +142,7 @@ const PolicyEngineWorkspacePage = lazy(() => import('./pages/PolicyEngineWorkspa
 const ContractTestMarketplaceWorkspacePage = lazy(() => import('./pages/ContractTestMarketplaceWorkspace'));
 const FreshnessPredictionWorkspacePage = lazy(() => import('./pages/FreshnessPredictionWorkspace'));
 const RecommendationExperimentationWorkspacePage = lazy(() => import('./pages/RecommendationExperimentationWorkspace'));
+const LibraryResourceDirectoryWorkspace = lazy(() => import('./pages/LibraryResourceDirectoryWorkspace'));
 
 const ServicesFallback = () => (
   <div className="section">
@@ -420,6 +421,8 @@ function AppRoot() {
 
                             <Route path="/open-source" element={<OpenSource />} />
                             <Route path="/privacy" element={<Privacy />} />
+                            <Route path="/library-resource-directory" element={<LibraryResourceDirectoryWorkspace />} />
+                            <Route path="/community-learning-directory" element={<LibraryResourceDirectoryWorkspace />} />
 
                             <Route path="/admin/imports" element={
                               <ProtectedRoute requiredRole="admin">
