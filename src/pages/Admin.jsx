@@ -101,6 +101,7 @@ import DuplicateServiceDetectorPanel from '../components/admin/DuplicateServiceD
 import CatalogueConflictDetectorPanel from '../components/admin/CatalogueConflictDetectorPanel';
 import CivicWorksModeratorPanel from '../components/civicWorks/CivicWorksModeratorPanel';
 import AgentReviewStudioPanel from '../components/admin/AgentReviewStudioPanel';
+import GovernedToolRegistryPanel from '../components/admin/GovernedToolRegistryPanel';
 import CivicAgentEvalHarnessPanel from '../components/admin/CivicAgentEvalHarnessPanel';
 
 import WardIssueHeatmap from '../components/analytics/WardIssueHeatmap';
@@ -779,6 +780,7 @@ const Admin = () => {
 
               { id: 'agent-review', label: 'Agent Review Studio', badge: null },
               { id: 'agent-eval-harness', label: 'Agent Eval Harness', badge: null },
+              { id: 'tool-registry', label: 'Tool Registry & Capabilities', badge: null },
 
 
               { id: 'model-gateway', label: 'Model Gateway & Residency', badge: null },
@@ -1857,6 +1859,13 @@ const Admin = () => {
             {activeTab === 'agent-eval-harness' && (
               <div>
                 <CivicAgentEvalHarnessPanel />
+              </div>
+            )}
+
+            {/* Governed Agent Tool Registry & Capability Controls Tab (#1146) */}
+            {activeTab === 'tool-registry' && (
+              <div>
+                <GovernedToolRegistryPanel />
               </div>
             )}
 

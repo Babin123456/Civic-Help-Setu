@@ -612,6 +612,14 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Governed Agent Tool Registry (#1146): server-only audit & revocation records.
+    match /agent_tool_registry_revocations/{revocationId} {
+      allow read, write: if false;
+    }
+    match /agent_tool_registry_audit/{auditId} {
+      allow read, write: if false;
+    }
+
 
     // ---------- everything else ----------
     match /{document=**} {

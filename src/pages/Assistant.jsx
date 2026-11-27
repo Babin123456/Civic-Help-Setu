@@ -52,6 +52,7 @@ import {
 
 import CaseMemoryInspectionModal from '../components/assistant/CaseMemoryInspectionModal';
 import { caseMemoryEngine } from '../services/agentMemory/caseMemoryEngine';
+import GovernedToolActionsPanel from '../components/assistant/GovernedToolActionsPanel';
 
 
 const Assistant = () => {
@@ -607,6 +608,14 @@ const Assistant = () => {
         {/* Sources, review dates and limitations (omitted when the response has no source data) */}
         {msg.ragResult && <SourceTraceabilityPanel ragResult={msg.ragResult} />}
         <SourcesAndLimitations message={msg} />
+
+        {/* Capability-governed tool actions (#1146) */}
+        <GovernedToolActionsPanel
+          serviceId={msg.serviceId}
+          title={data.title}
+          officialSources={data.officialSources}
+          sessionId={currentCaseId}
+        />
 
         {/* Suggested Follow-up Questions */}
         {msg.suggestions && msg.suggestions.length > 0 && (
