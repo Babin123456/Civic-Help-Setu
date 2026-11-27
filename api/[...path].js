@@ -59,6 +59,14 @@ import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+
+
+
+import verifiablePresentations from "./_lib/handlers/verifiable-presentations.js";
+
+
+import temporalPolicy from "./_lib/handlers/temporal-policy.js";
+
 import digitalTwinSimulations from "./_lib/handlers/digital-twin-simulations.js";
 import temporalPolicy from "./_lib/handlers/temporal-policy.js";
 import treePlantationSurvival from "./_lib/handlers/tree-plantation-survival.js";
@@ -71,6 +79,7 @@ import civicAgentEval from "./_lib/handlers/civic-agent-eval.js";
 import aiHallucinationReports from "./_lib/handlers/ai-hallucination-reports.js";
 
 import verifiableEvidenceBundles from "./_lib/handlers/verifiable-evidence-bundles.js";
+
 
 import zkAttributeProofVerify from "./_lib/handlers/zk-attribute-proof-verify.js";
 import federatedCivicQuery from "./_lib/handlers/federated-civic-query.js";
@@ -206,15 +215,10 @@ const baseHandlers = {
   "tree-plantation-survival": treePlantationSurvival,
   "portal-change-monitor": portalChangeMonitor,
   "tender-corrections": tenderCorrections,
-
+  "verifiable-presentations": verifiablePresentations,
   "verifiable-evidence-bundles": verifiableEvidenceBundles,
-
-
   "ward-analytics": wardAnalytics,
-
   "transit-concessions": transitConcessions,
-
-
   "ward-budget-proposals": wardBudgetProposals,
   "water-quality-register": waterQualityRegister,
   "waterbody-restoration": waterbodyRestoration,

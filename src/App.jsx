@@ -19,8 +19,10 @@ import BackToTop from './components/common/BackToTop';
 import RouteErrorFallback from './components/common/RouteErrorFallback';
 import RouteErrorBoundary from './components/common/RouteErrorBoundary';
 import { ServiceCardSkeletonGrid } from './components/ServiceCardSkeleton';
+const CitizenDataWallet = lazy(() => import('./pages/CitizenDataWallet'));
 
 import VerifiableEvidenceBundleWorkspace from './pages/VerifiableEvidenceBundleWorkspace';
+
 
 
 import ZkAttributeVerifierView from './pages/ZkAttributeVerifierView';
@@ -186,8 +188,10 @@ function AppRoot() {
                     <OfflineBanner />
                     <SkipToContent />
                     <Navbar />
+
                     <main id="main-content" style={{ flex: 1, minWidth: 0, width: '100%' }} tabIndex="-1">
                       <RouteErrorBoundary>
+
                         <Suspense fallback={<div className="section" role="status" aria-live="polite"><div className="container">Loading page…</div></div>}>
                           <Routes>
                             <Route path="/" element={<Home />} />
@@ -213,6 +217,16 @@ function AppRoot() {
                             <Route path="/services/property-tax-no-dues" element={<PropertyTaxNoDuesGuidePage />} />
                             <Route path="/property-tax-no-dues" element={<PropertyTaxNoDuesGuidePage />} />
 
+                            <Route path="/wallet" element={
+                                <ProtectedRoute>
+                                    <CitizenDataWallet />
+                                </ProtectedRoute>
+                            } />
+                            <Route path="/data-wallet" element={
+                                <ProtectedRoute>
+                                    <CitizenDataWallet />
+                                </ProtectedRoute>
+                            } />
                             <Route path="/services/business-licence-checklist" element={<SmallBusinessLicencePage />} />
                             <Route path="/business-licence-checklist" element={<SmallBusinessLicencePage />} />
                             <Route path="/services/fire-noc-guide" element={<FireSafetyGuidePage />} />
@@ -536,6 +550,7 @@ function AppRoot() {
                 </ConfirmationDialogProvider>
               </NetworkProvider>
             </LanguageProvider>
+
           </AuthProvider>
         </ToastProvider>
       </AccessibilityProvider>

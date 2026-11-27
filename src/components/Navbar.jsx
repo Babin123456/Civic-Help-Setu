@@ -27,6 +27,7 @@ import {
   KeyRound,
   Store,
   Trees,
+  FileBadge,
   GitCompare,
   Calendar,
   HelpCircle,
@@ -1403,6 +1404,12 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                   to: '/vault',
                   label: t('nav.vault', 'Document Vault'),
                   icon: Shield
+                })}
+
+                {renderNavLink({
+                  to: '/wallet',
+                  label: 'Citizen Data Wallet',
+                  icon: FileBadge
                 })}
 
                 {renderNavLink({
