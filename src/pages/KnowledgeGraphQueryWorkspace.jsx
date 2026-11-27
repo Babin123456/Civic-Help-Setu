@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GraphQueryControls } from '../components/knowledgeGraph/GraphQueryControls';
 import { GraphResultsViewer } from '../components/knowledgeGraph/GraphResultsViewer';
+import DependencyEdgeWorkflowPanel from '../components/knowledgeGraph/DependencyEdgeWorkflowPanel';
 import { civicKnowledgeGraph } from '../services/civicKnowledgeGraphService';
 import { SYNTHETIC_GRAPH_NODES } from '../data/civicKnowledgeGraphFixtures';
 
@@ -144,6 +145,13 @@ export default function KnowledgeGraphQueryWorkspace() {
           results={results}
           selectedNode={selectedNode}
           onSelectNode={setSelectedNode}
+        />
+
+        {/* Cross-Department Dependency List & Human-Reviewed Edge Publication (#1429) */}
+        <DependencyEdgeWorkflowPanel
+          startNodeId={query.startNodeId}
+          jurisdiction={query.jurisdiction}
+          effectiveAsOf={query.effectiveAsOf}
         />
 
         {/* Non-AI Fallback Statutory Notice */}
