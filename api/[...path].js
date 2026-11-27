@@ -30,6 +30,7 @@ import roadHazards from "./_lib/road-hazards.js";
 import bottleneckFeedback from "./_lib/handlers/bottleneck-feedback.js";
 import grievanceDepartmentRouting from "./_lib/handlers/grievance-department-routing.js";
 import addressChange from "./_lib/handlers/address-change-corrections.js";
+import agentWorkflows from "./_lib/handlers/agent-workflows.js";
 import anganwadiCalendar from "./_lib/handlers/anganwadi-calendar.js";
 import businessLicence from "./_lib/handlers/business-licence-feedback.js";
 import catalogueVisualQa from "./_lib/handlers/catalogue-visual-qa.js";
@@ -155,6 +156,7 @@ const baseHandlers = {
   "road-hazards": roadHazards,
   "agent-incident-response": agentIncidentResponse,
   "address-change-corrections": addressChange,
+  "agent-workflows": agentWorkflows,
   "anganwadi-calendar": anganwadiCalendar,
   "agent-review-studio": agentReviewStudio,
   "agent-tool-registry": agentToolRegistry,

@@ -54,6 +54,7 @@ import PublicToiletReviewQueue from '../components/admin/PublicToiletReviewQueue
 import TransitConcessionReviewQueue from '../components/admin/TransitConcessionReviewQueue';
 import OpenContractingAuditQueue from '../components/admin/OpenContractingAuditQueue';
 import AuditLogViewer from '../components/admin/AuditLogViewer';
+import WorkflowDeadLetterPanel from '../components/admin/WorkflowDeadLetterPanel';
 import ModelGatewayDashboard from '../components/admin/ModelGatewayDashboard';
 import ServiceImportPanel from '../components/admin/ServiceImportPanel';
 import ServiceRecordList from '../components/admin/ServiceRecordList';
@@ -1969,7 +1970,8 @@ const Admin = () => {
 
             {/* Audit Trail Tab */}
             {activeTab === 'audit' && (
-              <div>
+              <div className="space-y-6">
+                <WorkflowDeadLetterPanel />
                 <AuditLogViewer auditLogs={auditLogs} />
               </div>
             )}

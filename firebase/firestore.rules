@@ -335,6 +335,27 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Durable event-sourced agent workflows: server-write-only via firebase-admin;
+    // owners and admins may read materialized state and event logs.
+    match /agentWorkflows/{workflowId} {
+      allow read: if isAdmin() || (isMember() && resource.data.ownerId == request.auth.uid);
+      allow write: if false;
+
+      match /events/{sequenceId} {
+        allow read: if isAdmin() || (isMember() && get(/databases/$(database)/documents/agentWorkflows/$(workflowId)).data.ownerId == request.auth.uid);
+        allow write: if false;
+      }
+
+      match /idempotency/{keyId} {
+        allow read, write: if false;
+      }
+    }
+
+    match /agentWorkflowDeadLetters/{dlqId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     match /sourceConflicts/{conflictId} {
       allow read, delete: if isAdmin();
       allow create, update: if isAdmin() && incoming().keys().size() <= 40;
