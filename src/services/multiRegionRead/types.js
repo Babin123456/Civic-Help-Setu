@@ -34,6 +34,29 @@ export const REPLICA_HEALTH = Object.freeze({
   RECOVERING: 'recovering',
 });
 
+/** Regional routing considerations */
+export const ROUTING_CONSIDERATION = Object.freeze({
+  HEALTH: 'health',
+  LATENCY: 'latency',
+  CAPACITY: 'capacity',
+  RESIDENCY: 'residency',
+  STICKY_SESSION: 'sticky_session',
+});
+
+/** Enhanced routing decision metadata */
+export const ROUTING_META = Object.freeze({
+  /** Milliseconds of observed latency at the replica */
+  LATENCY_MS: 'latency_ms',
+  /** Replica capacity percentage (0-100) */
+  CAPACITY_PERCENT: 'capacity_percent',
+  /** Whether this routing decision established a sticky session */
+  STICKY_SESSION: 'sticky_session',
+  /** Region residency compliance status */
+  RESIDENCY_COMPLIANT: 'residency_compliant',
+  /** Whether residency rules were enforced (fail-closed) */
+  RESIDENCY_ENFORCED: 'residency_enforced',
+});
+
 /** Read routing decision reason codes */
 export const ROUTING_REASON = Object.freeze({
   PRIMARY_ONLY: 'primary_only',                 // Sensitive data, primary required
@@ -57,6 +80,7 @@ export const createRegionConfig = ({
   maxLagMs = 5000,           // Max acceptable lag before marking degraded
   maxLagCriticalMs = 10000,  // Max lag before marking unhealthy
   readOnly = true,           // Replicas are read-only
+  capacityPercent = 100,     // Current capacity percentage (0-100), default 100%
 } = {}) => ({
   id,
   displayName,
@@ -67,6 +91,7 @@ export const createRegionConfig = ({
   maxLagMs,
   maxLagCriticalMs,
   readOnly,
+  capacityPercent, // 0 = exhausted, 100 = full capacity
 });
 
 /** Replica runtime state */
@@ -81,6 +106,8 @@ export const createReplicaState = ({
   weight = 100,              // Effective weight (adjusted by health)
   drainingSince = null,
   recoveringSince = null,
+  latencyMs = 0,             // Observed request latency (ms)
+  capacityPercent = 100,     // Current capacity percentage (0-100)
 } = {}) => ({
   regionId,
   health,
@@ -92,6 +119,8 @@ export const createReplicaState = ({
   weight,
   drainingSince,
   recoveringSince,
+  latencyMs,
+  capacityPercent,
 });
 
 // ============================================================================

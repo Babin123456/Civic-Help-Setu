@@ -54,6 +54,7 @@ import PublicToiletReviewQueue from '../components/admin/PublicToiletReviewQueue
 import TransitConcessionReviewQueue from '../components/admin/TransitConcessionReviewQueue';
 import OpenContractingAuditQueue from '../components/admin/OpenContractingAuditQueue';
 import AuditLogViewer from '../components/admin/AuditLogViewer';
+import WorkflowDeadLetterPanel from '../components/admin/WorkflowDeadLetterPanel';
 import ModelGatewayDashboard from '../components/admin/ModelGatewayDashboard';
 import ServiceImportPanel from '../components/admin/ServiceImportPanel';
 import ServiceRecordList from '../components/admin/ServiceRecordList';
@@ -102,6 +103,7 @@ import DuplicateServiceDetectorPanel from '../components/admin/DuplicateServiceD
 import CatalogueConflictDetectorPanel from '../components/admin/CatalogueConflictDetectorPanel';
 import CivicWorksModeratorPanel from '../components/civicWorks/CivicWorksModeratorPanel';
 import AgentReviewStudioPanel from '../components/admin/AgentReviewStudioPanel';
+import GovernedToolRegistryPanel from '../components/admin/GovernedToolRegistryPanel';
 import CivicAgentEvalHarnessPanel from '../components/admin/CivicAgentEvalHarnessPanel';
 
 import WardIssueHeatmap from '../components/analytics/WardIssueHeatmap';
@@ -780,6 +782,7 @@ const Admin = () => {
 
               { id: 'agent-review', label: 'Agent Review Studio', badge: null },
               { id: 'agent-eval-harness', label: 'Agent Eval Harness', badge: null },
+              { id: 'tool-registry', label: 'Tool Registry & Capabilities', badge: null },
 
 
               { id: 'model-gateway', label: 'Model Gateway & Residency', badge: null },
@@ -1862,6 +1865,13 @@ const Admin = () => {
               </div>
             )}
 
+            {/* Governed Agent Tool Registry & Capability Controls Tab (#1146) */}
+            {activeTab === 'tool-registry' && (
+              <div>
+                <GovernedToolRegistryPanel />
+              </div>
+            )}
+
             {/* Model Gateway & Data Residency Tab (#1153) */}
             {activeTab === 'model-gateway' && (
               <div>
@@ -1962,7 +1972,8 @@ const Admin = () => {
 
             {/* Audit Trail Tab */}
             {activeTab === 'audit' && (
-              <div>
+              <div className="space-y-6">
+                <WorkflowDeadLetterPanel />
                 <AuditLogViewer auditLogs={auditLogs} />
               </div>
             )}

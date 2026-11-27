@@ -39,6 +39,7 @@ import {
   Lightbulb,
   Leaf,
   ShieldAlert,
+  ShieldCheck,
   GitFork,
   Scale,
   BarChart2,
@@ -995,6 +996,13 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 to: '/services',
                 label: t('nav.services', 'Services'),
                 icon: BookOpen
+              })}
+
+              {renderNavLink({
+                to: '/offline-emergency-card',
+                activeTarget: '/offline-emergency-card',
+                label: t('nav.offlineEmergencyCard', 'Offline Emergency Card'),
+                icon: ShieldCheck
               })}
 
               {renderNavLink({
