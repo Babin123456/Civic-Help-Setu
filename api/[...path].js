@@ -64,6 +64,7 @@ import civicDataCleanRoom from "./_lib/handlers/civic-data-clean-room.js";
 
 import floodIncidentReports from "./_lib/handlers/flood-incident-reports.js";
 import schoolZoneAudits from "./_lib/handlers/school-zone-audits.js";
+import schoolDefectRegister from "./_lib/handlers/school-defect-register.js";
 import heatReliefObservations from "./_lib/handlers/heat-relief-observations.js";
 
 import { GET as graphGET, POST as graphPOST } from "./_lib/graphRoute.js";
@@ -180,6 +181,7 @@ const baseHandlers = {
   "zk-attribute-proof-verify": zkAttributeProofVerify,
 
   "school-zone-audits": schoolZoneAudits,
+  "school-defect-register": schoolDefectRegister,
   "public-projects": publicProjects,
   "tenant-administration": tenantAdministration,
   "ghg-inventory": ghgInventory,
@@ -434,6 +436,7 @@ export function createApiDispatcher({
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-eval",
+      "school-defect-register",
       "civic-agent-policy",
       "civic-contract-test-marketplace",
       "civic-recommendation-experimentation",
