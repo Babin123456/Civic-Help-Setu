@@ -28,6 +28,7 @@ import {
   Store,
   Trees,
   FileBadge,
+  GitCompare,
   Calendar,
   HelpCircle,
   School,
@@ -39,6 +40,7 @@ import {
   Lightbulb,
   Leaf,
   ShieldAlert,
+  ShieldCheck,
   GitFork,
   Scale,
   BarChart2,
@@ -998,6 +1000,13 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
               })}
 
               {renderNavLink({
+                to: '/offline-emergency-card',
+                activeTarget: '/offline-emergency-card',
+                label: t('nav.offlineEmergencyCard', 'Offline Emergency Card'),
+                icon: ShieldCheck
+              })}
+
+              {renderNavLink({
                 to: '/acronyms',
                 label: 'Acronyms',
                 icon: FileText
@@ -1323,6 +1332,13 @@ const Navbar = ({ initialOpen = false, defaultOpen } = {}) => {
                 activeTarget: '/tree-health',
                 label: t('nav.treeHealth', 'Tree Health Inventory'),
                 icon: Trees
+              })}
+
+              {renderNavLink({
+                to: '/digital-twin',
+                activeTarget: '/digital-twin',
+                label: t('nav.digitalTwin', 'Digital Twin Simulator'),
+                icon: GitCompare
               })}
 
               {renderNavLink({

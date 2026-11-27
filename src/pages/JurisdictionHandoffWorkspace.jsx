@@ -21,6 +21,7 @@ import {
 import { useToast } from '../context/ToastContext';
 import JurisdictionMap from '../components/jurisdiction/JurisdictionMap';
 import TextOnlyHandOff from '../components/jurisdiction/TextOnlyHandOff';
+import BoundaryConflictResolverPanel from '../components/jurisdiction/BoundaryConflictResolverPanel';
 import { SAMPLE_SERVICES } from '../data/jurisdictionTestData';
 import {
   saveJurisdictionDraft,
@@ -352,6 +353,9 @@ export default function JurisdictionHandoffWorkspace() {
       <footer style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
         <p>Maintained Registry: {sourceInfo.dataSource} (v{sourceInfo.version}, updated {sourceInfo.lastUpdated}) | Deterministic Boundaries</p>
       </footer>
+
+      {/* Boundary Conflict & Border-Area Resolver (#1434) */}
+      <BoundaryConflictResolverPanel locality={locality} stateCode={selectedState} />
 
       {/* Inspecting Authority Modal / Drawer */}
       {inspectingAuthority && (

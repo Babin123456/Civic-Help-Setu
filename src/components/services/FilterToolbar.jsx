@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react';
 import { MAX_SEARCH_LENGTH } from '../../utils/searchParams';
-import { Search, X, ArrowUpDown, Filter, RotateCcw, SlidersHorizontal, Check } from 'lucide-react';
+import { Search, X, ArrowUpDown, RotateCcw } from 'lucide-react';
 import DepartmentFilterSelect from './DepartmentFilterSelect';
 import FeeAndSpeedFilter from './FeeAndSpeedFilter';
 import JurisdictionFilterSelect from './JurisdictionFilterSelect';
+import { useVoiceSearch } from '../../hooks/useVoiceSearch';
+import VoiceSearchPanel, { VoiceMicButton } from '../common/VoiceSearchPanel';
 
 const FilterToolbar = ({
   searchQuery,
@@ -33,7 +35,9 @@ const FilterToolbar = ({
 }) => {
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
+  const [voicePanelOpen, setVoicePanelOpen] = useState(false);
   const suggestionListId = 'service-search-suggestions';
+  const voice = useVoiceSearch();
 
   // Compute number of active filters to show in badge
   const activeFilterCount = useMemo(() => {
@@ -149,7 +153,7 @@ const FilterToolbar = ({
             aria-activedescendant={activeSuggestion >= 0 ? `service-suggestion-${activeSuggestion}` : undefined}
             className="input-field"
             style={{
-              padding: '0.75rem 3.25rem 0.75rem 3rem',
+              padding: '0.75rem 5.4rem 0.75rem 3rem',
               fontSize: '0.95rem',
               borderRadius: '99px',
               width: '100%',
@@ -158,28 +162,48 @@ const FilterToolbar = ({
               color: 'var(--text-primary)',
             }}
           />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => onSearchChange('')}
-              aria-label="Clear search"
-              style={{
-                position: 'absolute',
-                right: '0.9rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: 'var(--text-tertiary)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                background: 'transparent',
-                border: 'none',
-                padding: '4px',
+          <div
+            style={{
+              position: 'absolute',
+              right: '0.65rem',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+            }}
+          >
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => onSearchChange('')}
+                aria-label="Clear search"
+                style={{
+                  color: 'var(--text-tertiary)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  background: 'transparent',
+                  border: 'none',
+                  padding: '4px',
+                }}
+              >
+                <X size={16} />
+              </button>
+            )}
+            <VoiceMicButton
+              isListening={voice.isListening}
+              supported={voice.supported}
+              onClick={() => {
+                setVoicePanelOpen(true);
+                voice.requestStartListening();
               }}
-            >
-              <X size={16} />
-            </button>
-          )}
+              size={16}
+              labelStart="Start voice search"
+              labelStop="Stop voice search"
+              style={{ padding: '0.35rem' }}
+            />
+          </div>
           {suggestionsOpen && searchSuggestions.length > 0 && (
             <ul
               id={suggestionListId}
@@ -297,6 +321,24 @@ const FilterToolbar = ({
           )}
         </div>
       </div>
+
+      <VoiceSearchPanel
+        voice={voice}
+        isOpen={voicePanelOpen}
+        compact
+        submitLabel="Apply to search"
+        onClose={() => setVoicePanelOpen(false)}
+        onSubmitQuery={(cleanText) => {
+          onSearchChange(cleanText);
+          voice.clearTranscript();
+          setVoicePanelOpen(false);
+        }}
+        onSelectService={(match) => {
+          if (match?.service?.name) {
+            voice.setTranscriptDraft(match.service.name);
+          }
+        }}
+      />
 
       {/* Middle Filter Group: Department & Geographic Jurisdiction */}
       <div
