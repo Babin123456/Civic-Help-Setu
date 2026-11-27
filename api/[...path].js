@@ -26,6 +26,7 @@ import roadHazards from "./_lib/road-hazards.js";
  *   CSRF_COOKIE_NAME, CSRF_HEADER_NAME, APP_REQUIRE_ORIGIN, APP_ALLOW_MISSING_ORIGIN
  */
 import bottleneckFeedback from "./_lib/handlers/bottleneck-feedback.js";
+import grievanceDepartmentRouting from "./_lib/handlers/grievance-department-routing.js";
 import addressChange from "./_lib/handlers/address-change-corrections.js";
 import businessLicence from "./_lib/handlers/business-licence-feedback.js";
 import catalogueVisualQa from "./_lib/handlers/catalogue-visual-qa.js";
@@ -115,6 +116,7 @@ import { createDefaultBackpressureMiddleware } from "./_lib/backpressureMiddlewa
 
 const baseHandlers = {
   "bottleneck-feedback": bottleneckFeedback,
+  "grievance-department-routing": grievanceDepartmentRouting,
   "fair-scheduler": fairScheduler,
   "partner-ingestion": partnerIngestion,
   "abuse-control-plane": abuseControlPlane,
@@ -434,6 +436,7 @@ export function createApiDispatcher({
       "application-events",
       "civic-agent-cost-carbon",
       "civic-agent-eval",
+      "grievance-department-routing",
       "civic-agent-policy",
       "civic-contract-test-marketplace",
       "civic-recommendation-experimentation",
