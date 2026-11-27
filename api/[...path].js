@@ -59,6 +59,7 @@ import wardBudgetProposals from "./_lib/handlers/ward-budget-proposals.js";
 import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
+import firewallScan from "./_lib/handlers/firewall-scan.js";
 
 
 
@@ -192,6 +193,7 @@ const baseHandlers = {
   "federated-civic-query": federatedCivicQuery,
   "search-query-recovery": searchQueryRecovery,
   "fire-compliance-feedback": fireCompliance,
+  "firewall-scan": firewallScan,
   "flood-incident-reports": floodIncidentReports,
   "heat-relief-observations": heatReliefObservations,
   "heatwave-cooling-directory": heatReliefObservations,

@@ -43,6 +43,7 @@ import { logDiagnostic } from '../utils/diagnostics';
 import { getAllServices } from '../services/serviceCatalog';
 import { queryCivicKnowledge } from '../services/groundedCivicRagService';
 import SourceTraceabilityPanel from '../components/assistant/SourceTraceabilityPanel';
+import FirewallInspectionPanel from '../components/assistant/FirewallInspectionPanel';
 import DurableWorkflowPanel from '../components/assistant/DurableWorkflowPanel';
 import ClaimProvenanceGuidance from '../components/assistant/ClaimProvenanceGuidance';
 
@@ -54,7 +55,6 @@ import {
 import CaseMemoryInspectionModal from '../components/assistant/CaseMemoryInspectionModal';
 import { caseMemoryEngine } from '../services/agentMemory/caseMemoryEngine';
 import GovernedToolActionsPanel from '../components/assistant/GovernedToolActionsPanel';
-
 
 const Assistant = () => {
   const languageContext = useContext(LanguageContext);
@@ -91,6 +91,9 @@ const Assistant = () => {
   const inputRef = useRef(null);
   const [failedQuery, setFailedQuery] = useState(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showExternalDoc, setShowExternalDoc] = useState(false);
+  const [externalDocText, setExternalDocText] = useState('');
+  const [externalDocType, setExternalDocType] = useState('uploaded_pdf');
   const [showCaseMemoryModal, setShowCaseMemoryModal] = useState(false);
   // Messages cleared by "New conversation", kept in memory only for the undo window
   const [undoSnapshot, setUndoSnapshot] = useState(null);
@@ -112,6 +115,7 @@ const Assistant = () => {
     saveChatHistory(messages);
   }, [messages]);
 
+  const getAnswer = async (query, history, externalDocument = null) => {
   useEffect(() => {
     return () => {
       try {
@@ -146,6 +150,7 @@ const Assistant = () => {
       const jurisdictionParam = searchParams.get('state') || searchParams.get('jurisdiction') || null;
       response = await askGroundedCivicAssistant(safeQuery, {
         jurisdictionCode: jurisdictionParam,
+        ...(externalDocument ? { externalDocument } : {}),
       });
     } catch (groundingErr) {
       logDiagnostic('Grounded retrieval error, falling back to model gateway:', groundingErr);
@@ -156,9 +161,14 @@ const Assistant = () => {
         response = gatewayRes;
       } catch (gatewayErr) {
         logDiagnostic('Model Gateway error, falling back to civic agent pipeline:', gatewayErr);
-        response = await runCivicAgentPipeline(safeQuery, {
-          serviceContextId: currentServiceContextId,
-        });
+        try {
+          response = await runCivicAgentPipeline(safeQuery, {
+            serviceContextId: currentServiceContextId,
+          });
+        } catch (pipelineErr) {
+          logDiagnostic('Civic agent pipeline error, falling back to basic assistant:', pipelineErr);
+          response = await askCivicAssistant(safeQuery);
+        }
       }
     }
 
@@ -176,14 +186,12 @@ const Assistant = () => {
       suggestions: response.suggestions || [],
       guardrail: response.guardrail || null,
       entailment: response.entailment || null,
-
+      firewall: response.firewall || null,
       provenance: response.provenance || null,
       claims: response.claims || [],
       unsupportedClaims: response.unsupportedClaims || [],
-
       contractMeta: response.contractMeta || null,
       gatewayMeta,
-
       timestamp: new Date().toISOString(),
     };
   };
@@ -215,14 +223,25 @@ const Assistant = () => {
       };
       setMessages((prev) => [...prev, userMessage]);
     }
+    const externalDocument = externalDocText.trim()
+      ? {
+          contractVersion: '1.0.0',
+          sourceType: externalDocType,
+          sourceId: externalDocType === 'uploaded_pdf' ? 'user-uploaded-pdf' : 'user-external-web',
+          content: externalDocText.trim(),
+        }
+      : null;
+
     setInput('');
+    setExternalDocText('');
+    setShowExternalDoc(false);
     setHasVoiceTranscript(false);
     setIsLoading(true);
     setError(null);
     setFailedQuery(null);
 
     try {
-      const assistantMessage = await getAnswer(safeQuery, history);
+      const assistantMessage = await getAnswer(safeQuery, history, externalDocument);
       setMessages((prev) => [...prev, assistantMessage]);
 
       // Automatically stage model proposal in case-isolated memory if structured guidance is returned
@@ -463,6 +482,8 @@ const Assistant = () => {
             <span>AI Safety Guardrail: Request blocked before inference</span>
           </div>
         )}
+
+        {msg.firewall && <FirewallInspectionPanel firewall={msg.firewall} />}
 
         {msg.entailment && (msg.entailment.verifiedCount > 0 || !msg.entailment.overallSupported) && (
           <div
@@ -890,6 +911,58 @@ const Assistant = () => {
           />
         )}
 
+        {/* Untrusted External Document / Web Snippet Toggle (#1151) */}
+        <div style={{ marginBottom: '0.75rem' }}>
+          <button
+            type="button"
+            aria-expanded={showExternalDoc}
+            onClick={() => setShowExternalDoc((prev) => !prev)}
+            className="btn"
+            style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', borderRadius: '99px' }}
+          >
+            {showExternalDoc ? 'Hide untrusted document scanner' : 'Attach untrusted document / web snippet'}
+          </button>
+
+          {showExternalDoc && (
+            <div
+              role="region"
+              aria-label="Untrusted document firewall input"
+              style={{
+                marginTop: '0.5rem',
+                padding: '0.75rem',
+                borderRadius: '0.75rem',
+                border: '1px solid var(--border-main)',
+                background: 'var(--bg-secondary)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem',
+              }}
+            >
+              <label htmlFor="external-doc-type" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                Source Type (treated as untrusted evidence)
+              </label>
+              <select
+                id="external-doc-type"
+                value={externalDocType}
+                onChange={(e) => setExternalDocType(e.target.value)}
+                style={{ padding: '0.35rem 0.5rem', borderRadius: '0.4rem', fontSize: '0.85rem' }}
+              >
+                <option value="uploaded_pdf">Uploaded PDF text</option>
+                <option value="external_web">External web page content</option>
+              </select>
+              <label htmlFor="external-doc-text" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                Retrieved Content (ephemeral, scanned by Prompt-Injection Firewall)
+              </label>
+              <textarea
+                id="external-doc-text"
+                rows={3}
+                value={externalDocText}
+                onChange={(e) => setExternalDocText(e.target.value)}
+                placeholder="Paste extracted civic PDF or web snippet to scan before synthesis..."
+                style={{ padding: '0.5rem', borderRadius: '0.4rem', fontSize: '0.85rem', width: '100%' }}
+              />
+            </div>
+          )}
         {/* Voice Input Feedback (placed directly above the input bar so it stays in view) */}
         <VoiceInputStatus
           isListening={isListening}
@@ -1088,3 +1161,4 @@ const Assistant = () => {
 };
 
 export default Assistant;
+
