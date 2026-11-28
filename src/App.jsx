@@ -86,6 +86,7 @@ const TransitConcessionsDirectory = lazy(() => import('./pages/TransitConcession
 const WaterTankerTracker = lazy(() => import('./pages/WaterTankerTracker'));
 const AddressChangePlanner = lazy(() => import('./pages/AddressChangePlanner'));
 const FormFieldExplainerAssistant = lazy(() => import('./pages/FormFieldExplainerAssistant'));
+const CaregiverChecklistWorkspace = lazy(() => import('./pages/CaregiverChecklistWorkspace'));
 const SeniorProxyAssistanceWorkspace = lazy(() => import('./pages/SeniorProxyAssistanceWorkspace'));
 const MgnregaEvidenceWorkspace = lazy(() => import('./pages/MgnregaEvidenceWorkspace'));
 const PmKisanExceptionGuideWorkspace = lazy(() => import('./pages/PmKisanExceptionGuideWorkspace'));
@@ -340,6 +341,8 @@ function AppRoot() {
                             <Route path="/form-field-explainer" element={<FormFieldExplainerAssistant />} />
                             <Route path="/up-form-explainer" element={<FormFieldExplainerAssistant />} />
                             <Route path="/form-explainer" element={<FormFieldExplainerAssistant />} />
+                            <Route path="/caregiver-checklist" element={<CaregiverChecklistWorkspace />} />
+                            <Route path="/household-checklists" element={<CaregiverChecklistWorkspace />} />
                             <Route path="/senior-proxy" element={<SeniorProxyAssistanceWorkspace />} />
                             <Route path="/proxy-assistance" element={<SeniorProxyAssistanceWorkspace />} />
                             <Route path="/mgnrega-evidence" element={<MgnregaEvidenceWorkspace />} />
