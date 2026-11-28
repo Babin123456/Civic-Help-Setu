@@ -86,6 +86,7 @@ const TransitConcessionsDirectory = lazy(() => import('./pages/TransitConcession
 const WaterTankerTracker = lazy(() => import('./pages/WaterTankerTracker'));
 const AddressChangePlanner = lazy(() => import('./pages/AddressChangePlanner'));
 const FormFieldExplainerAssistant = lazy(() => import('./pages/FormFieldExplainerAssistant'));
+const SeniorProxyAssistanceWorkspace = lazy(() => import('./pages/SeniorProxyAssistanceWorkspace'));
 const MgnregaEvidenceWorkspace = lazy(() => import('./pages/MgnregaEvidenceWorkspace'));
 const PmKisanExceptionGuideWorkspace = lazy(() => import('./pages/PmKisanExceptionGuideWorkspace'));
 const SchemeRenewalCalendarWorkspace = lazy(() => import('./pages/SchemeRenewalCalendarWorkspace'));
@@ -339,6 +340,8 @@ function AppRoot() {
                             <Route path="/form-field-explainer" element={<FormFieldExplainerAssistant />} />
                             <Route path="/up-form-explainer" element={<FormFieldExplainerAssistant />} />
                             <Route path="/form-explainer" element={<FormFieldExplainerAssistant />} />
+                            <Route path="/senior-proxy" element={<SeniorProxyAssistanceWorkspace />} />
+                            <Route path="/proxy-assistance" element={<SeniorProxyAssistanceWorkspace />} />
                             <Route path="/mgnrega-evidence" element={<MgnregaEvidenceWorkspace />} />
                             <Route path="/wage-delay-evidence" element={<MgnregaEvidenceWorkspace />} />
                             <Route path="/pm-kisan-guide" element={<PmKisanExceptionGuideWorkspace />} />
