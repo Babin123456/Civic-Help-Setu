@@ -1,0 +1,237 @@
+.etc-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 1.5rem auto;
+}
+
+.etc-context-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.etc-context-info {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.etc-avatar-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.etc-applicant-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.etc-applicant-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.etc-applicant-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.etc-applicant-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.etc-pill {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  background: #e2e8f0;
+  border-radius: 9999px;
+  color: #334155;
+}
+
+.etc-switcher-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.etc-switcher-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.etc-select {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.etc-tabs-nav {
+  display: flex;
+  gap: 0.75rem;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.etc-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.25rem;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  position: relative;
+  text-align: left;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.etc-tab-btn:hover {
+  color: #1e293b;
+  background: rgba(241, 245, 249, 0.5);
+}
+
+.etc-tab-btn.active {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.etc-tab-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.etc-tab-label {
+  font-size: 0.95rem;
+}
+
+.etc-tab-desc {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: normal;
+}
+
+.etc-tab-btn.active .etc-tab-desc {
+  color: #60a5fa;
+}
+
+.etc-active-indicator {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #2563eb;
+  border-radius: 3px 3px 0 0;
+}
+
+.etc-tabpanel {
+  padding: 1rem 0;
+}
+
+/* Modal */
+.etc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.etc-modal-card {
+  background: #ffffff;
+  border-radius: 1rem;
+  max-width: 480px;
+  width: 100%;
+  padding: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.etc-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.etc-warning-icon {
+  color: #eab308;
+}
+
+.etc-modal-header h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+  color: #0f172a;
+}
+
+.etc-modal-body {
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.etc-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.etc-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.etc-btn-secondary {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+.etc-btn-danger {
+  background: #dc2626;
+  border: none;
+  color: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .etc-tab-desc {
+    display: none;
+  }
+}
