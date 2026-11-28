@@ -61,6 +61,7 @@ import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
 import firewallScan from "./_lib/handlers/firewall-scan.js";
 import pmKisanExceptionGuide from "./_lib/handlers/pm-kisan-exception-guide.js";
+import schemeRenewalCalendar from "./_lib/handlers/scheme-renewal-calendar.js";
 
 
 
@@ -211,6 +212,7 @@ const baseHandlers = {
   "accessibility-barrier-sla": accessibilityBarrierSla,
   "privacy-exports": privacyExports,
   "pm-kisan-exception-guide": pmKisanExceptionGuide,
+  "scheme-renewal-calendar": schemeRenewalCalendar,
   "public-toilets": publicToilets,
   "rental-checklist-corrections": rentalChecklist,
   "send-email": sendEmail,
