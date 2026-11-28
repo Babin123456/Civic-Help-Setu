@@ -60,6 +60,7 @@ import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
 import firewallScan from "./_lib/handlers/firewall-scan.js";
+import schemeRenewalCalendar from "./_lib/handlers/scheme-renewal-calendar.js";
 
 
 
@@ -209,6 +210,7 @@ const baseHandlers = {
   "pedestrian-barriers": pedestrianBarriers,
   "accessibility-barrier-sla": accessibilityBarrierSla,
   "privacy-exports": privacyExports,
+  "scheme-renewal-calendar": schemeRenewalCalendar,
   "public-toilets": publicToilets,
   "rental-checklist-corrections": rentalChecklist,
   "send-email": sendEmail,

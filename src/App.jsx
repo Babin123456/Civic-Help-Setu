@@ -86,6 +86,7 @@ const TransitConcessionsDirectory = lazy(() => import('./pages/TransitConcession
 const WaterTankerTracker = lazy(() => import('./pages/WaterTankerTracker'));
 const AddressChangePlanner = lazy(() => import('./pages/AddressChangePlanner'));
 const FormFieldExplainerAssistant = lazy(() => import('./pages/FormFieldExplainerAssistant'));
+const SchemeRenewalCalendarWorkspace = lazy(() => import('./pages/SchemeRenewalCalendarWorkspace'));
 const RentalTransitionWorkspace = lazy(() => import('./pages/RentalTransitionWorkspace'));
 const CitizenDraftSyncWorkspace = lazy(() => import('./pages/CitizenDraftSyncWorkspace'));
 const CivicDataApi = lazy(() => import('./pages/CivicDataApi'));
@@ -336,6 +337,8 @@ function AppRoot() {
                             <Route path="/form-field-explainer" element={<FormFieldExplainerAssistant />} />
                             <Route path="/up-form-explainer" element={<FormFieldExplainerAssistant />} />
                             <Route path="/form-explainer" element={<FormFieldExplainerAssistant />} />
+                            <Route path="/scheme-renewal-calendar" element={<SchemeRenewalCalendarWorkspace />} />
+                            <Route path="/renewal-calendar" element={<SchemeRenewalCalendarWorkspace />} />
                             <Route path="/citizen-drafts" element={<CitizenDraftSyncWorkspace />} />
                             <Route path="/draft-sync" element={<CitizenDraftSyncWorkspace />} />
 
