@@ -61,6 +61,10 @@ import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
 import firewallScan from "./_lib/handlers/firewall-scan.js";
 import caregiverDocumentChecklist from "./_lib/handlers/caregiver-document-checklist.js";
+import seniorProxyAssistance from "./_lib/handlers/senior-proxy-assistance.js";
+import mgnregaEvidenceBuilder from "./_lib/handlers/mgnrega-evidence-builder.js";
+import pmKisanExceptionGuide from "./_lib/handlers/pm-kisan-exception-guide.js";
+import schemeRenewalCalendar from "./_lib/handlers/scheme-renewal-calendar.js";
 
 
 
@@ -203,6 +207,7 @@ const baseHandlers = {
   "library-corrections": libraryCorrections,
   "library-resource-directory": libraryResourceDirectory,
   "office-comparison": officeComparison,
+  "mgnrega-evidence-builder": mgnregaEvidenceBuilder,
   "office-verification-campaigns": officeVerificationCampaigns,
   "open-contracting-analytics": openContractingAnalytics,
   "pds-observations": pdsObservations,
@@ -211,9 +216,12 @@ const baseHandlers = {
   "accessibility-barrier-sla": accessibilityBarrierSla,
   "privacy-exports": privacyExports,
   "caregiver-document-checklist": caregiverDocumentChecklist,
+  "pm-kisan-exception-guide": pmKisanExceptionGuide,
+  "scheme-renewal-calendar": schemeRenewalCalendar,
   "public-toilets": publicToilets,
   "rental-checklist-corrections": rentalChecklist,
   "send-email": sendEmail,
+  "senior-proxy-assistance": seniorProxyAssistance,
   "share-by-email": shareByEmail,
   "temporal-policy": temporalPolicy,
   "tree-plantation-survival": treePlantationSurvival,
