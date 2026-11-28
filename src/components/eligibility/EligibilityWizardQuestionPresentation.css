@@ -1,0 +1,252 @@
+.ewq-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 1.5rem auto;
+}
+
+.ewq-progress-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.ewq-progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 0.5rem;
+}
+
+.ewq-step-percent {
+  color: #2563eb;
+}
+
+.ewq-progress-track {
+  width: 100%;
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.ewq-progress-fill {
+  height: 100%;
+  background: #2563eb;
+  transition: width 0.3s ease;
+}
+
+.ewq-stage-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.ewq-question-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.ewq-question-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.ewq-q-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 800;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.ewq-q-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.35;
+  margin: 0;
+  outline: none;
+}
+
+.ewq-required-tag {
+  color: #dc2626;
+  margin-left: 0.25rem;
+}
+
+.ewq-q-desc {
+  font-size: 0.95rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.ewq-options-group {
+  border: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ewq-option-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1rem 1.25rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  background: #ffffff;
+  transition: all 0.15s ease;
+}
+
+.ewq-option-label:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.ewq-option-label.selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.ewq-radio-input {
+  margin-top: 0.25rem;
+  accent-color: #2563eb;
+  width: 18px;
+  height: 18px;
+}
+
+.ewq-option-content {
+  flex-grow: 1;
+}
+
+.ewq-option-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ewq-option-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ewq-check-icon {
+  color: #2563eb;
+}
+
+.ewq-option-desc {
+  display: block;
+  font-size: 0.825rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+.ewq-error-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+.ewq-help-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  background: #f8fafc;
+  border-left: 3px solid #64748b;
+  border-radius: 0 0.5rem 0.5rem 0;
+  margin-bottom: 1.5rem;
+}
+
+.ewq-help-icon {
+  color: #64748b;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.ewq-help-text {
+  font-size: 0.825rem;
+  color: #475569;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.ewq-nav-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ewq-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ewq-btn-prev {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}
+
+.ewq-btn-prev:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ewq-btn-next {
+  background: #2563eb;
+  border: none;
+  color: #ffffff;
+}
+
+.ewq-btn-next:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
