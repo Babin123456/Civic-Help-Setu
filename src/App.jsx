@@ -86,6 +86,7 @@ const TransitConcessionsDirectory = lazy(() => import('./pages/TransitConcession
 const WaterTankerTracker = lazy(() => import('./pages/WaterTankerTracker'));
 const AddressChangePlanner = lazy(() => import('./pages/AddressChangePlanner'));
 const FormFieldExplainerAssistant = lazy(() => import('./pages/FormFieldExplainerAssistant'));
+const FormFieldTranslationMemoryWorkspace = lazy(() => import('./pages/FormFieldTranslationMemoryWorkspace'));
 const NoticeOrderExplainerWorkspace = lazy(() => import('./pages/NoticeOrderExplainerWorkspace'));
 const CaregiverChecklistWorkspace = lazy(() => import('./pages/CaregiverChecklistWorkspace'));
 const SeniorProxyAssistanceWorkspace = lazy(() => import('./pages/SeniorProxyAssistanceWorkspace'));
@@ -342,6 +343,8 @@ function AppRoot() {
                             <Route path="/form-field-explainer" element={<FormFieldExplainerAssistant />} />
                             <Route path="/up-form-explainer" element={<FormFieldExplainerAssistant />} />
                             <Route path="/form-explainer" element={<FormFieldExplainerAssistant />} />
+                            <Route path="/form-translation-memory" element={<FormFieldTranslationMemoryWorkspace />} />
+                            <Route path="/translation-memory" element={<FormFieldTranslationMemoryWorkspace />} />
                             <Route path="/notice-explainer" element={<NoticeOrderExplainerWorkspace />} />
                             <Route path="/order-explainer" element={<NoticeOrderExplainerWorkspace />} />
                             <Route path="/caregiver-checklist" element={<CaregiverChecklistWorkspace />} />
