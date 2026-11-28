@@ -60,6 +60,7 @@ import wardAnalytics from "./_lib/handlers/ward-analytics.js";
 import waterTankerReports from "./_lib/handlers/water-tanker-reports.js";
 import civicSurveys from "./_lib/handlers/civic-surveys.js";
 import firewallScan from "./_lib/handlers/firewall-scan.js";
+import noticeOrderExplainer from "./_lib/handlers/notice-order-explainer.js";
 import caregiverDocumentChecklist from "./_lib/handlers/caregiver-document-checklist.js";
 import seniorProxyAssistance from "./_lib/handlers/senior-proxy-assistance.js";
 import mgnregaEvidenceBuilder from "./_lib/handlers/mgnrega-evidence-builder.js";
@@ -226,6 +227,7 @@ const baseHandlers = {
   "temporal-policy": temporalPolicy,
   "tree-plantation-survival": treePlantationSurvival,
   "portal-change-monitor": portalChangeMonitor,
+  "notice-order-explainer": noticeOrderExplainer,
   "tender-corrections": tenderCorrections,
   "verifiable-presentations": verifiablePresentations,
   "verifiable-evidence-bundles": verifiableEvidenceBundles,
