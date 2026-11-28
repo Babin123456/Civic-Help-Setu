@@ -1,0 +1,162 @@
+.nosp-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  padding: 1.75rem;
+  border-radius: 1rem;
+  margin: 1.5rem 0;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--card-bg, #ffffff);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.nosp-card-prompt {
+  border-left: 4px solid #2563eb;
+  background: #f8fafc;
+}
+
+.nosp-card-denied {
+  border-left: 4px solid #f59e0b;
+  background: #fffbeb;
+}
+
+.nosp-card-empty {
+  border-left: 4px solid #64748b;
+  background: #ffffff;
+}
+
+.nosp-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 0.75rem;
+  flex-shrink: 0;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.nosp-card-denied .nosp-icon-wrapper {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.nosp-empty-icon {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.nosp-content {
+  flex-grow: 1;
+}
+
+.nosp-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-color, #0f172a);
+  margin: 0 0 0.5rem 0;
+}
+
+.nosp-description {
+  font-size: 0.925rem;
+  color: var(--text-muted, #475569);
+  line-height: 1.5;
+  margin: 0 0 1.25rem 0;
+  max-width: 680px;
+}
+
+.nosp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.nosp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nosp-btn-primary {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+}
+
+.nosp-btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.nosp-btn-secondary {
+  background: transparent;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+.nosp-btn-secondary:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.nosp-privacy-note {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.775rem;
+  color: #64748b;
+}
+
+.nosp-active-filters-box {
+  background: #f8fafc;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.25rem;
+  border: 1px dashed #cbd5e1;
+}
+
+.nosp-filters-header {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.nosp-filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.nosp-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #e2e8f0;
+  color: #1e293b;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.nosp-tag-none {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+@media (max-width: 640px) {
+  .nosp-card {
+    flex-direction: column;
+    padding: 1.25rem;
+  }
+  .nosp-actions {
+    flex-direction: column;
+  }
+}
