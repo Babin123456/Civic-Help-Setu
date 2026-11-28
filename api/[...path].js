@@ -140,6 +140,7 @@ import journeyBenchmark from "./_lib/handlers/journey-benchmark.js";
 import civicKnowledgeGraph from "./_lib/handlers/civic-knowledge-graph.js";
 import multiRegionStatus from "./_lib/handlers/multi-region-status.js";
 import caseCollaboration from "./_lib/handlers/case-collaboration.js";
+import duplicateCaseDetector from "./_lib/handlers/duplicate-case-detector.js";
 import syntheticDatasets from "./_lib/syntheticDatasets.js";
 import cacheManagement from "./_lib/handlers/cache-management.js";
 import { withRequestSecurity } from "./_lib/requestSecurity.js";
@@ -268,6 +269,7 @@ const baseHandlers = {
   "multi-region-status": multiRegionStatus,
   "multi-region-metrics": multiRegionStatus,
   "case-collaboration": caseCollaboration,
+  "duplicate-case-detector": duplicateCaseDetector,
   "redacted-sharing-room": redactedSharingRoom,
   "synthetic-datasets": syntheticDatasets,
   "cache": cacheManagement,
